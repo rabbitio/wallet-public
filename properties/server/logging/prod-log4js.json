@@ -1,0 +1,32 @@
+{
+    "appenders": {
+        "access": {
+            "type": "dateFile",
+            "filename": "log/access.log",
+            "pattern": "-yyyy-MM-dd",
+            "category": "http",
+            "numBackups": 30
+        },
+        "app": {
+            "type": "dateFile",
+            "filename": "log/app.log",
+            "pattern": "-yyyy-MM-dd",
+            "numBackups": 30
+        },
+        "errorFile": {
+            "type": "dateFile",
+            "filename": "log/errors.log",
+            "pattern": "-yyyy-MM-dd",
+            "numBackups": 30
+        },
+        "errors": {
+            "type": "logLevelFilter",
+            "level": "ERROR",
+            "appender": "errorFile"
+        }
+    },
+    "categories": {
+        "default": { "appenders": ["app", "errors"], "level": "DEBUG" },
+        "http": { "appenders": ["access"], "level": "DEBUG" }
+    }
+}
