@@ -90,7 +90,7 @@ export function setDoubleSpendFlag(transactions) {
 export function setSpendTxId(transactions) {
     try {
         transactions.forEach(tx =>
-            tx.outputs.forEach(output => (output.spend_txid = getTXIDSendingGivenOutput(output, transactions)))
+            tx.outputs.forEach(output => (output.spend_txid = getTXIDSendingGivenOutput(output, tx.txid, transactions)))
         );
 
         return transactions;

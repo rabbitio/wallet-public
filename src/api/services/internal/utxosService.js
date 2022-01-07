@@ -62,8 +62,20 @@ export default class UtxosService {
                     AddressesServiceInternal.getAllUsedAddresses(),
                     AddressesDataApi.getAddressesIndexes(getWalletId()),
                 ]);
+
+                // eslint-disable-next-line no-console
+                console.log("BALANCE Addresses: " + JSON.stringify(allAddresses));
+
                 const allUtxos = await getAllUTXOs(allAddresses.internal, allAddresses.external, network);
+
+                // eslint-disable-next-line no-console
+                console.log("BALANCE UTXOs: " + JSON.stringify(allUtxos));
+
                 const balanceValues = calculateBalanceByWalletData(getAccountsData(), allUtxos, indexes, network);
+
+                // eslint-disable-next-line no-console
+                console.log("BALANCE BALANCE: " + JSON.stringify(balanceValues));
+
                 const dust = feeRate && calculateDustBalanceByWalletData(allUtxos, feeRate, network);
                 this._cachedBalanceData = {
                     balanceValues: { ...balanceValues, dust: dust ?? null },

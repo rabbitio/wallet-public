@@ -440,7 +440,9 @@ class TransactionsDataProvider {
 
                         const matchedOutputs = tx.outputs.filter(output => output.addresses.includes(address));
                         return matchedOutputs
-                            .filter(output => getTXIDSendingGivenOutput(output, provider._transactionsData) == null)
+                            .filter(
+                                output => getTXIDSendingGivenOutput(output, tx.txid, provider._transactionsData) == null
+                            )
                             .map(
                                 output =>
                                     new Utxo(

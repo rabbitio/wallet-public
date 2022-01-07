@@ -59,6 +59,7 @@ export function getAllSpendableUtxosByWalletData(accountsData, allUtxos, indexes
  * @param utxos - utxos to be checked
  * @returns Array of Utxo
  */
+// TODO: [tests, low] Write unit tests for payment logic
 function getNotDustUtxos(utxos) {
     return utxos.filter(utxo => {
         let threshold;
@@ -83,6 +84,7 @@ function getNotDustUtxos(utxos) {
  * @param network - network of given utxos
  * @return Array of signable Utxo
  */
+// TODO: [tests, low] Write unit tests for payment logic
 function getSignableUtxos(accountsData, utxos, indexes, network) {
     const addresses = utxos.map(utxo => utxo.address);
     const isBip49AddressMapping = isBip49Addresses(accountsData, addresses, indexes, network);
@@ -114,7 +116,7 @@ function getSignableUtxos(accountsData, utxos, indexes, network) {
  * @param network - network to look for utxos in
  * @return Object {unconfirmed: number of satoshies, spendable: number of satoshies, signable: number of satoshies, confirmed: number of satoshies}
  */
-// TODO: [tests, moderate]
+// TODO: [tests, low] Write unit tests for payment logic
 export function calculateBalanceByWalletData(accountsData, allUtxos, indexes, network) {
     try {
         const internalBalance = calculateBalanceByUtxos(allUtxos.internal, false);
@@ -147,7 +149,7 @@ export function calculateBalanceByWalletData(accountsData, allUtxos, indexes, ne
  * @param network - network to look for utxos in
  * @return {number} Sum of dust UTXOs
  */
-// TODO: [tests, moderate]
+// TODO: [tests, low] Write unit tests for payment logic
 export function calculateDustBalanceByWalletData(allUTXOs, feeRate, network) {
     try {
         const relevantUTXOs = [
@@ -211,6 +213,7 @@ export function getAddresses(utxos) {
  * @param network - network to get utxos for
  * @returns Array of Utxo
  */
+// TODO: [tests, low] Write unit tests for payment logic
 export function getSortedListOfCandidateUtxosForRbf(accountsData, indexes, candidateUtxos, network) {
     try {
         const spendableExternalUtxos = candidateUtxos.external.filter(utxo => utxo.confirmations >= MIN_CONFIRMATIONS);
@@ -232,6 +235,7 @@ export function getSortedListOfCandidateUtxosForRbf(accountsData, indexes, candi
  * @param address - target address to send given amount to
  * @returns Object {result: boolean, threshold: number}
  */
+// TODO: [tests, low] Write unit tests for payment logic
 export function isAmountDustForAddress(amount, address) {
     if (is.not.number(amount)) throw new Error("Amount should be a number.");
 
@@ -267,13 +271,18 @@ export function getDustThreshold(targetAddress) {
  * Returns null if there is no transaction sending this output.
  *
  * @param output - Output object
+ * @param outputTxId -  of transaction owning the given output
  * @param transactions - Array<Transaction>
  * @return {string|null} - txid
  */
-// TODO: [tests, low] Write unit tests for payment logic
-export function getTXIDSendingGivenOutput(output, transactions) {
+export function getTXIDSendingGivenOutput(output, outputTxId, transactions) {
     const correspondingTx = transactions.find(tx =>
-        tx.inputs.find(input => input.address === output.addresses[0] && input.output_number === output.number)
+        tx.inputs.find(
+            input =>
+                input.txid === outputTxId &&
+                input.address === output.addresses[0] &&
+                input.output_number === output.number
+        )
     );
 
     return correspondingTx?.txid || null;
@@ -286,6 +295,7 @@ export function getTXIDSendingGivenOutput(output, transactions) {
  * @param address - address to get type of Output for
  * @return {string} one of constants P2PKH_SCRIPT_TYPE|P2WPKH_SCRIPT_TYPE|P2SH_SCRIPT_TYPE
  */
+// TODO: [tests, low] Write unit tests for payment logic
 export function getOutputTypeByAddress(address) {
     let type = P2PKH_SCRIPT_TYPE;
     if (isSegWitAddress(address)) {
