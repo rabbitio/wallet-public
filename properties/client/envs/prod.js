@@ -19,4 +19,5 @@ export const MAX_ATTEMPTS_TO_RETRIEVE_TRANSACTIONS_DATA = 80;
 export const LANDING_PATH = "/";
 export const RAMP_NETWORK_API_KEY = "kghgdufkvmz8mxva8a3wkb2srs8ykx58c2v2vwfx";
 export const RAMP_WEBHOOK_STATUS_URL = "https://rabbit.io/api/v1/webhooks/ramp";
+export const RAMP_WIDGET_STAGING_URL = "";
 export const PUBLIC_LOGO_LINK = "https://rabbit.io/logo.svg";

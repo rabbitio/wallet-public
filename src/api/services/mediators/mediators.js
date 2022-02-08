@@ -117,12 +117,6 @@ export function setupMediators(
             (async () => {
                 try {
                     const transactionData = await transactionsDataProvider.getTransactionData(txid);
-                    // TODO: [bug, critical] This is workaround for weird date bug. Check in prod and remove if possible
-                    // eslint-disable-next-line no-console
-                    console.log("BUG_TXXS_DATE_NEW " + JSON.stringify(transactionData));
-                    if (!transactionData.time) {
-                        transactionData.time = Date.now();
-                    }
                     await transactionsDataProvider.updateTransactionsCacheAndPushTxsToServer([transactionData]);
                 } catch (e) {
                     logError(e, "Failed to push data of newly created transaction to transactions cache");

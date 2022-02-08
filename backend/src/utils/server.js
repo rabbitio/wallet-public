@@ -11,7 +11,10 @@ import AddressesDataRoutes from "../routes/addressesDataRoutes";
 import FiatRatesRoutes from "../routes/fiatRatesRoutes";
 import NotificationsRoutes from "../routes/notificationsRoutes";
 import EmailsRoutes from "../routes/emailsRoutes";
+import FiatPaymentsRoutes from "../routes/fiatPaymentsRoutes";
 import TransactionsRoutes from "../routes/transactionsRoutes";
+import EncryptedWalletPaymentIdsRoutes from "../routes/encryptedWalletPaymentIdsRoutes";
+import WebhookRoutes from "../routes/webhookRoutes";
 import { SERVER_PORT } from "../properties";
 
 const log = getLogger("server");
@@ -30,7 +33,10 @@ export function configureAndStartServer() {
     app.use(FiatRatesRoutes);
     app.use(NotificationsRoutes);
     app.use(EmailsRoutes);
+    app.use(FiatPaymentsRoutes);
     app.use(TransactionsRoutes);
+    app.use(EncryptedWalletPaymentIdsRoutes);
+    app.use(WebhookRoutes);
 
     app.listen(SERVER_PORT, () => {
         log.info(`Listening on ${SERVER_PORT}..., Node PID=${process.pid}`);

@@ -2,7 +2,6 @@ import express from "express";
 import { apiVersionPrefix } from "../controllers/controllerUtils";
 import TransactionsDataController from "../controllers/transactionsData";
 
-
 const router = express.Router({});
 
 const basePrefix = `${apiVersionPrefix}/transactionsData`;

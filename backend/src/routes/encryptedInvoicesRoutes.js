@@ -1,8 +1,7 @@
 import express from "express";
 
-import {apiVersionPrefix} from "../controllers/controllerUtils";
-import {EncryptedInvoicesController} from "../controllers/encryptedInvoices";
-
+import { apiVersionPrefix } from "../controllers/controllerUtils";
+import { EncryptedInvoicesController } from "../controllers/encryptedInvoices";
 
 const router = express.Router({});
 

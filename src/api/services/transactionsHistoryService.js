@@ -8,6 +8,7 @@ import { TransactionsDataService } from "./transactionsDataService";
 import AddressesServiceInternal from "./internal/addressesServiceInternal";
 import { transactionsDataProvider } from "./internal/transactionsDataProvider";
 import { getTransactionsHistory } from "../lib/transactions/transactions-history";
+import FiatPaymentsService from "./internal/FiatPaymentsService";
 
 export default class TransactionsHistoryService {
     static DEFAULT_SORT = "creationDate_desc";
@@ -48,6 +49,7 @@ export default class TransactionsHistoryService {
      *                      fiatFee: number,
      *                      note: "note_string", (if present)
      *                      isRbfAble: boolean,
+     *                      purchaseData: { paymentId: string, amountWithCurrencyString: string } | null
      *                  }, ... ],
      *              isWholeList: boolean,
      *              minAmount: number, // min amount throughout all transactions
@@ -69,11 +71,13 @@ export default class TransactionsHistoryService {
             const transactionIds = allTransactions.map(tx => tx.txid);
             const txStoredData = await TransactionsDataService.getTransactionsData(transactionIds);
             const allTxs = getTransactionsHistory(allAddresses, allTransactions, txStoredData);
-            const selectedOnes = getOnlyFiltered(allTxs, filterBy);
+            const withLabels = await addPurchaseData(allTxs);
+            const selectedOnes = getOnlyFiltered(withLabels, filterBy);
             const withFiatAmounts = await addFiatAmounts(selectedOnes);
             const searchedOnes = getOnlySearched(withFiatAmounts, searchCriteria);
             const sorted = sort(searchedOnes, sortBy);
             const paginated = sorted.slice(0, numberOfTransactionsToReturn);
+
             return {
                 transactions: mapToProperReturnFormat(paginated),
                 isWholeList: paginated.length === sorted.length,
@@ -184,6 +188,17 @@ function validateSearchCriteria(searchCriteria) {
     }
 }
 
+async function addPurchaseData(transactionsList) {
+    const purchasesData = await FiatPaymentsService.getPurchaseDataForTransactions(transactionsList.map(tx => tx.txid));
+
+    transactionsList.forEach(tx => {
+        const data = purchasesData.find(item => item.txid === tx.txid);
+        tx["purchaseData"] = data?.purchaseData;
+    });
+
+    return transactionsList;
+}
+
 function getOnlyFiltered(transactionsList, filterBy) {
     if (!filterBy || !filterBy.length) {
         return transactionsList;
@@ -264,7 +279,8 @@ function getOnlySearched(transactionsList, searchCriteria) {
             (transaction.address && transaction.address.toLowerCase().includes(searchCriteria)) ||
             ("" + transaction.fees).includes(searchCriteria) ||
             ("" + transaction.fiatFee).includes(searchCriteria) ||
-            (transaction.description && transaction.description.toLowerCase().includes(searchCriteria))
+            (transaction.description && transaction.description.toLowerCase().includes(searchCriteria)) ||
+            (transaction.labels && transaction.labels.find(label => label.toLowerCase().includes(searchCriteria)))
         );
     });
 }
@@ -330,6 +346,7 @@ function mapToProperReturnFormat(transactionsList) {
             fiatFee: transaction.fiatFee,
             note: transaction.description,
             isRbfAble: transaction.type === "out" && transaction.isRbfAble,
+            purchaseData: transaction.purchaseData,
         };
     });
 }

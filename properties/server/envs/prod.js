@@ -16,3 +16,8 @@ export const SUPPORT_EMAIL = "will be filled at CI/CD from secure env variable";
 export const SUPPORT_EMAIL_PASSWORD = "will be filled at CI/CD from secure env variable";
 export const EMAIL_BRIDGE_PORT = "will be filled at CI/CD from secure env variable";
 export const EMAIL_BRIDGE_HOST = "will be filled at CI/CD from secure env variable";
+export const RAMP_PUBLIC_KEY =
+    "-----BEGIN PUBLIC KEY-----\n" +
+    "MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAElvxpYOhgdAmI+7oL4mABRAfM5CwLkCbZ\n" +
+    "m64ERVKAisSulWFC3oRZom/PeyE2iXPX1ekp9UD1r+51c9TiuIHU4w==\n" +
+    "-----END PUBLIC KEY-----";

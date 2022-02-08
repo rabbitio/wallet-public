@@ -13,6 +13,7 @@ import BtcToFiatRatesService from "./btcToFiatRatesService";
 import AddressesServiceInternal from "./internal/addressesServiceInternal";
 import { transactionsDataProvider } from "./internal/transactionsDataProvider";
 import { getExtendedTransactionDetails } from "../lib/transactions/transactions-history";
+import FiatPaymentsService from "./internal/FiatPaymentsService";
 
 export class TransactionsDataService {
     static MIN_CONFIRMATIONS = MIN_CONFIRMATIONS;
@@ -91,6 +92,7 @@ export class TransactionsDataService {
      *         fiatConversionRate: number, // rate at transaction creation time
      *         note: string or undefined, // optional - undefined means there is no note
      *         isRbfAble: boolean, // Whether RBF can be applied for transaction
+     *         purchaseData: { paymentId: string, amountWithCurrencyString: string } | null
      *     }
      */
     // TODO: [tests, moderate] Units
@@ -104,11 +106,18 @@ export class TransactionsDataService {
             const extendedTransactionData = getExtendedTransactionDetails(transaction, addresses, txStoredData);
             const btcAmount = satoshiToBtc(extendedTransactionData.amount);
             const feeBTCAmount = satoshiToBtc(extendedTransactionData.fees);
-            const [fiatValues, fiatCurrencyData, btcUSDRateAtCreationDate, usdFiatRate] = await Promise.all([
+            const [
+                fiatValues,
+                fiatCurrencyData,
+                btcUSDRateAtCreationDate,
+                usdFiatRate,
+                purchasesData,
+            ] = await Promise.all([
                 PaymentService.convertBtcAmountsToFiat([btcAmount, feeBTCAmount]),
                 BtcToFiatRatesService.getCurrentFiatCurrencyData(),
                 BtcToFiatRatesService.getRateForSpecificDate(extendedTransactionData.time),
                 BtcToFiatRatesService.getUSDtoCurrentSelectedFiatCurrencyRate(),
+                FiatPaymentsService.getPurchaseDataForTransactions([extendedTransactionData.txid]),
             ]);
 
             const unconfirmedTime = Date.now() - transaction.time < 0 ? 0 : Date.now() - transaction.time;
@@ -137,6 +146,7 @@ export class TransactionsDataService {
                 fiatConversionRate: (btcUSDRateAtCreationDate * usdFiatRate || 0).toFixed(2),
                 note: extendedTransactionData.description,
                 isRbfAble: extendedTransactionData.type === "out" && extendedTransactionData.isRbfAble,
+                purchaseData: purchasesData[0].purchaseData,
             };
         } catch (e) {
             improveAndRethrow(e, "getTransactionDetails");

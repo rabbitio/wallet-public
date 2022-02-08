@@ -1,17 +1,20 @@
-import {getLogger} from "log4js";
+import { getLogger } from "log4js";
 
 import {
     addClientIpHash,
     addWalletIdAndSessionId,
-    processInternalError, processSuccess,
-    validateRequestDataAndResponseOnErrors
+    processInternalError,
+    processSuccess,
+    validateRequestDataAndResponseOnErrors,
 } from "./controllerUtils";
 
 import schemas from "../models/joi_schemas";
 import EncryptedIpsService from "../services/encryptedIpsService";
 import {
-    DELETE_ENCRYPTED_IPS_EP_NUMBER, GET_ENCRYPTED_IPS_EP_NUMBER, IS_IP_HASH_PRESENT_EP_NUMBER,
-    SAVE_ENCRYPTED_IP_EP_NUMBER
+    DELETE_ENCRYPTED_IPS_EP_NUMBER,
+    GET_ENCRYPTED_IPS_EP_NUMBER,
+    IS_IP_HASH_PRESENT_EP_NUMBER,
+    SAVE_ENCRYPTED_IP_EP_NUMBER,
 } from "./endpointNumbers";
 
 const log = getLogger("encryptedIps");
@@ -50,7 +53,12 @@ export class EncryptedIpsController {
 
         try {
             const data = addWalletIdAndSessionId(req, addClientIpHash(req, req.body));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(res, data, schemas.saveEncryptedIpScheme, endpointNumber);
+            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+                res,
+                data,
+                schemas.saveEncryptedIpScheme,
+                endpointNumber
+            );
 
             if (isRequestValid) {
                 log.debug("Request is valid, saving encrypted IP.");
@@ -95,7 +103,12 @@ export class EncryptedIpsController {
 
         try {
             const data = addWalletIdAndSessionId(req, addClientIpHash(req, {}));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(res, data, schemas.getEncryptedIpsScheme, endpointNumber);
+            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+                res,
+                data,
+                schemas.getEncryptedIpsScheme,
+                endpointNumber
+            );
 
             if (isRequestValid) {
                 log.debug("Request is valid, getting encrypted IPs.");
@@ -110,7 +123,7 @@ export class EncryptedIpsController {
                 }
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Error occurred during the saving of encrypted IPs: ", e);
+            processInternalError(res, endpointNumber, "Error occurred during the getting of encrypted IPs: ", e);
         }
     }
 
@@ -144,7 +157,12 @@ export class EncryptedIpsController {
 
         try {
             const data = addWalletIdAndSessionId(req, addClientIpHash(req, req.body));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(res, data, schemas.deleteEncryptedIpsScheme, endpointNumber);
+            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+                res,
+                data,
+                schemas.deleteEncryptedIpsScheme,
+                endpointNumber
+            );
 
             if (isRequestValid) {
                 log.debug("Request is valid, start deletion of encrypted IPs.");
@@ -191,7 +209,12 @@ export class EncryptedIpsController {
 
         try {
             const data = addWalletIdAndSessionId(req, addClientIpHash(req, { ipHash: req.query && req.query.ipHash }));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(res, data, schemas.isIpHashPresentScheme, endpointNumber);
+            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+                res,
+                data,
+                schemas.isIpHashPresentScheme,
+                endpointNumber
+            );
 
             if (isRequestValid) {
                 log.debug("Request is valid, checking ip hash.");

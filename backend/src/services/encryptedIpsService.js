@@ -1,9 +1,8 @@
-import {getLogger} from "log4js";
+import { getLogger } from "log4js";
 
-import {deleteExistingDocuments} from "./mongoUtil";
-import {improveAndRethrow} from "../utils/utils";
-import {dbConnectionHolder} from "../utils/dbConnectionHolder";
-
+import { deleteExistingDocuments } from "./mongoUtil";
+import { improveAndRethrow } from "../utils/utils";
+import { dbConnectionHolder } from "../utils/dbConnectionHolder";
 
 const log = getLogger("encryptedIpsService");
 const encryptedIpsCollectionName = "encryptedIps";
@@ -31,7 +30,10 @@ export default class EncryptedIpsService {
 
         try {
             const encryptedIpsCollection = await dbConnectionHolder.getCollection(encryptedIpsCollectionName);
-            const encryptedIpsDocuments = await encryptedIpsCollection.find({ walletId }).sort({ creationDate: -1 }).toArray();
+            const encryptedIpsDocuments = await encryptedIpsCollection
+                .find({ walletId })
+                .sort({ creationDate: -1 })
+                .toArray();
 
             if (!encryptedIpsDocuments || !encryptedIpsDocuments.length) {
                 log.debug("Encrypted IPs have not been found. Returning empty array.");
@@ -56,12 +58,17 @@ export default class EncryptedIpsService {
             await encryptedIpsCollection.deleteMany({ walletId, ipHash: { $in: ipHashesToDelete } });
 
             log.debug("Checking that encrypted IPs have been deleted.");
-            const notRemovedEncryptedIps = await encryptedIpsCollection.find({ walletId, ipHash: { $in: ipHashesToDelete } }).toArray();
+            const notRemovedEncryptedIps = await encryptedIpsCollection
+                .find({ walletId, ipHash: { $in: ipHashesToDelete } })
+                .toArray();
 
-            if (notRemovedEncryptedIps && notRemovedEncryptedIps.length === ipHashesToDelete.length ) {
+            if (notRemovedEncryptedIps && notRemovedEncryptedIps.length === ipHashesToDelete.length) {
                 throw new Error("No encrypted IPs have been deleted. ");
             } else if (notRemovedEncryptedIps && notRemovedEncryptedIps.length) {
-                throw new Error(`Not all encrypted IPs have been deleted. Deleted count: ${ipHashesToDelete.length - notRemovedEncryptedIps.length}. `);
+                throw new Error(
+                    `Not all encrypted IPs have been deleted. Deleted count: ${ipHashesToDelete.length -
+                        notRemovedEncryptedIps.length}. `
+                );
             }
 
             log.debug("Encrypted IPs have been successfully deleted.");
@@ -86,7 +93,9 @@ export default class EncryptedIpsService {
             const notRemovedEncryptedIps = await encryptedIpsCollection.find({ walletId }).toArray();
 
             if (notRemovedEncryptedIps && notRemovedEncryptedIps.length) {
-                throw new Error(`Not all encrypted IPs have been deleted. Remains ${notRemovedEncryptedIps.length} items of ${ipsToBeRemoved.length} that should be deleted. `);
+                throw new Error(
+                    `Not all encrypted IPs have been deleted. Remains ${notRemovedEncryptedIps.length} items of ${ipsToBeRemoved.length} that should be deleted. `
+                );
             }
 
             log.debug("Encrypted IPs have been successfully deleted.");
@@ -110,7 +119,7 @@ export default class EncryptedIpsService {
 
             const encryptedIpsDocuments = await encryptedIpsCollection.find({ walletId, ipHash }).toArray();
 
-            log.debug(`Search has been done. Returning ${ encryptedIpsDocuments.length > 0 }`);
+            log.debug(`Search has been done. Returning ${encryptedIpsDocuments.length > 0}`);
             return encryptedIpsDocuments.length > 0;
         } catch (e) {
             improveAndRethrow(e, "isIpHashWhitelisted");

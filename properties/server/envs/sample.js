@@ -18,3 +18,8 @@ export const SUPPORT_EMAIL = "support@rabbit.io";
 export const SUPPORT_EMAIL_PASSWORD = "YTV86KTJaU4WfGtIaeptuQ"; // Set this password for when you run new instance of the Proton Mail Bridge
 export const EMAIL_BRIDGE_PORT = 2025;
 export const EMAIL_BRIDGE_HOST = "127.0.0.1";
+export const RAMP_PUBLIC_KEY =
+    "-----BEGIN PUBLIC KEY-----\n" +
+    "MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEevN2PMEeIaaMkS4VIfXOqsLebj19kVeu\n" +
+    "wWl0AnkIA6DJU0r3ixkXVhJTltycJtkDoEAYtPHfARyTofB5ZNw9xA==\n" +
+    "-----END PUBLIC KEY-----";

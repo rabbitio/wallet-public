@@ -19,4 +19,5 @@ export const MAX_ATTEMPTS_TO_RETRIEVE_TRANSACTIONS_DATA = 80;
 export const LANDING_PATH = "/welcome";
 export const RAMP_NETWORK_API_KEY = "38dzmcsoh4upgbjhvmjxh9egbh5678cxnxhc5whe";
 export const RAMP_WEBHOOK_STATUS_URL = "https://pacific-sierra-54547.herokuapp.com/webhook";
+export const RAMP_WIDGET_STAGING_URL = "https://ri-widget-staging.firebaseapp.com/";
 export const PUBLIC_LOGO_LINK = "https://dev1.rabbit.io/logo.svg";

@@ -1,7 +1,6 @@
 import express from "express";
-import {apiVersionPrefix} from "../controllers/controllerUtils";
-import {EncryptedIpsController} from "../controllers/encryptedIps";
-
+import { apiVersionPrefix } from "../controllers/controllerUtils";
+import { EncryptedIpsController } from "../controllers/encryptedIps";
 
 const router = express.Router({});
 

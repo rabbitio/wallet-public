@@ -7,7 +7,7 @@ export default class AdminNotificationsService extends DedicatedNotificationsSer
     /**
      * Returns ony unseen admin notifications according to passed last view timestamp
      *
-     * @param lastViewTimestamp
+     * @param lastViewTimestamp {number} - timestamp when notifications were last seen
      * @return {Promise<Array<Notification>>}
      */
     async getUnseenNotificationsList(lastViewTimestamp) {

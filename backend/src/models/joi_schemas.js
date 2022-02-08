@@ -512,4 +512,53 @@ export default {
             .required(),
         addresses: Joi.array().required(),
     }),
+    saveEncryptedWalletPaymentId: Joi.object().keys({
+        walletId: Joi.string()
+            .min(1)
+            .required(),
+        sessionId: Joi.string()
+            .min(1)
+            .required(),
+        clientIpHash: Joi.string()
+            .min(1)
+            .required(),
+        encryptedPaymentId: Joi.string()
+            .min(1)
+            .required(),
+    }),
+    getListOfEncryptedWalletPaymentIds: Joi.object().keys({
+        walletId: Joi.string()
+            .min(1)
+            .required(),
+        sessionId: Joi.string()
+            .min(1)
+            .required(),
+        clientIpHash: Joi.string()
+            .min(1)
+            .required(),
+    }),
+    getTransactionsToPaymentsMapping: Joi.object().keys({
+        walletId: Joi.string()
+            .min(1)
+            .required(),
+        sessionId: Joi.string()
+            .min(1)
+            .required(),
+        clientIpHash: Joi.string()
+            .min(1)
+            .required(),
+        paymentIds: Joi.array().required(),
+    }),
+    getPaymentNotifications: Joi.object().keys({
+        walletId: Joi.string()
+            .min(1)
+            .required(),
+        sessionId: Joi.string()
+            .min(1)
+            .required(),
+        clientIpHash: Joi.string()
+            .min(1)
+            .required(),
+        paymentIds: Joi.array().required(),
+    }),
 };
