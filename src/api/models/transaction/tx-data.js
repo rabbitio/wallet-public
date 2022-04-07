@@ -27,4 +27,10 @@ export class TxData {
     isSendingUnconfirmedUTXOs() {
         return !!this.utxos.find(utxo => utxo.confirmations < 1);
     }
+
+    toMiniString() {
+        return `${this.amount},${this.address.slice(0, 10)},${this.change},fee:${
+            this.fee
+        },UTXOs:\n${this.utxos.map(utxo => utxo.toMiniString()).join("\n")}`;
+    }
 }

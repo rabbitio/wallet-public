@@ -45,6 +45,7 @@ import {
     WALLET_IMPORTED_EVENT,
 } from "../adapters/eventbus";
 import { transactionsDataProvider } from "./internal/transactionsDataProvider";
+import { Logger } from "./internal/logs/logger";
 
 export const ALLOWED_MNEMONIC_LENGTHS = [12, 15, 18, 21, 24];
 
@@ -64,20 +65,23 @@ const WORDS_LISTS = [
  *
  * @return Boolean - true if there is saved wallet data and false otherwise
  */
-// TODO: [tests, low] Units are required
+// TODO: [tests, low] Unit tests are required
 export function isWalletDataPresent() {
+    const loggerSource = "isWalletDataPresent";
     try {
         const encryptedWalletCredentials = getEncryptedWalletCredentials();
 
-        return (
-            (encryptedWalletCredentials != null &&
-                encryptedWalletCredentials.encryptedMnemonic &&
-                encryptedWalletCredentials.encryptedPassphrase &&
-                true) ||
-            false
+        const isPresent = !!(
+            encryptedWalletCredentials != null &&
+            encryptedWalletCredentials.encryptedMnemonic &&
+            encryptedWalletCredentials.encryptedPassphrase
         );
+
+        Logger.log(`Checking wallet data presence: ${isPresent}`, loggerSource);
+
+        return isPresent;
     } catch (e) {
-        improveAndRethrow(e, "isWalletDataPresent");
+        improveAndRethrow(e, loggerSource);
     }
 }
 
@@ -161,6 +165,8 @@ export async function isPassphraseCorrect(mnemonic, passphrase) {
     try {
         const result = await isPassphraseHashCorrespondToWallet(mnemonicToWalletId(mnemonic), getHash(passphrase));
 
+        Logger.log(`Checking passphrase result: ${JSON.stringify(result)}`, "isPassphraseCorrect");
+
         return (
             (result.reason === "walletId" && "wallet_not_exist") ||
             (result.reason === "passphrase" && "passphrase_not_correct") ||
@@ -186,6 +192,7 @@ export async function loginIntoWalletBySavedMnemonicAndCreateSession(password) {
             mnemonic = decrypt(encryptedWalletCredentials.encryptedMnemonic, password);
             passphrase = decrypt(encryptedWalletCredentials.encryptedPassphrase, password);
         } catch (e) {
+            Logger.log("Decryption of mnemonic or passphrase failed", "loginIntoWalletBySavedMnemonicAndCreateSession");
             // Decryption can fail in case of wrong password so we processing it and passing
             // empty mnemonic to login call as it will fail and update login attempts counter on server
             mnemonic = "";
@@ -228,6 +235,7 @@ export async function loginIntoWalletByMnemonicAndCreateSession(mnemonic, passwo
  *      - failed to login due to wrong passphrase
  */
 async function loginIntoWalletAndCreateSession(mnemonic, passphrase, password, walletId) {
+    const loggerSource = "loginIntoWalletAndCreateSession";
     try {
         const passphraseHash = getHash(passphrase);
         const passwordHash = getHash(password);
@@ -237,6 +245,9 @@ async function loginIntoWalletAndCreateSession(mnemonic, passphrase, password, w
 
         const ipHash = await ClientIpHashService.calculateIpHash(mnemonicToDataPassword(mnemonic));
         const authResult = await authenticateAndCreateSession(walletId, passphraseHash, passwordHash, ipHash);
+
+        Logger.log(`Authentication result ${JSON.stringify(authResult)}`, loggerSource);
+
         const accountsData = new AccountsData(mnemonic, passphrase, SupportedSchemes, SupportedNetworks);
         saveAccountsData(accountsData);
         saveEncryptedWalletCredentials(encrypt(mnemonic, password), encrypt(passphrase, password));
@@ -251,10 +262,12 @@ async function loginIntoWalletAndCreateSession(mnemonic, passphrase, password, w
         return authResult;
     } catch (e) {
         if (e instanceof ApiCallWrongResponseError && e.isForbiddenError()) {
-            return e.authenticationError || e.authorizationError;
+            const error = e.authenticationError || e.authorizationError;
+            Logger.log(`Authentication error ${JSON.stringify(error)}`, loggerSource);
+            return error;
         }
 
-        improveAndRethrow(e, "loginIntoWalletAndCreateSession");
+        improveAndRethrow(e, loggerSource);
     }
 }
 
@@ -262,6 +275,12 @@ export function mnemonicToWalletId(mnemonic) {
     return getHash(mnemonic);
 }
 
+/**
+ * This password is used to encrypt wallet data like credentials and IP address, transaction details
+ *
+ * @param mnemonic - mnemonic is a base for hashing to get the password
+ * @return {string} data password
+ */
 export function mnemonicToDataPassword(mnemonic) {
     // Making some string based on mnemonic to get different hash than just from mnemonic
     const mnemonicBasedString = mnemonic
@@ -283,21 +302,33 @@ export function mnemonicToDataPassword(mnemonic) {
  *          (in case of error - wallet already exists)
  */
 export async function importWalletByMnemonic(mnemonic, password, passphrase = "") {
+    const loggerSource = "importWalletByMnemonic";
     try {
+        Logger.log(`Start importing a wallet. Password/passphrase is empty:${!!password}${!!passphrase}`, loggerSource);
+
         const accountsDataResult = await saveNewWalletAndProvideLocalData(mnemonic, passphrase, password);
         if (accountsDataResult.errorDescription) {
+            Logger.log("Failed to save new wallet during the import", loggerSource);
             return accountsDataResult;
         }
 
+        Logger.log("New wallet successfully saved during the import", loggerSource);
+
         await AddressesServiceInternal.performScanningOfAddresses(SupportedNetworks, SupportedSchemes);
+
+        Logger.log("Addresses scanning performed successfully during the import", loggerSource);
 
         await transactionsDataProvider.waitForTransactionsToBeStoredOnServer(30000);
 
+        Logger.log("Discovered transactions successfully discovered during the import", loggerSource);
+
         EventBus.dispatch(WALLET_IMPORTED_EVENT);
+
+        Logger.log("Wallet imported event was successfully sent during the import", loggerSource);
 
         return { result: true };
     } catch (e) {
-        improveAndRethrow(e, "importWalletByMnemonic");
+        improveAndRethrow(e, loggerSource);
     }
 }
 
@@ -311,20 +342,29 @@ export async function importWalletByMnemonic(mnemonic, password, passphrase = ""
  *          (in case of error - wallet already exists)
  */
 export async function saveNewWalletByMnemonicOnServerAndCreateSession(mnemonic, password, passphrase = "") {
+    const loggerSource = "saveNewWalletByMnemonicOnServerAndCreateSession";
     try {
+        Logger.log("Start saving new wallet on server", loggerSource);
+
         const result = await saveNewWalletAndProvideLocalData(mnemonic, passphrase, password);
         if (result.errorDescription) {
+            Logger.log(`Failed to save new wallet on server ${JSON.stringify(result)}`, loggerSource);
+
             return result;
         }
 
+        Logger.log("New wallet saved on server, returning true", loggerSource);
         return { result: true };
     } catch (e) {
-        improveAndRethrow(e, "saveNewWalletByMnemonicOnServerAndCreateSession");
+        improveAndRethrow(e, loggerSource);
     }
 }
 
 async function saveNewWalletAndProvideLocalData(mnemonic, passphrase = "", password) {
+    const loggerSource = "saveNewWalletAndProvideLocalData";
     try {
+        Logger.log("Start saving", loggerSource);
+
         const passwordHash = getHash(password);
         const passphraseHash = getHash(passphrase);
         const accountsData = new AccountsData(mnemonic, passphrase, SupportedSchemes, AllAvailableNetworks);
@@ -342,6 +382,8 @@ async function saveNewWalletAndProvideLocalData(mnemonic, passphrase = "", passw
             initialAddressesData
         );
 
+        Logger.log("Wallet saved", loggerSource);
+
         saveAccountsData(accountsData);
         saveEncryptedWalletCredentials(encrypt(mnemonic, password), encrypt(passphrase, password));
         saveWalletId(mnemonicToWalletId(mnemonic));
@@ -350,6 +392,9 @@ async function saveNewWalletAndProvideLocalData(mnemonic, passphrase = "", passw
         isJustLoggedOutFlag = false; // TODO: [refactoring, low] Move to mediators
         resetIntervalLookingForAuthentication();
         await ClientIpHashService.provideIpHashStored(); // TODO: [refactoring, low] Move to mediators
+
+        Logger.log("IP hash provided", loggerSource);
+
         ChangeAddressUpdateSchedulingService.scheduleChangeAddressUpdates(); // TODO: [refactoring, low] Move to mediators
         EventBus.dispatch(SIGNED_UP_EVENT);
 
@@ -362,7 +407,8 @@ async function saveNewWalletAndProvideLocalData(mnemonic, passphrase = "", passw
                 howToFix: e.serverHowToFix,
             };
         }
-        improveAndRethrow(e, "saveNewWalletAndProvideLocalData");
+
+        improveAndRethrow(e, loggerSource);
     }
 }
 
@@ -372,8 +418,13 @@ async function saveNewWalletAndProvideLocalData(mnemonic, passphrase = "", passw
  * @returns Promise resolving to void
  */
 export async function doLogout() {
+    const loggerSource = "doLogout";
     try {
+        Logger.log("Start logging out", loggerSource);
+
         await logoutWallet(getWalletId());
+
+        Logger.log("Successfully logged out", loggerSource);
 
         // We are not clearing encrypted wallet data here as it is required for login process
         clearAccountsData();
@@ -382,7 +433,7 @@ export async function doLogout() {
         EventBus.dispatch(LOGGED_OUT_EVENT);
         isJustLoggedOutFlag = true;
     } catch (e) {
-        improveAndRethrow(e, "doLogout");
+        improveAndRethrow(e, loggerSource);
     }
 }
 
@@ -392,18 +443,25 @@ export async function doLogout() {
  * @returns Promise resolving to Object { result: true } if wallet removed successfully or to { result: false } if the password is wrong
  */
 export async function deleteWalletByCurrentSession(password) {
+    const loggerSource = "deleteWalletByCurrentSession";
     try {
+        Logger.log(`Start deleting wallet, password is empty: ${!!password}`, loggerSource);
+
         const result = await deleteWallet(getWalletId(), getHash(password));
         if (result.result) {
+            Logger.log("Wallet was removed", loggerSource);
+
             clearStorage();
             isJustLoggedOutFlag = true;
             EventBus.dispatch(LOGGED_OUT_EVENT);
             await ClientIpHashService.provideIpHashStoredAndItsUpdate();
+            Logger.log("IP hash was provided, local data were corrected", loggerSource);
         }
 
+        Logger.log("Wallet removal was finished", loggerSource);
         return result;
     } catch (e) {
-        improveAndRethrow(e, "deleteWalletByCurrentSession");
+        improveAndRethrow(e, loggerSource);
     }
 }
 
@@ -442,13 +500,15 @@ export async function isCurrentSessionValid() {
 }
 
 /**
- * Checks whether given password is valid or not
+ * Checks whether given password is valid or not for current wallet
  *
  * @param password - the password to be checked
  * @return Promise resolving to true if the password is valid or to false otherwise
  */
 export async function isPasswordValid(password) {
     try {
+        Logger.log(`Checking password. The parameter is empty: ${!!password}`, "isPasswordValid");
+
         return await isPasswordHashCorrespondToWallet(getWalletId(), getHash(password));
     } catch (e) {
         improveAndRethrow(e, "isPasswordValid");
@@ -463,7 +523,10 @@ export async function isPasswordValid(password) {
  * @return Promise resolving to result Object: { result: true } if password is changed or { result: false } if old password is not valid
  */
 export async function changePassword(oldPassword, newPassword) {
+    const loggerSource = "changePassword";
     try {
+        Logger.log(`Changing password. The old/new are empty: ${!!oldPassword}|${!!newPassword}`, loggerSource);
+
         const result = await changePasswordHash(getWalletId(), getHash(oldPassword), getHash(newPassword));
         if (result.result) {
             const { encryptedMnemonic, encryptedPassphrase } = getEncryptedWalletCredentials();
@@ -471,10 +534,11 @@ export async function changePassword(oldPassword, newPassword) {
             const reencryptedPassphrase = encrypt(decrypt(encryptedPassphrase, oldPassword), newPassword);
             saveEncryptedWalletCredentials(reencryptedMnemonic, reencryptedPassphrase);
         }
+        Logger.log(`Password changed. Returning: ${JSON.stringify(result)}`, loggerSource);
 
         return result;
     } catch (e) {
-        improveAndRethrow(e, "changePassword");
+        improveAndRethrow(e, loggerSource);
     }
 }
 

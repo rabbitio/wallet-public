@@ -1,7 +1,7 @@
 import { getFeesFromExtService } from "../external-apis/feerates-external";
 import { FEE_LIFETIME } from "../../properties";
 import { improveAndRethrow, logError } from "../utils/errorUtils";
-import { FeeRate, DEFAULT_RATES } from "../lib/fees";
+import { DEFAULT_RATES } from "../lib/fees";
 import {
     getFeeRatesExpirationTime,
     getSerializedFeeRatesArray,
@@ -9,6 +9,8 @@ import {
     saveFeeRatesExpirationTime,
 } from "./internal/storage";
 import { postponeExecution } from "../utils/browserUtils";
+import { Logger } from "./internal/logs/logger";
+import { FeeRate } from "../models/feeRate";
 
 /**
  * Retrieves smallest rate by given blocks counts.
@@ -20,6 +22,9 @@ import { postponeExecution } from "../utils/browserUtils";
 export async function getCurrentSmallestFeeRate(network, blocksCounts = []) {
     try {
         const rates = await Promise.all(blocksCounts.map(count => getCurrentFeeRate(network, count)));
+
+        Logger.log(`All rates: ${rates.map(r => r.toMiniString()).join(";")}`, "getCurrentSmallestFeeRate");
+
         return rates.reduce((prev, rate) => (prev == null || rate.rate < prev.rate ? rate : prev), null);
     } catch (e) {
         improveAndRethrow(e, "getCurrentSmallestFeeRate");
@@ -46,6 +51,7 @@ let isRetrievingRates = false;
  * @returns Promise resolving to FeeRate instance
  */
 export async function getCurrentFeeRate(network, blocksCount) {
+    const loggerSource = "getCurrentFeeRate";
     let rate = DEFAULT_RATES.find(rate => rate.network === network.key && rate.blocksCount === blocksCount);
     try {
         let feesRates = getFeesFromCache();
@@ -63,8 +69,14 @@ export async function getCurrentFeeRate(network, blocksCount) {
             try {
                 feesRates = await getFeesFromExtService(network);
                 saveFeeRatesToCache(feesRates, FEE_LIFETIME);
+                Logger.log(
+                    `Retrieved and saved to cache ${feesRates
+                        .map(item => `${item.blocksCount}:${item.rate}`)
+                        .join(",")}`,
+                    loggerSource
+                );
             } catch (e) {
-                logError(e, "getCurrentFeeRate", "Failed to get external fee rates");
+                logError(e, loggerSource, "Failed to get external fee rates");
             } finally {
                 isRetrievingRates = false;
             }
@@ -72,12 +84,15 @@ export async function getCurrentFeeRate(network, blocksCount) {
 
         const currentRate = feesRates?.length && filterRatesForBlocksCount(feesRates, blocksCount, network);
         if (!currentRate) {
-            logError(new Error("No fee rates have been got. Default will be returned: " + JSON.stringify(rate)));
+            logError(
+                new Error("No fee rates have been got. Default will be returned: " + JSON.stringify(rate)),
+                loggerSource
+            );
         } else {
             return currentRate;
         }
     } catch (e) {
-        logError(e, "getCurrentFeeRate");
+        logError(e, loggerSource);
     }
 
     return rate;

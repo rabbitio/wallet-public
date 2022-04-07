@@ -11,6 +11,7 @@ import {
 import { improveAndRethrow } from "../../utils/errorUtils";
 import CurrentAddressUtils from "../utils/currentAddressUtils";
 import { decrypt } from "../../adapters/crypto-utils";
+import { Logger } from "./logs/logger";
 
 export default class AddressesServiceInternal {
     /**
@@ -85,7 +86,9 @@ export default class AddressesServiceInternal {
      */
     // TODO: [tests, moderate] Units
     static async exportAddressesWithPrivateKeysByPassword(password) {
+        const loggerSource = "exportAddressesWithPrivateKeysByPassword";
         try {
+            Logger.log("Started exporting addresses and private keys", loggerSource);
             const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
             const network = getCurrentNetwork();
             const allAddresses = getAllUsedAddressesByIndexes(getAccountsData(), network, indexes);
@@ -96,11 +99,13 @@ export default class AddressesServiceInternal {
             const addressesArray = allAddresses.internal.concat(allAddresses.external);
             const addressesToEcPairs = getEcPairsToAddressesMapping(addressesArray, seedHex, network, indexes);
 
+            Logger.log(`Exported ${addressesToEcPairs.length} addresses and private keys. Returning`, loggerSource);
+
             return addressesToEcPairs.map(mappingItem => {
                 return { address: mappingItem.address, privateKey: mappingItem.ecPair.toWIF() };
             });
         } catch (e) {
-            improveAndRethrow(e, "exportAddressesWithPrivateKeysByPassword");
+            improveAndRethrow(e, loggerSource);
         }
     }
 }

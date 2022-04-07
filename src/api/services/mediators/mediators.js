@@ -2,6 +2,7 @@ import {
     AUTHENTICATION_DISCOVERED_EVENT,
     EventBus,
     LOGGED_OUT_EVENT,
+    NEW_ADDRESS_CREATED_EVENT,
     NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
     NO_AUTHENTICATION_EVENT,
     SIGNED_IN_EVENT,
@@ -9,6 +10,9 @@ import {
     THERE_IS_SESSION_ON_APP_INITIALIZATION_EVENT,
     TRANSACTION_PUSHED_EVENT,
     TX_DATA_RETRIEVED_EVENT,
+    USER_READY_TO_SEND_TRANSACTION_EVENT,
+    WALLET_DATA_EXPORTED_EVENT,
+    WALLET_IMPORTED_EVENT,
 } from "../../adapters/eventbus";
 import { logError } from "../../utils/errorUtils";
 import ChangeAddressUpdateSchedulingService from "../changeAddressUpdateSchedulingService";
@@ -26,17 +30,30 @@ import { isCurrentSessionValid, isJustLoggedOut } from "../authService";
 import { addressesMetadataService } from "../internal/addressesMetadataService";
 import { IS_TESTING } from "../../../properties";
 import { setupAnalyticsMediators } from "./trackersMediators";
+import { Logger } from "../internal/logs/logger";
+import { logWalletDataSlice } from "../internal/logs/scheduledLogger";
 
 function initializeTransactionsProvider() {
+    const loggerSource = "initializeTransactionsProvider";
     (async () => {
         try {
+            Logger.log("Start initializing transactions provider", loggerSource);
+
             const isSessionValid = await isCurrentSessionValid();
             if (isSessionValid) {
                 const addresses = await AddressesServiceInternal.getAllUsedAddresses();
-                await transactionsDataProvider.initialize([...addresses.internal, ...addresses.external]);
+                const allAddresses = [...addresses.internal, ...addresses.external];
+
+                Logger.log(`Initializing for ${allAddresses.length} addresses`, loggerSource);
+
+                await transactionsDataProvider.initialize(allAddresses);
+
+                Logger.log("Successfully initialized", loggerSource);
+            } else {
+                Logger.log("Session is not valid - stopped the initialization", loggerSource);
             }
         } catch (e) {
-            logError(e, null, "Failed to initialize transactions data provider");
+            logError(e, loggerSource, "Failed to initialize transactions data provider");
         }
     })();
 }
@@ -47,7 +64,10 @@ export function setupMediators(
     handleNewNotLocalTxs,
     handleDiscoveredAuthentication
 ) {
+    const loggerSource = "setupMediators";
     try {
+        Logger.log("Start initializing mediators", loggerSource);
+
         setupAnalyticsMediators();
 
         EventBus.addEventListener(SIGNED_IN_EVENT, () => saveIsNotFoundSessionMessageShownForLastLostSession(false));
@@ -108,7 +128,7 @@ export function setupMediators(
                         );
                         await UtxosService.calculateBalance(rate, true);
                     } catch (e) {
-                        logError(e, "tx data retrieved event handler");
+                        logError(e, `${TX_DATA_RETRIEVED_EVENT}_handler`);
                     }
                 })();
             });
@@ -119,15 +139,33 @@ export function setupMediators(
                     const transactionData = await transactionsDataProvider.getTransactionData(txid);
                     await transactionsDataProvider.updateTransactionsCacheAndPushTxsToServer([transactionData]);
                 } catch (e) {
-                    logError(e, "Failed to push data of newly created transaction to transactions cache");
+                    logError(
+                        e,
+                        `${TRANSACTION_PUSHED_EVENT}_handler`,
+                        "Failed to push data of newly created transaction to transactions cache"
+                    );
                 }
             })();
         });
 
         EventBus.addEventListener(NEW_NOT_LOCAL_TRANSACTIONS_EVENT, handleNewNotLocalTxs);
 
+        !IS_TESTING &&
+            [
+                WALLET_IMPORTED_EVENT,
+                SIGNED_IN_EVENT,
+                TRANSACTION_PUSHED_EVENT,
+                THERE_IS_SESSION_ON_APP_INITIALIZATION_EVENT,
+                AUTHENTICATION_DISCOVERED_EVENT,
+                WALLET_DATA_EXPORTED_EVENT,
+                NEW_ADDRESS_CREATED_EVENT,
+                USER_READY_TO_SEND_TRANSACTION_EVENT,
+            ].forEach(event => EventBus.addEventListener(event, logWalletDataSlice));
+
         EventBus.addEventListener(AUTHENTICATION_DISCOVERED_EVENT, handleDiscoveredAuthentication);
+
+        Logger.log("Successfully initialized mediators", loggerSource);
     } catch (e) {
-        logError(e);
+        logError(e, loggerSource);
     }
 }

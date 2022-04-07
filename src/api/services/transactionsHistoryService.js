@@ -9,6 +9,7 @@ import AddressesServiceInternal from "./internal/addressesServiceInternal";
 import { transactionsDataProvider } from "./internal/transactionsDataProvider";
 import { getTransactionsHistory } from "../lib/transactions/transactions-history";
 import FiatPaymentsService from "./internal/FiatPaymentsService";
+import { Logger } from "./internal/logs/logger";
 
 export default class TransactionsHistoryService {
     static DEFAULT_SORT = "creationDate_desc";
@@ -71,6 +72,12 @@ export default class TransactionsHistoryService {
             const transactionIds = allTransactions.map(tx => tx.txid);
             const txStoredData = await TransactionsDataService.getTransactionsData(transactionIds);
             const allTxs = getTransactionsHistory(allAddresses, allTransactions, txStoredData);
+
+            Logger.log(
+                `Getting. Addresses: ${allAddressesSingleArray.length}, all txs: ${allTxs.length}`,
+                "getTransactionsList"
+            );
+
             const withLabels = await addPurchaseData(allTxs);
             const selectedOnes = getOnlyFiltered(withLabels, filterBy);
             const withFiatAmounts = await addFiatAmounts(selectedOnes);
@@ -86,7 +93,7 @@ export default class TransactionsHistoryService {
                 wholeListLength: allTxs.length,
             };
         } catch (e) {
-            improveAndRethrow(e, TransactionsHistoryService.getTransactionsList);
+            improveAndRethrow(e, "getTransactionsList");
         }
     }
 }

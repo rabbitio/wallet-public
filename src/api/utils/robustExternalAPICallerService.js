@@ -3,6 +3,7 @@ import axios from "axios";
 import { rpsEnsurer } from "../external-apis/utils/rpsEnsurer";
 import { getDomainWithoutSubdomains, postponeExecution, safeStringify } from "./browserUtils";
 import { logError } from "./errorUtils";
+import { externalServicesStatsCollector } from "../services/utils/externalServicesStatsCollector";
 
 /**
  * Template service needed to avoid duplication of the same logic when we need to call
@@ -72,7 +73,6 @@ export default class RobustExternalAPICallerService {
         attemptsCount = 1,
         doNotFailForNowData = false
     ) {
-        const startTimestamp = Date.now();
         let result;
         for (let i = 0; (i < attemptsCount || result?.shouldBeForceRetried) && result?.data == null; ++i) {
             result = null;
@@ -101,7 +101,10 @@ export default class RobustExternalAPICallerService {
                             `Failed to retrieve data from providers at attempt ${i}. All errors are: ${safeStringify(
                                 result.errors
                             )}.`
-                        )
+                        ),
+                        "callExternalAPI",
+                        "",
+                        true
                     );
                 }
             } catch (e) {
@@ -120,38 +123,19 @@ export default class RobustExternalAPICallerService {
             }
         }
 
-        // TODO: [refactoring, critical] Remove debug output
-        // eslint-disable-next-line no-console
-        console.log(`RBST_END-${this.bio}: ${(Date.now() - startTimestamp) / 1000}s`);
-
         return result?.data;
     }
 
     async _performCallAttempt(queryParametersValues, timeoutMS, cancelToken) {
-        // TODO: [feature, moderate] Reordering will break the execution for already running retrieval processes
-        //       So this feature should be rethought and implemented using kinda lock stopping all the calls to this
-        //       service and reordering providers and only then proceeding with calls
-        // this._reorderProvidersByNiceFactor();
+        const providers = this._reorderProvidersByNiceFactor();
         let data = undefined,
             providerIndex = 0,
             countOfRequestsDeclinedByRPS = 0,
             errors = [];
-        while (!data && providerIndex < this.providers.length) {
-            // TODO: [refactoring, critical] Remove debug output
-            // eslint-disable-next-line no-console
-            console.log("RBST PR: " + this.providers[providerIndex].endpoint + ": " + queryParametersValues.length);
-            let provider = this.providers[providerIndex];
+        while (!data && providerIndex < providers.length) {
+            let provider = providers[providerIndex];
             const domain = getDomainWithoutSubdomains(provider.endpoint);
             if (provider.RPS && rpsEnsurer.isRPSExceeded(domain)) {
-                // TODO: [refactoring, critical] Remove debug output
-                // eslint-disable-next-line no-console
-                console.log(
-                    "Provider's RPS is exceeded " +
-                        rpsEnsurer.getMsFromLastCall(domain) +
-                        " < " +
-                        Math.ceil(1000 / provider.RPS)
-                );
-
                 ++providerIndex; // Current provider's RPS is exceeded so trying next provider
                 ++countOfRequestsDeclinedByRPS;
                 continue;
@@ -182,6 +166,7 @@ export default class RobustExternalAPICallerService {
                     let response = null;
                     if (i === 0) {
                         response = await axios[httpMethods[i]](...params);
+                        externalServicesStatsCollector.externalServiceCalledWithoutError(provider.endpoint);
                     } else {
                         // For requests starting from second one we postpone each request to not to exceed RPS of current provider
                         response = await postponeExecution(
@@ -199,6 +184,7 @@ export default class RobustExternalAPICallerService {
                 }
             } catch (e) {
                 punishProvider(provider);
+                externalServicesStatsCollector.externalServiceFailed(provider.endpoint, e?.message);
                 errors.push(e);
             } finally {
                 providerIndex++;
@@ -206,14 +192,15 @@ export default class RobustExternalAPICallerService {
         }
 
         // If we are declining more than 50% of providers (by exceeding RPS) then we note that it better to retry the whole process of providers requesting
-        const shouldBeForceRetried =
-            data == null && countOfRequestsDeclinedByRPS > Math.floor(this.providers.length * 0.5);
+        const shouldBeForceRetried = data == null && countOfRequestsDeclinedByRPS > Math.floor(providers.length * 0.5);
 
         return { data, shouldBeForceRetried, errors };
     }
 
     _reorderProvidersByNiceFactor() {
-        this.providers = this.providers.sort((p1, p2) => p2.niceFactor - p1.niceFactor);
+        const providersCopy = [...this.providers];
+
+        return providersCopy.sort((p1, p2) => p2.niceFactor - p1.niceFactor);
     }
 }
 

@@ -20,12 +20,13 @@ import UtxosService from "./internal/utxosService";
 import AddressesDataApi from "../external-apis/backend-api/addressesDataApi";
 import { mainnet } from "../lib/networks";
 import { getDecryptedWalletCredentials } from "./internal/authServiceInternal";
-import { EventBus, TRANSACTION_PUSHED_EVENT } from "../adapters/eventbus";
+import { EventBus, TRANSACTION_PUSHED_EVENT, USER_READY_TO_SEND_TRANSACTION_EVENT } from "../adapters/eventbus";
 import { transactionsDataProvider } from "./internal/transactionsDataProvider";
 import { txDataToTransaction } from "./utils/txDataUtils";
 import { buildTransaction } from "../lib/transactions/build-transaction";
 import { createFakeSendAllTransaction, createFakeTransaction } from "../lib/transactions/fake-transactions";
 import { broadcastTransaction } from "./internal/transactionsBroadcastingService";
+import { Logger } from "./internal/logs/logger";
 
 export default class PaymentService {
     static BLOCKS_COUNTS_FOR_OPTIONS = [1, 5, 10, 25];
@@ -42,7 +43,10 @@ export default class PaymentService {
      * @return Promise resolving to txId of broadcasted transaction
      */
     static async createTransactionByValidTxDataAndBroadcast(txData, password, note) {
+        const loggerSource = "createTransactionByValidTxDataAndBroadcast";
         try {
+            Logger.log(`Start broadcasting ${txData.amount}->${txData.address}`, loggerSource);
+
             const { mnemonic, passphrase } = getDecryptedWalletCredentials(password);
             const seedHex = bip39.mnemonicToSeedHex(mnemonic, passphrase);
             const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
@@ -59,27 +63,28 @@ export default class PaymentService {
 
             const transactionId = await broadcastTransaction(transaction, txData.network);
 
+            Logger.log(`Transaction was pushed ${transactionId}`, loggerSource);
+
             EventBus.dispatch(TRANSACTION_PUSHED_EVENT, null, transactionId, txData.amount, txData.fee);
 
             try {
                 await transactionsDataProvider.pushNewTransactionToCache(
                     txDataToTransaction(txData, transactionId, 0, null, Date.now())
                 );
+                Logger.log(`Transaction was pushed to cache ${transactionId}`, loggerSource);
             } catch (e) {
-                logError(
-                    e,
-                    "createTransactionByValidTxDataAndBroadcast",
-                    "Failed to push broadcasted transaction to tx data provider cache"
-                );
+                logError(e, loggerSource, "Failed to push broadcasted transaction to tx data provider cache");
             }
 
             if (typeof note === "string" && note !== "") {
                 await TransactionsDataService.saveTransactionData(transactionId, { note });
+                Logger.log(`The note was saved. Length: ${note.length}`, loggerSource);
             }
 
+            Logger.log(`The transaction successfully sent and processed: ${transactionId}`, loggerSource);
             return transactionId;
         } catch (e) {
-            improveAndRethrow(e, "createTransactionByValidTxDataAndBroadcast");
+            improveAndRethrow(e, loggerSource);
         }
     }
 
@@ -120,7 +125,9 @@ export default class PaymentService {
         isSendAll,
         balanceBTC = null
     ) {
+        const loggerSource = "validateParamsAndCreateTransactionsWithFakeSignatures";
         try {
+            Logger.log(`Start. ${amount}->${address}. All: ${isSendAll}. Balance: ${balanceBTC}`, loggerSource);
             const currentNetwork = getCurrentNetwork();
             const addressValidationResult = validateTargetAddress(address, currentNetwork);
             const amountValidationResult = await PaymentService.validateAmountToBeSent(
@@ -130,6 +137,7 @@ export default class PaymentService {
                 balanceBTC
             );
             if (amountValidationResult.result && addressValidationResult.result) {
+                Logger.log("Address and amount are valid", loggerSource);
                 const resolvedPromises = await Promise.all([
                     ...this.BLOCKS_COUNTS_FOR_OPTIONS.map(blocksCount =>
                         getCurrentFeeRate(currentNetwork, blocksCount)
@@ -138,9 +146,9 @@ export default class PaymentService {
                     !isSendAll ? AddressesService.getCurrentChangeAddress() : null,
                 ]);
                 const feeRates = resolvedPromises.slice(0, this.BLOCKS_COUNTS_FOR_OPTIONS.length);
-                // eslint-disable-next-line no-console
-                console.log("OOPPPPTTSS RAATTES - " + JSON.stringify(feeRates));
                 const [utxos, changeAddress] = resolvedPromises.slice(resolvedPromises.length - 2);
+
+                Logger.log(`Got ${utxos.length} UTXOs`, loggerSource);
 
                 let resultsArray = feeRates.map(feeRate => {
                     let txData;
@@ -161,6 +169,10 @@ export default class PaymentService {
                     if (!txData?.errorDescription) {
                         return { txData: txData, btcFee: satoshiToBtc(txData.fee) };
                     } else {
+                        Logger.log(
+                            `Creation failed. Rate: ${feeRate.blocksCount}->${feeRate.rate}. ${txData.errorDescription}. ${txData.howToFix}`,
+                            loggerSource
+                        );
                         return { errorDescription: txData.errorDescription, howToFix: txData.howToFix };
                     }
                 });
@@ -177,20 +189,34 @@ export default class PaymentService {
                     return result;
                 });
 
+                Logger.log(
+                    `Txs data created:\n${resultsArray
+                        .map(
+                            item =>
+                                `${item.txData ? `tx:${item.txData.toMiniString()}` : `error:${JSON.stringify(item)}`}`
+                        )
+                        .join("\n")}\n`,
+                    loggerSource
+                );
+
                 return {
                     result: true,
                     txsDataArray: resultsArray,
                 };
             } else {
+                const description = `${addressValidationResult.errorDescription ||
+                    ""}${amountValidationResult.errorDescription || ""}`;
+                const howToFix = `${addressValidationResult.howToFix || ""}${amountValidationResult.howToFix || ""}`;
+
+                Logger.log(`Validation failed. ${description}. ${howToFix}`, loggerSource);
                 return {
                     result: false,
-                    errorDescription: `${addressValidationResult.errorDescription ||
-                        ""}${amountValidationResult.errorDescription || ""}`,
-                    howToFix: `${addressValidationResult.howToFix || ""}${amountValidationResult.howToFix || ""}`,
+                    errorDescription: description,
+                    howToFix: howToFix,
                 };
             }
         } catch (e) {
-            improveAndRethrow(e, "validateParamsAndCreateTransactionsWithFakeSignatures");
+            improveAndRethrow(e, loggerSource);
         }
     }
 
@@ -328,6 +354,13 @@ export default class PaymentService {
         } catch (e) {
             improveAndRethrow(e, "convertBtcAmountsToFiat");
         }
+    }
+
+    /**
+     * Sends event that user is ready to send transaction. This is needed for logging the state of wallet before the sending
+     */
+    static notifyThatTheUserIsReadyTOSendTransaction() {
+        EventBus.dispatch(USER_READY_TO_SEND_TRANSACTION_EVENT);
     }
 }
 

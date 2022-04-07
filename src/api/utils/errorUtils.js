@@ -1,5 +1,6 @@
 import { ApiCallWrongResponseError } from "../external-apis/backend-api/utils";
 import { safeStringify } from "./browserUtils";
+import { Logger } from "../services/internal/logs/logger";
 
 export function improveAndRethrow(e, settingFunction, additionalMessage) {
     const message = improvedErrorMessage(e, settingFunction, additionalMessage);
@@ -18,7 +19,7 @@ function improvedErrorMessage(e, settingFunction, additionalMessage) {
     return message;
 }
 
-export function logError(e, settingFunction, additionalMessage) {
+export function logError(e, settingFunction, additionalMessage, onlyToConsole = false) {
     let message = improvedErrorMessage(e, settingFunction, additionalMessage);
     const specificErrorInfo = getSpecificInfoFromError(e);
     specificErrorInfo && (message += specificErrorInfo);
@@ -30,8 +31,13 @@ export function logError(e, settingFunction, additionalMessage) {
         } catch (e) {}
     }
 
+    const finalErrorText = message + ". " + safeStringify(e);
     // eslint-disable-next-line no-console
-    console.error(message + " " + safeStringify(e));
+    console.error(finalErrorText);
+
+    if (!onlyToConsole) {
+        Logger.log(finalErrorText, "logError");
+    }
 }
 
 export function getSpecificInfoFromError(e) {

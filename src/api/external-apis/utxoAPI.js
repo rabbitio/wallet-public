@@ -2,6 +2,7 @@ import RobustExternalAPICallerService from "../utils/robustExternalAPICallerServ
 import { testnet } from "../lib/networks";
 import { Utxo } from "../models/transaction/utxo";
 
+/** @deprecated */
 // This provide is not used now TODO: [refactoring, low] consider removing it
 export const externalUTXOsAPICaller = new RobustExternalAPICallerService("externalUTXOsAPICaller", [
     {

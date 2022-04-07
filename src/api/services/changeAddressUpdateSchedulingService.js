@@ -3,6 +3,7 @@ import CurrentAddressUtils from "./utils/currentAddressUtils";
 import { getAccountsData, getCurrentNetwork, getWalletId } from "./internal/storage";
 import { CHANGE_SCHEME, INTERNAL_CHANGE_INDEX } from "../lib/addresses";
 import { improveAndRethrow, logError } from "../utils/errorUtils";
+import { Logger } from "./internal/logs/logger";
 
 /**
  * Provides API to schedule automatic change address updating (via interval) and removing these schedules.
@@ -13,8 +14,8 @@ export default class ChangeAddressUpdateSchedulingService {
 
     /**
      * Schedules updating of change address. The change addresses are being created for transactions creation, RBF etc.
-     * We getting current (unused) change address. But if the current address is used then we should perform the
-     * addresses scanning to make sure that we are not missing any used addresses. But the scanning is pretty "heavy"
+     * We are getting current (unused) change address. But if the current address is used then we should perform the
+     * addresses scanning to make sure that we are not missing some used addresses. But the scanning is pretty "heavy"
      * and can take several additional seconds and it will cause the user to wait.
      *
      * This service performs change address retrieval in background. So with high probability if the user starts some
@@ -30,18 +31,24 @@ export default class ChangeAddressUpdateSchedulingService {
         intervalSeconds = CHANGE_ADDRESS_UPDATE_INTERVAL_SECONDS,
         maxCallsCount = -1
     ) {
+        const loggerSource = "scheduleChangeAddressUpdates";
         try {
-            if (ChangeAddressUpdateSchedulingService.intervals.length) {
+            const intervalsCount = ChangeAddressUpdateSchedulingService.intervals.length;
+            if (intervalsCount) {
+                Logger.log(`Intervals (${intervalsCount}) already set. Skipping.`, loggerSource);
                 return;
             }
             let callsCount = 0;
             ChangeAddressUpdateSchedulingService.intervals = networks.reduce((intervals, network) => {
+                Logger.log(`Setting up for ${network.key}`, loggerSource);
                 const intervalId = setInterval(() => {
                     if (maxCallsCount !== -1 && callsCount++ >= maxCallsCount) {
+                        Logger.log("Removing updating by interval", `${loggerSource}_${network.key}`);
                         ChangeAddressUpdateSchedulingService.removeScheduledChangeAddressUpdating();
                     } else {
                         (async () => {
                             try {
+                                Logger.log("Start scanning CHANGE-INTERNAL", `${loggerSource}_${network.key}`);
                                 await CurrentAddressUtils._getCurrentAddress(
                                     getAccountsData(),
                                     network,
@@ -51,8 +58,9 @@ export default class ChangeAddressUpdateSchedulingService {
                                     INTERNAL_CHANGE_INDEX,
                                     false
                                 );
+                                Logger.log("Finished scanning CHANGE-INTERNAL", `${loggerSource}_${network.key}`);
                             } catch (e) {
-                                logError(e, "scheduleChangeAddressUpdates", "Failed to update change Address.");
+                                logError(e, `${loggerSource}_${network.key}`, "Failed to update change Address.");
                             }
                         })();
                     }
@@ -60,8 +68,10 @@ export default class ChangeAddressUpdateSchedulingService {
 
                 return [...intervals, intervalId];
             }, []);
+
+            Logger.log(`Set up ${ChangeAddressUpdateSchedulingService.intervals.length} intervals.`, loggerSource);
         } catch (e) {
-            improveAndRethrow(e, "scheduleChangeAddressUpdates");
+            improveAndRethrow(e, loggerSource);
         }
     }
 

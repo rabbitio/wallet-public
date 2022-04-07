@@ -4,6 +4,7 @@ import { improveAndRethrow } from "../utils/errorUtils";
 import { satoshiToBtc } from "../lib/btc-utils";
 import { getCurrentSmallestFeeRate } from "./feeRatesService";
 import { getCurrentNetwork } from "./internal/storage";
+import { Logger } from "./internal/logs/logger";
 
 export default class BalanceService {
     /**
@@ -20,12 +21,21 @@ export default class BalanceService {
      *     }
      */
     static async getSpendableWalletBalance(forceCalculate = false) {
+        const loggerSource = "getSpendableWalletBalance";
         try {
+            Logger.log("Start getting balance", loggerSource);
+
             const network = getCurrentNetwork();
             const currentSmallestFeeRate = await getCurrentSmallestFeeRate(
                 network,
                 PaymentService.BLOCKS_COUNTS_FOR_OPTIONS
             );
+
+            Logger.log(
+                `Getting balance, smallest rate is ${currentSmallestFeeRate.blocksCount}->${currentSmallestFeeRate.rate}`,
+                loggerSource
+            );
+
             const balanceData = await UtxosService.calculateBalance(currentSmallestFeeRate, forceCalculate);
             const spendableBtcAmount = satoshiToBtc(balanceData.spendable);
             const btcDustAmount = satoshiToBtc(balanceData.dust);
@@ -34,14 +44,17 @@ export default class BalanceService {
                 btcDustAmount,
             ]);
 
-            return {
+            const result = {
                 btcAmount: spendableBtcAmount,
                 fiatAmount: spendableFiatAmount,
                 btcDustAmount: btcDustAmount,
                 fiatDustAmount: fiatDustAmount,
             };
+
+            Logger.log(`Returning: ${JSON.stringify(result)}`, loggerSource);
+            return result;
         } catch (e) {
-            improveAndRethrow(e, "getSpendableWalletBalance");
+            improveAndRethrow(e, loggerSource);
         }
     }
 }

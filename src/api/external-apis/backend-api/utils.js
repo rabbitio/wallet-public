@@ -17,11 +17,14 @@ export async function doApiCall(
     data,
     successStatuses,
     errorMessage,
-    options = { doPostEventOnNotAuthenticated: true, ipHash: null }
+    options = { doPostEventOnNotAuthenticated: true, ipHash: null, headers: {} }
 ) {
     try {
         endpoint = await addIpHashParameterToUrl(endpoint, options.ipHash);
-        const headers = (IS_TESTING && { Cookie: cookieStorage.getSavedCookieHeader() }) || {}; // Workaround for integration testing
+        // IS_TESTING is used as a workaround for integration testing
+        const headers =
+            (IS_TESTING && { Cookie: cookieStorage.getSavedCookieHeader(), ...options.headers }) || options.headers;
+
         let response;
         if (method === "get") {
             response = await axios.get(endpoint, { headers });

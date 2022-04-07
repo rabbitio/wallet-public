@@ -18,3 +18,6 @@ export const TRANSACTION_PUSHED_EVENT = "transactionPushedEvent";
 export const WALLET_IMPORTED_EVENT = "walletImportedEvent";
 export const NEW_NOT_LOCAL_TRANSACTIONS_EVENT = "newNotLocalTransactionsEvent";
 export const AUTHENTICATION_DISCOVERED_EVENT = "authenticationDiscoveredEvent";
+export const WALLET_DATA_EXPORTED_EVENT = "walletDataExportedEvent";
+export const NEW_ADDRESS_CREATED_EVENT = "newAddressCreatedEvent";
+export const USER_READY_TO_SEND_TRANSACTION_EVENT = "userReadyTOSendTransactionEvent";

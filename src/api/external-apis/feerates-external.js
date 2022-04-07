@@ -1,8 +1,8 @@
 import { mainnet, testnet } from "../lib/networks";
-import { FeeRate } from "../lib/fees";
 import RobustExternalAPICallerService from "../utils/robustExternalAPICallerService";
 import { FEE_RATES_SERVICE_ENDPOINT } from "../../properties";
 import { improveAndRethrow } from "../utils/errorUtils";
+import { FeeRate } from "../models/feeRate";
 
 const robustFeeRatsRetriever = new RobustExternalAPICallerService("robustFeeRatsRetriever", [
     {

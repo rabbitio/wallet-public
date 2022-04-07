@@ -8,6 +8,7 @@ import { getAllUTXOs } from "../utils/utxosUtils";
 import AddressesDataApi from "../../external-apis/backend-api/addressesDataApi";
 import AddressesServiceInternal from "./addressesServiceInternal";
 import { improveAndRethrow } from "../../utils/errorUtils";
+import { Logger } from "./logs/logger";
 
 export default class UtxosService {
     static _cachedBalanceData = {};
@@ -51,6 +52,7 @@ export default class UtxosService {
      *     }
      */
     static async calculateBalance(feeRate = null, forceCalculate = false) {
+        const loggerSource = "calculateBalance";
         try {
             if (
                 !this._cachedBalanceData?.balanceValues ||
@@ -63,29 +65,29 @@ export default class UtxosService {
                     AddressesDataApi.getAddressesIndexes(getWalletId()),
                 ]);
 
-                // eslint-disable-next-line no-console
-                console.log("BALANCE Addresses: " + JSON.stringify(allAddresses));
-
                 const allUtxos = await getAllUTXOs(allAddresses.internal, allAddresses.external, network);
 
-                // eslint-disable-next-line no-console
-                console.log("BALANCE UTXOs: " + JSON.stringify(allUtxos));
+                const utxosToString = utxos => utxos.map(utxo => utxo.toMiniString()).join("\n");
+                Logger.log(
+                    `Recalculating, all UTXOs: internal:\n${utxosToString(allUtxos.internal)}\n` +
+                        `external:\n${utxosToString(allUtxos.external)}`,
+                    loggerSource
+                );
 
                 const balanceValues = calculateBalanceByWalletData(getAccountsData(), allUtxos, indexes, network);
-
-                // eslint-disable-next-line no-console
-                console.log("BALANCE BALANCE: " + JSON.stringify(balanceValues));
-
                 const dust = feeRate && calculateDustBalanceByWalletData(allUtxos, feeRate, network);
                 this._cachedBalanceData = {
                     balanceValues: { ...balanceValues, dust: dust ?? null },
                     expiresAt: Date.now() + this.CACHE_LIFETIME_MS,
                 };
+            } else {
+                Logger.log("Using cached balance", loggerSource);
             }
 
+            Logger.log(`Returning balance: ${JSON.stringify(this._cachedBalanceData.balanceValues)}`, loggerSource);
             return { ...this._cachedBalanceData.balanceValues };
         } catch (e) {
-            improveAndRethrow(e, "calculateBalance");
+            improveAndRethrow(e, loggerSource);
         }
     }
 }

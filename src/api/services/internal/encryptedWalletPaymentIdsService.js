@@ -2,6 +2,7 @@ import { improveAndRethrow } from "../../utils/errorUtils";
 import { EncryptedWalletPaymentIdsApi } from "../../external-apis/backend-api/encryptedWalletPaymentIdsApi";
 import { getDataPassword, getWalletId } from "./storage";
 import { decrypt, encrypt } from "../../adapters/crypto-utils";
+import { Logger } from "./logs/logger";
 
 export class EncryptedWalletPaymentIdsService {
     /**
@@ -11,11 +12,16 @@ export class EncryptedWalletPaymentIdsService {
      * @return {Promise<void>}
      */
     static async saveNewPaymentIdForCurrentWallet(paymentId) {
+        const loggerSource = "saveNewPaymentIdForCurrentWallet";
         try {
+            Logger.log(`Start saving new payment id: ${paymentId}`, loggerSource);
+
             const encryptedId = encrypt(paymentId, getDataPassword());
             await EncryptedWalletPaymentIdsApi.saveEncryptedWalletPaymentId(getWalletId(), encryptedId);
+
+            Logger.log(`New payment id was saved: ${paymentId}`, loggerSource);
         } catch (e) {
-            improveAndRethrow(e, "saveNewPaymentIdForCurrentWallet");
+            improveAndRethrow(e, loggerSource);
         }
     }
 

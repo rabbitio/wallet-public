@@ -3,6 +3,9 @@ import { EncryptedWalletPaymentIdsService } from "./encryptedWalletPaymentIdsSer
 import FiatPaymentsApi from "../../external-apis/backend-api/fiatPaymentsApi";
 import { getWalletId } from "./storage";
 
+/**
+ * Provides API for purchases of crypto made via ramp.network widget
+ */
 export default class FiatPaymentsService {
     static async getPaymentsNotifications() {
         try {

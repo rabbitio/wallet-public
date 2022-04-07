@@ -31,10 +31,6 @@ class AddressesMetadataService {
             { count: 1, change: true, type: alternativeType },
         ]);
 
-        // TODO: [refactoring, critical] Remove debug output
-        // eslint-disable-next-line no-console
-        console.log("Addresses for frequent scanning" + JSON.stringify(lastAddresses));
-
         const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
         const frequentAddresses = this._addressesMetadata
             .filter(addressMetadata => addressMetadata.txsCount > 3 && addressMetadata.lastTxTimestamp > monthAgo)
@@ -90,10 +86,6 @@ class AddressesMetadataService {
                 ? 1
                 : m1.lastUpdateTimestamp - m2.lastUpdateTimestamp
         );
-
-        // TODO: [refactoring, critical] Remove debug output
-        // eslint-disable-next-line no-console
-        console.log("FULL SCNN - METADATA SOOORTTED " + JSON.stringify(this._addressesMetadata));
 
         return this._addressesMetadata.map(metadata => metadata.address);
     }

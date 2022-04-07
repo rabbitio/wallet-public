@@ -7,4 +7,11 @@ export class Utxo {
         this.type = type;
         this.address = address;
     }
+
+    toMiniString() {
+        return (
+            `${this.txid.slice(0, 6)},${this.number},val:${this.value_satoshis},con:${this.confirmations},` +
+            `:${this.address.slice(0, 10)}`
+        );
+    }
 }

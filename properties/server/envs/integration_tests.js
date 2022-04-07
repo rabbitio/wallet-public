@@ -24,3 +24,4 @@ export const RAMP_PUBLIC_KEY =
     "MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEevN2PMEeIaaMkS4VIfXOqsLebj19kVeu\n" +
     "wWl0AnkIA6DJU0r3ixkXVhJTltycJtkDoEAYtPHfARyTofB5ZNw9xA==\n" +
     "-----END PUBLIC KEY-----";
+export const MAX_CLIENT_LOGS_LIFETIME_MS = 60 * 60 * 1000;

@@ -4,6 +4,8 @@ import { BTC_NETWORK_KEY, IS_TESTING } from "../../../properties";
 
 // TODO: [refactoring, moderate] Make as class
 let storageProvider = !IS_TESTING && localStorage;
+const MAX_LOCAL_STORAGE_VOLUME_BYTES = 5 * 1024 * 1024;
+const MAX_LOGS_STORAGE_BYTES = MAX_LOCAL_STORAGE_VOLUME_BYTES * 0.75;
 
 export function setStorageProvider(provider) {
     storageProvider = provider;
@@ -153,4 +155,21 @@ export function saveIsPassphraseUsed(walletId, flag) {
 export function getIsPassphraseUsed(walletId) {
     const isPassphraseUsedMap = JSON.parse(storageProvider.getItem("isPassphraseUsed") || "{}");
     return isPassphraseUsedMap[walletId];
+}
+
+export function saveLogs(logsString) {
+    const lettersCountToRemove = logsString.length - Math.round(MAX_LOGS_STORAGE_BYTES / 2);
+    if (lettersCountToRemove > 0) {
+        storageProvider.setItem("clientLogs", logsString.slice(lettersCountToRemove, logsString.length));
+    } else {
+        storageProvider.setItem("clientLogs", logsString);
+    }
+}
+
+export function getLogs() {
+    return storageProvider.getItem("clientLogs");
+}
+
+export function removeLogs() {
+    return storageProvider.removeItem("clientLogs");
 }

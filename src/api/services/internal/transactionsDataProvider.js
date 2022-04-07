@@ -24,6 +24,7 @@ import {
     setDoubleSpendFlag,
     setSpendTxId,
 } from "../../lib/transactions/txs-list-calculations";
+import { Logger } from "./logs/logger";
 
 /**
  * Manages frequent and full scanning for transactions by addresses. Manages transactions data cache filling from
@@ -70,28 +71,17 @@ class TransactionsDataProvider {
     }
 
     async _doFrequentScanning() {
-        const startTimestamp = Date.now();
-        // eslint-disable-next-line no-console
-        console.log("QUICK SCNN - START");
-
         try {
             const frequentAddresses = await addressesMetadataService.getAddressesForFrequentScanning();
             await this._retrieveData(frequentAddresses);
         } catch (e) {
             logError(e, "_doFrequentScanning");
-        } finally {
-            // eslint-disable-next-line no-console
-            console.log("QUICK SCNN - END - " + (Date.now() - startTimestamp) / 1000 + "s");
         }
     }
 
     async _doFullScanning() {
-        const startTimestamp = Date.now();
         try {
             if (this._cancelProcessingHolder) {
-                // eslint-disable-next-line no-console
-                console.log("FULL SCNN - CANCELLING");
-
                 this._cancelProcessingHolder.cancel();
                 this._cancelProcessingHolder = null;
             }
@@ -102,31 +92,26 @@ class TransactionsDataProvider {
         try {
             const addresses = addressesMetadataService.getAddressesSortedByLastUpdateDate();
             this._cancelProcessingHolder = CancelProcessing.instance();
-            // eslint-disable-next-line no-console
-            console.log("FULL SCNN - BEFFR - " + addresses.length);
             await this._retrieveData(addresses, this._cancelProcessingHolder);
-            // eslint-disable-next-line no-console
-            console.log("FULL SCNN - AFFTRR");
         } catch (e) {
             logError(e, "_doFullScanning");
         } finally {
-            // eslint-disable-next-line no-console
-            console.log("FULL SCNN - END - " + (Date.now() - startTimestamp) / 1000 + "s");
-
             this._cancelProcessingHolder = null; // TODO: [bug, moderate] can this affect another call of this method?
         }
     }
 
     async _actualizeUnconfirmedTransactions() {
         try {
-            const transactions = this._transactionsData.filter(tx => tx.confirmations === 0);
-            const promises = transactions.map(tx =>
+            const unconfirmedTransactions = this._transactionsData.filter(tx => tx.confirmations === 0);
+            const promises = unconfirmedTransactions.map(tx =>
                 transactionDataAPICaller.callExternalAPI([tx.txid], 5000, null, 1, true)
             );
-            const txsData = await Promise.all(promises);
-            const notEmptyData = txsData.reduce((prev, current, index) => {
+            const unconfirmedTxsData = await Promise.all(promises);
+            const notEmptyData = unconfirmedTxsData.reduce((prev, current, index) => {
                 if (!current) {
-                    this._transactionsData = this._transactionsData.filter(tx => tx.txid !== transactions[index].txid);
+                    this._transactionsData = this._transactionsData.filter(
+                        tx => tx.txid !== unconfirmedTransactions[index].txid
+                    );
                     return [...prev];
                 }
 
@@ -152,13 +137,21 @@ class TransactionsDataProvider {
      * @return {boolean} - whether the operation was successful
      */
     async initialize(addresses) {
+        const loggerSource = "initialize";
+        Logger.log("Start initializing transactions provider", loggerSource);
         if (this._isInitialized) {
+            Logger.log("Transactions provider already initialized", loggerSource);
             return;
         }
 
         try {
             const currentBlockHeight = await externalBlocksAPICaller.callExternalAPI([getCurrentNetwork()]);
+
+            Logger.log(`Initializing for block height ${currentBlockHeight}`, loggerSource);
+
             const transactionsData = await TransactionsApi.getTransactionsByAddresses(addresses, currentBlockHeight);
+
+            Logger.log(`Retrieved ${transactionsData.length} transactions`, loggerSource);
 
             this._transactionsData = improveRetrievedRawTransactionsData(
                 transactionsData,
@@ -176,11 +169,13 @@ class TransactionsDataProvider {
                 EventBus.addEventListener(NEW_BLOCK_DEDUPLICATED_EVENT, this._eventListener);
 
                 await this._doFullScanning();
+                Logger.log(`Full scanning performed, count: ${this._transactionsData.length}`, loggerSource);
             }
 
+            Logger.log("Successfully initialized", loggerSource);
             this._isInitialized = true;
         } catch (e) {
-            improveAndRethrow(e, "initialize", "Failed to initialize the provider");
+            improveAndRethrow(e, loggerSource, "Failed to initialize the provider");
         }
     }
 
@@ -204,10 +199,6 @@ class TransactionsDataProvider {
      * @param transactionsData {Array<Transaction>}
      */
     async updateTransactionsCacheAndPushTxsToServer(transactionsData) {
-        // TODO: [refactoring, critical] Remove debug output
-        // eslint-disable-next-line no-console
-        console.log("CACCCHE - UPD - BEFFR: " + this._transactionsData.length);
-
         try {
             this._transactionsData = improveRetrievedRawTransactionsData(
                 transactionsData,
@@ -215,43 +206,29 @@ class TransactionsDataProvider {
                 false
             );
             await this._storeConfirmedTransactions();
-
-            // TODO: [refactoring, critical] Remove debug output
-            // eslint-disable-next-line no-console
-            console.log("CACCCHE - UPD - AFFT: " + this._transactionsData.length);
         } catch (e) {
             improveAndRethrow(e, "updateTransactionsCacheAndPushTxsToServer");
         }
     }
 
     async _storeConfirmedTransactions() {
+        const loggerSource = "_storeConfirmedTransactions";
         try {
             const notStoredTxs = this._transactionsData.filter(tx => !tx.isStoredOnServer && tx.confirmations > 0);
 
-            // TODO: [refactoring, critical] Remove debug output
-            // eslint-disable-next-line no-console
-            console.log("STTTOORR TXXS: " + JSON.stringify(notStoredTxs));
-
-            const setIsStoredOnServerFlagForStoringTransactions = flag =>
-                notStoredTxs.forEach(tx => {
-                    const cachedTx = this._transactionsData.find(cachedTx => cachedTx.txid === tx.txid);
-                    cachedTx && (cachedTx.isStoredOnServer = flag);
-                });
-            setIsStoredOnServerFlagForStoringTransactions(true); // We set the flag first to avoid concurrent savings
             if (notStoredTxs.length) {
+                notStoredTxs.forEach(tx => (tx.isStoredOnServer = true)); // We set the flag first to avoid concurrent savings
                 try {
                     await TransactionsApi.saveTransactions(notStoredTxs);
+                    Logger.log(`Stored: ${notStoredTxs.map(tx => tx.txid.slice(0, 7)).join(",")}`, loggerSource);
                 } catch (e) {
-                    // TODO: [refactoring, critical] Remove debug output
-                    // eslint-disable-next-line no-console
-                    console.log("ERRRRR STTTOORR TXXS: " + notStoredTxs.length);
-
+                    Logger.log(`Failed to store transactions data on server: ${e?.message}`, loggerSource);
                     // Rolling back flag in case of errors to save them later
-                    setIsStoredOnServerFlagForStoringTransactions(false);
+                    notStoredTxs.forEach(tx => (tx.isStoredOnServer = false));
                 }
             }
         } catch (e) {
-            logError(e, "_storeConfirmedTransactions", "Failed to store transactions data on server.");
+            logError(e, loggerSource, "Failed to store transactions data on server.");
         }
     }
 
@@ -304,10 +281,6 @@ class TransactionsDataProvider {
                             tx.outputs.find(output => output.addresses.find(address => addresses.includes(address))))
                 );
 
-                // TODO: [refactoring, critical] Remove debug output
-                // eslint-disable-next-line no-console
-                console.log("RETTR TXXSSS: " + relatedToAddresses.length);
-
                 return relatedToAddresses.map(tx => tx.clone());
             };
 
@@ -328,6 +301,7 @@ class TransactionsDataProvider {
      */
     async pushNewTransactionToCache(newTx) {
         this._transactionsData = improveRetrievedRawTransactionsData([newTx], this._transactionsData);
+        Logger.log(`New transaction pushed to cache: ${newTx.txid}`, "pushNewTransactionToCache");
     }
 
     async _retrieveData(addresses, cancelProcessingHolder) {
@@ -357,15 +331,6 @@ class TransactionsDataProvider {
                 fetchingErrors.push(e);
             } finally {
                 fetchingErrors.forEach(e => logError(e, "_retrieveData", "Transactions data retrieval failed"));
-
-                // TODO: [refactoring, critical] Remove debug output
-                // eslint-disable-next-line no-console
-                console.log(
-                    "BBBBFFFRR RECCALCC: " +
-                        this._transactionsData.length +
-                        " -- " +
-                        JSON.stringify(addressesUpdateTimestamps)
-                );
 
                 try {
                     await addressesMetadataService.recalculateAddressesMetadataByTransactions(

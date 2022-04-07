@@ -2,6 +2,7 @@ import { EventBus, NEW_BLOCK_EVENT, NEW_BLOCK_DEDUPLICATED_EVENT } from "../../a
 import { externalBlocksAPICaller } from "../../external-apis/blocksAPI";
 import { getCurrentNetwork } from "./storage";
 import { logError } from "../../utils/errorUtils";
+import { Logger } from "./logs/logger";
 
 /**
  * Manages last block in the network - listens for it and uses long-polling just to ensure block
@@ -19,18 +20,22 @@ class CurrentBlockService {
     }
 
     async initialize() {
+        const loggerSource = "initialize";
         try {
             this._currentBlockNumber = await externalBlocksAPICaller.callExternalAPI([getCurrentNetwork()]);
+
+            Logger.log(`Current block data initialized: ${this._currentBlockNumber}`, loggerSource);
+
             this._interval = setInterval(async () => {
                 try {
                     const block = await externalBlocksAPICaller.callExternalAPI([getCurrentNetwork()]);
                     this._processNewBlockNumber(block);
                 } catch (e) {
-                    logError(e, "", "Failed to get block number in the listener");
+                    logError(e, "blocks_lookup", "Failed to get block number in the listener");
                 }
-            }, 30000);
+            }, 90000);
         } catch (e) {
-            logError(e, "initialize", "Failed to initialize current block number");
+            logError(e, loggerSource, "Failed to initialize current block number");
         }
     }
 

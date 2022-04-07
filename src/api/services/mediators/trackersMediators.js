@@ -8,10 +8,14 @@ import {
 import { getWalletId } from "../internal/storage";
 import { logError } from "../../utils/errorUtils";
 import TransactionsHistoryService from "../transactionsHistoryService";
+import { Logger } from "../internal/logs/logger";
 
 const MEASUREMENT_ID = "G-VDHZL5BZCR";
 
 export const setupAnalyticsMediators = () => {
+    const loggerSource = "setupAnalyticsMediators";
+    Logger.log("Start setting up analytics mediators", loggerSource);
+
     EventBus.addEventListener(SIGNED_UP_EVENT, () => {
         GoogleAnalyticsUtils.doActionOnGTag(["config", MEASUREMENT_ID, { user_id: getWalletId() }]);
         MixPanelUtils.identify(getWalletId());
@@ -60,6 +64,8 @@ export const setupAnalyticsMediators = () => {
             logError(e, "WALLET_IMPORTED_EVENT listener", "Failed to send events with imported transactions");
         }
     });
+
+    Logger.log("Setting up analytics mediators done", loggerSource);
 };
 
 class GoogleAnalyticsUtils {

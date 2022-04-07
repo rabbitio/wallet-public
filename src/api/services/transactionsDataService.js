@@ -14,6 +14,7 @@ import AddressesServiceInternal from "./internal/addressesServiceInternal";
 import { transactionsDataProvider } from "./internal/transactionsDataProvider";
 import { getExtendedTransactionDetails } from "../lib/transactions/transactions-history";
 import FiatPaymentsService from "./internal/FiatPaymentsService";
+import { Logger } from "./internal/logs/logger";
 
 export class TransactionsDataService {
     static MIN_CONFIRMATIONS = MIN_CONFIRMATIONS;
@@ -29,15 +30,20 @@ export class TransactionsDataService {
      * @returns Promise resolving to nothing
      */
     static async saveTransactionData(transactionId, data) {
+        const loggerSource = "saveTransactionData";
         try {
+            Logger.log(`Start saving tx data for ${transactionId}`, loggerSource);
+
             const dataPassword = getDataPassword();
             const transactionIdHash = getSaltedHash(transactionId, dataPassword);
             const encryptedNote = encrypt(data.note, dataPassword);
             const transactionsData = { encryptedNote };
 
-            return await saveTransactionDataToServerForCurrentWallet(transactionIdHash, transactionsData);
+            await saveTransactionDataToServerForCurrentWallet(transactionIdHash, transactionsData);
+
+            Logger.log(`Tx data was saved ${transactionId}`, loggerSource);
         } catch (e) {
-            improveAndRethrow(e, "saveTransactionData");
+            improveAndRethrow(e, loggerSource);
         }
     }
 
@@ -97,7 +103,10 @@ export class TransactionsDataService {
      */
     // TODO: [tests, moderate] Units
     static async getTransactionDetails(txId) {
+        const loggerSource = "getTransactionDetails";
         try {
+            Logger.log(`Start getting for ${txId}`, loggerSource);
+
             const [transaction, addresses, txStoredData] = await Promise.all([
                 transactionsDataProvider.getTransactionData(txId),
                 AddressesServiceInternal.getAllUsedAddresses(),
@@ -121,7 +130,7 @@ export class TransactionsDataService {
             ]);
 
             const unconfirmedTime = Date.now() - transaction.time < 0 ? 0 : Date.now() - transaction.time;
-            return {
+            const result = {
                 txId: extendedTransactionData.txid,
                 creationTime: extendedTransactionData.time,
                 type: extendedTransactionData.type === "in" ? "incoming" : "outgoing",
@@ -148,8 +157,11 @@ export class TransactionsDataService {
                 isRbfAble: extendedTransactionData.type === "out" && extendedTransactionData.isRbfAble,
                 purchaseData: purchasesData[0].purchaseData,
             };
+
+            Logger.log(`Returning ${JSON.stringify(result)}`, loggerSource);
+            return result;
         } catch (e) {
-            improveAndRethrow(e, "getTransactionDetails");
+            improveAndRethrow(e, loggerSource);
         }
     }
 
@@ -162,7 +174,10 @@ export class TransactionsDataService {
      *   { transactionId: "id_string", note: "note_string" }
      */
     static async updateTransactionData(transactionId, data) {
+        const loggerSource = "updateTransactionData";
         try {
+            Logger.log(`Start updating for ${transactionId}`, loggerSource);
+
             const dataPassword = getDataPassword();
             const transactionIdHash = getSaltedHash(transactionId, dataPassword);
             const encryptedNote = encrypt(data.note, dataPassword);
@@ -173,9 +188,12 @@ export class TransactionsDataService {
             );
 
             if (updateResult === "not_found") {
+                Logger.log(`Tx not found on server ${transactionId}. Returning null`, loggerSource);
+
                 return null;
             }
 
+            Logger.log(`Tx data was updated ${transactionId}`, loggerSource);
             return { transactionId, note: decrypt(updateResult.encryptedNote, dataPassword) };
         } catch (e) {
             improveAndRethrow(e, TransactionsDataService.updateTransactionData);

@@ -10,6 +10,7 @@ import PaymentUrlService from "./services/paymentUrlService";
 import { blocksListener } from "./services/internal/blocksListener";
 import { currentBlockService } from "./services/internal/currentBlockService";
 import { IS_TESTING } from "../properties";
+import { ScheduledLogger } from "./services/internal/logs/scheduledLogger";
 
 export function setupAppAndInitializeBackgroundTasks(
     handleNotFoundSession,
@@ -49,6 +50,8 @@ export function setupAppAndInitializeBackgroundTasks(
               },
         IS_TESTING ? [] : () => blocksListener.setupListeningForNewBlocks(),
         () => currentBlockService.initialize(),
+        IS_TESTING ? [] : ScheduledLogger.logWalletSlicePeriodically,
+        IS_TESTING ? [] : ScheduledLogger.logExternalServicesStatsPeriodically,
     ].flat();
 
     initializers.forEach(initializer => {

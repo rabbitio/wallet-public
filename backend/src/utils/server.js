@@ -15,6 +15,7 @@ import FiatPaymentsRoutes from "../routes/fiatPaymentsRoutes";
 import TransactionsRoutes from "../routes/transactionsRoutes";
 import EncryptedWalletPaymentIdsRoutes from "../routes/encryptedWalletPaymentIdsRoutes";
 import WebhookRoutes from "../routes/webhookRoutes";
+import ClientLogsRoutes from "../routes/clentLogsRoutes";
 import { SERVER_PORT } from "../properties";
 
 const log = getLogger("server");
@@ -23,8 +24,9 @@ export function configureAndStartServer() {
     const app = express();
     app.use(connectLogger(getLogger("http"), { level: "auto" }));
     app.use(cookieParser());
-    app.use(bodyParser.json()); // for parsing application/json
-    app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-Form-urlencoded
+    app.use(bodyParser.text({ limit: "5mb" })); // for parsing text/plain
+    app.use(bodyParser.json({ limit: "1mb" })); // for parsing application/json
+    app.use(bodyParser.urlencoded({ extended: true, limit: "100kb" })); // for parsing application/x-www-Form-urlencoded
     app.use(WalletsRoutes);
     app.use(TransactionsDataRoutes);
     app.use(EncryptedIpsRoutes);
@@ -37,6 +39,7 @@ export function configureAndStartServer() {
     app.use(TransactionsRoutes);
     app.use(EncryptedWalletPaymentIdsRoutes);
     app.use(WebhookRoutes);
+    app.use(ClientLogsRoutes);
 
     app.listen(SERVER_PORT, () => {
         log.info(`Listening on ${SERVER_PORT}..., Node PID=${process.pid}`);

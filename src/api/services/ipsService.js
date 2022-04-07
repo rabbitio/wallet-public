@@ -9,6 +9,7 @@ import {
     isIpHashPresent,
     saveEncryptedIpAddress,
 } from "../external-apis/backend-api/encryptedIpsApi";
+import { Logger } from "./internal/logs/logger";
 
 /**
  * Encrypts and saves given IP.
@@ -17,14 +18,19 @@ import {
  * @returns Promise resolving to nothing
  */
 export async function saveIpAddress(ip) {
+    const loggerSource = "saveIpAddress";
     try {
+        Logger.log(`Start saving IP address. It is empty: ${!!ip}`, loggerSource);
+
         const bytesRepresentation = ipToStringOfBytes(ip);
         const dataPassword = getDataPassword();
         const encryptedIp = encrypt(ip, dataPassword);
         const ipHash = getSaltedHash(bytesRepresentation, dataPassword);
         await saveEncryptedIpAddress(getWalletId(), encryptedIp, ipHash);
+
+        Logger.log(`IP address was saved`, loggerSource);
     } catch (e) {
-        improveAndRethrow(e, "saveIpAddress");
+        improveAndRethrow(e, loggerSource);
     }
 }
 
@@ -43,12 +49,17 @@ export function ipToStringOfBytes(ip) {
  * @returns Promise resolving to nothing
  */
 export async function deleteIpAddress(ip) {
+    const loggerSource = "deleteIpAddress";
     try {
+        Logger.log(`Start deleting IP address. It is empty: ${!!ip}`, loggerSource);
+
         const bytesRepresentation = ipToStringOfBytes(ip);
         const ipHash = getSaltedHash(bytesRepresentation, getDataPassword());
         await deleteEncryptedIpAddresses(getWalletId(), [ipHash]);
+
+        Logger.log("IP address was removed", loggerSource);
     } catch (e) {
-        improveAndRethrow(e, "deleteIpAddress");
+        improveAndRethrow(e, loggerSource);
     }
 }
 
@@ -70,14 +81,19 @@ export async function doesIpAddressExist(ip) {
 /**
  * Returns all ip addresses for current wallet (sorted by creation date desc).
  *
- * @returns Promise resolving to array of IPs
+ * @returns {Promise<Array<string>>} Promise resolving to array of IPs
  */
 export async function getAllIpAddresses() {
+    const loggerSource = "getAllIpAddresses";
     try {
+        Logger.log("Start getting all IP addresses", loggerSource);
         const allEncryptedIps = await getAllEncryptedIpAddresses(getWalletId());
-        return allEncryptedIps.map(encryptedIp => decrypt(encryptedIp, getDataPassword()));
+        const result = allEncryptedIps.map(encryptedIp => decrypt(encryptedIp, getDataPassword()));
+
+        Logger.log(`Returning ${result.length} IP addresses`, loggerSource);
+        return result;
     } catch (e) {
-        improveAndRethrow(e, "getAllIpAddresses");
+        improveAndRethrow(e, loggerSource);
     }
 }
 

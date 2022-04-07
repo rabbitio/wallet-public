@@ -21,6 +21,7 @@ import {
     createTransactionWithChangedFee,
 } from "../lib/transactions/rbf";
 import { broadcastTransaction } from "./internal/transactionsBroadcastingService";
+import { Logger } from "./internal/logs/logger";
 
 export default class RbfService {
     static BLOCKS_COUNTS_FOR_RBF_OPTIONS = [1, 2, 5, 10];
@@ -44,7 +45,9 @@ export default class RbfService {
      */
     // TODO: [tests, moderate] Implement tests checking the calculation logic (just behavior currently)
     static async getFeeOptionsForRbf(oldTxId) {
+        const loggerSource = "getFeeOptionsForRbf";
         try {
+            Logger.log(`Start getting fee options for txid: ${oldTxId}`, loggerSource);
             const network = getCurrentNetwork();
             const resolvedPromises = await Promise.all([
                 ...this.BLOCKS_COUNTS_FOR_RBF_OPTIONS.map(blocksCount => getCurrentFeeRate(network, blocksCount)),
@@ -57,8 +60,20 @@ export default class RbfService {
             const [oldTransaction, allAddresses, changeAddress, indexes] = resolvedPromises.slice(
                 resolvedPromises.length - 4
             );
+
+            Logger.log(
+                `Addresses: internal: ${allAddresses.internal.length}, external: ${allAddresses.external.length}`,
+                loggerSource
+            );
+
             const allUtxos = await getAllUTXOs(allAddresses.internal, allAddresses.external, network);
+
+            Logger.log(`UTXOs: ${JSON.stringify(allUtxos.count)}`, loggerSource);
+
             const candidateUtxos = getSortedListOfCandidateUtxosForRbf(getAccountsData(), indexes, allUtxos, network);
+
+            Logger.log(`Candidate UTXOs: ${JSON.stringify(candidateUtxos)}`, loggerSource);
+
             const ratesToFeeMapping = calculateFeeForExistingTransactionForFeeRates(
                 oldTransaction,
                 allAddresses,
@@ -68,9 +83,10 @@ export default class RbfService {
             );
             await convertToBtcAmountAndAddFiatAmount(ratesToFeeMapping, oldTransaction.fee_satoshis);
 
+            Logger.log(`Returning fees: ${oldTxId}. ${JSON.stringify(ratesToFeeMapping)}`, loggerSource);
             return ratesToFeeMapping;
         } catch (e) {
-            improveAndRethrow(e, this.getFeeOptionsForRbf);
+            improveAndRethrow(e, loggerSource);
         }
     }
 
@@ -87,7 +103,10 @@ export default class RbfService {
      *         - { result: true, fee: number }
      */
     static async validateFeeForRbf(oldTxId, inputtedFee) {
+        const loggerSource = "validateFeeForRbf";
         try {
+            Logger.log(`Validating fee: ${oldTxId}. Fee: ${inputtedFee}`, loggerSource);
+
             const currentNetwork = getCurrentNetwork();
             const [oldTx, allAddresses, changeAddress, indexes] = await Promise.all([
                 transactionsDataProvider.getTransactionData(oldTxId),
@@ -108,6 +127,8 @@ export default class RbfService {
             );
 
             if (newCalculatedFeesItems.errorDescription) {
+                Logger.log(`Failed to calculate fees: ${JSON.stringify(newCalculatedFeesItems)}`, loggerSource);
+
                 return {
                     result: false,
                     errorDescription: newCalculatedFeesItems.errorDescription,
@@ -116,9 +137,12 @@ export default class RbfService {
             }
 
             const minNewFee = newCalculatedFeesItems[0].fee;
-            return await validateFinalNewFee(inputtedFee, minNewFee);
+            const result = await validateFinalNewFee(inputtedFee, minNewFee);
+
+            Logger.log(`Result: ${JSON.stringify(result)}`, loggerSource);
+            return result;
         } catch (e) {
-            improveAndRethrow(e, "validateFeeForRbf");
+            improveAndRethrow(e, loggerSource);
         }
     }
 
@@ -133,7 +157,13 @@ export default class RbfService {
      *          or error object { errorDescription: string, howtoFix: string, newTransactionId: string }
      */
     static async performReplaceByFeeByPassword(oldTxId, newFee, password, isFinalPrice = false) {
+        const loggerSource = "performReplaceByFeeByPassword";
         try {
+            Logger.log(
+                `Start. Old txid: ${oldTxId}, new fee: ${newFee}, empty password: ${!!password}, final: ${isFinalPrice}`,
+                loggerSource
+            );
+
             const network = getCurrentNetwork();
             const { mnemonic, passphrase } = getDecryptedWalletCredentials(password);
             const seedHex = bip39.mnemonicToSeedHex(mnemonic, passphrase);
@@ -144,8 +174,18 @@ export default class RbfService {
                 AddressesServiceInternal.getAllUsedAddresses(),
                 AddressesDataApi.getAddressesIndexes(getWalletId()),
             ]);
+
+            Logger.log(
+                `Data was retrieved. Addresses external: ${allAddresses.external.length}, internal: ${allAddresses.internal.length}`,
+                loggerSource
+            );
+
             const allUtxos = await getAllUTXOs(allAddresses.internal, allAddresses.external, network);
+            Logger.log(`UTXOs were retrieved: ${JSON.stringify(allUtxos)}`, loggerSource);
+
             const candidateUtxos = getSortedListOfCandidateUtxosForRbf(accountsData, indexes, allUtxos, network);
+            Logger.log(`Candidate UTXOS: ${JSON.stringify(candidateUtxos)}`, loggerSource);
+
             const txOrErrorObject = createTransactionWithChangedFee(
                 oldTx,
                 btcToSatoshi(newFee),
@@ -159,20 +199,28 @@ export default class RbfService {
             );
 
             if (txOrErrorObject.errorDescription) {
+                Logger.log(`Failed to create new transaction: ${JSON.stringify(txOrErrorObject)}`, loggerSource);
                 return txOrErrorObject;
             }
 
+            Logger.log("Transaction was created, pushing it", loggerSource);
+
             const newTransactionId = await broadcastTransaction(txOrErrorObject, network);
+
+            Logger.log(`Transaction was pushed: ${newTransactionId}`, loggerSource);
 
             await saveNoteForNewTransaction(oldTxId, newTransactionId);
 
-            return {
+            const result = {
                 oldFee: satoshiToBtc(oldTx.fee_satoshis),
                 newFee,
                 newTransactionId,
             };
+
+            Logger.log(`Returning result: ${JSON.stringify(result)}`, loggerSource);
+            return result;
         } catch (e) {
-            improveAndRethrow(e, "performReplaceByFeeByPassword");
+            improveAndRethrow(e, loggerSource);
         }
     }
 }
