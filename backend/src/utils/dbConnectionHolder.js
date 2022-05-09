@@ -166,7 +166,7 @@ export const dbConnectionHolder = new DbConnectionHolder();
 export function connectToDbWrapped(callback) {
     (async () => {
         await dbConnectionHolder.connectToDb();
-        callback();
+        await callback();
     })();
 }
 

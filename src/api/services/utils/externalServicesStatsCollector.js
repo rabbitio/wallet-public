@@ -1,4 +1,4 @@
-import { logError } from "../../utils/errorUtils";
+import { improveAndRethrow, logError } from "../../utils/errorUtils";
 
 class ExternalServicesStatsCollector {
     constructor() {
@@ -6,36 +6,46 @@ class ExternalServicesStatsCollector {
     }
 
     externalServiceFailed(serviceUrl, message) {
-        const processMessage = (stat, errorMessage) => {
-            const errors = stat.errors ?? {};
-            if (errorMessage.match(/.*network.+error.*/i)) {
-                errors["networkError"] = (errors["networkError"] ?? 0) + 1;
-            } else if (errorMessage.match(/.*timeout.+exceeded.*/i)) {
-                errors["timeoutExceeded"] = (errors["timeoutExceeded"] ?? 0) + 1;
+        try {
+            const processMessage = (stat, errorMessage) => {
+                const errors = stat.errors ?? {};
+                if (errorMessage.match(/.*network.+error.*/i)) {
+                    errors["networkError"] = (errors["networkError"] || 0) + 1;
+                } else if (errorMessage.match(/.*timeout.+exceeded.*/i)) {
+                    errors["timeoutExceeded"] = (errors["timeoutExceeded"] || 0) + 1;
+                } else if (errors["other"]) {
+                    errors["other"].push(message);
+                } else {
+                    errors["other"] = [message];
+                }
+
+                stat.errors = errors;
+            };
+
+            if (this.stats.has(serviceUrl)) {
+                const stat = this.stats.get(serviceUrl);
+                stat.callsCount += 1;
+                stat.failsCount += 1;
+                processMessage(stat, message);
             } else {
-                errors["other"] = (errors["other"] ?? []).push(message);
+                this.stats.set(serviceUrl, { callsCount: 1, failsCount: 1 });
+                processMessage(this.stats.get(serviceUrl), message);
             }
-
-            stat.errors = errors;
-        };
-
-        if (this.stats.has(serviceUrl)) {
-            const stat = this.stats.get(serviceUrl);
-            stat.callsCount += 1;
-            stat.failsCount += 1;
-            processMessage(stat, message);
-        } else {
-            this.stats.set(serviceUrl, { callsCount: 1, failsCount: 1 });
-            processMessage(this.stats.get(serviceUrl), message);
+        } catch (e) {
+            improveAndRethrow(e, "externalServiceFailed");
         }
     }
 
     externalServiceCalledWithoutError(serviceUrl) {
-        if (this.stats.has(serviceUrl)) {
-            const stat = this.stats.get(serviceUrl);
-            stat.callsCount += 1;
-        } else {
-            this.stats.set(serviceUrl, { callsCount: 1, failsCount: 0 });
+        try {
+            if (this.stats.has(serviceUrl)) {
+                const stat = this.stats.get(serviceUrl);
+                stat.callsCount += 1;
+            } else {
+                this.stats.set(serviceUrl, { callsCount: 1, failsCount: 0 });
+            }
+        } catch (e) {
+            improveAndRethrow(e, "externalServiceCalledWithoutError");
         }
     }
 

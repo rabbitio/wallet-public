@@ -38,8 +38,16 @@ export async function saveIpAddress(ip) {
  * Provides the same string for the same addresses written differently to get the same hashes for same IPs
  */
 export function ipToStringOfBytes(ip) {
-    const bytesArray = ipaddr.parse(ip).toByteArray();
-    return bytesArray.join(",");
+    try {
+        const bytesArray = ipaddr.parse(ip).toByteArray();
+        return bytesArray.join(",");
+    } catch (e) {
+        improveAndRethrow(
+            e,
+            "ipToStringOfBytes",
+            `Parsing failed. IP length: ${ip?.length}, validation result: ${JSON.stringify(validateIpAddress(ip))}`
+        );
+    }
 }
 
 /**

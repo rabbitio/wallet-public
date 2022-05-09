@@ -68,7 +68,7 @@ export function setupMediators(
     try {
         Logger.log("Start initializing mediators", loggerSource);
 
-        setupAnalyticsMediators();
+        !IS_TESTING && setupAnalyticsMediators();
 
         EventBus.addEventListener(SIGNED_IN_EVENT, () => saveIsNotFoundSessionMessageShownForLastLostSession(false));
         EventBus.addEventListener(SIGNED_UP_EVENT, () => saveIsNotFoundSessionMessageShownForLastLostSession(false));

@@ -1,6 +1,8 @@
 import { EventBus, NEW_BLOCK_EVENT } from "../../adapters/eventbus";
 import { logError } from "../../utils/errorUtils";
 import { Logger } from "./logs/logger";
+import { getCurrentNetwork } from "./storage";
+import { mainnet } from "../../lib/networks";
 
 // TODO: [feature, moderate] Add more providers
 class BlocksListener {
@@ -26,7 +28,10 @@ class BlocksListener {
         this._socket.onmessage = message => {
             try {
                 const data = JSON.parse(message.data);
-                EventBus.dispatch(NEW_BLOCK_EVENT, null, data);
+                if (getCurrentNetwork() === mainnet.key) {
+                    EventBus.dispatch(NEW_BLOCK_EVENT, null, data);
+                }
+
                 Logger.log(`On message websoket performed. Block ${data?.x?.height}`, loggerSource);
             } catch (e) {
                 logError(e, loggerSource, "Failed to handle message from blocks socket");

@@ -76,9 +76,7 @@ class GoogleAnalyticsUtils {
     static doActionOnGTag(parameters) {
         try {
             if (window.gtag) {
-                const result = window.gtag(...parameters);
-                // eslint-disable-next-line no-console
-                console.log("GTAG event result: " + result);
+                window.gtag(...parameters);
             } else {
                 logError(null, "doActionOnGTag", "No gtag found");
             }

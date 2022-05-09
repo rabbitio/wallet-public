@@ -60,6 +60,11 @@ export const transactionDataAPICaller = new RobustExternalAPICallerService("tran
         },
     },
     {
+        /**
+         * API docs https://developer.bitaps.com/blockchain
+         */
+        timeout: 10000,
+        RPS: 2, // Docs say that RPS is 3 but using it causes frequent 429 HTTP errors
         endpoint: "https://api.bitaps.com/btc/",
         httpMethod: "get",
         composeQueryString: params => {

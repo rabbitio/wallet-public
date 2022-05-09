@@ -3,27 +3,66 @@ import { Input } from "../models/transaction/input";
 import { Output } from "../models/transaction/output";
 import { Transaction } from "../models/transaction/transaction";
 import { btcToSatoshi } from "../lib/btc-utils";
-import { externalBlocksAPICaller } from "./blocksAPI";
 import { P2PKH_SCRIPT_TYPE, P2SH_SCRIPT_TYPE, P2WPKH_SCRIPT_TYPE } from "../lib/utxos";
 import { improveAndRethrow } from "../utils/errorUtils";
 import { provideFirstSeenTime } from "./utils/firstSeenTimeHolder";
 import { getHash } from "../adapters/crypto-utils";
 import { testnet } from "../lib/networks";
-import { safeStringify } from "../utils/browserUtils";
+import { currentBlockService } from "../services/internal/currentBlockService";
 
-const externalTransactionsDataAPICaller = new RobustExternalAPICallerService("externalTransactionsDataAPICaller", [
+/**
+ * Params array for each provider should contain exactly 3 parameters:
+ *     params[0] {Network} - Network object to get transactions for
+ *     params[1] {string} - address string
+ *     params[2] {number} - current block number
+ */
+export const noBatchTransactionsProviders = [
     {
-        timeout: 10000,
+        /**
+         * API documentation https://github.com/Blockstream/esplora/blob/master/API.md
+         */
+        maxPageLength: 25,
+        timeout: 20000,
         RPS: 10,
         endpoint: "https://blockstream.info/",
         httpMethod: "get",
-        composeQueryString: params => {
+        composeQueryString: function(params) {
             const [network, address] = params;
             const networkPath = network.key === testnet.key ? "testnet/" : "";
-            return `${networkPath}api/address/${address}/txs`;
+            let query = `${networkPath}api/address/${address}/txs`;
+            if (params[3]) {
+                // For pagination. This parameter should not be passed when using this API - we add this parameter internally
+                query = `${query}/chain/${params[3]}`;
+            }
+
+            return query;
         },
-        getDataByResponse: (response, params) => {
-            // TODO: [bug, critical] Returns only 25 confirmed and 50 unconfirmed transactions. Use last_seen_txid to get remaining confirmed
+        changeQueryParametersForPageNumber: function(params, previousResponse, pageNumber) {
+            const previousData = previousResponse?.data;
+            if (!previousData || !Array.isArray(previousData) || pageNumber === 0) {
+                return params;
+            }
+
+            return [params[0], params[1], params[2], previousData[previousData?.length - 1].txid];
+        },
+        checkWhetherResponseIsForLastPage: function(previousResponse, currentResponse, currentPageNumber) {
+            return (
+                currentResponse?.data == null ||
+                !Array.isArray(currentResponse.data) ||
+                currentResponse.data.filter(tx => tx?.status?.block_height != null).length < this.maxPageLength
+            );
+        },
+        /* NOTE: this provider returns only 50 unconfirmed transactions for the passed address. So it can cause
+                 the tricky bugs in rare cases when someone uses the same address and there are a lot of transactions
+                 to this address
+                 TODO: maybe throw an error to use another provider if we see 50 unconfirmed transactions? or just
+                       ignore as eventually we will see all transactions (after the confirmation)
+         */
+        getDataByResponse: function(response, params) {
+            if (response?.data == null) {
+                return null;
+            }
+
             const currentBlockNumber = params[2];
             return (response?.data ?? []).map(tx => {
                 const mapType = type =>
@@ -65,15 +104,38 @@ const externalTransactionsDataAPICaller = new RobustExternalAPICallerService("ex
         },
     },
     {
-        timeout: 90000,
+        /**
+         * This API is not documented and just discovered manually. It has pagination, but I tried even 300 transactions
+         * per request and no restrictions were discovered - the API returns all the transactions successfully.
+         * So we use 300 as page size for this request.
+         */
+        maxPageLength: 300,
+        timeout: 120000,
         RPS: 5,
         endpoint: "https://tradeblock.com/blockchain/api/v2.0/btc/related",
         httpMethod: "get",
-        composeQueryString: params => {
+        composeQueryString: function(params) {
             const address = params[1];
-            return `?addr=${address}&limit_var=10000&offset_var=0`;
+            let query = `?addr=${address}&limit_var=${this.maxPageLength}&offset_var=`;
+            query = `${query}${params[3] != null ? `${params[3] * this.maxPageLength}` : "0"}`;
+
+            return query;
         },
-        getDataByResponse: (response, params) => {
+        changeQueryParametersForPageNumber: function(params, previousResponse, pageNumber) {
+            if (!previousResponse || pageNumber === 0) {
+                return params;
+            }
+
+            return [params[0], params[1], params[2], pageNumber];
+        },
+        checkWhetherResponseIsForLastPage: function(previousResponse, currentResponse, currentPageNumber) {
+            return (currentResponse?.data?.length ?? 0) < this.maxPageLength;
+        },
+        getDataByResponse: function(response, params) {
+            if (response?.data == null) {
+                return null;
+            }
+
             const currentBlockNumber = params[2];
             return (response?.data ?? []).map(tx => {
                 const mapType = type =>
@@ -121,25 +183,50 @@ const externalTransactionsDataAPICaller = new RobustExternalAPICallerService("ex
         },
     },
     {
-        timeout: 10000,
-        RPS: 3,
+        /**
+         * API docs https://developer.bitaps.com/blockchain.
+         * This API provides separate endpoints for confirmed and unconfirmed transactions.
+         * Max transactions per page is 50, but we use 13 as this provider fails to return the whole requested
+         * data and cuts it - looks like it has some not-documented data size restrictions.
+         */
+        maxPageLength: 13,
+        timeout: 20000,
+        RPS: 2, // Docs say that RPS is 3 but using it c10000auses frequent 429 HTTP errors
         endpoint: "https://api.bitaps.com/btc/",
-        httpMethod: ["get", "get"],
-        composeQueryString: [
-            params => {
-                const [network, address] = params;
-                const networkPath = network.key === testnet.key ? "testnet/" : "";
-                return `${networkPath}v1/blockchain/address/transactions/${address}?mode=verbose`;
-            },
-            params => {
-                const [network, address] = params;
-                const networkPath = network.key === testnet.key ? "testnet/" : "";
-                return `${networkPath}v1/blockchain/address/unconfirmed/transactions/${address}?mode=verbose`;
-            },
-        ],
-        getDataByResponse: (response, params) => {
+        httpMethod: ["get", "get"], // Separate requests for confirmed and unconfirmed transactions
+        composeQueryString: (function() {
+            const createQueryComposerGenerator = function(unconfirmed) {
+                return function(params) {
+                    const [network, address] = params;
+                    const networkPath = network.key === testnet.key ? "testnet/" : "";
+                    const part = unconfirmed ? "/unconfirmed" : "";
+                    let query = `${networkPath}v1/blockchain/address${part}/transactions/${address}?mode=verbose&limit=${this.maxPageLength}`;
+                    if (params[3] != null) {
+                        query = `${query}&page=${params[3] + 1}`;
+                    }
+
+                    return query;
+                };
+            };
+            return [createQueryComposerGenerator(false), createQueryComposerGenerator(true)];
+        })(),
+        changeQueryParametersForPageNumber: function(params, previousResponse, pageNumber) {
+            if (!previousResponse || pageNumber === 0) {
+                return params;
+            }
+
+            return [params[0], params[1], params[2], pageNumber];
+        },
+        checkWhetherResponseIsForLastPage: function(previousResponse, currentResponse, currentPageNumber) {
+            return (currentResponse?.data?.data?.list?.length ?? 0) < this.maxPageLength;
+        },
+        getDataByResponse: function(response, params) {
+            if (response?.data?.data?.list == null) {
+                return null;
+            }
+
             const currentBlockNumber = params[2];
-            return (response?.data?.list ?? []).map(tx => {
+            return (response?.data?.data?.list ?? []).map(tx => {
                 const mapType = type =>
                     type === "P2WPKH"
                         ? P2WPKH_SCRIPT_TYPE
@@ -148,28 +235,34 @@ const externalTransactionsDataAPICaller = new RobustExternalAPICallerService("ex
                         : type === "P2SH"
                         ? P2SH_SCRIPT_TYPE
                         : null;
-                const inputs = tx.vIn.map(
-                    input =>
+                const inputs = [];
+                while (tx.vIn[inputs.length]) {
+                    const key = inputs.length + "";
+                    inputs.push(
                         new Input(
-                            input.address,
-                            btcToSatoshi(input.amount),
-                            input.txId,
-                            input.vOut,
-                            mapType(input.type),
-                            input.sequence
+                            tx.vIn[key].address,
+                            btcToSatoshi(tx.vIn[key].amount),
+                            tx.vIn[key].txId,
+                            tx.vIn[key].vOut,
+                            mapType(tx.vIn[key].type),
+                            tx.vIn[key].sequence
                         )
-                );
-
-                const outputs = Object.keys(tx.vOut).map(outputIndex => {
-                    const output = tx.vOut[outputIndex];
-                    return new Output(
-                        [output.address],
-                        btcToSatoshi(output.value),
-                        mapType(output.type),
-                        output.spent?.txId,
-                        outputIndex
                     );
-                });
+                }
+
+                const outputs = [];
+                while (tx.vOut[outputs.length]) {
+                    const key = outputs.length + "";
+                    outputs.push(
+                        new Output(
+                            [tx.vOut[key].address],
+                            btcToSatoshi(tx.vOut[key].value),
+                            mapType(tx.vOut[key].type),
+                            tx.vOut[key].spent?.txId,
+                            +key
+                        )
+                    );
+                }
 
                 return new Transaction(
                     tx.txId,
@@ -177,7 +270,7 @@ const externalTransactionsDataAPICaller = new RobustExternalAPICallerService("ex
                     tx.blockHeight ?? 0,
                     tx.timestamp || tx.blockTime,
                     tx.fee,
-                    null, // This provider have no such analysis
+                    null, // This provider has no such analysis
                     inputs,
                     outputs
                 );
@@ -185,16 +278,41 @@ const externalTransactionsDataAPICaller = new RobustExternalAPICallerService("ex
         },
     },
     {
-        // TODO: [feature, low] Pagination should be added as currently at most 50 txs can be returned
-        timeout: 7000,
-        RPS: 0.1,
+        /**
+         * API documentation https://btc.com/btc/adapter?type=api-doc.
+         * This provider fails to retrieve big transactions.
+         */
+        maxPageLength: 50,
+        timeout: 20000,
+        RPS: 0.05,
         endpoint: "https://chain.api.btc.com/v3/address",
         httpMethod: "get",
-        composeQueryString: params => {
+        composeQueryString: function(params) {
             const address = params[1];
-            return `/${address}/tx`;
+            let query = `/${address}/tx?pagesize=${this.maxPageLength}`;
+            if (params[3] != null) {
+                query += `&page=${params[3]}`;
+            } else {
+                query += `&page=0`;
+            }
+
+            return query;
         },
-        getDataByResponse: (response, params) => {
+        changeQueryParametersForPageNumber: function(params, previousResponse, pageNumber) {
+            if (!previousResponse || pageNumber === 0) {
+                return params;
+            }
+
+            return [params[0], params[1], params[2], pageNumber];
+        },
+        checkWhetherResponseIsForLastPage: function(previousResponse, currentResponse, currentPageNumber) {
+            return (currentResponse?.data?.data?.list?.length ?? 0) < this.maxPageLength;
+        },
+        getDataByResponse: function(response, params) {
+            if (response?.data?.data?.list == null) {
+                return null;
+            }
+
             return (response?.data?.data?.list ?? []).map(tx => {
                 const mapType = type =>
                     type === "P2WPKH_V0" ? P2WPKH_SCRIPT_TYPE : type === "P2PKH" ? P2PKH_SCRIPT_TYPE : P2SH_SCRIPT_TYPE;
@@ -234,8 +352,17 @@ const externalTransactionsDataAPICaller = new RobustExternalAPICallerService("ex
             });
         },
     },
-]);
+];
 
+/**
+ * @type {RobustExternalAPICallerService}
+ */
+const externalTransactionsDataAPICaller = new RobustExternalAPICallerService(
+    "externalTransactionsDataAPICaller",
+    noBatchTransactionsProviders
+);
+
+// TODO: [tests, moderate] add unit tests
 export async function performNoBatchTransactionsDataRetrieval(
     addressesList,
     network,
@@ -244,9 +371,7 @@ export async function performNoBatchTransactionsDataRetrieval(
     maxAttemptsCountToGetDataForEachAddress = 1
 ) {
     try {
-        // eslint-disable-next-line no-console
-        console.log("NOBATCHHH STRTTT " + JSON.stringify(addressesList));
-        const currentBlock = await externalBlocksAPICaller.callExternalAPI([network], 6000);
+        const currentBlock = currentBlockService.getCurrentBlockHeight();
         const data = await Promise.all(
             addressesList.map(address => {
                 if (cancelProcessingHolder == null || !cancelProcessingHolder.isCanceled()) {
@@ -268,9 +393,6 @@ export async function performNoBatchTransactionsDataRetrieval(
             })
         );
 
-        // eslint-disable-next-line no-console
-        console.log("NOBATCHHH GTTTT " + JSON.stringify(data));
-
         // Removing duplicated transactions from retrieved list
         return data
             .flat()
@@ -280,8 +402,6 @@ export async function performNoBatchTransactionsDataRetrieval(
                 []
             );
     } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log("NOBATCHHH ERRRR " + safeStringify(e));
         improveAndRethrow(e, "performNoBatchTransactionsDataRetrieval");
     }
 }
