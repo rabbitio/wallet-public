@@ -79,12 +79,14 @@ export function getPathWithParams() {
 }
 
 /**
- * Retrieves domain without subdomains from given URL
+ * Retrieves second.top domains without subdomains, query etc. from given URL
  * @param url - URL string
- * @return {string} pure domain name (second and first levels)
+ * @return {string} pure domain name (second and top levels)
  */
 export function getDomainWithoutSubdomains(url) {
-    const domainWithSubDomains = url.indexOf("//") > -1 ? url.split("/")[2] : url.split("/")[0];
+    const withoutQuery = url.split("?")[0];
+    const domainWithSubDomains =
+        withoutQuery.indexOf("//") > -1 ? withoutQuery.split("/")[2] : withoutQuery.split("/")[0];
     const domainParts = domainWithSubDomains.split(".");
 
     return domainParts.slice(domainParts.length - 2).join(".");

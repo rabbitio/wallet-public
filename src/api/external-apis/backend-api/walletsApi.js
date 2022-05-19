@@ -201,7 +201,18 @@ export async function savePreference(walletId, preferenceName, preferenceValue) 
  * Retrieves wallet data
  *
  * @param walletId - id of wallet to get data for
- * @return Promise resolving to data object
+ * @return Promise resolving to data object:
+ *         {
+ *             walletId: string,
+ *             creationTime: timestamp(number),
+ *             lastPasswordChangeDate: timestamp(number),
+ *             settings: {
+ *                  currencyCode: string | null,
+ *                  addressesType: string | null,
+ *                  lastNotificationsViewTimestamp: timestamp(number),
+ *                  showFeeRates: boolean,
+ *             },
+ *         }
  */
 export async function getWalletData(walletId) {
     try {

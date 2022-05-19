@@ -35,10 +35,11 @@ export default class TransactionsNotificationsService extends DedicatedNotificat
 
     /**
      * Returns all "new transaction" notifications
+     * @param walletCreationTime {number} - wallet creation timestamp
      *
      * @return {Promise<Array<Notification>>}
      */
-    async getWholeNotificationsList() {
+    async getWholeNotificationsList(walletCreationTime) {
         return this._allTransactions
             .map(tx => TransactionsNotificationsService._createNewTransactionNotification(tx))
             .sort((t1, t2) => t2.timestamp - t1.timestamp);

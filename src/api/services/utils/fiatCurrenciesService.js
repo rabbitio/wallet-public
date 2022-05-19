@@ -5,7 +5,7 @@ export default class FiatCurrenciesService {
     }
 
     static isCodeValid(code) {
-        return fiatCurrenciesList.filter(data => data[0] === code).length !== 0;
+        return !!fiatCurrenciesList.find(currenciesData => currenciesData[0] === code);
     }
 
     static getCurrencySymbolByCode(code) {

@@ -9,7 +9,9 @@ export default class DedicatedNotificationsService {
 
     /**
      * Returns all notifications
+     * @param walletCreationTime {number} - wallet creation timestamp
+     *
      * @return {Promise<Array<Notification>>}
      */
-    getWholeNotificationsList() {}
+    getWholeNotificationsList(walletCreationTime) {}
 }

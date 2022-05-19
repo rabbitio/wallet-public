@@ -33,21 +33,24 @@ export default class AdminNotificationsService extends DedicatedNotificationsSer
     /**
      * Returns all admin notifications
      *
+     * @param walletCreationTime {number} - wallet creation timestamp
      * @return {Promise<Array<Notification>>}
      */
-    async getWholeNotificationsList() {
+    async getWholeNotificationsList(walletCreationTime) {
         try {
             const notifications = await NotificationsAPI.getNotifications();
-            return (notifications || []).map(
-                notification =>
-                    new Notification(
-                        NOTIFICATIONS_TYPES.ADMIN,
-                        notification.title,
-                        notification.text,
-                        notification.timestamp,
-                        {}
-                    )
-            );
+            return (notifications || [])
+                .filter(notification => +notification.timestamp > +walletCreationTime)
+                .map(
+                    notification =>
+                        new Notification(
+                            NOTIFICATIONS_TYPES.ADMIN,
+                            notification.title,
+                            notification.text,
+                            notification.timestamp,
+                            {}
+                        )
+                );
         } catch (e) {
             improveAndRethrow(e, "getWholeNotificationsList", "Failed to get whole list of admin notifications");
         }

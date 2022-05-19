@@ -22,9 +22,11 @@ export default class FiatPaymentsNotificationsService {
 
     /**
      * Returns all fiat payments notifications
+     * @param walletCreationTime {number} - wallet creation timestamp
+     *
      * @return {Promise<Array<Notification>>}
      */
-    async getWholeNotificationsList() {
+    async getWholeNotificationsList(walletCreationTime) {
         return this._getAllNotifications();
     }
 

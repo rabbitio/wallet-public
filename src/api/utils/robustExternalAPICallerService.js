@@ -84,7 +84,7 @@ export default class RobustExternalAPICallerService {
                 !provider.getDataByResponse ||
                 !provider.composeQueryString
             ) {
-                throw new Error(`Wrong format of providers data for: ${provider}`);
+                throw new Error(`Wrong format of providers data for: ${JSON.stringify(provider)}`);
             }
         });
 
@@ -98,6 +98,7 @@ export default class RobustExternalAPICallerService {
         });
         this.bio = bio;
         this._logger = logError;
+        // TODO: add a check that ether all providers has RPS or no one
     }
 
     static defaultRPSFactor = 1;
@@ -202,12 +203,12 @@ export default class RobustExternalAPICallerService {
             try {
                 const axiosConfig = { ...(cancelToken ? { cancelToken } : {}), timeout: provider.timeout || timeoutMS };
                 const httpMethods = Array.isArray(provider.httpMethod) ? provider.httpMethod : [provider.httpMethod];
-                const queryStringComposers = Array.isArray(provider.composeQueryString)
-                    ? provider.composeQueryString
-                    : [provider.composeQueryString];
                 const iterationsData = [];
                 for (let subRequestIndex = 0; subRequestIndex < httpMethods.length; ++subRequestIndex) {
-                    const query = queryStringComposers[subRequestIndex].bind(provider)(parametersValues);
+                    const queryStringComposer = Array.isArray(provider.composeQueryString)
+                        ? provider.composeQueryString[subRequestIndex]
+                        : provider.composeQueryString;
+                    const query = queryStringComposer.bind(provider)(parametersValues);
                     const endpoint = `${provider.endpoint}${query}`;
                     const axiosParams = [endpoint, axiosConfig];
                     if (["post", "put", "patch"].find(method => method === httpMethods[subRequestIndex])) {
@@ -232,7 +233,7 @@ export default class RobustExternalAPICallerService {
                                     responsesForPages[pageNumber - 1],
                                     pageNumber
                                 );
-                                const query = queryStringComposers[subRequestIndex].bind(provider)(actualizedParams);
+                                const query = queryStringComposer.bind(provider)(actualizedParams);
                                 axiosParams[0] = `${provider.endpoint}${query}`;
                             }
                             /**
@@ -297,7 +298,7 @@ export default class RobustExternalAPICallerService {
         const shouldBeForceRetried = data == null && countOfRequestsDeclinedByRPS > Math.floor(providers.length * 0.5);
         const rpsMultiplier = shouldBeForceRetried ? RobustExternalAPICallerService.rpsMultiplier : 1;
 
-        return { data, shouldBeForceRetried, rpsFactor: rpsFactor * rpsMultiplier, errors };
+        return { data: data ?? null, shouldBeForceRetried, rpsFactor: rpsFactor * rpsMultiplier, errors };
     }
 
     _reorderProvidersByNiceFactor() {
