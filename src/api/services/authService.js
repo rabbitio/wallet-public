@@ -42,6 +42,7 @@ import {
     LOGGED_OUT_EVENT,
     SIGNED_IN_EVENT,
     SIGNED_UP_EVENT,
+    WALLET_DELETED_EVENT,
     WALLET_IMPORTED_EVENT,
 } from "../adapters/eventbus";
 import { transactionsDataProvider } from "./internal/transactionsDataProvider";
@@ -453,6 +454,7 @@ export async function deleteWalletByCurrentSession(password) {
 
             clearStorage();
             isJustLoggedOutFlag = true;
+            EventBus.dispatch(WALLET_DELETED_EVENT);
             EventBus.dispatch(LOGGED_OUT_EVENT);
             await ClientIpHashService.provideIpHashStoredAndItsUpdate();
             Logger.log("IP hash was provided, local data were corrected", loggerSource);

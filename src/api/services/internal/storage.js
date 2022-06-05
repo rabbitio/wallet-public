@@ -112,7 +112,19 @@ export function clearScanAddressesFlag() {
 }
 
 export function clearStorage() {
+    let keysThatShouldNotBeRemoved = [
+        "doNotRemoveClientLogsWhenSignedOut",
+        getDoNotRemoveClientLogsWhenSignedOut() === "true" ? "clientLogs" : [],
+    ].flat();
+
+    keysThatShouldNotBeRemoved = keysThatShouldNotBeRemoved.map(item => ({
+        key: item,
+        value: storageProvider.getItem(item),
+    }));
     storageProvider.clear();
+    for (let i = 0; i < keysThatShouldNotBeRemoved.length; ++i) {
+        storageProvider.setItem(keysThatShouldNotBeRemoved[i].key, keysThatShouldNotBeRemoved[i].value);
+    }
 }
 
 export function saveFeeRates(serializedFeeRatesArray) {
@@ -172,4 +184,12 @@ export function getLogs() {
 
 export function removeLogs() {
     return storageProvider.removeItem("clientLogs");
+}
+
+export function getDoNotRemoveClientLogsWhenSignedOut() {
+    return storageProvider.getItem("doNotRemoveClientLogsWhenSignedOut");
+}
+
+export function setDoNotRemoveClientLogsWhenSignedOut(value) {
+    storageProvider.setItem("doNotRemoveClientLogsWhenSignedOut", value);
 }

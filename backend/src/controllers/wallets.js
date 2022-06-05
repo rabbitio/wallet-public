@@ -511,8 +511,9 @@ export default class WalletsController {
      *    {
      *        "currencyCode": string,
      *        "addressesType": string,
-     *        "lastNotificationsViewTimestamp: string,
-     *        "showFeeRates: string,
+     *        "lastNotificationsViewTimestamp": string,
+     *        "showFeeRates": string,
+     *        "doNotRemoveClientLogsWhenSignedOut": string,
      *    }
      *
      * It sends:

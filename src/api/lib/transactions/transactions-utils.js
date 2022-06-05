@@ -94,17 +94,25 @@ export function getSumOfOutputsSendingToAddressByTransactionsList(address, trans
         throw new Error("Transactions list should be an array. ");
     }
 
-    return transactionsList.reduce(
-        (prev, tx) =>
+    return transactionsList.reduce((prev, tx) => {
+        if (!tx.outputs || !Array.isArray(tx.outputs) || !tx.outputs.length) {
+            return prev;
+        }
+
+        return (
             prev +
-            tx.outputs.reduce(
-                (prevOutputSum, output) =>
+            tx.outputs.reduce((prevOutputSum, output) => {
+                if (!output?.addresses || !Array.isArray(output.addresses) || !output.addresses.length) {
+                    return prevOutputSum;
+                }
+
+                return (
                     prevOutputSum +
-                    ((output.addresses.find(outputAddress => outputAddress === address) && output.value_satoshis) || 0),
-                0
-            ),
-        0
-    );
+                    (output.addresses.find(outputAddress => outputAddress === address) ? output.value_satoshis : 0)
+                );
+            }, 0)
+        );
+    }, 0);
 }
 
 /**

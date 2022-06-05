@@ -4,7 +4,7 @@ import { mainnet, testnet } from "../lib/networks";
 export const externalBlocksAPICaller = new RobustExternalAPICallerService("externalBlocksAPICaller", [
     {
         endpoint: "https://blockstream.info/",
-        timeout: 10000,
+        timeout: 15000,
         RPS: 10,
         httpMethod: "get",
         composeQueryString: params => {
@@ -16,7 +16,7 @@ export const externalBlocksAPICaller = new RobustExternalAPICallerService("exter
     },
     {
         endpoint: "https://blockchain.info/latestblock?cors=true",
-        timeout: 10000,
+        timeout: 15000,
         RPS: 30, // Just an assumption
         httpMethod: "get",
         composeQueryString: params => "",

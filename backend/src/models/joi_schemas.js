@@ -242,6 +242,7 @@ export default {
             addressesType: Joi.string().min(1),
             lastNotificationsViewTimestamp: Joi.string().min(1),
             showFeeRates: Joi.string().min(1),
+            doNotRemoveClientLogsWhenSignedOut: Joi.string().min(1),
         }),
     }),
     saveTransactionDataScheme: Joi.object().keys({

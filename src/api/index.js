@@ -4,13 +4,18 @@ import BtcToFiatRatesService from "./services/btcToFiatRatesService";
 import { registerThisWalletAsBitcoinProtocolHandler } from "./utils/browserUtils";
 import { isCurrentSessionValid } from "./services/authService";
 import ChangeAddressUpdateSchedulingService from "./services/changeAddressUpdateSchedulingService";
-import { EventBus, THERE_IS_SESSION_ON_APP_INITIALIZATION_EVENT } from "./adapters/eventbus";
+import {
+    EventBus,
+    THERE_IS_NO_SESSION_ON_APP_INITIALIZATION_EVENT,
+    THERE_IS_SESSION_ON_APP_INITIALIZATION_EVENT,
+} from "./adapters/eventbus";
 import { logError } from "./utils/errorUtils";
 import PaymentUrlService from "./services/paymentUrlService";
 import { blocksListener } from "./services/internal/blocksListener";
 import { currentBlockService } from "./services/internal/currentBlockService";
 import { IS_TESTING } from "../properties";
 import { ScheduledLogger } from "./services/internal/logs/scheduledLogger";
+import { LogsStorage } from "./services/internal/logs/logsStorage";
 
 export function setupAppAndInitializeBackgroundTasks(
     handleNotFoundSession,
@@ -24,6 +29,8 @@ export function setupAppAndInitializeBackgroundTasks(
             (async () => {
                 if (await isCurrentSessionValid()) {
                     EventBus.dispatch(THERE_IS_SESSION_ON_APP_INITIALIZATION_EVENT);
+                } else {
+                    EventBus.dispatch(THERE_IS_NO_SESSION_ON_APP_INITIALIZATION_EVENT);
                 }
             })(),
         () => setupMediators(handleNotFoundSession, handleLogout, handleNewNotLocalTxs, handleDiscoveredAuthentication),
@@ -52,6 +59,7 @@ export function setupAppAndInitializeBackgroundTasks(
         () => currentBlockService.initialize(),
         IS_TESTING ? [] : ScheduledLogger.logWalletSlicePeriodically,
         IS_TESTING ? [] : ScheduledLogger.logExternalServicesStatsPeriodically,
+        IS_TESTING ? [] : () => setInterval(() => LogsStorage.saveToTheDisk(), 10000),
     ].flat();
 
     initializers.forEach(initializer => {

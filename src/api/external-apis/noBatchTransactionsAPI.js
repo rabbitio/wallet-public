@@ -191,7 +191,7 @@ export const noBatchTransactionsProviders = [
          */
         maxPageLength: 13,
         timeout: 20000,
-        RPS: 2, // Docs say that RPS is 3 but using it c10000auses frequent 429 HTTP errors
+        RPS: 0.5, // Docs say that RPS is 3 but using it causes frequent 429 HTTP errors
         endpoint: "https://api.bitaps.com/btc/",
         httpMethod: ["get", "get"], // Separate requests for confirmed and unconfirmed transactions
         composeQueryString: (function() {

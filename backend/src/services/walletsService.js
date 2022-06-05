@@ -79,6 +79,7 @@ export default class WalletsService {
                             addressesType: null,
                             lastNotificationsViewTimestamp: Date.now(),
                             showFeeRates: false,
+                            doNotRemoveClientLogsWhenSignedOut: false,
                         },
                         sessionId,
                         sessionExpirationTime: expirationTime,

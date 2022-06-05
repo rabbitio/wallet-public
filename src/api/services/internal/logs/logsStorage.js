@@ -1,6 +1,5 @@
-import { getLogs, removeLogs, saveLogs } from "../storage";
+import { getLogs, getDoNotRemoveClientLogsWhenSignedOut, removeLogs, saveLogs } from "../storage";
 import { logError } from "../../../utils/errorUtils";
-import { IS_TESTING } from "../../../../properties";
 
 export class LogsStorage {
     static _inMemoryStorage = [];
@@ -17,20 +16,21 @@ export class LogsStorage {
         return `${getLogs()}\n${this._inMemoryStorage.join("\n")}`;
     }
 
-    static _saveToTheDisk() {
+    static saveToTheDisk() {
         try {
             const existingLogs = getLogs();
             saveLogs(`${existingLogs}\n${this._inMemoryStorage.join("\n")}`);
             this._inMemoryStorage = [];
         } catch (e) {
-            logError(e, "_saveToTheDisk", "Failed to save logs to disk");
+            logError(e, "saveToTheDisk", "Failed to save logs to disk");
         }
     }
 
-    static _removeAllClientLogs() {
-        removeLogs();
-        this._inMemoryStorage = [];
+    static removeAllClientLogs() {
+        const doNotRemoveClientLogsWhenSignedOut = getDoNotRemoveClientLogsWhenSignedOut();
+        if (doNotRemoveClientLogsWhenSignedOut !== "true") {
+            removeLogs();
+            this._inMemoryStorage = [];
+        }
     }
 }
-
-!IS_TESTING && setInterval(() => LogsStorage._saveToTheDisk(), 10000);

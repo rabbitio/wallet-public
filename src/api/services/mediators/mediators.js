@@ -1,5 +1,6 @@
 import {
     AUTHENTICATION_DISCOVERED_EVENT,
+    CURRENT_PREFERENCES_EVENT,
     EventBus,
     LOGGED_OUT_EVENT,
     NEW_ADDRESS_CREATED_EVENT,
@@ -7,11 +8,13 @@ import {
     NO_AUTHENTICATION_EVENT,
     SIGNED_IN_EVENT,
     SIGNED_UP_EVENT,
+    THERE_IS_NO_SESSION_ON_APP_INITIALIZATION_EVENT,
     THERE_IS_SESSION_ON_APP_INITIALIZATION_EVENT,
     TRANSACTION_PUSHED_EVENT,
     TX_DATA_RETRIEVED_EVENT,
     USER_READY_TO_SEND_TRANSACTION_EVENT,
     WALLET_DATA_EXPORTED_EVENT,
+    WALLET_DELETED_EVENT,
     WALLET_IMPORTED_EVENT,
 } from "../../adapters/eventbus";
 import { logError } from "../../utils/errorUtils";
@@ -23,6 +26,7 @@ import {
     getCurrentNetwork,
     getIsNotFoundSessionMessageShownForLastLostSession,
     saveIsNotFoundSessionMessageShownForLastLostSession,
+    setDoNotRemoveClientLogsWhenSignedOut,
 } from "../internal/storage";
 import PaymentService from "../paymentService";
 import AddressesServiceInternal from "../internal/addressesServiceInternal";
@@ -32,6 +36,8 @@ import { IS_TESTING } from "../../../properties";
 import { setupAnalyticsMediators } from "./trackersMediators";
 import { Logger } from "../internal/logs/logger";
 import { logWalletDataSlice } from "../internal/logs/scheduledLogger";
+import { LogsStorage } from "../internal/logs/logsStorage";
+import { PreferencesService } from "../preferencesService";
 
 function initializeTransactionsProvider() {
     const loggerSource = "initializeTransactionsProvider";
@@ -163,6 +169,24 @@ export function setupMediators(
             ].forEach(event => EventBus.addEventListener(event, logWalletDataSlice));
 
         EventBus.addEventListener(AUTHENTICATION_DISCOVERED_EVENT, handleDiscoveredAuthentication);
+
+        [
+            LOGGED_OUT_EVENT,
+            NO_AUTHENTICATION_EVENT,
+            THERE_IS_NO_SESSION_ON_APP_INITIALIZATION_EVENT,
+            WALLET_DELETED_EVENT,
+        ].forEach(event => EventBus.addEventListener(event, () => LogsStorage.removeAllClientLogs()));
+
+        EventBus.addEventListener(CURRENT_PREFERENCES_EVENT, (event, data) => {
+            const doNotRemoveClientLogsWhenSignedOut = [data]
+                .flat()
+                .find(
+                    item => item.name === PreferencesService.PREFERENCES.DONT_REMOVE_CLIENT_LOGS_WHEN_SIGNED_OUT.name
+                );
+            if (doNotRemoveClientLogsWhenSignedOut.value != null) {
+                setDoNotRemoveClientLogsWhenSignedOut("" + doNotRemoveClientLogsWhenSignedOut.value);
+            }
+        });
 
         Logger.log("Successfully initialized mediators", loggerSource);
     } catch (e) {
