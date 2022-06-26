@@ -241,7 +241,7 @@ export const noBatchTransactionsProviders = [
                     inputs.push(
                         new Input(
                             tx.vIn[key].address,
-                            btcToSatoshi(tx.vIn[key].amount),
+                            tx.vIn[key].amount,
                             tx.vIn[key].txId,
                             tx.vIn[key].vOut,
                             mapType(tx.vIn[key].type),
@@ -256,7 +256,7 @@ export const noBatchTransactionsProviders = [
                     outputs.push(
                         new Output(
                             [tx.vOut[key].address],
-                            btcToSatoshi(tx.vOut[key].value),
+                            tx.vOut[key].value,
                             mapType(tx.vOut[key].type),
                             tx.vOut[key].spent?.txId,
                             +key

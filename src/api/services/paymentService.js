@@ -357,6 +357,33 @@ export default class PaymentService {
     }
 
     /**
+     * Converts array of fiat amounts to array of amounts in BTC.
+     * If no rate is retrieved or invalid rate is retrieved returns array of nulls.
+     *
+     * @param fiatAmountsArray - array of amounts in fiat to be converted
+     * @param btcDigitsAfterComma - pass if you want to get more digits after comma for BTC values, default is 8
+     * @returns Promise resolving to string fiat amounts array
+     */
+    static async convertFiatAmountsToBtc(fiatAmountsArray, btcDigitsAfterComma = 8) {
+        try {
+            let btcToFiatRate = await BtcToFiatRatesService.getBtcToCurrentSelectedFiatCurrencyRate();
+            if (!btcToFiatRate || btcToFiatRate.rate == null) {
+                return fiatAmountsArray.map(amount => null);
+            }
+
+            return fiatAmountsArray.map(amount => {
+                if (amount == null) {
+                    return null;
+                }
+                let converted = (amount / btcToFiatRate.rate).toFixed(btcDigitsAfterComma);
+                return converted === "0." + "0".repeat(btcDigitsAfterComma) ? "" : converted;
+            });
+        } catch (e) {
+            improveAndRethrow(e, "convertFiatAmountsToBtc");
+        }
+    }
+
+    /**
      * Sends event that user is ready to send transaction. This is needed for logging the state of wallet before the sending
      */
     static notifyThatTheUserIsReadyTOSendTransaction() {

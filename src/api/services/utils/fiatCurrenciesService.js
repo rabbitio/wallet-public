@@ -12,6 +12,11 @@ export default class FiatCurrenciesService {
         const data = fiatCurrenciesList.find(currencyData => currencyData[0] === code.toUpperCase());
         return (data && data[1]) || null;
     }
+
+    static getCurrencyDecimalCountByCode(code) {
+        const data = fiatCurrenciesList.find(currencyData => currencyData[0] === code.toUpperCase());
+        return (data && data[3]) || null;
+    }
 }
 
 const fiatCurrenciesList = [

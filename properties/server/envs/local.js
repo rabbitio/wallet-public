@@ -6,7 +6,9 @@ export const MONGODB_MAX_RECONNECTION_INTERVAL = 100000; // 100sec
 export const DB_NAME = "wallet";
 export const PORTS = [43127, 43128, 43129];
 export const REPLICA_SET_NAME = "local-mongo-rs";
-export const MONGODB_URL = "mongodb://127.0.0.1:43127,127.0.0.1:43128,127.0.0.1:43129/wallet?replicaSet=local-mongo-rs";
+// export const MONGODB_URL = "mongodb://127.0.0.1:43127,127.0.0.1:43128,127.0.0.1:43129/wallet?replicaSet=local-mongo-rs"; // For the im-memory local DB
+export const MONGODB_URL =
+    "mongodb+srv://application_backend_local:FX3Rr7YR9V-f-7-VYB3@wallet.ltys2.mongodb.net/wallet?replicaSet=wallet&retryWrites=true&w=majority"; // Free Atlas replica set for only local/dev use
 export const SESSION_EXPIRATION_TIME = 3 * 60 * 60 * 1000; // 3h in ms
 export const PASSWORD_SALT = "cbc9c81e-db75-4c6f-9769-78e7238b01d4";
 export const SERVER_PORT = 3002;
