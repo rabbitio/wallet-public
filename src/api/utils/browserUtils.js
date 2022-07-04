@@ -6,26 +6,13 @@ import { improveAndRethrow } from "./errorUtils";
  * @param text - text to be copied
  */
 export function copyBrowserTextToClipboard(text) {
-    const textArea = document.createElement("textarea");
     try {
-        textArea.textContent = text;
-
-        // Avoid scrolling to bottom
-        textArea.style.top = "0";
-        textArea.style.left = "0";
-        textArea.style.position = "fixed";
-
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-
-        if (!document.execCommand("copy")) {
+        const copy = require("clipboard-copy");
+        if (!copy(text)) {
             throw new Error("Failed to execute copy command.");
         }
     } catch (e) {
         improveAndRethrow(e, "saveTextToFile");
-    } finally {
-        document.body.removeChild(textArea);
     }
 }
 
