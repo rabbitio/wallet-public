@@ -92,7 +92,9 @@ export const noBatchTransactionsProviders = [
 
                 return new Transaction(
                     tx.txid,
-                    tx.status?.block_height ? currentBlockNumber - tx?.status.block_height + 1 : 0,
+                    tx.status?.block_height && currentBlockNumber
+                        ? currentBlockNumber - tx?.status.block_height + 1
+                        : 0,
                     tx.status?.block_height ?? 0,
                     tx?.status.block_time || provideFirstSeenTime(getHash(tx.txid)),
                     tx.fee,
@@ -171,7 +173,7 @@ export const noBatchTransactionsProviders = [
 
                 return new Transaction(
                     tx.txid,
-                    tx.blockheight ? currentBlockNumber - tx.blockheight + 1 : 0,
+                    tx.blockheight && currentBlockNumber ? currentBlockNumber - tx.blockheight + 1 : 0,
                     tx.blockheight ?? 0,
                     tx.time || tx.blocktime,
                     btcToSatoshi(tx.total_vin - tx.total_vout),
@@ -266,7 +268,7 @@ export const noBatchTransactionsProviders = [
 
                 return new Transaction(
                     tx.txId,
-                    tx.blockHeight ? currentBlockNumber - tx.blockHeight + 1 : 0,
+                    tx.blockHeight && currentBlockNumber ? currentBlockNumber - tx.blockHeight + 1 : 0,
                     tx.blockHeight ?? 0,
                     tx.timestamp || tx.blockTime,
                     tx.fee,
@@ -313,6 +315,7 @@ export const noBatchTransactionsProviders = [
                 return null;
             }
 
+            const currentBlockNumber = params[2];
             return (response?.data?.data?.list ?? []).map(tx => {
                 const mapType = type =>
                     type === "P2WPKH_V0" ? P2WPKH_SCRIPT_TYPE : type === "P2PKH" ? P2PKH_SCRIPT_TYPE : P2SH_SCRIPT_TYPE;
@@ -342,7 +345,7 @@ export const noBatchTransactionsProviders = [
                 return new Transaction(
                     tx.hash,
                     tx.confirmations,
-                    tx.confirmations > 0 ? params[2] - tx.confirmations + 1 : 0,
+                    tx.confirmations && currentBlockNumber ? currentBlockNumber - tx.confirmations + 1 : 0,
                     tx.block_time ?? provideFirstSeenTime(getHash(tx.hash)),
                     tx.fee,
                     tx.is_double_spend,
