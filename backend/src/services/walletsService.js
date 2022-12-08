@@ -1,4 +1,4 @@
-import uuid from "uuid/v4";
+import { v4 } from "uuid";
 import pbkdf2 from "pbkdf2";
 import util from "util";
 import { getLogger } from "log4js";
@@ -53,7 +53,7 @@ export default class WalletsService {
 
             const currentTime = new Date();
             const expirationTime = WalletsService._getSessionExpirationTime();
-            const sessionId = uuid();
+            const sessionId = v4();
 
             const passphraseHashSecured = WalletsService._securePasswordHash(passphraseHash);
             const passwordHashSecured = WalletsService._securePasswordHash(passwordHash);
@@ -460,7 +460,7 @@ export default class WalletsService {
     static async _createNewSessionForWallet(walletsCollection, wallet) {
         log.debug("Creating new session for found wallet and valid password.");
 
-        const newSessionId = uuid();
+        const newSessionId = v4();
         const updateOneResult = await walletsCollection.updateOne(
             { walletId: wallet.walletId },
             { $set: { sessionId: newSessionId, sessionExpirationTime: WalletsService._getSessionExpirationTime() } }

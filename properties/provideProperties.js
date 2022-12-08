@@ -21,7 +21,9 @@ const targetServerPropertiesPathForIntegrationTests = path.join(__dirname, "../t
 const targetServerLoggingPropertiesPath = path.join(__dirname, "../backend/src/log4js.json");
 
 let environmentPrefix = "";
-if (reactEnv === "development" || propEnv === "local") {
+if (propEnv === "local") {
+    environmentPrefix = "local";
+} else if (reactEnv === "development" || propEnv === "dev") {
     environmentPrefix = "local";
 } else if (reactEnv === "production" || propEnv === "prod") {
     environmentPrefix = "prod";

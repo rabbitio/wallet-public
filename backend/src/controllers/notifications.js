@@ -10,7 +10,8 @@ import {
 import schemas from "../models/joi_schemas";
 import { GET_NOTIFICATIONS_EP_NUMBER, SAVE_NOTIFICATION_EP_NUMBER } from "./endpointNumbers";
 import { NotificationsService } from "../services/notificationsService";
-import { getHash } from "../../../src/api/adapters/crypto-utils";
+
+import { getHash } from "../utils/utils";
 import { NOTIFICATIONS_API_TOKEN_HASH } from "../properties";
 
 const log = getLogger("notifications");

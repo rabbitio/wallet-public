@@ -1,5 +1,6 @@
 import { mkdirSync } from "fs";
 import { configure } from "log4js";
+import Hashes from "jshashes";
 
 export function improveAndRethrow(e, settingFunction, additionalMessage) {
     const message = improvedErrorMessage(e, settingFunction, additionalMessage);
@@ -85,4 +86,8 @@ export function getUTCDateStartByLocalDate(date) {
 export function getLocalDateByUTCTimestamp(timestamp) {
     const utcOffset = new Date().getTimezoneOffset() * 60000 * -1;
     return new Date(+timestamp + utcOffset);
+}
+
+export function getHash(valueToBeHashed) {
+    return new Hashes.SHA512().hex(valueToBeHashed);
 }

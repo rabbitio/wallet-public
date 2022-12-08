@@ -1,21 +1,21 @@
-import { setupMediators } from "./services/mediators/mediators";
-import ClientIpHashService from "./services/clientIpHashService";
-import BtcToFiatRatesService from "./services/btcToFiatRatesService";
-import { registerThisWalletAsBitcoinProtocolHandler } from "./utils/browserUtils";
-import { isCurrentSessionValid } from "./services/authService";
-import ChangeAddressUpdateSchedulingService from "./services/changeAddressUpdateSchedulingService";
+import { setupMediators } from "./common/services/mediators/mediators";
+import ClientIpHashService from "./auth/services/internal/clientIpHashService";
+import CoinsToFiatRatesService from "./wallet/common/services/coinsToFiatRatesService";
+import { registerThisWalletAsBitcoinProtocolHandler } from "./common/utils/browserUtils";
+import { isCurrentSessionValid } from "./auth/services/authService";
+import ChangeAddressUpdateSchedulingService from "./wallet/btc/services/changeAddressUpdateSchedulingService";
 import {
     EventBus,
     THERE_IS_NO_SESSION_ON_APP_INITIALIZATION_EVENT,
     THERE_IS_SESSION_ON_APP_INITIALIZATION_EVENT,
-} from "./adapters/eventbus";
-import { logError } from "./utils/errorUtils";
-import PaymentUrlService from "./services/paymentUrlService";
-import { blocksListener } from "./services/internal/blocksListener";
-import { currentBlockService } from "./services/internal/currentBlockService";
+} from "./common/adapters/eventbus";
+import { logError } from "./common/utils/errorUtils";
+import PaymentUrlService from "./wallet/btc/services/paymentUrlService";
+import { blocksListener } from "./wallet/btc/services/internal/blocksListener";
+import { currentBlockService } from "./wallet/btc/services/internal/currentBlockService";
 import { IS_TESTING } from "../properties";
-import { ScheduledLogger } from "./services/internal/logs/scheduledLogger";
-import { LogsStorage } from "./services/internal/logs/logsStorage";
+import { ScheduledLogger } from "./support/services/internal/logs/scheduledLogger";
+import { LogsStorage } from "./support/services/internal/logs/logsStorage";
 
 export function setupAppAndInitializeBackgroundTasks(
     handleNotFoundSession,
@@ -34,7 +34,7 @@ export function setupAppAndInitializeBackgroundTasks(
                 }
             })(),
         () => setupMediators(handleNotFoundSession, handleLogout, handleNewNotLocalTxs, handleDiscoveredAuthentication),
-        () => BtcToFiatRatesService.scheduleBtcToFiatRatesUpdate(),
+        () => CoinsToFiatRatesService.scheduleCoinsToFiatRatesUpdate(),
         IS_TESTING
             ? []
             : () =>
