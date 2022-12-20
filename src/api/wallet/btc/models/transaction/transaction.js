@@ -1,3 +1,9 @@
+import { improveAndRethrow } from "../../../../common/utils/errorUtils";
+import { Input } from "./input";
+import { Output } from "./output";
+import { getDustThreshold, getOutputTypeByAddress } from "../../lib/utxos";
+import { MAX_RBF_SEQUENCE } from "../../lib/transactions/build-transaction";
+
 export class Transaction {
     constructor(
         txid,
@@ -33,5 +39,33 @@ export class Transaction {
             this.outputs.map(output => output.clone()),
             this.is_most_probable_double_spend
         );
+    }
+
+    /**
+     * Composes transaction on base of tx data
+     *
+     * @param txData {TxData} TxData object from sending process
+     * @param txId {string} hash string
+     * @param [confirmations=0] {number}
+     * @param [blockHeight=0] {number}
+     */
+    static fromTxData(txData, txId, confirmations = 0, blockHeight = 0) {
+        try {
+            const inputs = txData.utxos.map(
+                utxo =>
+                    new Input(utxo.address, utxo.value_satoshis, utxo.txid, utxo.number, utxo.type, MAX_RBF_SEQUENCE)
+            );
+            const to = txData.address;
+            const outputs = [new Output([to], txData.amount, getOutputTypeByAddress(to), null, 0)];
+            const change = txData.utxos.reduce((p, c) => p + c.value_satoshis, 0) - txData.amount - txData.fee;
+            if (change > getDustThreshold(to)) {
+                outputs.push(
+                    new Output([txData.changeAddress], change, getOutputTypeByAddress(txData.changeAddress), null, 1)
+                );
+            }
+            return new Transaction(txId, confirmations, blockHeight, Date.now(), txData.fee, false, inputs, outputs);
+        } catch (e) {
+            improveAndRethrow(e, "fromTxData");
+        }
     }
 }

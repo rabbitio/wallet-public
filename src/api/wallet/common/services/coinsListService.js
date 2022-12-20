@@ -87,26 +87,12 @@ export class CoinsListService {
                 const coinToUSDRate = coinsToUSDRates.find(rateData => rateData.coin === coins[index]);
                 const coinToCurrentFiatRate = coinToUSDRate ? coinToUSDRate.usdRate * usdToCurrentFiatRate.rate : null;
 
-                const maxDigitsAfterDot = 8; // Note/Todo: Move this setting somewhere else
-
-                const balanceNotTrimmed = typeof balance === "number" ? balance.toFixed(coins[index].digits) : balance;
-                let balanceTrimmed;
-                if (typeof balance === "number") {
-                    balanceTrimmed =
-                        coins[index].digits > maxDigitsAfterDot
-                            ? balance.toFixed(maxDigitsAfterDot)
-                            : balance.toFixed(coins[index].digits);
-                    balanceTrimmed = NumbersUtils.removeRedundantRightZerosFromNumberString(balanceTrimmed);
-                } else {
-                    const balanceWithoutZeros = NumbersUtils.removeRedundantRightZerosFromNumberString(balance);
-                    const dotIndex = balanceWithoutZeros.indexOf(".");
-                    balanceTrimmed =
-                        dotIndex < 0
-                            ? balanceWithoutZeros
-                            : coins[index].digits > maxDigitsAfterDot
-                            ? balance.slice(0, dotIndex + maxDigitsAfterDot + 1)
-                            : balance.slice(0, dotIndex + coins[index].digits + 1);
-                }
+                const isBalanceZero = balance === 0 || /^[0.,]+$/.test(balance);
+                let balanceNotTrimmed = typeof balance === "number" ? balance.toFixed(coins[index].digits) : balance;
+                balanceNotTrimmed = isBalanceZero
+                    ? Number(0).toFixed(coins[index].digits)
+                    : NumbersUtils.removeRedundantRightZerosFromNumberString(balanceNotTrimmed);
+                const balanceTrimmed = NumbersUtils.trimCoinAmounts([[balanceNotTrimmed, coins[index]]])[0];
 
                 return {
                     ticker: coins[index].ticker,
@@ -116,7 +102,11 @@ export class CoinsListService {
                     coinToFiatRate: coinToCurrentFiatRate
                         ? coinToCurrentFiatRate.toFixed(currentFiatData.decimalCount)
                         : null,
-                    coinFiatRateChange24hPercent: coinToUSDRate ? +coinToUSDRate.change24hPercent : null,
+                    coinFiatRateChange24hPercent: coinToUSDRate
+                        ? isBalanceZero
+                            ? 0
+                            : +coinToUSDRate.change24hPercent
+                        : null,
                     balance: balanceNotTrimmed,
                     balanceTrimmed: balanceTrimmed,
                     balanceFiat: coinToCurrentFiatRate

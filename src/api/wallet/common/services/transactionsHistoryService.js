@@ -19,15 +19,15 @@ export default class TransactionsHistoryService {
         1000
     );
     static _cachePrefix = "1ad60a23-40f7-47c5-a574-8e87c3dc71ca";
-    static _cacheKey = (tickers, numberOfTransactionsToReturn, filterBy, search) =>
+    static _cacheKey = (tickers, numberOfTransactionsToReturn, filterBy, search, sortBy) =>
         `${this._cachePrefix}_${JSON.stringify(tickers ?? "")}${JSON.stringify(filterBy ?? "")}${JSON.stringify(
-            search ?? ""
-        )}_${numberOfTransactionsToReturn}`;
+            sortBy ?? ""
+        )}${JSON.stringify(search ?? "")}_${numberOfTransactionsToReturn}`;
 
-    static invalidateCaches(tickers, numberOfTransactionsToReturn, filterBy, search) {
+    static invalidateCaches(tickers, numberOfTransactionsToReturn, filterBy, search, sortBy) {
         if (tickers) {
             this._cacheAndRequestsResolver.invalidate(
-                this._cacheKey(tickers, numberOfTransactionsToReturn, filterBy, search)
+                this._cacheKey(tickers, numberOfTransactionsToReturn, filterBy, search, sortBy)
             );
         } else {
             this._cacheAndRequestsResolver.invalidateContaining(this._cachePrefix);
@@ -104,7 +104,7 @@ export default class TransactionsHistoryService {
             const filteredCoins = getRequestedCoinsList(coinTickersList, filterBy);
 
             const cached = await this._cacheAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
-                this._cacheKey(coinTickersList, numberOfTransactionsToReturn, filterBy, searchCriteria)
+                this._cacheKey(coinTickersList, numberOfTransactionsToReturn, filterBy, searchCriteria, sortBy)
             );
             if (cached) return cached;
 
@@ -134,7 +134,7 @@ export default class TransactionsHistoryService {
             };
 
             this._cacheAndRequestsResolver.saveCachedData(
-                this._cacheKey(coinTickersList, numberOfTransactionsToReturn, filterBy, searchCriteria),
+                this._cacheKey(coinTickersList, numberOfTransactionsToReturn, filterBy, searchCriteria, sortBy),
                 result
             );
 
@@ -143,7 +143,7 @@ export default class TransactionsHistoryService {
             improveAndRethrow(e, loggerSource);
         } finally {
             this._cacheAndRequestsResolver.markActiveCalculationAsFinished(
-                this._cacheKey(coinTickersList, numberOfTransactionsToReturn, filterBy, searchCriteria)
+                this._cacheKey(coinTickersList, numberOfTransactionsToReturn, filterBy, searchCriteria, sortBy)
             );
         }
     }
@@ -268,12 +268,11 @@ function validateSearchCriteria(searchCriteria) {
 
 function getRequestedCoinsList(coinsTickersList, filterBy) {
     let currencyFilter = (filterBy || []).find(filter => filter[0] === "currency");
-    let tickers = coinsTickersList;
     if (currencyFilter && currencyFilter.length > 1) {
-        tickers = coinsTickersList.filter(ticker => currencyFilter.find(item => item === ticker));
+        coinsTickersList = coinsTickersList.filter(ticker => currencyFilter.find(item => item === ticker));
     }
 
-    return tickers.map(ticker => Coins.getCoinByTicker(ticker));
+    return coinsTickersList.map(ticker => Coins.getCoinByTicker(ticker));
 }
 
 async function addNotes(allTransactions) {
@@ -418,20 +417,24 @@ function validateNumberOfTransactions(numberOfTransactionsToReturn) {
 }
 
 async function addFiatAmounts(coins, transactionsList) {
-    for (let i = 0; i < coins.length; ++i) {
-        const coinTransactions = transactionsList.filter(tx => coins[i] === Coins.getCoinByTicker(tx.ticker));
-        const amounts = coinTransactions.map(tx => (tx.amount ? +coins[i].atomsToCoinAmount(tx.amount) : null));
-        const fees = coinTransactions.map(tx => (tx.fees ? +coins[i].feeCoin.atomsToCoinAmount(tx.fees) : null));
+    try {
+        for (let i = 0; i < coins.length; ++i) {
+            const coinTransactions = transactionsList.filter(tx => coins[i] === Coins.getCoinByTicker(tx.ticker));
+            const amounts = coinTransactions.map(tx => (tx.amount ? +coins[i].atomsToCoinAmount(tx.amount) : null));
+            const fees = coinTransactions.map(tx => (tx.fees ? +coins[i].feeCoin.atomsToCoinAmount(tx.fees) : null));
 
-        const fiatAmounts = await CoinsToFiatRatesService.convertCoinAmountsToFiat(coins[i], amounts.concat(fees));
+            const fiatAmounts = await CoinsToFiatRatesService.convertCoinAmountsToFiat(coins[i], amounts.concat(fees));
 
-        for (let j = 0; j < coinTransactions.length; ++j) {
-            coinTransactions[j].fiatAmount = fiatAmounts[j];
-            coinTransactions[j].fiatFee = fiatAmounts[j + coinTransactions.length];
+            for (let j = 0; j < coinTransactions.length; ++j) {
+                coinTransactions[j].fiatAmount = fiatAmounts[j];
+                coinTransactions[j].fiatFee = fiatAmounts[j + coinTransactions.length];
+            }
         }
-    }
 
-    return transactionsList;
+        return transactionsList;
+    } catch (e) {
+        improveAndRethrow(e, "addFiatAmounts");
+    }
 }
 
 function mapToProperReturnFormat(transactionsList) {

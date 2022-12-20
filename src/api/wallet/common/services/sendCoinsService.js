@@ -2,13 +2,14 @@ import { BigNumber } from "ethers";
 import { Coins } from "../../coins";
 import { Wallets } from "../wallets";
 import { isAmountDustForAddress } from "../../btc/lib/utxos";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
+import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
 import { Logger } from "../../../support/services/internal/logs/logger";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import CoinsToFiatRatesService from "./coinsToFiatRatesService";
 import { getDecryptedWalletCredentials } from "../../../auth/services/authService";
 import { EventBus, TRANSACTION_PUSHED_EVENT } from "../../../common/adapters/eventbus";
 import { TransactionsDataService } from "./transactionsDataService";
+import { BalancesService } from "./balancesService";
 
 export class SendCoinsService {
     /**
@@ -231,12 +232,9 @@ export class SendCoinsService {
         try {
             Logger.log(`Start broadcasting ${txData.amount}->${txData.address}`, loggerSource);
 
+            const wallet = Wallets.getWalletByCoin(coin);
             const { mnemonic, passphrase } = getDecryptedWalletCredentials(password);
-            const pushedTxIdOrError = await Wallets.getWalletByCoin(coin).createTransactionAndBroadcast(
-                mnemonic,
-                passphrase,
-                txData
-            );
+            const pushedTxIdOrError = await wallet.createTransactionAndBroadcast(mnemonic, passphrase, txData);
 
             if (pushedTxIdOrError.errorDescription) {
                 Logger.log(`Pushing failed - determined error: ${JSON.stringify(pushedTxIdOrError)}`, loggerSource);
@@ -245,6 +243,8 @@ export class SendCoinsService {
                     howToFix: pushedTxIdOrError.howToFix,
                 };
             }
+
+            this._actualizeCaches(wallet, coin, txData, pushedTxIdOrError);
 
             EventBus.dispatch(TRANSACTION_PUSHED_EVENT, null, pushedTxIdOrError, txData.amount, txData.fee);
 
@@ -261,6 +261,19 @@ export class SendCoinsService {
                 loggerSource
             );
             improveAndRethrow(e, loggerSource);
+        }
+    }
+
+    static _actualizeCaches(wallet, coin, txData, txId) {
+        try {
+            wallet.actualizeLocalCachesWithNewTransactionData(coin, txData, txId);
+        } catch (e) {
+            logError(e, "sendCoinsService._actualizeCaches", "Failed to actualize wallet caches");
+        }
+        try {
+            BalancesService.actualizeCachedBalancesAccordingToJustSentTransaction(coin, txData, txId);
+        } catch (e) {
+            logError(e, "sendCoinsService._actualizeCaches", "Failed to actualize balances caches");
         }
     }
 }

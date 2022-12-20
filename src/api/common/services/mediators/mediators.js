@@ -39,7 +39,6 @@ import { logWalletDataSlice } from "../../../support/services/internal/logs/sche
 import { LogsStorage } from "../../../support/services/internal/logs/logsStorage";
 import AddressesService from "../../../wallet/btc/services/addressesService";
 import { PreferencesService } from "../../../wallet/common/services/preferencesService";
-import { BalancesService } from "../../../wallet/common/services/balancesService";
 import { CoinsListService } from "../../../wallet/common/services/coinsListService";
 import TransactionsHistoryService from "../../../wallet/common/services/transactionsHistoryService";
 import { Coins } from "../../../wallet/coins";
@@ -120,7 +119,7 @@ export function setupMediators(
                     handleLogout();
                 }
             } catch (e) {
-                logError(e);
+                logError(e, "NO_AUTHENTICATION_EVENT_handler");
                 saveIsNotFoundSessionMessageShownForLastLostSession(true);
                 handleNotFoundSession();
                 handleLogout();
@@ -136,7 +135,7 @@ export function setupMediators(
                     transactionsDataProvider.resetState();
                     addressesMetadataService.clearMetadata();
                 } catch (e) {
-                    logError(e);
+                    logError(e, "LOGGED_OUT_EVENT,NO_AUTHENTICATION_EVENT_handler");
                 }
             })
         );
@@ -156,22 +155,6 @@ export function setupMediators(
                 })();
             });
 
-        !IS_TESTING &&
-            EventBus.addEventListener(TRANSACTION_PUSHED_EVENT, (event, txid) => {
-                (async () => {
-                    try {
-                        const transactionData = await transactionsDataProvider.getTransactionData(txid);
-                        await transactionsDataProvider.updateTransactionsCacheAndPushTxsToServer([transactionData]);
-                    } catch (e) {
-                        logError(
-                            e,
-                            `${TRANSACTION_PUSHED_EVENT}_handler`,
-                            "Failed to push data of newly created transaction to transactions cache"
-                        );
-                    }
-                })();
-            });
-
         EventBus.addEventListener(NEW_NOT_LOCAL_TRANSACTIONS_EVENT, function() {
             AddressesService.invalidateCaches();
         });
@@ -180,8 +163,6 @@ export function setupMediators(
 
         [TRANSACTION_PUSHED_EVENT, TX_DATA_RETRIEVED_EVENT, NEW_NOT_LOCAL_TRANSACTIONS_EVENT].forEach(event => {
             EventBus.addEventListener(event, function() {
-                TransactionsHistoryService.invalidateCaches();
-                BalancesService.invalidateCaches();
                 CoinsListService.invalidateCaches();
             });
         });

@@ -8,6 +8,7 @@ import { Erc20TokenTransactionDetailsService } from "../services/erc20TokenTrans
 import { EthAddressesService } from "../../eth/services/ethAddressesService";
 import { Erc20TokenSendTransactionService } from "../services/erc20TokenSendTransactionService";
 import { EthSendTransactionService } from "../../eth/services/ethSendTransactionService";
+import { Erc20TransactionsProvider } from "../external-apis/erc20TransactionsProvider";
 
 class UsdtErc20Wallet extends Wallet {
     constructor() {
@@ -99,6 +100,15 @@ class UsdtErc20Wallet extends Wallet {
             return EthAddressesService.exportAddressesWithPrivateKeys(password);
         } catch (e) {
             improveAndRethrow(e, "exportWalletData");
+        }
+    }
+
+    actualizeLocalCachesWithNewTransactionData(sentCoin, txData, txId) {
+        try {
+            const address = EthAddressesService.getCurrentEthAddress();
+            Erc20TransactionsProvider.actualizeCacheWithNewTransactionSentFromAddress(sentCoin, address, txData, txId);
+        } catch (e) {
+            improveAndRethrow(e, "actualizeLocalCachesWithNewTransactionData");
         }
     }
 }

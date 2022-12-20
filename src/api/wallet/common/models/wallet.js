@@ -136,4 +136,16 @@ export class Wallet {
     async exportWalletData(password) {
         throw new Error("Not implemented in base Wallet class");
     }
+
+    /**
+     * Actualizes local caches with newly sent transaction data to operate with it immediately after send inside the app
+     *
+     * @param sentCoin {Coin} coin the transaction sent
+     * @param txData {TxData} sent transaction details
+     * @param txId {string} id of new transaction
+     * @returns {void}
+     */
+    actualizeLocalCachesWithNewTransactionData(sentCoin, txData, txId) {
+        throw new Error("Not implemented in base Wallet class");
+    }
 }

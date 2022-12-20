@@ -61,7 +61,7 @@ export default class TransactionsNotificationsService extends DedicatedNotificat
                 tx => tx.confirmations < TransactionDetailsService.minConfirmations(tx.ticker)
             );
         } catch (e) {
-            improveAndRethrow(e, "_actualizeNotificationsLists");
+            improveAndRethrow(e, "_actualizeTransactionsData");
         }
     }
 
@@ -74,7 +74,8 @@ export default class TransactionsNotificationsService extends DedicatedNotificat
             `You've ` +
                 (tx.type === "incoming" ? "got " : "sent ") +
                 `${tx.amountSignificantString} ` +
-                tx.tickerPrintable,
+                tx.tickerPrintable +
+                (tx.status !== "confirmed" ? ". The transaction is now pending confirmation.." : ""),
             tx.creationTime,
             { txid: tx.txid, ticker: tx.ticker }
         );
@@ -84,9 +85,15 @@ export default class TransactionsNotificationsService extends DedicatedNotificat
         return new Notification(
             NOTIFICATIONS_TYPES.TRANSACTION_CONFIRMED,
             "Transaction confirmed",
-            `#${tx.txid.slice(0, 10)} ${tx.type === "incoming" ? "sending" : "receiving"} ${
-                tx.amountSignificantString
-            } ${tx.tickerPrintable}`,
+            (tx.type === "incoming" ? "Incoming" : "Outgoing") +
+                " transaction of " +
+                tx.amountSignificantString +
+                " " +
+                tx.tickerPrintable +
+                " is confirmed.",
+            // `#${tx.txid.slice(0, 10)} ${tx.type === "incoming" ? "sending" : "receiving"} ${
+            //     tx.amountSignificantString
+            // } ${tx.tickerPrintable}`,
             /**
              * This is a small hack as confirmation time is not the creation time, and we can avoid calling for
              * confirmation timestamp just by slightly increasing the creation timestamp. It will help when we sort

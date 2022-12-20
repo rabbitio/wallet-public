@@ -83,6 +83,6 @@ export async function isIpHashPresent(walletId, ipHash) {
             return false;
         }
 
-        improveAndRethrow(e, getAllEncryptedIpAddresses);
+        improveAndRethrow(e, "isIpHashPresent");
     }
 }

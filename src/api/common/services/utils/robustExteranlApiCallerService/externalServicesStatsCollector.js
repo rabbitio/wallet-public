@@ -9,6 +9,7 @@ class ExternalServicesStatsCollector {
         try {
             const processMessage = (stat, errorMessage) => {
                 const errors = stat.errors ?? {};
+                errorMessage = errorMessage ?? "";
                 if (errorMessage.match(/.*network.+error.*/i)) {
                     errors["networkError"] = (errors["networkError"] || 0) + 1;
                 } else if (errorMessage.match(/.*timeout.+exceeded.*/i)) {

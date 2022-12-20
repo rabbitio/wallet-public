@@ -7,6 +7,7 @@ import { EthTransactionsHistoryService } from "./services/ethTransactionsHistory
 import { EthTransactionDetailsService } from "./services/ethTransactionDetailsService";
 import { EthAddressesService } from "./services/ethAddressesService";
 import { EthSendTransactionService } from "./services/ethSendTransactionService";
+import { EthTransactionsProvider } from "./external-apis/ethTransactionsProvider";
 
 class EthereumWallet extends Wallet {
     constructor() {
@@ -98,6 +99,15 @@ class EthereumWallet extends Wallet {
             return EthAddressesService.exportAddressesWithPrivateKeys(password);
         } catch (e) {
             improveAndRethrow(e, "exportWalletData");
+        }
+    }
+
+    actualizeLocalCachesWithNewTransactionData(sentCoin, txData, txId) {
+        try {
+            const address = EthAddressesService.getCurrentEthAddress();
+            EthTransactionsProvider.actualizeCacheWithNewTransactionSentFromAddress(address, txData, txId);
+        } catch (e) {
+            improveAndRethrow(e, "actualizeLocalCachesWithNewTransactionData");
         }
     }
 }

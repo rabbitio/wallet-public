@@ -27,16 +27,18 @@ export class WalletSliceService {
                     `tx:${tx.txid};${tx.confirmations};${tx.time};${tx.fee_satoshis};${tx.double_spend};${tx.inputs
                         .map(
                             inp =>
-                                `in:${inp?.address?.slice(0, 8)},${inp.value_satoshis},${
-                                    typeof inp?.txid === "string" ? inp.txid.slice(0, 5) : ""
-                                },${inp.output_number}`
+                                `in:${typeof inp?.address === "string" ? inp?.address?.slice(0, 8) : ""},${
+                                    inp.value_satoshis
+                                },${typeof inp?.txid === "string" ? inp?.txid.slice(0, 5) : ""},${inp.output_number}`
                         )
                         .join("|")};${tx.outputs
                         .map(
                             out =>
-                                `out_${out.number}:${out.addresses[0]?.slice(0, 8)},${out.value_satoshis},${(
-                                    out.spend_txid ?? ""
-                                ).slice(0, 5)}`
+                                `out_${out.number}:${
+                                    typeof out.addresses[0] === "string" ? out.addresses[0]?.slice(0, 8) : ""
+                                },${out.value_satoshis},${
+                                    typeof out?.spend_txid === "string" ? out.spend_txid.slice(0, 5) : ""
+                                }`
                         )
                         .join("|")}\n`
             );

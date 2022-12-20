@@ -1,6 +1,39 @@
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 
 export class NumbersUtils {
+    static maxDigitsAfterDot = 8;
+
+    static trimCoinAmounts(amounts) {
+        try {
+            return amounts.map(amountBatch => {
+                const [amount, coin] = amountBatch;
+
+                let amountTrimmed;
+
+                if (typeof amount === "number") {
+                    amountTrimmed =
+                        coin.digits > this.maxDigitsAfterDot
+                            ? amount.toFixed(this.maxDigitsAfterDot)
+                            : amount.toFixed(coin.digits);
+                    amountTrimmed = this.removeRedundantRightZerosFromNumberString(amountTrimmed);
+                } else {
+                    const dotIndex = amount.indexOf(".");
+                    amountTrimmed =
+                        dotIndex < 0
+                            ? amount
+                            : coin.digits > this.maxDigitsAfterDot
+                            ? amount.slice(0, dotIndex + this.maxDigitsAfterDot + 1)
+                            : amount.slice(0, dotIndex + coin.digits + 1);
+                    amountTrimmed = this.removeRedundantRightZerosFromNumberString(amountTrimmed);
+                }
+
+                return amountTrimmed;
+            });
+        } catch (e) {
+            improveAndRethrow(e, "trimCoinAmounts");
+        }
+    }
+
     static removeRedundantRightZerosFromNumberString(numberAsAString) {
         try {
             const parts = ("" + numberAsAString).split(".");

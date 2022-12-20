@@ -45,7 +45,7 @@ class TransactionsDataProvider {
          * scanning only for frequently used addresses if the batch mode is disabled.
          */
         this.dataUpdateTimeoutMS = TransactionsDataRetrieverService.isBatchRetrievalModeWorkingRightNow()
-            ? 20000
+            ? 35000
             : 15000;
 
         /**
@@ -302,12 +302,17 @@ class TransactionsDataProvider {
      * Adds new transaction to cache. Useful to add new transaction to cache immediately without waiting for
      * retrieving it from blockchain explorers
      *
-     * @param newTx - Transaction - new tx
+     * @param newTx {Transaction} new tx
      * @return Promise resolving to undefined
      */
-    async pushNewTransactionToCache(newTx) {
-        this._transactionsData = improveRetrievedRawTransactionsData([newTx], this._transactionsData);
-        Logger.log(`New transaction pushed to cache: ${newTx.txid}`, "pushNewTransactionToCache");
+    pushNewTransactionToCache(newTx) {
+        const loggerSource = "pushNewTransactionToCache";
+        try {
+            this._transactionsData = improveRetrievedRawTransactionsData([newTx], this._transactionsData);
+            Logger.log(`New transaction pushed to cache: ${newTx.txid}`, loggerSource);
+        } catch (e) {
+            improveAndRethrow(e, loggerSource);
+        }
     }
 
     // TODO: [tests, moderate] write units
@@ -333,7 +338,8 @@ class TransactionsDataProvider {
                 const newData = dataArrays.flat().filter(data => data.txid);
                 this._notifyAboutNewIncomingTransactions(newData);
                 this._transactionsData = improveRetrievedRawTransactionsData(newData, this._transactionsData);
-                await this._storeConfirmedTransactions();
+                // We don't wait for storing the transactions to speed up the data retrieval process
+                this._storeConfirmedTransactions();
             } catch (e) {
                 fetchingErrors.push(e);
             } finally {

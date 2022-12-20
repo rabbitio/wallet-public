@@ -7,6 +7,8 @@ import AddressesService from "./services/addressesService";
 import PaymentService from "./services/paymentService";
 import AddressesServiceInternal from "./services/internal/addressesServiceInternal";
 import { bitcoin } from "./bitcoin";
+import { transactionsDataProvider } from "./services/internal/transactionsDataProvider";
+import { Transaction } from "./models/transaction/transaction";
 
 class BitcoinWallet extends Wallet {
     constructor() {
@@ -95,6 +97,15 @@ class BitcoinWallet extends Wallet {
             return await AddressesServiceInternal.exportAddressesWithPrivateKeysByPassword(password);
         } catch (e) {
             improveAndRethrow(e, "exportWalletData");
+        }
+    }
+
+    actualizeLocalCachesWithNewTransactionData(sentCoin, txData, txId) {
+        try {
+            const tx = Transaction.fromTxData(txData, txId);
+            transactionsDataProvider.pushNewTransactionToCache(tx);
+        } catch (e) {
+            improveAndRethrow(e, "actualizeLocalCachesWithNewTransactionData");
         }
     }
 }

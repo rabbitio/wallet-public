@@ -11,7 +11,7 @@ export default class InvoicesApi {
             const data = { walletId, invoiceUuid, encryptedInvoiceData };
             return await doApiCall(`${urlWithPrefix}/${serverEndpointEntity}`, "post", data, 201, errorMessage);
         } catch (e) {
-            improveAndRethrow(e, InvoicesApi.saveInvoice);
+            improveAndRethrow(e, "saveInvoice");
         }
     }
 
@@ -25,7 +25,7 @@ export default class InvoicesApi {
                 return [];
             }
 
-            improveAndRethrow(e, InvoicesApi.getInvoicesList);
+            improveAndRethrow(e, "getInvoicesList");
         }
     }
 
@@ -41,7 +41,7 @@ export default class InvoicesApi {
                 return null;
             }
 
-            improveAndRethrow(e, InvoicesApi.deleteInvoices);
+            improveAndRethrow(e, "deleteInvoices");
         }
     }
 }

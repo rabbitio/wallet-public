@@ -10,16 +10,17 @@ export class Coins {
         ETH: ethereum,
         USDTERC20: usdtErc20,
     };
+    static _keys = Object.keys(this.COINS);
 
     // Static initializer. Cannot use static {} as safari still doesn't support it
     static initializer = (() => this.COINS.USDTERC20.setFeeCoin(this.COINS.ETH) && true)();
 
     static getSupportedCoinsList() {
-        return Object.keys(this.COINS).map(ticker => this.COINS[ticker]);
+        return this._keys.map(ticker => this.COINS[ticker]);
     }
 
     static getSupportedCoinsTickers() {
-        return Object.keys(this.COINS);
+        return this._keys;
     }
 
     /**
@@ -27,7 +28,7 @@ export class Coins {
      * @return {Network[]}
      */
     static getSupportedNetworks() {
-        return Object.keys(this.COINS).map(ticker => getCurrentNetwork(this.COINS[ticker]));
+        return this._keys.map(ticker => getCurrentNetwork(this.COINS[ticker]));
     }
 
     /**

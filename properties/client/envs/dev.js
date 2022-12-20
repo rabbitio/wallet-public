@@ -22,3 +22,4 @@ export const RAMP_NETWORK_API_KEY = "38dzmcsoh4upgbjhvmjxh9egbh5678cxnxhc5whe";
 export const RAMP_WEBHOOK_STATUS_URL = "https://pacific-sierra-54547.herokuapp.com/webhook";
 export const RAMP_WIDGET_STAGING_URL = "https://ri-widget-staging.firebaseapp.com/";
 export const PUBLIC_LOGO_LINK = "https://rabbit.io/logo.svg";
+export const LOG_LEVEL = "trace"; // of "trace", "debug"

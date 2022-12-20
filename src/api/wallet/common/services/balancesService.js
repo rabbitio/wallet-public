@@ -8,14 +8,23 @@ import { CacheAndConcurrentRequestsResolver } from "../../../common/services/uti
 
 export class BalancesService {
     // TODO: [tests, moderate] add units for caching for existing tests
-    static _allBalancesResolver = new CacheAndConcurrentRequestsResolver("allBalances", 30000, 40, 1000);
-    static _summaryBalanceResolver = new CacheAndConcurrentRequestsResolver("summaryBalance", 30000, 40, 1000);
-    static _balancesCacheKey = "fb868f86-b7a4-4441-aae8-2b3997c17354";
+    static _allBalancesResolver = new CacheAndConcurrentRequestsResolver("allBalances", null, 40, 1000);
+    static _allBalancesLastUpdateTimestamps = new Map();
+    static _allBalancesTtl = 30000;
+    static _balancesCacheKey = wallet => (wallet?.coin?.ticker ?? "") + "_fb868f86-b7a4-4441-aae8-2b3997c17354";
+    static _summaryBalanceResolver = new CacheAndConcurrentRequestsResolver("summaryBalance", null, 40, 1000);
+    static _summaryBalanceLastUpdateTimestamp = 0;
+    static _summaryBalanceTtl = 30000;
     static _summaryBalanceCacheKey = "bdd4d228-e39b-42ea-9a67-3fee90f1a2fb";
 
-    static invalidateCaches() {
-        cache.invalidate(this._balancesCacheKey);
-        cache.invalidate(this._summaryBalanceCacheKey);
+    static invalidateCaches(wallets) {
+        if (wallets) {
+            wallets.map(wallet => cache.invalidate(this._balancesCacheKey(wallet)));
+            cache.invalidate(this._summaryBalanceCacheKey);
+        } else {
+            cache.invalidateContaining(this._balancesCacheKey());
+            cache.invalidate(this._summaryBalanceCacheKey);
+        }
     }
 
     /**
@@ -48,7 +57,8 @@ export class BalancesService {
             const cached = await this._summaryBalanceResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
                 this._summaryBalanceCacheKey
             );
-            if (cached) return cached;
+            const expirationTimestamp = this._summaryBalanceLastUpdateTimestamp + this._summaryBalanceTtl;
+            if (cached && Date.now() < expirationTimestamp) return cached;
 
             const wallets = Wallets.getWalletsForAllSupportedCoins();
             let [balances, currentFiatCurrencyData, coinsToFUSDRates, usdToFiatRates] = await Promise.all([
@@ -94,6 +104,7 @@ export class BalancesService {
             };
 
             this._summaryBalanceResolver.saveCachedData(this._summaryBalanceCacheKey, { ...result });
+            this._summaryBalanceLastUpdateTimestamp = Date.now();
 
             return result;
         } catch (e) {
@@ -106,36 +117,81 @@ export class BalancesService {
     // TODO: [tests, moderate] add units for caching for existing tests
     static async _getWalletsBalances(walletsList) {
         try {
-            const cached = await this._allBalancesResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
-                this._balancesCacheKey
+            const cached = await Promise.all(
+                walletsList.map(wallet =>
+                    this._allBalancesResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
+                        this._balancesCacheKey(wallet)
+                    )
+                )
             );
-            const cachedBalances = [];
-            const walletsAbsentInCache = walletsList.reduce((prev, wallet) => {
-                const walletIndexInCache = (cached?.walletsList ?? []).indexOf(wallet);
-                if (walletIndexInCache > -1) {
-                    cachedBalances.push(cached?.balances[walletIndexInCache]);
-                    return prev;
-                }
-
-                return [...prev, wallet];
-            }, []);
-
-            if (!cached || walletsAbsentInCache.length) {
-                const promises = walletsList.map(wallet => wallet.calculateBalance());
+            const walletsToRequestBalancesFor = walletsList.filter(
+                (wallet, index) =>
+                    cached[index] == null ||
+                    Date.now() > this._allBalancesLastUpdateTimestamps.get(wallet.coin.ticker) + this._allBalancesTtl
+            );
+            const actualizedBalances = [];
+            if (walletsToRequestBalancesFor.length) {
+                const promises = walletsToRequestBalancesFor.map(wallet => wallet.calculateBalance());
                 const result = await Promise.all(promises);
-                this._allBalancesResolver.saveCachedData(this._balancesCacheKey, {
-                    walletsList: walletsList,
-                    balances: result,
+                walletsToRequestBalancesFor.forEach((wallet, index) => {
+                    const dataItem = { wallet: wallet, balance: result[index] };
+                    this._allBalancesResolver.saveCachedData(this._balancesCacheKey(wallet), dataItem);
+                    this._allBalancesLastUpdateTimestamps.set(wallet.coin.ticker, Date.now());
+                    actualizedBalances.push(dataItem);
                 });
-
-                return result;
             }
 
-            return cachedBalances;
+            return walletsList.map(wallet => {
+                const actualized = actualizedBalances.find(item => item.wallet === wallet);
+                if (actualized) return actualized.balance;
+                return cached.find(item => item.wallet === wallet)?.balance;
+            });
         } catch (e) {
             improveAndRethrow(e, "_getWalletsBalances");
         } finally {
-            this._allBalancesResolver.markActiveCalculationAsFinished(this._balancesCacheKey);
+            walletsList.forEach(wallet =>
+                this._allBalancesResolver.markActiveCalculationAsFinished(this._balancesCacheKey(wallet))
+            );
+        }
+    }
+
+    /**
+     * Actualizes local balance caches with just sent transaction amount and fee. We do this to show the actual
+     * balance to user as soon as possible. Later this service will actualize balance from external services, but it
+     * can take some time.
+     *
+     * @param coin {Coin} coin the transaction sends
+     * @param txData {TxData} object with sent transaction details
+     * @param txId {string} hash of just sent transaction
+     */
+    static actualizeCachedBalancesAccordingToJustSentTransaction(coin, txData, txId) {
+        try {
+            const differentCoinFee = coin.doesUseDifferentCoinFee();
+            const amountCoins = +coin.atomsToCoinAmount(txData.amount + "");
+            const feeCoins = +(differentCoinFee ? coin.feeCoin : coin).atomsToCoinAmount(txData.fee + "");
+            const handleCached = (cached, coinAmount1, coinAmount2 = 0) => {
+                if (cached && cached.balance) {
+                    const reduce = +coinAmount1 + +coinAmount2 > +cached.balance ? 0 : +coinAmount1 + +coinAmount2;
+                    cached.balance = +cached.balance - reduce;
+                    return { isModified: true, data: cached };
+                }
+                return { isModified: false, data: cached };
+            };
+            this._allBalancesResolver.actualizeCachedData(
+                this._balancesCacheKey(Wallets.getWalletByCoin(coin)),
+                cached => handleCached(cached, amountCoins, differentCoinFee ? 0 : feeCoins)
+            );
+            this._allBalancesLastUpdateTimestamps.set(coin.ticker, Date.now());
+            if (differentCoinFee) {
+                this._allBalancesResolver.actualizeCachedData(
+                    this._balancesCacheKey(Wallets.getWalletByCoin(coin.feeCoin)),
+                    cached => handleCached(cached, feeCoins)
+                );
+                this._allBalancesLastUpdateTimestamps.set(coin.feeCoin.ticker, Date.now());
+            }
+            this._summaryBalanceResolver.invalidate(this._summaryBalanceCacheKey);
+        } catch (e) {
+            improveAndRethrow(e, "actualizeCachedBalancesAccordingToJustSentTransaction");
         }
     }
 }

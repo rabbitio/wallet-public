@@ -87,8 +87,8 @@ export default class AddressesDataListService {
             return {
                 addressesData: mapToProperReturnFormat(paginated),
                 isWholeList: paginated.length === sorted.length,
-                minAmount: getMinAmount(withAmounts),
-                maxAmount: getMaxAmount(withAmounts),
+                minAmount: getMinAmount(withFiatAmounts),
+                maxAmount: getMaxAmount(withFiatAmounts),
                 wholeListLength: allAddresses.length,
                 // coin: coin,
             };
@@ -220,12 +220,12 @@ function getOnlyFiltered(addressesList, filterBy) {
                             filterCriteria[2] !== undefined &&
                             typeof filterCriteria[1] === "number" &&
                             (filterCriteria[1] === -1 ||
-                                addressData.amountBtc == null ||
-                                addressData.amountBtc >= filterCriteria[1]) &&
+                                addressData.fiatAmount == null ||
+                                addressData.fiatAmount >= filterCriteria[1]) &&
                             typeof filterCriteria[2] === "number" &&
                             (filterCriteria[2] === -1 ||
-                                addressData.amountBtc == null ||
-                                addressData.amountBtc <= filterCriteria[2])
+                                addressData.fiatAmount == null ||
+                                addressData.fiatAmount <= filterCriteria[2])
                         );
                     case "datesRange":
                         return (
@@ -343,8 +343,8 @@ function getMinAmount(addressesList) {
     return (
         (addressesList &&
             addressesList.length &&
-            addressesList.reduce((min, current) => (+(current.amountBtc ?? 0) < +min.amountBtc ? current : min))
-                .amountBtc) ||
+            addressesList.reduce((min, current) => (+(current.fiatAmount ?? 0) < +min.fiatAmount ? current : min))
+                .fiatAmount) ||
         0
     );
 }
@@ -353,8 +353,8 @@ function getMaxAmount(addressesList) {
     return (
         (addressesList &&
             addressesList.length &&
-            addressesList.reduce((max, current) => (+(current.amountBtc ?? 0) > +max.amountBtc ? current : max))
-                .amountBtc) ||
+            addressesList.reduce((max, current) => (+(current.fiatAmount ?? 0) > +max.fiatAmount ? current : max))
+                .fiatAmount) ||
         0
     );
 }

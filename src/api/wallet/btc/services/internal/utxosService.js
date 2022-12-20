@@ -9,10 +9,16 @@ import AddressesDataApi from "../../../common/backend-api/addressesDataApi";
 import AddressesServiceInternal from "./addressesServiceInternal";
 import { improveAndRethrow } from "../../../../common/utils/errorUtils";
 import { Logger } from "../../../../support/services/internal/logs/logger";
+import { CacheAndConcurrentRequestsResolver } from "../../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
 
 export default class UtxosService {
-    static _cachedBalanceData = {};
-    static CACHE_LIFETIME_MS = 30 * 1000;
+    static _balanceCacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
+        "btc_utxosService",
+        30000,
+        65,
+        1000
+    );
+    static _balanceCacheId = "balances_03682d38-6c21-49d7-a1cf-c24a8ecfe3e7";
 
     /**
      * Retrieves a list of all UTXOs that can be used for new outgoing transaction creation
@@ -54,40 +60,38 @@ export default class UtxosService {
     static async calculateBalance(feeRate = null, forceCalculate = false) {
         const loggerSource = "calculateBalance";
         try {
-            if (
-                !this._cachedBalanceData?.balanceValues ||
-                Date.now() > (this._cachedBalanceData?.expiresAt || 0) ||
-                forceCalculate
-            ) {
-                const network = getCurrentNetwork();
-                const [allAddresses, indexes] = await Promise.all([
-                    AddressesServiceInternal.getAllUsedAddresses(),
-                    AddressesDataApi.getAddressesIndexes(getWalletId()),
-                ]);
-
-                const allUtxos = await getAllUTXOs(allAddresses.internal, allAddresses.external, network);
-
-                const utxosToString = utxos => utxos.map(utxo => utxo.toMiniString()).join("\n");
-                Logger.log(
-                    `Recalculating, all UTXOs: internal:\n${utxosToString(allUtxos.internal)}\n` +
-                        `external:\n${utxosToString(allUtxos.external)}`,
-                    loggerSource
-                );
-
-                const balanceValues = calculateBalanceByWalletData(getAccountsData(), allUtxos, indexes, network);
-                const dust = feeRate && calculateDustBalanceByWalletData(allUtxos, feeRate, network);
-                this._cachedBalanceData = {
-                    balanceValues: { ...balanceValues, dust: dust ?? null },
-                    expiresAt: Date.now() + this.CACHE_LIFETIME_MS,
-                };
-            } else {
-                Logger.log("Using cached balance", loggerSource);
+            const cached = await this._balanceCacheAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
+                this._balanceCacheId
+            );
+            if (cached) {
+                return cached;
             }
+            const network = getCurrentNetwork();
+            const [allAddresses, indexes] = await Promise.all([
+                AddressesServiceInternal.getAllUsedAddresses(),
+                AddressesDataApi.getAddressesIndexes(getWalletId()),
+            ]);
 
-            Logger.log(`Returning balance: ${JSON.stringify(this._cachedBalanceData.balanceValues)}`, loggerSource);
-            return { ...this._cachedBalanceData.balanceValues };
+            const allUtxos = await getAllUTXOs(allAddresses.internal, allAddresses.external, network);
+
+            const utxosToString = utxos => utxos.map(utxo => utxo.toMiniString()).join("\n");
+            Logger.log(
+                `Recalculating, all UTXOs: internal:\n${utxosToString(allUtxos.internal)}\n` +
+                    `external:\n${utxosToString(allUtxos.external)}`,
+                loggerSource
+            );
+
+            const balanceValues = calculateBalanceByWalletData(getAccountsData(), allUtxos, indexes, network);
+            const dust = feeRate && calculateDustBalanceByWalletData(allUtxos, feeRate, network);
+            const balanceValuesAndDust = { ...balanceValues, dust: dust ?? null };
+
+            this._balanceCacheAndRequestsResolver.saveCachedData(this._balanceCacheId, balanceValuesAndDust);
+            Logger.log(`Returning balance: ${JSON.stringify(balanceValuesAndDust)}`, loggerSource);
+            return balanceValuesAndDust;
         } catch (e) {
             improveAndRethrow(e, loggerSource);
+        } finally {
+            this._balanceCacheAndRequestsResolver.markActiveCalculationAsFinished(this._balanceCacheId);
         }
     }
 }

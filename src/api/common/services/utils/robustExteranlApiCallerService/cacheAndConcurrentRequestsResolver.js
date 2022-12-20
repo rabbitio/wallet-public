@@ -10,6 +10,12 @@ import { improveAndRethrow, logError } from "../../../utils/errorUtils";
  * TODO: [tests, critical] Massively used logic - add unit tests
  */
 export class CacheAndConcurrentRequestsResolver {
+    /**
+     * @param bio {string} unique identifier for the exact service
+     * @param cacheTtl {number|null} time to live for cache ms. 0 or null means the cache cannot expire (if you need to clean it externally)
+     * @param maxCallAttemptsToWaitForAlreadyRunningRequest {number} number of request allowed to do waiting for result before we fail the original request
+     * @param timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished {number} timeout ms for polling for a result
+     */
     constructor(
         bio,
         cacheTtl,
@@ -17,7 +23,7 @@ export class CacheAndConcurrentRequestsResolver {
         timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished = 1000
     ) {
         this._bio = bio;
-        this._cacheTtlMs = cacheTtl;
+        this._cacheTtlMs = cacheTtl ? cacheTtl : null;
         this._requestsManager = new ManagerOfRequestsToTheSameResource(
             bio,
             maxCallAttemptsToWaitForAlreadyRunningRequest,
@@ -44,10 +50,14 @@ export class CacheAndConcurrentRequestsResolver {
     }
 
     saveCachedData(cacheId, data, sessionDependentData = true) {
-        if (sessionDependentData) {
-            cache.putSessionDependentData(cacheId, data, this._cacheTtlMs);
-        } else {
-            cache.put(cacheId, data, this._cacheTtlMs);
+        try {
+            if (sessionDependentData) {
+                cache.putSessionDependentData(cacheId, data, this._cacheTtlMs);
+            } else {
+                cache.put(cacheId, data, this._cacheTtlMs);
+            }
+        } catch (e) {
+            improveAndRethrow(e, `${this._bio}.saveCachedData`);
         }
     }
 
@@ -56,6 +66,43 @@ export class CacheAndConcurrentRequestsResolver {
             this._requestsManager.finishActiveCalculation(cacheId);
         } catch (e) {
             improveAndRethrow(e, `${this._bio}.markActiveCalculationAsFinished`);
+        }
+    }
+
+    /**
+     * Actualized currently present cached data by key. Applies the provided function to the cached data.
+     *
+     * @param cacheId {string} id of cache entry
+     * @param synchronousCurrentCacheProcessor (function|null} synchronous function accepting cache entry. Should return
+     *        an object in following format:
+     *        {
+     *            isModified: boolean,
+     *            data: any
+     *        }
+     *        the flag signals whether data was changed during the processing or not
+     * @param [sessionDependent=true] {boolean} whether to mark the cache entry as session-dependent
+     * @param [finishActiveCalculation=false] {boolean} whether to finish active calculations
+     */
+    actualizeCachedData(
+        cacheId,
+        synchronousCurrentCacheProcessor,
+        sessionDependent = true,
+        finishActiveCalculation = false
+    ) {
+        try {
+            const cached = cache.get(cacheId);
+            const result = synchronousCurrentCacheProcessor(cached);
+            if (sessionDependent) {
+                cache.putSessionDependentData(cacheId, result?.data, this._cacheTtlMs);
+            } else {
+                cache.put(cacheId, result?.data, this._cacheTtlMs);
+            }
+
+            if (finishActiveCalculation && result?.isModified) {
+                this._requestsManager.finishActiveCalculation(cacheId);
+            }
+        } catch (e) {
+            improveAndRethrow(e, `${this._bio}.actualizeCachedData`);
         }
     }
 

@@ -95,6 +95,12 @@ export function saveCurrentNetwork(newNetwork) {
     }
 }
 
+/**
+ * Retrieves saved network or saves network and returns according to application properties
+ *
+ * @param coin {Coin} coin to get network for
+ * @returns {Network} network in given coin
+ */
 export function getCurrentNetwork(coin = Coins.COINS.BTC) {
     let networkType = storageProvider.getItem("network");
     if (!networkType) {

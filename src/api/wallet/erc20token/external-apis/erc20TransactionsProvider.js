@@ -1,12 +1,13 @@
 import { BigNumber } from "ethers";
 
 import { ETH_PR_K_ETHSCAN } from "../../../../properties";
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
+import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
 
 /**
+ * TODO: [feature, critical] check for pagination. task_id=b10ff856bea04ebca54a1d284d24196d
  * Params for this provider's endpoint are:
  *   params[0] {Coin} coin to get txs for
  *   params[1] {string} address to get txs for
@@ -76,10 +77,11 @@ export class Erc20TransactionsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "erc20TransactionsProvider",
         [new EtherScanErc20TransactionsProvider("https://api.etherscan.io/api", "get", 20000, 3, 100)],
-        12000,
+        30000,
         20,
         1000,
-        logError
+        false,
+        mergeCachedErc20TransactionsWithNew
     );
 
     /**
@@ -93,15 +95,84 @@ export class Erc20TransactionsProvider {
     static async getErc20TransactionsByAddress(coin, address, cancelProcessor = null) {
         try {
             return await this._provider.callExternalAPICached(
-                [coin, address, 1],
+                this._calculateParamsArray(coin, address),
                 16000,
                 cancelProcessor?.getToken(),
                 2,
-                () => address
+                hashFunctionForParams
             );
         } catch (e) {
             improveAndRethrow(e, "getErc20TransactionsByAddress");
         }
+    }
+
+    /**
+     * Puts the just sent transaction by given data to cache to force it to appear in the app as fast as possible.
+     *
+     * @param coin {Coin} sent coin
+     * @param address {string} the sending address
+     * @param txData {TxData} the TxData object used to send a transaction
+     * @param txId {string} the id of transaction
+     */
+    static actualizeCacheWithNewTransactionSentFromAddress(coin, address, txData, txId) {
+        try {
+            const txForCache = new TransactionsHistoryItem(
+                txId,
+                coin.ticker,
+                coin.tickerPrintable,
+                "out",
+                txData.amount,
+                0,
+                Date.now(),
+                txData.address,
+                txData.fee,
+                null,
+                false,
+                address === txData.address
+            );
+            const cacheProcessor = currentCache => {
+                try {
+                    currentCache.push(txForCache);
+                    return {
+                        data: currentCache,
+                        isModified: true,
+                    };
+                } catch (e) {
+                    improveAndRethrow(e, "cacheActualizationHandler for erc20TransactionsProvider");
+                }
+            };
+            this._provider.actualizeCachedData(
+                this._calculateParamsArray(coin, address),
+                cacheProcessor,
+                hashFunctionForParams
+            );
+        } catch (e) {
+            improveAndRethrow(e, "actualizeCacheWithNewTransactionSentFromAddress");
+        }
+    }
+
+    static _calculateParamsArray(coin, address) {
+        return [coin, address, 1];
+    }
+}
+
+const hashFunctionForParams = paramsArray => `${paramsArray[0]?.ticker}_${paramsArray[1]}`;
+
+function mergeCachedErc20TransactionsWithNew(cachedData, newData) {
+    try {
+        if (cachedData?.length && newData?.length) {
+            const merged = [...newData];
+            // Add cached transactions missing in the returned transactions list. This is useful when we push just sent transaction to cache
+            cachedData.forEach(cachedTx => {
+                if (!newData.find(newTx => newTx.hash === cachedTx.hash)) {
+                    merged.push(cachedTx);
+                }
+            });
+            return merged;
+        }
+        return newData || cachedData;
+    } catch (e) {
+        improveAndRethrow(e, "mergeCachedErc20TransactionsWithNew");
     }
 }
 
@@ -111,7 +182,6 @@ export function createErc20TransactionsProviderForTesting(params) {
         [new EtherScanErc20TransactionsProvider(...params)],
         10000,
         20,
-        1000,
-        logError
+        1000
     );
 }

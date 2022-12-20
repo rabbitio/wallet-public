@@ -12,14 +12,14 @@ export function improveAndRethrow(e, settingFunction, additionalMessage) {
 }
 
 function improvedErrorMessage(e, settingFunction, additionalMessage) {
-    let message = `\nFunction call ${settingFunction ? settingFunction.name || settingFunction : ""} failed. `;
+    let message = `\nFunction call ${settingFunction ?? ""} failed. `;
     e && e.message && (message += `Error message: ${e.message}. `);
     additionalMessage && (message += `${additionalMessage} `);
 
     return message;
 }
 
-export function logError(e, settingFunction, additionalMessage, onlyToConsole = false) {
+export function logError(e, settingFunction, additionalMessage = "", onlyToConsole = false) {
     let message = improvedErrorMessage(e, settingFunction, additionalMessage);
     const specificErrorInfo = getSpecificInfoFromError(e);
     specificErrorInfo && (message += specificErrorInfo);

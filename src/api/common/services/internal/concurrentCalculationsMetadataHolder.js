@@ -1,6 +1,7 @@
 import { v4 } from "uuid";
 import { logError } from "../../utils/errorUtils";
 import { IS_TESTING } from "../../../../properties";
+import { ConsoleLogger } from "../../../support/services/internal/logs/consoleLogger";
 
 class ConcurrentCalculationsMetadataHolder {
     constructor() {
@@ -37,11 +38,8 @@ class ConcurrentCalculationsMetadataHolder {
                 calculation.isFiled = isFailed;
             }
 
-            // eslint-disable-next-line no-console
-            console.log(
-                `CALC END: ${domain}.${(calculation?.uuid ?? "").slice(0, 7)} - ${(calculation?.startTimestamp ?? 0) -
-                    (calculation?.endTimestamp ?? 0)} ms`
-            );
+            const elapsed = (((calculation?.endTimestamp ?? 0) - (calculation?.startTimestamp ?? 0)) / 1000).toFixed(1);
+            ConsoleLogger.trace(`${elapsed} ms: ${domain}.${(calculation?.uuid ?? "").slice(0, 7)}`);
 
             return calculation;
         } catch (e) {
@@ -66,9 +64,8 @@ class ConcurrentCalculationsMetadataHolder {
             .map(domain => this._calculations[domain].map(c => ({ ...c, domain })))
             .flat()
             .filter(c => c.endTimestamp === null && Date.now() - c.startTimestamp > waitingLastsMs);
-        // eslint-disable-next-line no-console
-        console.log(
-            `CALCULATIONS WAITING more than ${waitingLastsMs} ms:\n` +
+        ConsoleLogger.trace(
+            `Calculations waiting more than ${(waitingLastsMs / 1000).toFixed(1)}s:\n` +
                 calculations.map(c => `${c.domain}.${c.uuid.slice(0, 8)}: ${Date.now() - c.startTimestamp}\n`)
         );
     }
