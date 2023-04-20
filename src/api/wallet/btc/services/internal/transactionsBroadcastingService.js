@@ -7,9 +7,9 @@ import { Logger } from "../../../../support/services/internal/logs/logger";
  * broadcasts it via Explorer's API.
  *
  * TODO: [refactoring, low] Pass hex string here, not a bitcoinjs object
- * @param transaction - bitcoinjs transaction object to be broadcasted
- * @param network - network to broadcast transaction to
- * @returns Promise resolving to transaction ID string
+ * @param transaction {object} bitcoinjs transaction object to be published
+ * @param network {Network} to broadcast transaction to
+ * @returns {Promise<string>} transaction ID string
  * @throws wrapper-error with specific message if any error is caught
  */
 export async function broadcastTransaction(transaction, network) {

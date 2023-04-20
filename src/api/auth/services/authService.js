@@ -17,20 +17,19 @@ import {
     saveIsPassphraseUsed,
     saveWalletId,
 } from "../../common/services/internal/storage";
-import { improveAndRethrow } from "../../common/utils/errorUtils";
+import { improveAndRethrow, logError } from "../../common/utils/errorUtils";
 import { SupportedSchemes } from "../../wallet/btc/lib/addresses-schemes";
 import { AccountsData } from "../../wallet/btc/lib/accounts";
 import {
     authenticateAndCreateSession,
     changePasswordHash,
     deleteWallet,
-    isCurrentClientSessionValidOnServer,
     isPassphraseHashCorrespondToWallet,
     isPasswordHashCorrespondToWallet,
     logoutWallet,
     saveWalletOnServerAndCreateSession,
 } from "../backend-api/walletsApi";
-import { ApiCallWrongResponseError } from "../../common/backend-api/utils";
+import { ApiCallWrongResponseError, SESSION_COOKIE_NAME } from "../../common/backend-api/utils";
 import AddressesService from "../../wallet/btc/services/addressesService";
 import ClientIpHashService from "./internal/clientIpHashService";
 import {
@@ -43,8 +42,9 @@ import {
     WALLET_IMPORTED_EVENT,
 } from "../../common/adapters/eventbus";
 import { WalletDataApi } from "../../wallet/common/backend-api/walletDataApi";
-import { ImportWalletService } from "../../wallet/btc/services/importWalletService";
+import { PreferencesService } from "../../wallet/common/services/preferencesService";
 import { Coins } from "../../wallet/coins";
+import { ImportWalletService } from "../../wallet/common/services/importWalletService";
 
 export const ALLOWED_MNEMONIC_LENGTHS = [12, 15, 18, 21, 24];
 
@@ -219,6 +219,7 @@ export async function loginIntoWalletByMnemonicAndCreateSession(mnemonic, passwo
  * Performs login into existing wallet by given mnemonic and password.
  * If login succeeds saves accounts data of this wallet, encrypted mnemonic and walletId to storage for further use.
  *
+ * TODO: [refactoring, high] use response class model for this
  * Returning promise is resolved to one of objects:
  *   1. { result: false, reason: "walletId" }
  *      - wallet id was not found
@@ -230,10 +231,10 @@ export async function loginIntoWalletByMnemonicAndCreateSession(mnemonic, passwo
  *      - you have lost your last attempt to login due to wrong password, wait lockPeriodMs and try again
  *   5. { result: false, reason: "forbidden_ip" }
  *      - client's ip is not whitelisted
- *   6. { result: true, sessionId: string }
+ *   6. { result: true, sessionId: string, walletData: UserDataAndSettings }
  *      - successful login
  *   7. { result: false, reason: "passphrase" }
- *      - failed to login due to wrong passphrase
+ *      - failed to sign in due to wrong passphrase
  */
 async function loginIntoWalletAndCreateSession(mnemonic, passphrase, password, walletId) {
     const loggerSource = "loginIntoWalletAndCreateSession";
@@ -254,6 +255,7 @@ async function loginIntoWalletAndCreateSession(mnemonic, passphrase, password, w
         saveEncryptedWalletCredentials(encrypt(mnemonic, password), encrypt(passphrase, password));
         saveWalletId(mnemonicToWalletId(mnemonic));
         saveDataPassword(mnemonicToDataPassword(mnemonic));
+        PreferencesService.cacheWalletData(authResult.walletData);
         isJustLoggedOutFlag = false;
         resetIntervalLookingForAuthentication();
         await ClientIpHashService.provideIpHashStored();
@@ -315,7 +317,7 @@ export async function importWalletByMnemonic(mnemonic, password, passphrase = ""
 
         Logger.log("New wallet successfully saved during the import", loggerSource);
 
-        await ImportWalletService.grabWalletHistoricalDataAndSave();
+        await ImportWalletService.safelyRecogniseTokensAndScanBtcWhenImporting();
 
         EventBus.dispatch(WALLET_IMPORTED_EVENT);
 
@@ -347,6 +349,8 @@ export async function saveNewWalletByMnemonicOnServerAndCreateSession(mnemonic, 
 
             return result;
         }
+
+        EventBus.dispatch(SIGNED_UP_EVENT);
 
         Logger.log("New wallet saved on server, returning true", loggerSource);
         return { result: true };
@@ -390,8 +394,6 @@ async function saveNewWalletAndProvideLocalData(mnemonic, passphrase = "", passw
 
         Logger.log("IP hash provided", loggerSource);
 
-        EventBus.dispatch(SIGNED_UP_EVENT);
-
         return accountsData;
     } catch (e) {
         if (e instanceof ApiCallWrongResponseError && e.isWalletExistError()) {
@@ -424,6 +426,7 @@ export async function doLogout() {
         clearAccountsData();
         clearDataPassword();
         setIntervalLookingForAuthentication();
+        Cookie.remove(SESSION_COOKIE_NAME);
         EventBus.dispatch(LOGGED_OUT_EVENT);
         isJustLoggedOutFlag = true;
     } catch (e) {
@@ -446,6 +449,7 @@ export async function deleteWalletByCurrentSession(password) {
             Logger.log("Wallet was removed", loggerSource);
 
             clearStorage();
+            Cookie.remove(SESSION_COOKIE_NAME);
             isJustLoggedOutFlag = true;
             EventBus.dispatch(WALLET_DELETED_EVENT);
             EventBus.dispatch(LOGGED_OUT_EVENT);
@@ -472,7 +476,7 @@ export async function deleteWalletByCurrentSession(password) {
  */
 export function isThereClientSession() {
     try {
-        return (Cookie.get("sessionId") && true) || false;
+        return (Cookie.get(SESSION_COOKIE_NAME) && true) || false;
     } catch (e) {
         improveAndRethrow(e, "isThereClientSession");
     }
@@ -481,15 +485,22 @@ export function isThereClientSession() {
 /**
  * Checks current client session validity on server.
  *
- * @return Promise resolving to true if session is valid and to false otherwise
+ * @param [booleanValueToReturnInsteadOfError=null] {boolean|null}
+ * @return {Promise<boolean>} true if session is valid and to false otherwise or passed value in case of error if is passed
  */
-export async function isCurrentSessionValid() {
+export async function isCurrentSessionValid(booleanValueToReturnInsteadOfError = null) {
     try {
-        const result = await isCurrentClientSessionValidOnServer(getWalletId());
+        const result = await WalletDataApi.getAccountData(getWalletId());
         !result && setIntervalLookingForAuthentication();
 
-        return result;
+        if (result) {
+            PreferencesService.cacheWalletData(result);
+        }
+        return !!result;
     } catch (e) {
+        if (typeof booleanValueToReturnInsteadOfError === "boolean") {
+            return booleanValueToReturnInsteadOfError;
+        }
         improveAndRethrow(e, "isCurrentSessionValid");
     }
 }
@@ -527,6 +538,7 @@ export async function changePassword(oldPassword, newPassword) {
             const { encryptedMnemonic, encryptedPassphrase } = getEncryptedWalletCredentials();
             const reencryptedMnemonic = encrypt(decrypt(encryptedMnemonic, oldPassword), newPassword);
             const reencryptedPassphrase = encrypt(decrypt(encryptedPassphrase, oldPassword), newPassword);
+            PreferencesService.cacheLastPasswordChangeTimestamp(Date.now()); // TODO: [feature, moderate] make this timestamp a wallet setting for easier management
             saveEncryptedWalletCredentials(reencryptedMnemonic, reencryptedPassphrase);
         }
         Logger.log(`Password changed. Returning: ${JSON.stringify(result)}`, loggerSource);
@@ -534,24 +546,6 @@ export async function changePassword(oldPassword, newPassword) {
         return result;
     } catch (e) {
         improveAndRethrow(e, loggerSource);
-    }
-}
-
-/**
- * Retrieves las password change date
- *
- * @return Promise resolving to Date
- */
-export async function getLastPasswordChangeDate() {
-    try {
-        const data = await WalletDataApi.getWalletData(getWalletId());
-        if (data?.lastPasswordChangeDate) {
-            return data.lastPasswordChangeDate;
-        }
-
-        throw new Error("Failed to get last password change date.");
-    } catch (e) {
-        improveAndRethrow(e, "getLastPasswordChangeDate");
     }
 }
 
@@ -568,13 +562,18 @@ export function isJustLoggedOut() {
 
 let checkAuthenticationIntervalId = null;
 function setIntervalLookingForAuthentication() {
+    // TODO: [refactoring, moderate] looks like we can use setTimeout here
     checkAuthenticationIntervalId && clearInterval(checkAuthenticationIntervalId);
     checkAuthenticationIntervalId = setInterval(async () => {
-        if (await isCurrentSessionValid()) {
-            EventBus.dispatch(AUTHENTICATION_DISCOVERED_EVENT);
-            checkAuthenticationIntervalId = null;
+        try {
+            if (await isCurrentSessionValid()) {
+                EventBus.dispatch(AUTHENTICATION_DISCOVERED_EVENT);
+                checkAuthenticationIntervalId = null;
+            }
+        } catch (e) {
+            logError(e, "checkAuthenticationInterval");
         }
-    }, 5000);
+    }, 30000);
 }
 
 function resetIntervalLookingForAuthentication() {

@@ -5,9 +5,11 @@ import { ETH_PR_K } from "../../../../properties";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
 import { Coins } from "../../coins";
-import { EthKeys } from "../../eth/lib/ethKeys";
+import { KeysBip44 } from "../../common/lib/keysBip44";
 import { Logger } from "../../../support/services/internal/logs/logger";
 import { Erc20transactionUtils } from "../lib/erc20transactionUtils";
+import { FeeEstimationUtils } from "../../common/utils/feeEstimationUtils";
+import { Coin } from "../../common/models/coin";
 
 class Erc20TokenTransactionsDataProvider {
     constructor(coin) {
@@ -23,7 +25,7 @@ class Erc20TokenTransactionsDataProvider {
     // TODO: [tests, critical] docs, tests
     _createRwContract(mnemonic, passphrase, network) {
         try {
-            const { privateKey } = EthKeys.generateKeysForAccountAddressByWalletCredentials(
+            const { privateKey } = KeysBip44.generateKeysForAccountAddressByWalletCredentials(
                 mnemonic,
                 passphrase,
                 network
@@ -32,18 +34,6 @@ class Erc20TokenTransactionsDataProvider {
             return new ethers.Contract(this.tokenAddress, erc20abi, wallet);
         } catch (e) {
             improveAndRethrow(e, "createRWContract");
-        }
-    }
-    /**
-     * Returns balance for this token and given address
-     * @param accountAddress {string} token address to get the balance for
-     * @returns {Promise<string>} balance string in coin's atoms
-     */
-    async getBalanceByAccountAddress(accountAddress) {
-        try {
-            return (await this._contract.balanceOf(accountAddress)).toString();
-        } catch (e) {
-            improveAndRethrow(e, "getBalanceByAccountAddress");
         }
     }
 
@@ -103,15 +93,9 @@ class Erc20TokenTransactionsDataProvider {
                 gasLimitHex = await EthQueryAdapter.query(providerUrl, "estimateGas", [transactionData]);
             } catch (e) {
                 logError(e, "estimateGasForTransfer");
-                /**
-                 * Estimation can fail if there is not enough ETH on the "sender"'s account.
-                 * So here we are trying to estimate using the hardcoded wallet having ETH for fee estimation.
-                 * Find its details in project's credentials database. This can provide not so accurate estimation, but
-                 * it is better than nothing.
-                 * NOTE: this hardcoded account should have at least sending USDT amount and amount to cover max gas.
-                 * That means for rare cases of high gas prices you need to have some significant amount like 50-100 USD equialent of ETH.
-                 */
-                transactionData.from = "0x71538cae72716738f59dbedcce3dda3a183de8aa";
+                transactionData.from = FeeEstimationUtils.getWalletAddressToUseAsFromAddressForTokenSendingEstimation(
+                    Coin.PROTOCOLS.ERC20
+                );
                 gasLimitHex = await EthQueryAdapter.query(providerUrl, "estimateGas", [transactionData]);
             }
 

@@ -1,112 +1,37 @@
 import axios from "axios";
 
-import { rpsEnsurer } from "./rpsEnsurer";
-import { getDomainWithoutSubdomains, postponeExecution, safeStringify } from "../../../utils/browserUtils";
+import { postponeExecution, safeStringify } from "../../../utils/browserUtils";
 import { improveAndRethrow, logError } from "../../../utils/errorUtils";
 import { externalServicesStatsCollector } from "./externalServicesStatsCollector";
-import { ExternalApiProvider } from "./externalApiProvider";
 import { concurrentCalculationsMetadataHolder } from "../../internal/concurrentCalculationsMetadataHolder";
 
 /**
- * TODO: [refactoring, critical] update backend copy of this service
+ * TODO: [refactoring, critical] update backend copy of this service. Also there is a task to extract this
+ *                               service and other related to it stuff to dedicated npm package task_id=b008ee5e4a3f42c08c73831c4bb3db4e
  *
  * Template service needed to avoid duplication of the same logic when we need to call
  * external APIs to retrieve some data. The idea is to use several API providers to retrieve the same data. It helps to
  * improve the reliability of a data retrieval.
- *
- * You need to instantiate it by passing the set of parameters. Major is the array of providers with their related
- * parameters and specific functions. See the details below.
  */
 export default class RobustExternalAPICallerService {
     /**
-     * @param bio - service name for logging
-     * @param providersData - Array of objects of following format:
-     *     {
-     *         endpoint: URL string. Note that you can add parts and parameters to it inside your implementation of
-     *                   composeQueryString
-     *         httpMethod: one of "get", "post", "put", "delete", "patch" or an array of these values. Array is used
-     *                     when you need to do several sub-requests for the one retrieval. Like when a provider has
-     *                     separate endpoints for confirmed and unconfirmed transactions. Just add the sequence of
-     *                     methods like sequence of calls. E.g. if you need to do two "get" requests and one "post" to
-     *                     get all the data the array should be ["get", "get", "post"]
-     *         composeQueryString: {function<String>(Array<parameter>)} function accepting array of values for query
-     *                             parameters and composing query string internally.
-     *                             When using an array of http methods this parameter CAN contain an array of
-     *                             functions for each request method. Or the same function weill be used for each sub-request
-     *         changeQueryParametersForPageNumber: {function<Array<any>>(Array<any>, Object, number)} optional function changing
-     *                                             query parameters according to given page number. Params are:
-     *                                             0 - an array of request parameters
-     *                                             1 - a response for previous page
-     *                                             2 - previous page number
-     *
-     *                                             Implement this function if the API has pagination.
-     *                                             If the request contains of sub-requests then you can add an array
-     *                                             of such functions for each sub-request. Otherwise, the only function
-     *                                             will be used for all sub-request.
-     *         checkWhetherResponseIsForLastPage: {function<boolean>(Object, Object, number)} optional function checking
-     *                                             whether a given response indicates that the last page of data was
-     *                                             returned. Params are:
-     *                                             0 - an array of request parameters
-     *                                             1 - a response for previous page
-     *                                             2 - previous page number
-     *
-     *                                             Implement this function if the API has pagination.
-     *                                             If the request contains of sub-requests then you can add an array
-     *                                             of such functions for each sub-request. Otherwise, the only function
-     *                                             will be used for all sub-request.
-     *         getDataByResponse: {function<any>(Object, Array)>} function accepting response object and params array
-     *                             if present and extracting required data from it. Returns null of there is no data.
-     *                             The exact return type is up to dedicated service instance
-     *         composeBody: {function<>(Array<parameter>)}. Optional function for "post", "put", "patch" methods if you
-     *                      need to add a body to request
-     *         RPS: number of requests per second allowed by provider. Note that we can use lower RPS when
-     *              an API abusing is detected (optional)
-     *         timeout: custom timeout for HTTP requests to this provider (optional)
-     *     }
-     *
-     *     1. When using sub-requests feature you can also add the arrays of functions for the following provider methods:
-     *        - "composeQueryString"
-     *        - "changeQueryParametersForPageNumber"
-     *        - "checkWhetherResponseIsForLastPage"
-     *        - "getDataByResponse" TODO: not implemented yet
-     *        - "composeBody" TODO: not implemented yet
-     *        Using arrays is up to you - if the same method can be used per each sub-request then just set the method
-     *        as a value for the parameter.
-     *     2. If the endpoint of dedicated provider has pagination then you should customize the behavior using
-     *        "changeQueryParametersForPageNumber", "checkWhetherResponseIsForLastPage"
-     *     3. We perform RPS counting all over the App to avoid blocking our clients due to abuses of the providers.
-     *     4. Arrow functions are not allowed as the values for properties
-     * @param logger - function to be used for logging
+     * @param bio {string} service name for logging
+     * @param providersData {ExternalApiProvider[]} array of providers
+     * @param [logger] {function} function to be used for logging
      */
     constructor(bio, providersData, logger = logError) {
         providersData.forEach(provider => {
-            if (
-                (!provider.endpoint && provider.endpoint !== "") ||
-                !provider.httpMethod ||
-                !provider.getDataByResponse ||
-                !provider.composeQueryString
-            ) {
+            if ((!provider.endpoint && provider.endpoint !== "") || !provider.httpMethod) {
                 throw new Error(`Wrong format of providers data for: ${JSON.stringify(provider)}`);
             }
         });
 
         // We add niceFactor - just number to order the providers array by. It is helpful to call
         // less robust APIs only if more robust fails
-        if (providersData[0] instanceof ExternalApiProvider) {
-            this.providers = providersData;
-            providersData.forEach(provider => provider.resetNiceFactor());
-        } else {
-            // TODO: [refactoring, moderate] Change when migrating all the providers to ExternalApiProvider
-            this.providers = providersData.map(provider => {
-                return {
-                    ...provider,
-                    niceFactor: 1,
-                };
-            });
-        }
+        this.providers = providersData;
+        providersData.forEach(provider => provider.resetNiceFactor());
         this.bio = bio;
         this._logger = logError;
-        // TODO: add a check that ether all providers has RPS or no one
     }
 
     static defaultRPSFactor = 1;
@@ -132,7 +57,7 @@ export default class RobustExternalAPICallerService {
         doNotFailForNowData = false
     ) {
         let result;
-        const calculationUUID = concurrentCalculationsMetadataHolder.startCalculation(this.bio);
+        const calculationUuid = concurrentCalculationsMetadataHolder.startCalculation(this.bio);
 
         try {
             for (let i = 0; (i < attemptsCount || result?.shouldBeForceRetried) && result?.data == null; ++i) {
@@ -147,10 +72,16 @@ export default class RobustExternalAPICallerService {
 
                 try {
                     if (i === 0 && !result?.shouldBeForceRetried) {
-                        result = await this._performCallAttempt(parametersValues, timeoutMS, cancelToken, rpsFactor);
+                        result = await this._performCallAttempt(
+                            parametersValues,
+                            timeoutMS,
+                            cancelToken,
+                            rpsFactor,
+                            doNotFailForNowData
+                        );
                     } else {
-                        const maxRPS = Math.max(...this.providers.map(provider => provider.RPS ?? 0));
-                        const waitingTimeMS = maxRPS ? 1000 / (maxRPS / rpsFactor) : 0;
+                        const maxRps = Math.max(...this.providers.map(provider => provider.getRps() ?? 0));
+                        const waitingTimeMs = maxRps ? 1000 / (maxRps / rpsFactor) : 0;
 
                         result = await new Promise((resolve, reject) => {
                             setTimeout(async () => {
@@ -160,20 +91,21 @@ export default class RobustExternalAPICallerService {
                                             parametersValues,
                                             timeoutMS,
                                             cancelToken,
-                                            rpsFactor
+                                            rpsFactor,
+                                            doNotFailForNowData
                                         )
                                     );
                                 } catch (e) {
                                     reject(e);
                                 }
-                            }, waitingTimeMS);
+                            }, waitingTimeMs);
                         });
                     }
                     if (result.errors?.length) {
                         const errors = result.errors;
                         this._logger(
                             new Error(
-                                `Failed at attempt ${i}. ${errors.length} errors. Messages: ${JSON.stringify(
+                                `Failed at attempt ${i}. ${errors.length} errors. Messages: ${safeStringify(
                                     errors.map(error => error.message)
                                 )}: ${safeStringify(errors)}.`
                             ),
@@ -188,6 +120,7 @@ export default class RobustExternalAPICallerService {
             }
 
             if (result?.data == null) {
+                // TODO: [feature, moderate] looks like we should not fail for null data as it is strange - the provider will fail when processing data internally
                 const error = new Error(
                     `Failed to retrieve data. It means all attempts have been failed. DEV: add more attempts to this data retrieval`
                 );
@@ -202,89 +135,81 @@ export default class RobustExternalAPICallerService {
         } catch (e) {
             improveAndRethrow(e, `${this.bio}.callExternalAPI`);
         } finally {
-            concurrentCalculationsMetadataHolder.endCalculation(this.bio, calculationUUID);
+            concurrentCalculationsMetadataHolder.endCalculation(this.bio, calculationUuid);
         }
     }
 
-    async _performCallAttempt(parametersValues, timeoutMS, cancelToken, rpsFactor, id) {
+    async _performCallAttempt(parametersValues, timeoutMS, cancelToken, rpsFactor, doNotFailForNowData) {
         const providers = this._reorderProvidersByNiceFactor();
         let data = undefined,
             providerIndex = 0,
-            countOfRequestsDeclinedByRPS = 0,
+            countOfRequestsDeclinedByRps = 0,
             errors = [];
         while (!data && providerIndex < providers.length) {
             let provider = providers[providerIndex];
-            const domain = getDomainWithoutSubdomains(provider.endpoint);
-            if (provider.RPS && rpsEnsurer.isRPSExceeded(domain)) {
+            if (provider.isRpsExceeded()) {
                 /**
                  * Current provider's RPS is exceeded, so we try next provider. Also, we count such cases to make
                  * a decision about the force-retry need.
                  */
                 ++providerIndex;
-                ++countOfRequestsDeclinedByRPS;
+                ++countOfRequestsDeclinedByRps;
                 continue;
             }
 
             try {
-                const axiosConfig = { ...(cancelToken ? { cancelToken } : {}), timeout: provider.timeout || timeoutMS };
+                const axiosConfig = {
+                    ...(cancelToken ? { cancelToken } : {}),
+                    timeout: provider.timeout || timeoutMS,
+                    headers: provider.specificHeaders ?? {},
+                };
                 const httpMethods = Array.isArray(provider.httpMethod) ? provider.httpMethod : [provider.httpMethod];
                 const iterationsData = [];
                 for (let subRequestIndex = 0; subRequestIndex < httpMethods.length; ++subRequestIndex) {
-                    const queryStringComposer = Array.isArray(provider.composeQueryString)
-                        ? provider.composeQueryString[subRequestIndex] // TODO: [refactoring, moderate] Change when migrating all the providers to ExternalApiProvider
-                        : provider.composeQueryString;
-                    const query = queryStringComposer.bind(provider)(parametersValues, subRequestIndex);
+                    const query = provider.composeQueryString(parametersValues, subRequestIndex);
                     const endpoint = `${provider.endpoint}${query}`;
                     const axiosParams = [endpoint, axiosConfig];
                     if (["post", "put", "patch"].find(method => method === httpMethods[subRequestIndex])) {
-                        const body = provider.composeBody
-                            ? provider.composeBody(parametersValues, subRequestIndex)
-                            : null;
+                        const body = provider.composeBody(parametersValues, subRequestIndex) ?? null;
                         axiosParams.splice(1, 0, body);
                     }
 
                     let pageNumber = 0;
                     const responsesForPages = [];
-                    let hasNextPage =
-                        (provider.doesSupportPagination && provider.doesSupportPagination()) ||
-                        provider.checkWhetherResponseIsForLastPage != null; // TODO: [refactoring, moderate] Change when migrating all the providers to ExternalApiProvider
+                    let hasNextPage = provider.doesSupportPagination();
                     do {
                         if (subRequestIndex === 0 && pageNumber === 0) {
-                            rpsEnsurer.actualizeLastCalledTimestamp(domain, provider.RPS);
+                            provider.actualizeLastCalledTimestamp();
                             responsesForPages[pageNumber] = await axios[httpMethods[subRequestIndex]](...axiosParams);
-                            externalServicesStatsCollector.externalServiceCalledWithoutError(provider.endpoint);
+                            externalServicesStatsCollector.externalServiceCalledWithoutError(provider.getApiGroupId());
                         } else {
                             if (pageNumber > 0) {
-                                let changer = provider.changeQueryParametersForPageNumber;
-                                changer = Array.isArray(changer) ? changer[subRequestIndex] : changer; // TODO: [refactoring, moderate] Change when migrating all the providers to ExternalApiProvider
-                                const actualizedParams = changer.bind(provider)(
+                                const actualizedParams = provider.changeQueryParametersForPageNumber(
                                     parametersValues,
                                     responsesForPages[pageNumber - 1],
                                     pageNumber,
                                     subRequestIndex
                                 );
-                                const query = queryStringComposer.bind(provider)(actualizedParams);
+                                const query = provider.composeQueryString(actualizedParams, subRequestIndex);
                                 axiosParams[0] = `${provider.endpoint}${query}`;
                             }
                             /**
-                             * For requests starting from second one we postpone each request to not exceed RPS
+                             * For second and more request we postpone each request to not exceed RPS
                              * of current provider. We use rpsFactor to dynamically increase the rps to avoid
                              * too frequent calls if we continue failing to retrieve the data due to RPS exceeding.
                              * TODO: [dev] test RPS factor logic (units or integration)
                              */
 
-                            const waitingTimeMS = provider.RPS ? 1000 / (provider.RPS / rpsFactor) : 0;
+                            const waitingTimeMS = provider.getRps() ? 1000 / (provider.getRps() / rpsFactor) : 0;
 
                             responsesForPages[pageNumber] = await postponeExecution(async () => {
-                                rpsEnsurer.actualizeLastCalledTimestamp(domain, provider.RPS);
+                                provider.actualizeLastCalledTimestamp();
                                 return await axios[httpMethods[subRequestIndex]](...axiosParams);
                             }, waitingTimeMS);
                         }
 
                         if (hasNextPage) {
-                            let checker = provider.checkWhetherResponseIsForLastPage;
-                            checker = Array.isArray(checker) ? checker[subRequestIndex] : checker;
-                            hasNextPage = !checker.bind(provider)(
+                            hasNextPage = !provider.checkWhetherResponseIsForLastPage(
                                 responsesForPages[pageNumber - 1],
                                 responsesForPages[pageNumber],
                                 pageNumber,
@@ -295,7 +220,7 @@ export default class RobustExternalAPICallerService {
                     } while (hasNextPage);
 
                     const responsesDataForPages = responsesForPages.map(response =>
-                        provider.getDataByResponse(response, parametersValues, subRequestIndex)
+                        provider.getDataByResponse(response, parametersValues, subRequestIndex, iterationsData)
                     );
 
                     let allData = responsesDataForPages;
@@ -305,20 +230,24 @@ export default class RobustExternalAPICallerService {
                         allData = responsesDataForPages[0];
                     }
 
-                    allData && iterationsData.push(allData);
+                    iterationsData.push(allData);
                 }
                 if (iterationsData.length) {
-                    data = httpMethods.length > 1 ? iterationsData.flat() : iterationsData[0];
-                } else {
+                    if (httpMethods.length > 1) {
+                        data = provider.incorporateIterationsData(iterationsData);
+                    } else {
+                        data = iterationsData[0];
+                    }
+                } else if (!doNotFailForNowData) {
                     externalServicesStatsCollector.externalServiceFailed(
-                        provider.endpoint,
+                        provider.getApiGroupId(),
                         "Response data was null for some reason"
                     );
                     punishProvider(provider);
                 }
             } catch (e) {
                 punishProvider(provider);
-                externalServicesStatsCollector.externalServiceFailed(provider.endpoint, e?.message);
+                externalServicesStatsCollector.externalServiceFailed(provider.getApiGroupId(), e?.message);
                 errors.push(e);
             } finally {
                 providerIndex++;
@@ -326,7 +255,7 @@ export default class RobustExternalAPICallerService {
         }
 
         // If we are declining more than 50% of providers (by exceeding RPS) then we note that it better to retry the whole process of providers requesting
-        const shouldBeForceRetried = data == null && countOfRequestsDeclinedByRPS > Math.floor(providers.length * 0.5);
+        const shouldBeForceRetried = data == null && countOfRequestsDeclinedByRps > Math.floor(providers.length * 0.5);
         const rpsMultiplier = shouldBeForceRetried ? RobustExternalAPICallerService.rpsMultiplier : 1;
 
         return { data: data ?? null, shouldBeForceRetried, rpsFactor: rpsFactor * rpsMultiplier, errors };

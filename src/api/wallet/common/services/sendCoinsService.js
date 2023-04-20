@@ -134,7 +134,7 @@ export class SendCoinsService {
             Logger.log(`Start. ${coinAmount}->${address}. All: ${isSendAll}. Balance: ${balanceCoins}`, loggerSource);
             const currentNetwork = getCurrentNetwork(coin);
             const wallet = Wallets.getWalletByCoin(coin);
-            const addressValidationResult = wallet.isAddressValid(address, currentNetwork);
+            const addressValidationResult = wallet.isAddressValidForSending(address, currentNetwork);
             const amountValidationResult = await SendCoinsService.validateAmountToBeSent(
                 coinAmount,
                 isSendAll,
@@ -160,7 +160,7 @@ export class SendCoinsService {
                 const fiatFeeAmounts = await CoinsToFiatRatesService.convertCoinAmountsToFiat(
                     coin.feeCoin,
                     txsDataResult.txsDataArray.map(result =>
-                        result?.fee ? +coin.feeCoin.atomsToCoinAmount(result.fee) : undefined
+                        result?.fee != null ? +coin.feeCoin.atomsToCoinAmount(result.fee) : undefined
                     )
                 );
 
@@ -168,10 +168,9 @@ export class SendCoinsService {
                     if (!txData?.errorDescription) {
                         return {
                             txData: txData,
-                            coinFee: txData.fee ? coin.feeCoin.atomsToCoinAmount(txData.fee) : null,
-                            coinFeeTrimmed: txData.fee
-                                ? coin.feeCoin.atomsToCoinAmountSignificantString(txData.fee)
-                                : null,
+                            coinFee: txData.fee != null ? coin.feeCoin.atomsToCoinAmount(txData.fee) : null,
+                            coinFeeTrimmed:
+                                txData.fee != null ? coin.feeCoin.atomsToCoinAmountSignificantString(txData.fee) : null,
                             fiatFee: fiatFeeAmounts[index] != null ? fiatFeeAmounts[index] : null,
                         };
                     }

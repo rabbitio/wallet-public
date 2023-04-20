@@ -2,14 +2,14 @@ import TransactionsNotificationsService from "./internal/notifications/transacti
 import AdminNotificationsService from "./internal/notifications/adminNotificationsService";
 import {
     getShownNotificationPushesCount,
-    getWalletId,
     saveShownNotificationPushesCount,
 } from "../../common/services/internal/storage";
 import { improveAndRethrow, logError } from "../../common/utils/errorUtils";
 import Notification from "../models/notification";
 import FiatPaymentsNotificationsService from "./internal/notifications/fiatPaymentsNotificationsService";
 import { Logger } from "../../support/services/internal/logs/logger";
-import { WalletDataApi } from "../../wallet/common/backend-api/walletDataApi";
+import { PreferencesService } from "../../wallet/common/services/preferencesService";
+import { UserDataAndSettings } from "../../wallet/common/models/userDataAndSettings";
 
 class NotificationsService {
     constructor() {
@@ -62,11 +62,14 @@ class NotificationsService {
 
     async _getUnseenNotificationsList(isSetLastNotificationsViewTimestamp = false, forceFetchData = false) {
         try {
-            const { settings } = await WalletDataApi.getWalletData(getWalletId());
+            const lastNotificationsViewTimestamp = PreferencesService.getUserSettingValue(
+                UserDataAndSettings.SETTINGS.LAST_NOTIFICATIONS_VIEW_TIMESTAMP
+            );
             const notificationsPromises = this._dedicatedServices.map(service =>
-                service
-                    .getUnseenNotificationsList(+settings?.lastNotificationsViewTimestamp || 0, forceFetchData)
-                    .catch(e => logError(e, "_getUnseenNotificationsList", "One of notifications services failed"))
+                service.getUnseenNotificationsList(+lastNotificationsViewTimestamp || 0, forceFetchData).catch(e => {
+                    logError(e, "_getUnseenNotificationsList", "One of notifications services failed");
+                    return [];
+                })
             );
             const notifications = (await Promise.all(notificationsPromises))
                 .flat()
@@ -74,7 +77,10 @@ class NotificationsService {
             notifications.sort((n1, n2) => n2.timestamp - n1.timestamp);
 
             if (isSetLastNotificationsViewTimestamp) {
-                await WalletDataApi.savePreference(getWalletId(), "lastNotificationsViewTimestamp", "" + Date.now());
+                await PreferencesService.cacheAndSaveSetting(
+                    UserDataAndSettings.SETTINGS.LAST_NOTIFICATIONS_VIEW_TIMESTAMP,
+                    "" + Date.now()
+                );
                 saveShownNotificationPushesCount(0);
             }
 
@@ -93,10 +99,10 @@ class NotificationsService {
         const loggerSource = "getWholeListOfNotifications";
         try {
             Logger.log("Start getting the whole list of notifications", loggerSource);
-            const walletData = await WalletDataApi.getWalletData(getWalletId());
+            const creationTime = PreferencesService.getWalletCreationTime();
             const promises = this._dedicatedServices.map(service =>
                 service
-                    .getWholeNotificationsList(walletData?.creationTime)
+                    .getWholeNotificationsList(creationTime)
                     .catch(e =>
                         logError(
                             e,

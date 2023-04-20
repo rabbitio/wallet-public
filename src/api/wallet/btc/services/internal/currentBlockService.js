@@ -33,7 +33,7 @@ class CurrentBlockService {
                 } catch (e) {
                     logError(e, "blocks_lookup", "Failed to get block number in the listener");
                 }
-            }, 90000);
+            }, 120000);
         } catch (e) {
             logError(e, loggerSource, "Failed to initialize current block number");
         }

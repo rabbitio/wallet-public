@@ -17,7 +17,7 @@ export default class ExportWalletService {
         const loggerSource = "exportWalletData";
         Logger.log(`Start exporting wallet data. Password is empty: ${!!password}`, loggerSource);
 
-        const wallets = Wallets.getWalletsForAllSupportedCoins();
+        const wallets = Wallets.getWalletsForAllEnabledCoins();
         const data = await Promise.all(wallets.map(wallet => wallet.exportWalletData(password)));
         const exportedDataArray = data
             .map((walletData, index) => walletData.map(item => ({ ...item, currency: wallets[index].coin.ticker })))

@@ -16,7 +16,8 @@ export default class UtxosService {
         "btc_utxosService",
         30000,
         65,
-        1000
+        1000,
+        false
     );
     static _balanceCacheId = "balances_03682d38-6c21-49d7-a1cf-c24a8ecfe3e7";
 
@@ -60,18 +61,15 @@ export default class UtxosService {
     static async calculateBalance(feeRate = null, forceCalculate = false) {
         const loggerSource = "calculateBalance";
         try {
-            const cached = await this._balanceCacheAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
+            const result = await this._balanceCacheAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
                 this._balanceCacheId
             );
-            if (cached) {
-                return cached;
+            if (!result.canStartDataRetrieval) {
+                return result?.cachedData;
             }
             const network = getCurrentNetwork();
-            const [allAddresses, indexes] = await Promise.all([
-                AddressesServiceInternal.getAllUsedAddresses(),
-                AddressesDataApi.getAddressesIndexes(getWalletId()),
-            ]);
-
+            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
+            const allAddresses = await AddressesServiceInternal.getAllUsedAddresses(indexes);
             const allUtxos = await getAllUTXOs(allAddresses.internal, allAddresses.external, network);
 
             const utxosToString = utxos => utxos.map(utxo => utxo.toMiniString()).join("\n");

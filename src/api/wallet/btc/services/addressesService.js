@@ -11,14 +11,14 @@ import { hasMinConfirmations } from "../lib/transactions/transactions-utils";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import {
     CHANGE_SCHEME,
-    EXTERNAL_SCHEME,
-    LEGACY_SCHEME,
     createNewExternalAddressByScheme,
     EXTERNAL_CHANGE_INDEX,
-    getExternalAddressPath,
-    INTERNAL_CHANGE_INDEX,
-    getNetworkByAddress,
+    EXTERNAL_SCHEME,
     getAddressByIndex,
+    getExternalAddressPath,
+    getNetworkByAddress,
+    INTERNAL_CHANGE_INDEX,
+    LEGACY_SCHEME,
 } from "../lib/addresses";
 import Address from "../../common/models/address";
 import CurrentAddressUtils from "./utils/currentAddressUtils";
@@ -27,20 +27,18 @@ import AddressesDataAdapter from "../../common/backend-api/adapters/addressesDat
 import { transactionsDataProvider } from "./internal/transactionsDataProvider";
 import { Logger } from "../../../support/services/internal/logs/logger";
 import { EventBus, NEW_ADDRESS_CREATED_EVENT } from "../../../common/adapters/eventbus";
-import { WalletDataApi } from "../../common/backend-api/walletDataApi";
 import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
+import { PreferencesService } from "../../common/services/preferencesService";
+import { UserDataAndSettings } from "../../common/models/userDataAndSettings";
 
 export default class AddressesService {
-    static _addressTypeCacheKey = "b39d43b0-999e-4097-a164-397c2eec8d06";
     static _externalAddressCacheKey = "7712d7db-46d4-4f68-8462-60944a26433e";
 
     // TODO: [tests, moderate] add units for caching for existing tests
-    static _addressResolver = new CacheAndConcurrentRequestsResolver("externalAddress", 35000, 50, 1000);
-    static _addressTypeResolver = new CacheAndConcurrentRequestsResolver("externalAddressType", 100000, 50, 3000);
+    static _addressResolver = new CacheAndConcurrentRequestsResolver("externalAddress", 90000, 100, 1000, false);
 
     static invalidateCaches() {
         this._addressResolver.invalidate(this._externalAddressCacheKey);
-        this._addressTypeResolver.invalidate(this._addressTypeCacheKey);
     }
 
     // TODO: [tests, moderate] units
@@ -66,7 +64,7 @@ export default class AddressesService {
         try {
             Logger.log("Start creating new external address", loggerSource);
 
-            const addressType = await this.getAddressesType();
+            const addressType = this.getAddressesType();
 
             Logger.log(`Address type: ${addressType}`, loggerSource);
 
@@ -101,7 +99,7 @@ export default class AddressesService {
             const walletId = getWalletId();
             const addressesIndexes = await AddressesDataApi.getAddressesIndexes(walletId);
 
-            const addressType = await this.getAddressesType();
+            const addressType = this.getAddressesType();
             const scheme = addressType === this.ADDRESSES_TYPES.SEGWIT ? EXTERNAL_SCHEME : LEGACY_SCHEME;
 
             const resultForAddressOfInvoice = createNewExternalAddressByScheme(
@@ -244,9 +242,7 @@ export default class AddressesService {
                 throw new Error(`Wrong addresses type passed ${addressesType}`);
             }
 
-            await WalletDataApi.savePreference(getWalletId(), "addressesType", addressesType);
-
-            this._addressResolver.saveCachedData(this._addressTypeCacheKey, addressesType);
+            await PreferencesService.cacheAndSaveSetting(UserDataAndSettings.SETTINGS.ADDRESSES_TYPE, addressesType);
 
             Logger.log(`Address type selection saved ${addressesType}`, loggerSource);
         } catch (e) {
@@ -259,23 +255,12 @@ export default class AddressesService {
      *
      * @return {Promise<string>}
      */
-    static async getAddressesType() {
+    static getAddressesType() {
         try {
-            const cached = await this._addressTypeResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
-                this._addressTypeCacheKey
-            );
-            if (cached) return cached;
-
-            const data = await WalletDataApi.getWalletData(getWalletId());
-
-            const type = data?.settings?.addressesType || this.ADDRESSES_TYPES.SEGWIT;
-            this._addressTypeResolver.saveCachedData(this._addressTypeCacheKey, type);
-
-            return type;
+            const addressesType = PreferencesService.getUserSettingValue(UserDataAndSettings.SETTINGS.ADDRESSES_TYPE);
+            return addressesType || this.ADDRESSES_TYPES.SEGWIT;
         } catch (e) {
             improveAndRethrow(e, "saveAddressesType");
-        } finally {
-            this._addressTypeResolver.markActiveCalculationAsFinished(this._addressTypeCacheKey);
         }
     }
 
@@ -358,13 +343,15 @@ export default class AddressesService {
      */
     static async getCurrentExternalAddress() {
         try {
-            const cached = await this._addressResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
+            const result = await this._addressResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
                 this._externalAddressCacheKey
             );
-            if (cached) return cached;
+            if (!result.canStartDataRetrieval) {
+                return result?.cachedData;
+            }
 
             const network = getCurrentNetwork();
-            const addressType = await this.getAddressesType();
+            const addressType = this.getAddressesType();
             const scheme = addressType === this.ADDRESSES_TYPES.SEGWIT ? EXTERNAL_SCHEME : LEGACY_SCHEME;
 
             const currentAddress = await CurrentAddressUtils._getCurrentAddress(

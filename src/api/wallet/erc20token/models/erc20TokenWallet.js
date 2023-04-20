@@ -1,49 +1,52 @@
 import { ethers } from "ethers";
 import { Wallet } from "../../common/models/wallet";
-import { usdtErc20 } from "./usdtErc20";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { Erc20TokenBalanceService } from "../services/erc20TokenBalanceService";
-import { Erc20TokenTransactionsHistoryService } from "../services/erc20TokenTransactionsHistoryService";
 import { Erc20TokenTransactionDetailsService } from "../services/erc20TokenTransactionDetailsService";
 import { EthAddressesService } from "../../eth/services/ethAddressesService";
 import { Erc20TokenSendTransactionService } from "../services/erc20TokenSendTransactionService";
 import { EthSendTransactionService } from "../../eth/services/ethSendTransactionService";
 import { Erc20TransactionsProvider } from "../external-apis/erc20TransactionsProvider";
+import { EthereumTransactionsHistoryService } from "../../eth/services/ethereumTransactionsHistoryService";
 
-class UsdtErc20Wallet extends Wallet {
-    constructor() {
-        super(usdtErc20, false);
+export class Erc20TokenWallet extends Wallet {
+    constructor(coin) {
+        super(coin, false);
     }
 
     async calculateBalance() {
         try {
-            return await Erc20TokenBalanceService.calculateBalance(usdtErc20);
+            return await Erc20TokenBalanceService.calculateBalance(this.coin);
         } catch (e) {
-            improveAndRethrow(e, "calculateBalance");
+            improveAndRethrow(e, `${this.coin.ticker}_calculateBalance`);
         }
     }
 
     async getTransactionsList() {
         try {
-            return await Erc20TokenTransactionsHistoryService.getTransactionsList(usdtErc20);
+            return await EthereumTransactionsHistoryService.getEthereumTransactionsHistory(this.coin);
         } catch (e) {
-            improveAndRethrow(e, "getTransactionsList");
+            improveAndRethrow(e, `${this.coin.ticker}_getTransactionsList`);
         }
     }
 
-    async getTransactionDetails(txId) {
+    async getTransactionDetails(txId, transactionType = null) {
         try {
-            return await Erc20TokenTransactionDetailsService.getErc20TransactionDetails(usdtErc20, txId);
+            return await Erc20TokenTransactionDetailsService.getErc20TransactionDetails(
+                this.coin,
+                txId,
+                transactionType
+            );
         } catch (e) {
-            improveAndRethrow(e, "getTransactionDetails");
+            improveAndRethrow(e, `${this.coin.ticker}_getTransactionDetails`);
         }
     }
 
     async isTxBelongingToWalletsCoin(txId) {
         try {
-            return await Erc20TokenTransactionDetailsService.doesTxBelongToErc20Token(usdtErc20, txId);
+            return await Erc20TokenTransactionDetailsService.doesTxBelongToErc20Token(this.coin, txId);
         } catch (e) {
-            improveAndRethrow(e, "isTxBelongingToWalletsCoin");
+            improveAndRethrow(e, `${this.coin.ticker}_isTxBelongingToWalletsCoin`);
         }
     }
 
@@ -51,22 +54,22 @@ class UsdtErc20Wallet extends Wallet {
         try {
             return EthAddressesService.getCurrentEthAddress();
         } catch (e) {
-            improveAndRethrow(e, "getCurrentAddress");
+            improveAndRethrow(e, `${this.coin.ticker}_getCurrentAddress`);
         }
     }
 
-    isAddressValid(address) {
+    isAddressValidForSending(address) {
         try {
             return { result: ethers.utils.isAddress(address) };
         } catch (e) {
-            improveAndRethrow(e, "isAddressValid");
+            improveAndRethrow(e, `${this.coin.ticker}_isAddressValidForSending`);
         }
     }
 
     async createTransactionsWithFakeSignatures(address, coinAmount, isSendAll, currentNetwork, balanceCoins) {
         try {
             return await Erc20TokenSendTransactionService.createErc20TransactionsWithFakeSignatures(
-                usdtErc20,
+                this.coin,
                 address,
                 coinAmount,
                 isSendAll,
@@ -74,43 +77,37 @@ class UsdtErc20Wallet extends Wallet {
                 balanceCoins
             );
         } catch (e) {
-            improveAndRethrow(e, "createTransactionsWithFakeSignatures");
+            improveAndRethrow(e, `${this.coin.ticker}_createTransactionsWithFakeSignatures`);
         }
     }
 
     async createTransactionAndBroadcast(mnemonic, passphrase, txData) {
         try {
             return await EthSendTransactionService.createEthTransactionAndBroadcast(
-                usdtErc20,
+                this.coin,
                 mnemonic,
                 passphrase,
                 txData
             );
         } catch (e) {
-            improveAndRethrow(e, "createTransactionAndBroadcast");
+            improveAndRethrow(e, `${this.coin.ticker}_createTransactionAndBroadcast`);
         }
-    }
-
-    async createNewAddress(label) {
-        throw new Error("New address creation is not supported for " + usdtErc20.ticker);
     }
 
     async exportWalletData(password) {
         try {
             return EthAddressesService.exportAddressesWithPrivateKeys(password);
         } catch (e) {
-            improveAndRethrow(e, "exportWalletData");
+            improveAndRethrow(e, `${this.coin.ticker}_exportWalletData`);
         }
     }
 
     actualizeLocalCachesWithNewTransactionData(sentCoin, txData, txId) {
         try {
             const address = EthAddressesService.getCurrentEthAddress();
-            Erc20TransactionsProvider.actualizeCacheWithNewTransactionSentFromAddress(sentCoin, address, txData, txId);
+            Erc20TransactionsProvider.actualizeCacheWithNewTransaction(sentCoin, address, txData, txId);
         } catch (e) {
-            improveAndRethrow(e, "actualizeLocalCachesWithNewTransactionData");
+            improveAndRethrow(e, `${this.coin.ticker}_actualizeLocalCachesWithNewTransactionData`);
         }
     }
 }
-
-export const usdtErc20Wallet = new UsdtErc20Wallet();

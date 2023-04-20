@@ -13,8 +13,8 @@ export class WalletSliceService {
         try {
             // TODO: [bug, critical] add independent errors hadling per data part to avoid failing all data sclice if specific call fails
             const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
-            const wallets = Wallets.getWalletsForAllSupportedCoins();
-            let addressesBtc = await AddressesServiceInternal.getAllUsedAddresses();
+            const wallets = Wallets.getWalletsForAllEnabledCoins();
+            let addressesBtc = await AddressesServiceInternal.getAllUsedAddresses(indexes);
             let utxos = await getAllUTXOs(addressesBtc.internal, addressesBtc.external, getCurrentNetwork());
             let balances = await BalancesService.getBalances(wallets);
             let transactionsBtc = (

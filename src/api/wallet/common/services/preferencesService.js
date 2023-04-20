@@ -3,124 +3,143 @@ import { getWalletId } from "../../../common/services/internal/storage";
 import { Logger } from "../../../support/services/internal/logs/logger";
 import { CURRENT_PREFERENCES_EVENT, EventBus } from "../../../common/adapters/eventbus";
 import { WalletDataApi } from "../backend-api/walletDataApi";
+import { cache } from "../../../common/utils/cache";
+import { UserDataAndSettings, UserSetting, UserSettingValue } from "../models/userDataAndSettings";
 
 /**
- * Manages preferences of the wallet (like UI preferences)
+ * Manages account data of the wallet (like UI preferences or enabled coins list)
  */
+// TODO: [refactoring, moderate] rename to UserDataAndSettingsService
 export class PreferencesService {
-    /**
-     * Supported types of preferences
-     */
-    static PREFERENCES_TYPES = {
-        FLAG: "flag",
-    };
-
-    /**
-     * Supported preferences metadata
-     */
-    static PREFERENCES = {
-        SHOW_FEE_RATES: {
-            name: "showFeeRates",
-            type: this.PREFERENCES_TYPES.FLAG,
-            default: true,
-        },
-        DONT_REMOVE_CLIENT_LOGS_WHEN_SIGNED_OUT: {
-            name: "doNotRemoveClientLogsWhenSignedOut",
-            type: this.PREFERENCES_TYPES.FLAG,
-            default: false,
-        },
-    };
-
-    /**
-     * Updates value of preference by name
-     *
-     * @param name {string} name, should be one of the PREFERENCES.name
-     * @param value {string} value of the preference to be saved
-     * @return {Promise<void>}
-     */
-    static async updatePreferenceValue(name, value) {
-        const loggerSource = "updatePreferenceValue";
-        try {
-            Logger.log(`Saving ${name}->${value}`, loggerSource);
-
-            await WalletDataApi.savePreference(getWalletId(), name, "" + value);
-
-            EventBus.dispatch(CURRENT_PREFERENCES_EVENT, null, { name: name, value: value });
-
-            Logger.log(`Saved ${name}->${value}`, loggerSource);
-        } catch (e) {
-            improveAndRethrow(e, loggerSource);
-        }
-    }
-
-    /**
-     * Retrieves value of a specific preference
-     *
-     * @param preferenceMetadata {Object} one of this.PREFERENCES objects
-     * @return {Promise<*>} resolves to value of given preference or to default value if it is not found
-     */
-    static async getPreferenceValue(preferenceMetadata) {
-        try {
-            const preferences = await retrievePreferencesValues();
-
-            EventBus.dispatch(CURRENT_PREFERENCES_EVENT, null, preferences);
-
-            Logger.log(`Got ${JSON.stringify(preferences)}. Asked: ${preferenceMetadata.name}`, "getPreferenceValue");
-
-            return preferences.find(preference => preference.name === preferenceMetadata.name)?.value;
-        } catch (e) {
-            improveAndRethrow(e, "getPreferenceValue");
-        }
-    }
+    static _CACHE_KEY = "walletDataCache_kf34sdkp21";
 
     /**
      * Retrieves all values of preferences
      *
-     * @return {Promise<{name: *, type: *, value: *}[]>} returns array of preferences data objects { name: string, value: *, type: string }
+     * @return {{name: string, type: string, value: any}[]}
      */
-    static async getPreferencesValues() {
+    static getPreferencesValues() {
         try {
-            const preferences = await retrievePreferencesValues();
-
-            EventBus.dispatch(CURRENT_PREFERENCES_EVENT, null, preferences);
-
-            Logger.log(`Got ${JSON.stringify(preferences)}`, "getPreferencesValues");
-
-            return preferences;
+            const cachedSettings = cache.get(this._CACHE_KEY)?.settings ?? [];
+            const preferences = UserDataAndSettings.getAllSettings().filter(s => s.preferenceType);
+            return preferences.map(preference => {
+                let value;
+                const cachedSettingValue =
+                    cachedSettings.find(s => s?.setting === preference)?.value ?? preference.defaultValue;
+                switch (preference.preferenceType) {
+                    case UserSetting.PREFERENCES_TYPES.FLAG:
+                        value = cachedSettingValue === "true" || cachedSettingValue === true;
+                        break;
+                    default:
+                        value = cachedSettingValue;
+                }
+                return {
+                    name: preference.name,
+                    value: value,
+                    type: preference.preferenceType,
+                };
+            });
         } catch (e) {
             improveAndRethrow(e, "getPreferencesValues");
         }
     }
-}
 
-async function retrievePreferencesValues() {
-    try {
-        const walletData = await WalletDataApi.getWalletData(getWalletId());
+    /**
+     * IMPORTANT: should be called when user sings into wallet or initializes app having an active
+     * session on client. This helps to avoid retrieving the same data many times from server.
+     * Also, some services used when the session is active require this data.
+     *
+     * @param walletData {UserDataAndSettings}
+     * @return {void}
+     */
+    static cacheWalletData(walletData) {
+        try {
+            cache.putSessionDependentData(this._CACHE_KEY, walletData);
+        } catch (e) {
+            improveAndRethrow(e, "cacheWalletData");
+        }
+    }
 
-        const settings = walletData?.settings ?? {};
-        return Object.keys(PreferencesService.PREFERENCES).map(key => {
-            const preference = PreferencesService.PREFERENCES[key];
-            let value;
+    /**
+     * @return {number|undefined}
+     */
+    static getWalletCreationTime() {
+        return cache.get(this._CACHE_KEY)?.creationTime;
+    }
 
-            if (settings.hasOwnProperty(preference.name)) {
-                switch (preference.type) {
-                    case PreferencesService.PREFERENCES_TYPES.FLAG:
-                        value = settings[preference.name] === "true" || settings[preference.name] === true;
-                        break;
-                    default:
-                        value = settings[preference.name];
-                }
+    /**
+     * @return {number|undefined}
+     */
+    static getLastPasswordChangeTimestamp() {
+        const userdataCache = cache.get(this._CACHE_KEY);
+        return userdataCache?.lastPasswordChangeDate || userdataCache?.creationTime;
+    }
+
+    static cacheLastPasswordChangeTimestamp(timestamp) {
+        const current = cache.get(this._CACHE_KEY);
+        cache.put(this._CACHE_KEY, { ...current, lastPasswordChangeDate: timestamp });
+    }
+
+    /**
+     * @param setting {UserSetting}
+     * @return {any}
+     */
+    static getUserSettingValue(setting) {
+        try {
+            const settingsList = cache.get(this._CACHE_KEY)?.settings;
+            return (
+                (settingsList ?? []).find(settingValue => settingValue?.setting === setting)?.value ??
+                setting.defaultValue
+            );
+        } catch (e) {
+            improveAndRethrow(e, "getSettingValue");
+        }
+    }
+
+    /**
+     * Updates value of wallet setting. Puts value if it is not present in the list
+     *
+     * @param setting {UserSetting} use UserDataAndSettings.SETTINGS
+     * @param value {string} value of the setting to be saved
+     * @return {Promise<void>}
+     */
+    static async cacheAndSaveSetting(setting, value) {
+        const loggerSource = "cacheAndSaveSetting";
+        try {
+            Logger.log(`Saving ${setting.name}->${value}`, loggerSource);
+
+            const currentUserData = cache.get(this._CACHE_KEY) ?? {};
+            !currentUserData?.settings && (currentUserData.settings = []);
+            let settingValue = currentUserData.settings.find(s => s?.setting?.name === setting.name);
+            if (!settingValue) {
+                currentUserData.settings.push(new UserSettingValue(setting, value));
             } else {
-                value = preference.default;
+                settingValue.value = value;
             }
+            cache.put(this._CACHE_KEY, currentUserData);
 
-            return {
-                name: preference.name,
-                value: value,
-                type: preference.type,
-            };
-        });
-    } catch (e) {
-        improveAndRethrow(e, "retrievePreferencesValues");
+            await WalletDataApi.saveUserSetting(getWalletId(), setting.name, "" + value);
+
+            EventBus.dispatch(CURRENT_PREFERENCES_EVENT, null, currentUserData.settings);
+            Logger.log(`Saved ${setting.name}->${value}`, loggerSource);
+        } catch (e) {
+            improveAndRethrow(e, "cacheAndSaveSetting");
+        }
+    }
+
+    static scheduleWalletDataSynchronization() {
+        this._walletDataSyncIntervalId = setInterval(async () => {
+            try {
+                const accountData = await WalletDataApi.getAccountData(getWalletId());
+                cache.put(this._CACHE_KEY, accountData);
+                EventBus.dispatch(CURRENT_PREFERENCES_EVENT, null, accountData.settings);
+            } catch (e) {
+                improveAndRethrow(e, "walletDataSyncInterval");
+            }
+        }, 600_000);
+    }
+
+    static removeWalletDataSyncInterval() {
+        this._walletDataSyncIntervalId && clearInterval(this._walletDataSyncIntervalId);
     }
 }

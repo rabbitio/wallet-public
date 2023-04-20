@@ -9,14 +9,22 @@ import { Coins } from "../../coins";
 import { Wallets } from "../wallets";
 import { Logger } from "../../../support/services/internal/logs/logger";
 import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
+import {
+    FIAT_CURRENCY_CHANGED_EVENT,
+    INCREASE_FEE_IS_FINISHED_EVENT,
+    NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
+    TRANSACTION_PUSHED_EVENT,
+} from "../../../common/adapters/eventbus";
+import { NumbersUtils } from "../utils/numbersUtils";
 
 export default class TransactionsHistoryService {
     // TODO: [tests, moderate] add units for caching for existing tests
     static _cacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
         "transactionsHistoryService",
-        12000,
-        100,
-        1000
+        60000,
+        700,
+        1000,
+        false
     );
     static _cachePrefix = "1ad60a23-40f7-47c5-a574-8e87c3dc71ca";
     static _cacheKey = (tickers, numberOfTransactionsToReturn, filterBy, search, sortBy) =>
@@ -34,9 +42,18 @@ export default class TransactionsHistoryService {
         }
     }
 
+    static eventsListForcingToClearCache = [
+        FIAT_CURRENCY_CHANGED_EVENT,
+        NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
+        TRANSACTION_PUSHED_EVENT,
+        INCREASE_FEE_IS_FINISHED_EVENT,
+    ];
+
     static DEFAULT_SORT = "creationDate_desc";
 
     // TODO: [refactoring, moderate] add constants and enums for sort, filters to avoid using not robust hardcoded values
+    // TODO: [refactoring, critical] separate this module into several as it is too long and its unit tests are difficult to read and enhance
+    // TODO: [refactoring, critical] use models for parameters (e.g. TransactionsFilterQuery) and for returning result
     /**
      * Returns list of transactions by given sortBy, filterBy, searchCriteria for the given coins list.
      *
@@ -59,27 +76,28 @@ export default class TransactionsHistoryService {
      *                   + [ "status", "status_string_1", "status_string_2_optional", "status_string_3_optional", "status_string_4_optional" ]
      *                     - where status_string is one of "unconfirmed", "increasing_fee", "confirming", "confirmed"
      *                   + [ "currency", "TICKER1", "TICKER2", ... , "TICKER_N" ]
-     *                     - where TICKERi is one of supported coin tickers (Coins.getSupportedCoinsTickers())
+     *                     - where TICKER is one of enabled coin tickers (Coins.getEnabledCoinsTickers())
      * @param [searchCriteria] {string} optional - any string to search transactions containing it inside one of the fields
      * @param [sortBy] {string} optional - possible values (exactly one of):
      *                 "amount_asc", "amount_desc", "creationDate_asc", "creationDate_desc", "unconfirmedFirst"
      * @returns {Promise<{
      *              transactions: {
      *                  txid: string,
-     *                  type: "incoming"|"outgoing",
-     *                  status: "unconfirmed"|"increasing_fee"|"confirming"|"confirmed",
+     *                  type: ("incoming"|"outgoing"),
+     *                  status: ("unconfirmed"|"increasing_fee"|"confirming"|"confirmed"),
      *                  confirmations: number,
      *                  isConfirmed: boolean,
      *                  creationTime: number,
-     *                  amount: number|string,
+     *                  amount: (number|string),
      *                  amountSignificantString: string,
-     *                  fiatAmount: number|string,
-     *                  fee: number|string|null,
-     *                  feeSignificantString: string|null,
+     *                  amountSignificantStringShortened: string,
+     *                  fiatAmount: (number|string),
+     *                  fee: (number|string|null),
+     *                  feeSignificantString: (string|null),
      *                  fiatFee: number,
      *                  note: string|null,
      *                  isRbfAble: boolean,
-     *                  purchaseData: { paymentId: string, amountWithCurrencyString: string } | null,
+     *                  purchaseData: ({ paymentId: string, amountWithCurrencyString: string }|null),
      *                  ticker: string,
      *                  tickerPrintable: string
      *              }[],
@@ -88,7 +106,7 @@ export default class TransactionsHistoryService {
      *              maxAmount: number,
      *              wholeListLength: number
      *          }
-     *      >} TODO: [refactoring, moderate] use view-model
+     *      >}
      *      where amount is in coin (not atoms) and min and max amounts are fiat values
      *
      */
@@ -103,15 +121,17 @@ export default class TransactionsHistoryService {
 
             const filteredCoins = getRequestedCoinsList(coinTickersList, filterBy);
 
-            const cached = await this._cacheAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
+            const waitingResult = await this._cacheAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
                 this._cacheKey(coinTickersList, numberOfTransactionsToReturn, filterBy, searchCriteria, sortBy)
             );
-            if (cached) return cached;
+            if (!waitingResult.canStartDataRetrieval) {
+                return waitingResult?.cachedData;
+            }
 
             const promises = filteredCoins.map(coin => Wallets.getWalletByCoin(coin).getTransactionsList());
             const allTransactions = (await Promise.all(promises)).flat();
 
-            await addNotes(allTransactions);
+            await addNotesIgnoringErrors(allTransactions);
 
             Logger.log(
                 `Getting. Coins: ${JSON.stringify(coinTickersList)}, all txs: ${allTransactions.length}`,
@@ -130,7 +150,11 @@ export default class TransactionsHistoryService {
                 isWholeList: paginated.length === sorted.length,
                 minAmount: getMinAmount(allTransactions),
                 maxAmount: getMaxAmount(allTransactions),
-                wholeListLength: allTransactions.length || filteredCoins.length !== coinTickersList.length,
+                // If we filter by coin we don't know what is the actual transactions count for the whole coins list, so we just add 1 to signal the whole list is large
+                wholeListLength:
+                    filteredCoins.length === coinTickersList.length
+                        ? allTransactions.length
+                        : allTransactions.length + 1,
             };
 
             this._cacheAndRequestsResolver.saveCachedData(
@@ -152,7 +176,7 @@ export default class TransactionsHistoryService {
 function validateTickersList(coinTickersList) {
     if (
         !Array.isArray(coinTickersList) ||
-        coinTickersList.find(ticker => Coins.getSupportedCoinsTickers().indexOf(ticker) < 0)
+        coinTickersList.find(ticker => Coins.getEnabledCoinsTickers().indexOf(ticker) < 0)
     ) {
         throw new Error("Tickers list is not valid: " + JSON.stringify(coinTickersList));
     }
@@ -196,8 +220,7 @@ function validateFilterBy(filterBy) {
             (typeFilters.length && typeFilters[0].length !== 2) ||
             (statusFilters.length && (statusFilters[0].length < 2 || statusFilters[0].length > 5)) ||
             (currencyFilters.length &&
-                (currencyFilters[0].length < 2 ||
-                    currencyFilters[0].length > Coins.getSupportedCoinsTickers().length)) ||
+                (currencyFilters[0].length < 2 || currencyFilters[0].length > Coins.getEnabledCoinsTickers().length)) ||
             (amountRangeFilters.length &&
                 amountRangeFilters[0].length &&
                 (is.not.number(amountRangeFilters[0][1]) ||
@@ -228,7 +251,7 @@ function validateFilterBy(filterBy) {
             (currencyFilters.length &&
                 currencyFilters[0]
                     .slice(1)
-                    .filter(tickerFilter => !Coins.getSupportedCoinsTickers().find(ticker => ticker === tickerFilter))
+                    .filter(tickerFilter => !Coins.getEnabledCoinsTickers().find(ticker => ticker === tickerFilter))
                     .length)
         ) {
             isValid = false;
@@ -275,7 +298,7 @@ function getRequestedCoinsList(coinsTickersList, filterBy) {
     return coinsTickersList.map(ticker => Coins.getCoinByTicker(ticker));
 }
 
-async function addNotes(allTransactions) {
+async function addNotesIgnoringErrors(allTransactions) {
     try {
         const transactionIds = allTransactions.map(tx => tx.txid);
         const txStoredData = await TransactionsDataService.getTransactionsData(transactionIds);
@@ -440,6 +463,7 @@ async function addFiatAmounts(coins, transactionsList) {
 function mapToProperReturnFormat(transactionsList) {
     return transactionsList.map(transaction => {
         const coin = Coins.getCoinByTicker(transaction.ticker);
+        const fiatDigitsCount = (("" + transaction.fiatAmount).split(".")[1] ?? "").length;
         return {
             txid: transaction.txid,
             // TODO: [refactoring, moderate] use type constant
@@ -454,9 +478,12 @@ function mapToProperReturnFormat(transactionsList) {
             creationTime: transaction.time,
             amount: transaction.amount,
             amountSignificantString: transaction.amount
-                ? coin.atomsToCoinAmountSignificantString(transaction.amount)
+                ? coin.atomsToCoinAmountSignificantString(transaction.amount, 12) // TODO: [refactoring, moderate] these constants for length is better to locate in UI code
                 : null,
-            fiatAmount: transaction.fiatAmount,
+            amountSignificantStringShortened: transaction.amount
+                ? coin.atomsToCoinAmountSignificantString(transaction.amount, 9)
+                : null,
+            fiatAmount: NumbersUtils.trimCurrencyAmount(transaction.fiatAmount, fiatDigitsCount, 12),
             fee: transaction.fees,
             feeSignificantString: transaction.fees
                 ? coin.feeCoin.atomsToCoinAmountSignificantString(transaction.fees)

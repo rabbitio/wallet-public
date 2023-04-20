@@ -1,201 +1,262 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
+import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
 import { Coins } from "../../coins";
-import { rabbitTickerToStandardTicker, standardTickerToRabbitTicker } from "./utils/tickersAdapter";
+import { rabbitTickerToStandardTicker } from "./utils/tickersAdapter";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
+import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { ApiGroupCoinIdAdapters, areCoinsSupportedByCex } from "../adapters/apiGroupCoinIdAdapters";
+import { cache } from "../../../common/utils/cache";
 
-export const consToUSDRatesProviders = [
-    {
+// TODO: [feature, low] add provider (only some tokens): https://api.blockchain.com/v3/exchange/tickers
+// TODO: [feature, low] add provider (only some tokens): https://api.crypto.com/v2/public/get-ticker RPS=100 https://exchange-docs.crypto.com/spot/index.html#rate-limits
+// TODO: [feature, low] add provider (only some tokens): BYBIT
+// TODO: [feature, low] add provider (only some tokens): BITMART
+
+const persistentCacheIdForWholeCoinsListRates = "4dae01dc-d6a9-4931-9646-55eb59f9f96e";
+
+class CoincapCoinsToUsdRatesProvider extends ExternalApiProvider {
+    constructor() {
         // https://docs.coincap.io/
         // endpoint: "https://api.coincap.io/v2/assets?ids=bitcoin,ethereum,tether",
-        endpoint: "https://api.coincap.io/v2/assets",
-        httpMethod: "get",
-        RPS: 3, // 200 per minute without API key
-        composeQueryString: params => {
-            const coins = params[0];
-            const coinIdsClearForProvider = coins.map(coin => {
-                let coinIdClearForProvider = null;
-                switch (coin.ticker) {
-                    case Coins.COINS.BTC.ticker:
-                        coinIdClearForProvider = "bitcoin";
-                        break;
-                    case Coins.COINS.ETH.ticker:
-                        coinIdClearForProvider = "ethereum";
-                        break;
-                    case Coins.COINS.USDTERC20.ticker:
-                        coinIdClearForProvider = "tether";
-                        break;
-                    default:
-                        throw new Error("Add support for the coin to coincap coin-usd rates provider: " + coin.ticker);
-                }
+        super("https://api.coincap.io/v2/assets", "get", 15000, ApiGroups.COINCAP);
+    }
 
-                return coinIdClearForProvider;
-            });
-
+    composeQueryString(params, subRequestIndex = 0) {
+        try {
+            const enabledCoins = params[0];
+            const coinIdsClearForProvider = ApiGroupCoinIdAdapters.getCoinIdsListByCoinsListForApiGroup(
+                ApiGroups.COINCAP,
+                enabledCoins
+            );
             return `?ids=${coinIdsClearForProvider.join(",")}`;
-        },
-        getDataByResponse: response => {
-            let coinsData = response.data.data;
+        } catch (e) {
+            improveAndRethrow(e, "CoincapCoinsToUsdRatesProvider.composeQueryString");
+        }
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        try {
+            let coinsData = response?.data?.data;
 
             if (!Array.isArray(coinsData)) throw new Error("Wrong data format for 'coincap'");
 
-            coinsData = coinsData.map(coinData => {
-                const coin = Coins.COINS[standardTickerToRabbitTicker(coinData.symbol)];
-
-                if (!coin) throw new Error("Wrong coin symbol for 'coincap'");
-                if (!coinData?.priceUsd) throw new Error("Wrong price for 'coincap'");
-                if (!coinData?.changePercent24Hr) throw new Error("Wrong 24h percent for 'coincap'");
+            return params[0].map(coin => {
+                const data = coinsData.find(
+                    item => rabbitTickerToStandardTicker(coin.ticker, coin.protocol) === item.symbol
+                );
+                if (!data) throw new Error(`No rate found for ${coin.ticker}`);
+                if (!data?.priceUsd) throw new Error("Wrong price for 'coincap'");
+                if (!data?.changePercent24Hr) throw new Error("Wrong 24h percent for 'coincap'");
 
                 return {
                     coin: coin,
-                    usdRate: +coinData.priceUsd,
-                    change24hPercent: +coinData.changePercent24Hr,
+                    usdRate: +data.priceUsd,
+                    change24hPercent: +data.changePercent24Hr,
                 };
             });
+        } catch (e) {
+            improveAndRethrow(e, "CoincapCoinsToUsdRatesProvider.getDataByResponse");
+        }
+    }
+}
 
-            return coinsData;
-        },
-    },
-    {
+class CexCoinsToUsdRatesProvider extends ExternalApiProvider {
+    constructor() {
         // https://docs.cex.io/#tickers-for-all-pairs-by-markets
-        endpoint: "https://cex.io/api/tickers",
-        httpMethod: "get",
-        RPS: 1, // 600 per 10 minutes
-        composeQueryString: params => {
-            return `/${params[0].map(coin => rabbitTickerToStandardTicker(coin.ticker)).join("/")}/USD`;
-        },
-        getDataByResponse: (response, params) => {
-            let coinsData = response.data.data;
+        super("https://cex.io/api/tickers/USD", "get", 15000, ApiGroups.CEX);
+    }
+
+    composeQueryString(params, subRequestIndex = 0) {
+        try {
             const coins = params[0];
+            const supported = areCoinsSupportedByCex(coins);
+            if (!supported) {
+                throw new Error("CEX doesn't support exactly:" + JSON.stringify(coins.map(c => c.ticker)));
+            }
+            return "";
+        } catch (e) {
+            improveAndRethrow(e, "CexCoinsToUsdRatesProvider.composeQueryString");
+        }
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        try {
+            let coinsData = response?.data?.data;
+            const enabledCoins = params[0];
 
             if (!Array.isArray(coinsData)) throw new Error("Wrong data format for 'cex'");
 
-            for (let i = 0; i < coins.length; ++i) {
+            for (let i = 0; i < enabledCoins.length; ++i) {
                 if (
                     !coinsData.find(
-                        item => `${rabbitTickerToStandardTicker(coins[i].ticker)}:USD` === item?.pair?.toUpperCase()
+                        item =>
+                            `${rabbitTickerToStandardTicker(enabledCoins[i].ticker, enabledCoins[i].protocol)}:USD` ===
+                            (item?.pair ?? "").toUpperCase()
                     )
                 ) {
-                    throw new Error("Missing coin for 'cex': " + coins[i].ticker);
+                    throw new Error("Missing coin for 'cex': " + enabledCoins[i].ticker);
                 }
             }
 
-            coinsData = Object.keys(Coins.COINS).map(ticker => {
+            coinsData = enabledCoins.map(coin => {
                 const coinData = coinsData.find(
-                    item => `${rabbitTickerToStandardTicker(ticker)}:USD` === item?.pair?.toUpperCase()
+                    item =>
+                        `${rabbitTickerToStandardTicker(coin.ticker, coin.protocol)}:USD` ===
+                        (item?.pair ?? "").toUpperCase()
                 );
                 if (!coinData?.last) throw new Error("Wrong price for 'cex'");
                 if (!coinData?.priceChangePercentage) throw new Error("Wrong 24h percent for 'cex'");
 
                 return {
-                    coin: Coins.COINS[ticker],
+                    coin: coin,
                     usdRate: +coinData.last,
                     change24hPercent: +coinData.priceChangePercentage,
                 };
             });
 
             return coinsData;
-        },
-    },
-    {
+        } catch (e) {
+            improveAndRethrow(e, "CexCoinsToUsdRatesProvider.getDataByResponse");
+        }
+    }
+}
+
+class CoingeckoCoinsToUsdRatesProvider extends ExternalApiProvider {
+    constructor() {
+        /**
+         * Coingecko is strict in terms of abusing API and blocks by IP for >=1 minutes if you abuse it.
+         */
         // https://www.coingecko.com/en/api/documentation
-        endpoint: "https://api.coingecko.com/api/v3/coins/markets",
-        httpMethod: "get",
-        RPS: 0.5, // 50 per minute without API key
-        composeQueryString: params => {
+        super("https://api.coingecko.com/api/v3/coins/markets", "get", 15000, ApiGroups.COINGECKO);
+    }
+
+    composeQueryString(params, subRequestIndex = 0) {
+        try {
             const baseQuery =
                 "vs_currency=USD&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h";
-            const coins = params[0];
-            const coinIdsClearForProvider = coins.map(coin => {
-                let coinIdClearForProvider = null;
-                switch (coin.ticker) {
-                    case Coins.COINS.BTC.ticker:
-                        coinIdClearForProvider = "bitcoin";
-                        break;
-                    case Coins.COINS.ETH.ticker:
-                        coinIdClearForProvider = "ethereum";
-                        break;
-                    case Coins.COINS.USDTERC20.ticker:
-                        coinIdClearForProvider = "tether";
-                        break;
-                    default:
-                        throw new Error("Add support for the coin to coingecko coin-usd rates provider:" + coin.ticker);
-                }
-
-                return coinIdClearForProvider;
-            });
-
+            // We use all supported coins because coingecko supports all our coins currently
+            const allSupportedCoins = params[1];
+            const coinIdsClearForProvider = ApiGroupCoinIdAdapters.getCoinIdsListByCoinsListForApiGroup(
+                ApiGroups.COINGECKO,
+                allSupportedCoins
+            );
             return `?${baseQuery}&ids=${coinIdsClearForProvider.join(",")}`;
-        },
-        getDataByResponse: response => {
-            let coinsData = response.data;
+        } catch (e) {
+            improveAndRethrow(e, "CoingeckoCoinsToUsdRatesProvider.composeQueryString");
+        }
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        try {
+            let coinsData = response?.data;
+            const allSupportedCoins = params[1];
 
             if (!Array.isArray(coinsData)) throw new Error("Wrong data format for 'coingecko'");
 
-            coinsData = coinsData.map(coinData => {
-                const ticker = coinData.symbol?.toUpperCase();
-                const coin = Coins.COINS[standardTickerToRabbitTicker(ticker)];
-                if (!coin) throw new Error("Wrong coin symbol for 'coingecko'");
-                if (!coinData?.current_price) throw new Error("Wrong price for 'coingecko'");
-                if (!coinData?.price_change_percentage_24h_in_currency)
+            const result = allSupportedCoins.map(coin => {
+                const data = coinsData.find(
+                    item =>
+                        rabbitTickerToStandardTicker(coin.ticker, coin.protocol) === (item?.symbol ?? "").toUpperCase()
+                );
+                if (!data) throw new Error(`No rate found for ${coin.ticker} in coingecko`);
+                if (!data?.current_price) throw new Error("Wrong price for 'coingecko'");
+                if (!data?.price_change_percentage_24h_in_currency)
                     throw new Error("Wrong 24h percent for 'coingecko'");
 
                 return {
                     coin: coin,
-                    usdRate: +coinData.current_price,
-                    change24hPercent: +coinData.price_change_percentage_24h_in_currency,
+                    usdRate: +data.current_price,
+                    change24hPercent: +data.price_change_percentage_24h_in_currency,
                 };
             });
 
-            return coinsData;
-        },
-    },
-    {
+            saveAllSupportedCoinsRatesToPersistentCache(result);
+            return result;
+        } catch (e) {
+            improveAndRethrow(e, "CoingeckoCoinsToUsdRatesProvider.getDataByResponse");
+        }
+    }
+}
+
+class MessariCoinsToUsdRatesProvider extends ExternalApiProvider {
+    constructor() {
+        // NOTE: this provider returns only restricted set of assets so should be used with lowest priority
         // https://messari.io/api/docs#tag/Assets
-        endpoint:
-            "https://data.messari.io/api/v1/assets?fields=slug,symbol,metrics/market_data/price_usd,metrics/market_data/percent_change_usd_last_24_hours",
-        httpMethod: "get",
-        RPS: 0.3, // 20 per minute, 1000 per day without API key
-        composeQueryString: () => "",
-        getDataByResponse: response => {
+        super(
+            "https://data.messari.io/api/v2/assets?fields=slug,symbol,metrics/market_data/price_usd,metrics/market_data/percent_change_usd_last_24_hours",
+            "get",
+            15000,
+            ApiGroups.MESSARI
+        );
+    }
+
+    composeQueryString(params, subRequestIndex = 0) {
+        try {
+            // Adapter will fail if there are not supported coins in the list
+            ApiGroupCoinIdAdapters.getCoinIdsListByCoinsListForApiGroup(ApiGroups.MESSARI, params[0]);
+        } catch (e) {
+            improveAndRethrow(e, "MessariCoinsToUsdRatesProvider.composeQueryString");
+        }
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        try {
             let coinsData = response.data?.data;
 
             if (!Array.isArray(coinsData)) throw new Error("Wrong data format for 'messari'");
 
-            const rabbitCoins = Object.keys(Coins.COINS);
+            const enabledCoins = params[0];
             const data = [];
-            for (let i = 0; i < rabbitCoins.length; ++i) {
+            for (let i = 0; i < enabledCoins.length; ++i) {
                 const coinData = coinsData.find(
-                    item => item?.symbol.toUpperCase() === rabbitTickerToStandardTicker(rabbitCoins[i])
+                    item =>
+                        (item?.symbol ?? "").toUpperCase() ===
+                        rabbitTickerToStandardTicker(enabledCoins[i].ticker, enabledCoins[i].protocol)
                 );
-                if (!coinData) throw new Error("Wrong coin symbol for 'messari' " + rabbitCoins[i]);
+                if (!coinData) throw new Error("Wrong coin symbol for 'messari' " + enabledCoins[i].ticker);
                 if (!coinData?.metrics?.market_data?.price_usd)
-                    throw new Error("Wrong price for 'messari' " + rabbitCoins[i]);
+                    throw new Error("Wrong price for 'messari' " + enabledCoins[i].ticker);
                 if (!coinData?.metrics?.market_data?.percent_change_usd_last_24_hours)
-                    throw new Error("Wrong 24h percent for 'messari' " + rabbitCoins[i]);
+                    throw new Error("Wrong 24h percent for 'messari' " + enabledCoins[i].ticker);
 
                 data.push({
-                    coin: Coins.COINS[rabbitCoins[i]],
+                    coin: enabledCoins[i],
                     usdRate: +coinData.metrics.market_data.price_usd,
                     change24hPercent: +coinData.metrics.market_data.percent_change_usd_last_24_hours,
                 });
             }
 
             return data;
-        },
-    },
+        } catch (e) {
+            improveAndRethrow(e, "MessariCoinsToUsdRatesProvider.getDataByResponse");
+        }
+    }
+}
+
+export const consToUSDRatesProviders = [
+    new CoingeckoCoinsToUsdRatesProvider(),
+    new CoincapCoinsToUsdRatesProvider(),
+    new CexCoinsToUsdRatesProvider(),
+    new MessariCoinsToUsdRatesProvider(),
 ];
 
 class CoinToUSDRatesProvider {
     constructor(providers) {
         this.bio = "coinToUSDRatesProvider";
-        this._callerService = new CachedRobustExternalApiCallerService(this.bio, providers, 10000);
-        this._coinsList = Coins.getSupportedCoinsList();
-        this._attemptsCountForDataRetrieval = 10;
+        this._ttlMs = 600_000;
+        this._callerService = new CachedRobustExternalApiCallerService(
+            this.bio,
+            providers,
+            this._ttlMs,
+            100,
+            1000,
+            false
+        );
+        this._attemptsCountForDataRetrieval = 1;
     }
 
     /**
      * Retrieves current coins-usd rates for given coins list and 24h change in %.
-     * Returns cached data if it is retrieved in last 10 seconds
      *
      * @return {Promise<Array<{
      *     coin: Coin,
@@ -204,17 +265,72 @@ class CoinToUSDRatesProvider {
      * }>>}
      */
     async getCoinsToUSDRates() {
+        let persistentCacheForAllSupported = getAllSupportedCoinsRatesFromPersistentCache();
         try {
+            if (
+                typeof persistentCacheForAllSupported?.timestamp === "number" &&
+                persistentCacheForAllSupported.timestamp + this._ttlMs >= Date.now() &&
+                Array.isArray(persistentCacheForAllSupported?.data)
+            ) {
+                return persistentCacheForAllSupported.data;
+            }
+            const enabledCoins = Coins.getEnabledCoinsList();
+            const supportedCoins = Coins.getSupportedCoinsList();
             return await this._callerService.callExternalAPICached(
-                [this._coinsList],
-                7000,
+                [enabledCoins, supportedCoins],
+                25000,
                 null,
                 this._attemptsCountForDataRetrieval,
-                () => ""
+                params => hashFunctionForCacheIdForCoinsList(params[0])
             );
         } catch (e) {
-            improveAndRethrow(e, `${this.bio}.getCoinsToUSDRates`);
+            if (persistentCacheForAllSupported?.data != null) {
+                logError(e, "getCoinsToUSDRates");
+                return persistentCacheForAllSupported.data;
+            } else {
+                improveAndRethrow(e, `${this.bio}.getCoinsToUSDRates`);
+            }
         }
+    }
+}
+
+const hashFunctionForCacheIdForCoinsList = coins =>
+    coins.map(coin => rabbitTickerToStandardTicker(coin.ticker, coin.protocol)).join(",") +
+    "_ccfe9f34-e3db-4e8f-b7c4-9128f3578188";
+
+function saveAllSupportedCoinsRatesToPersistentCache(result) {
+    try {
+        const persistentCacheItem = JSON.stringify({
+            data: result.map(item => ({
+                ticker: item.coin.ticker,
+                usdRate: item.usdRate,
+                change24hPercent: item.change24hPercent,
+            })),
+            timestamp: Date.now(),
+        });
+        cache.putClientPersistentData(persistentCacheIdForWholeCoinsListRates, persistentCacheItem);
+    } catch (e) {
+        improveAndRethrow(e, "saveAllSupportedCoinsRatesToPersistentCache");
+    }
+}
+
+function getAllSupportedCoinsRatesFromPersistentCache() {
+    try {
+        const cachedSerialized = cache.getClientPersistentData(persistentCacheIdForWholeCoinsListRates);
+        if (!cachedSerialized) {
+            return null;
+        }
+        const cached = JSON.parse(cachedSerialized);
+        return {
+            timestamp: cached.timestamp,
+            data: cached.data.map(item => ({
+                coin: Coins.getCoinByTicker(item.ticker),
+                usdRate: item.usdRate,
+                change24hPercent: item.change24hPercent,
+            })),
+        };
+    } catch (e) {
+        improveAndRethrow(e, "saveAllSupportedCoinsRatesToPersistentCache");
     }
 }
 

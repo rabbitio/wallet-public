@@ -13,21 +13,22 @@ export class TransactionDetailsService {
      *
      * @param txId {string} id of transaction to get the details for
      * @param ticker {string} the ticker for coin
+     * @param [transactionType=null] {"in"|"out"|null} optional type of transaction
      * @return {Promise<({
      *             txId: string,
      *             creationTime: number, @description of milliseconds
      *             type: string, @description "incoming"|"outgoing"
      *             isSendingAndReceiving: boolean, @description true if the transaction sends coins to the wallet itself
      *             status: string,
-     *             unconfirmedTime: number|undefined, @description undefined is for confirmed transactions
+     *             unconfirmedTime: (number|undefined), @description undefined is for confirmed transactions
      *             confirmations: number,
      *             explorerLink: string,
      *             address: string, @description target for outgoing transaction; receiving for incoming transaction
-     *             ticker: string @description coin ticker of the transaction
-     *             tickerPrintable: string @description coin ticker of the transaction in printable format
+     *             ticker: string, @description coin ticker of the transaction
+     *             tickerPrintable: string, @description coin ticker of the transaction in printable format
      *             latinName: string,
      *             coinAmount: string,
-     *             fiatAmount: string|null,
+     *             fiatAmount: (string|null),
      *             coinFee: string,
      *             feeCoinTicker: string,
      *             feeCoinTickerPrintable: string,
@@ -37,11 +38,11 @@ export class TransactionDetailsService {
      *             fiatConversionRate: string, @description rate at transaction creation time
      *             note: string|undefined, @description optional - undefined means there is no note
      *             isRbfAble: boolean, @description Whether RBF can be applied for transaction
-     *             purchaseData: { paymentId: string, amountWithCurrencyString: string } | null
-     *         })>}
+     *             purchaseData: ({ paymentId: string, amountWithCurrencyString: string } | null)
+     *         }|null)>}
      */
     // TODO: [tests, moderate] Units
-    static async getTransactionDetails(txId, ticker) {
+    static async getTransactionDetails(txId, ticker, transactionType = null) {
         const loggerSource = "getTransactionDetails";
         try {
             Logger.log(`Start getting for ${txId} ${ticker}`, loggerSource);
@@ -49,38 +50,33 @@ export class TransactionDetailsService {
             if (!ticker) {
                 ticker = (await TransactionCoinService.getCoinByTransaction(txId))?.ticker;
                 Logger.log(`Recognized currency ${txId} ${ticker}`, loggerSource);
+                if (!ticker) return null;
             }
 
             const coin = Coins.getCoinByTicker(ticker);
             const wallet = Wallets.getWalletByCoin(coin);
+            const typeAdopted = transactionType === "incoming" ? "in" : transactionType === "outgoing" ? "out" : null;
             const [transaction, txsData] = await Promise.all([
-                wallet.getTransactionDetails(txId),
+                wallet.getTransactionDetails(txId, typeAdopted),
                 TransactionsDataService.getTransactionsData([txId]),
             ]);
 
-            if (!transaction) {
-                throw new Error("Transaction was not found with id: " + txId);
+            if (transaction == null) {
+                return null;
             }
 
-            const note = txsData.find(item => item.transactionId === txId)?.note;
+            const note = (txsData ?? []).find(item => item.transactionId === txId)?.note;
 
             const coinAmount = coin.atomsToCoinAmount(transaction.amount);
-            const feeCoinAmount = coin.feeCoin.atomsToCoinAmount(transaction.fees);
-            let [
-                [fiatAmount, fiatFee],
-                fiatCurrencyData,
-                coinUSDRateAtCreationDate,
-                usdFiatRate,
-                purchasesData,
-            ] = await Promise.all([
-                CoinsToFiatRatesService.convertCoinAmountsToFiat(coin, [+coinAmount, +feeCoinAmount]),
-                CoinsToFiatRatesService.getCurrentFiatCurrencyData(),
+            const feeCoinAmount = transaction.fees != null ? coin.feeCoin.atomsToCoinAmount(transaction.fees) : null;
+            let fiatCurrencyData = CoinsToFiatRatesService.getCurrentFiatCurrencyData();
+            let [[fiatAmount, fiatFee], coinToCurrentFiatRateAtCreationDate, purchasesData] = await Promise.all([
+                CoinsToFiatRatesService.convertCoinAmountsToFiat(coin, [+coinAmount, +(feeCoinAmount ?? 0)]),
                 CoinsToFiatRatesService.getCoinToCurrentFiatCurrencyRateForSpecificDate(coin, transaction.time),
-                CoinsToFiatRatesService.getUSDtoCurrentSelectedFiatCurrencyRate(),
                 FiatPaymentsService.getPurchaseDataForTransactions([transaction.txid]),
             ]);
 
-            if (coin.doesUseDifferentCoinFee()) {
+            if (coin.doesUseDifferentCoinFee() && transaction.fees != null) {
                 fiatFee = (await CoinsToFiatRatesService.convertCoinAmountsToFiat(coin.feeCoin, [+feeCoinAmount]))[0];
             }
 
@@ -105,19 +101,20 @@ export class TransactionDetailsService {
                 tickerPrintable: coin.tickerPrintable,
                 latinName: coin.latinName,
                 coinAmount: coinAmount,
-                fiatAmount: (fiatAmount != null && fiatAmount.toFixed(fiatCurrencyData.decimalCount)) || null,
-                coinFee: feeCoinAmount,
+                fiatAmount: fiatAmount != null ? Number(fiatAmount).toFixed(fiatCurrencyData.decimalCount) : null,
+                coinFee: feeCoinAmount ?? null,
                 feeCoinTicker: coin.feeCoin.ticker,
                 feeCoinTickerPrintable: coin.feeCoin.tickerPrintable,
-                fiatFee: fiatFee.toFixed(fiatCurrencyData.decimalCount),
+                fiatFee: fiatFee != null ? Number(fiatFee).toFixed(fiatCurrencyData.decimalCount) : null,
                 fiatCurrencyCode: fiatCurrencyData?.currency,
                 fiatCurrencySymbol: fiatCurrencyData?.symbol,
-                fiatConversionRate: (coinUSDRateAtCreationDate?.rate * usdFiatRate || 0).toFixed(
-                    fiatCurrencyData.decimalCount
-                ),
+                fiatConversionRate:
+                    coinToCurrentFiatRateAtCreationDate?.rate != null
+                        ? Number(coinToCurrentFiatRateAtCreationDate.rate).toFixed(fiatCurrencyData.decimalCount)
+                        : null,
                 note: note,
                 isRbfAble: transaction.type === "out" && transaction.isRbfAble,
-                purchaseData: purchasesData[0]?.purchaseData,
+                purchaseData: purchasesData?.length ? purchasesData[0]?.purchaseData : null,
             };
 
             Logger.log(`Returning ${JSON.stringify(result)}`, loggerSource);

@@ -7,15 +7,16 @@ import { getLogger } from "log4js";
  * we just try another.
  */
 export default class RobustExternalAPICallerService {
-    log = getLogger("RobustExternalAPICallerService");
+    log = getLogger("robustExternalAPICallerService");
 
     /**
+     * TODO: [refactoring, moderate] use classes instead of passing objects
      * @param providersData - Array of objects of following format:
      *     {
      *         endpoint: string,
      *         httpMethod: string, // get, post, put, delete, patch
      *         composeQueryString: function accepting array of values for query parameters,
-     *         getDataByResponse: function accepting response object and extracting required data from it
+     *         getDataByResponse: function accepting response object and parameters array and extracting required data from it
      *     }
      */
     constructor(providersData) {

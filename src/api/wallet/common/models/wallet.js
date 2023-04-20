@@ -32,9 +32,10 @@ export class Wallet {
      * Retrieves details for transaction by id
      *
      * @param txId {string} id of transaction to get the details for
+     * @param [transactionType=null] {"in"|"out"|null} optional transaction type
      * @return {Promise<TransactionsHistoryItem|null>} transaction details or null
      */
-    async getTransactionDetails(txId) {
+    async getTransactionDetails(txId, transactionType = null) {
         throw new Error("Not implemented in base Wallet class");
     }
 
@@ -58,19 +59,22 @@ export class Wallet {
     }
 
     /**
-     * Validates given address
+     * Validates given address for sending
      *
      * @param address {string} address to be validated
-     * @return {{result: boolean}} true if address is valid and false otherwise
+     * @return {{ result: true }|{ result: false, errorDescription: string|undefined, howToFix: string|undefined }}
+     *         true if address is valid and false otherwise with optional details
      */
-    isAddressValid(address) {
+    isAddressValidForSending(address) {
         throw new Error("Not implemented in base Wallet class");
     }
 
     /**
      * TODO: [feature, critical] add constant for speed options count for all coins
      *
-     *  Creates 4 fake transactions options with different fee rates for confirmation speed selection
+     * Creates 4 fake transactions options with different fee rates for confirmation speed selection.
+     * Also can return one option - it means this wallet doesn't support prioritisation for transactions.
+     *
      * @param address {string} address to be validated
      * @param coinAmount {string} amount to be validated in coin denomination
      * @param isSendAll {boolean} whether transaction should send all available coins or not
@@ -124,7 +128,7 @@ export class Wallet {
      * @returns {Promise<{ uuid: string, address: string }>} address and its unique id
      */
     async createNewAddress(label) {
-        throw new Error("Not implemented in base Wallet class");
+        throw new Error("New address creation is not supported for " + this?.coin?.ticker);
     }
 
     /**

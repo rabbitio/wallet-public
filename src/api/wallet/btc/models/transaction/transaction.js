@@ -63,7 +63,16 @@ export class Transaction {
                     new Output([txData.changeAddress], change, getOutputTypeByAddress(txData.changeAddress), null, 1)
                 );
             }
-            return new Transaction(txId, confirmations, blockHeight, Date.now(), txData.fee, false, inputs, outputs);
+            return new Transaction(
+                txId,
+                confirmations,
+                blockHeight,
+                Math.floor(Date.now() / 1000),
+                txData.fee,
+                false,
+                inputs,
+                outputs
+            );
         } catch (e) {
             improveAndRethrow(e, "fromTxData");
         }

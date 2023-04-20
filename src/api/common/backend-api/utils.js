@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookie from "js-cookie";
 
 import { API_URL, IS_TESTING } from "../../../properties";
 import { cookieStorage } from "../utils/cookiesStorage";
@@ -10,6 +11,8 @@ import { postponeExecution, safeStringify } from "../utils/browserUtils";
 
 export const API_VERSION_PREFIX = "/api/v1";
 export const urlWithPrefix = `${API_URL}${API_VERSION_PREFIX}`;
+
+export const SESSION_COOKIE_NAME = "sessionId";
 
 export async function doApiCall(
     endpoint,
@@ -63,6 +66,7 @@ export async function doApiCall(
 
             const apiCallError = new ApiCallWrongResponseError(e.response, e.message);
             if (apiCallError.isForbiddenError() && options.doPostEventOnNotAuthenticated) {
+                !IS_TESTING && Cookie.remove(SESSION_COOKIE_NAME);
                 EventBus.dispatch(NO_AUTHENTICATION_EVENT, null, { error: e });
             }
 

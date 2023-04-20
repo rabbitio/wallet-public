@@ -1,5 +1,5 @@
 export default class FiatCurrenciesService {
-    static getFullCurrencyNameByCode(code) {
+    static getFullCurrencyNameByCode(code = "") {
         const data = fiatCurrenciesList.find(currencyData => currencyData[0] === code.toUpperCase());
         return (data && data[2]) || null;
     }
@@ -14,12 +14,12 @@ export default class FiatCurrenciesService {
      * @param code {string} currency code
      * @return {string|null} code or null if there is no symbol for the currency
      */
-    static getCurrencySymbolByCode(code) {
+    static getCurrencySymbolByCode(code = "") {
         const data = fiatCurrenciesList.find(currencyData => currencyData[0] === code.toUpperCase());
         return (data && data[1]) || null;
     }
 
-    static getCurrencyDecimalCountByCode(code) {
+    static getCurrencyDecimalCountByCode(code = "") {
         const data = fiatCurrenciesList.find(currencyData => currencyData[0] === code.toUpperCase());
         return (data && data[3]) || null;
     }

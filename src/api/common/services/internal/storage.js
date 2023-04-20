@@ -7,7 +7,7 @@ import { Network } from "../../../wallet/common/models/networks";
 // TODO: [refactoring, low] Upgrade this logic according to new domains-based code structure
 let storageProvider = !IS_TESTING && localStorage;
 const MAX_LOCAL_STORAGE_VOLUME_BYTES = 5 * 1024 * 1024;
-const MAX_LOGS_STORAGE_BYTES = MAX_LOCAL_STORAGE_VOLUME_BYTES * 0.75;
+const MAX_LOGS_STORAGE_BYTES = MAX_LOCAL_STORAGE_VOLUME_BYTES * 0.65;
 
 export function setStorageProvider(provider) {
     storageProvider = provider;
@@ -205,4 +205,12 @@ export function getDoNotRemoveClientLogsWhenSignedOut() {
 
 export function setDoNotRemoveClientLogsWhenSignedOut(value) {
     storageProvider.setItem("doNotRemoveClientLogsWhenSignedOut", value);
+}
+
+export function getPersistentCacheItem(uniqueKey) {
+    return storageProvider.getItem(uniqueKey);
+}
+
+export function setPersistentCacheItem(uniqueKey, value) {
+    storageProvider.setItem(uniqueKey, value);
 }

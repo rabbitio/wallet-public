@@ -1,13 +1,28 @@
 import { improveAndRethrow } from "../../common/utils/errorUtils";
-import { bitcoinWallet } from "../btc/bitcoinWallet";
+import { Coins } from "../coins";
+import { tronWallet } from "../trx/tronWallet";
 import { ethereumWallet } from "../eth/ethereumWallet";
-import { usdtErc20Wallet } from "../erc20token/tokens/usdtErc20Wallet";
+import { bitcoinWallet } from "../btc/bitcoinWallet";
+import { Erc20TokenWallet } from "../erc20token/models/erc20TokenWallet";
+import { Coin } from "./models/coin";
+import { Trc20TokenWallet } from "../trc20token/models/trc20TokenWallet";
 
 export class Wallets {
-    static _WALLETS = [bitcoinWallet, ethereumWallet, usdtErc20Wallet];
+    static _WALLETS = [
+        bitcoinWallet,
+        ethereumWallet,
+        tronWallet,
+        ...Coins.getCoinsListByProtocol(Coin.PROTOCOLS.ERC20).map(erc20Token => new Erc20TokenWallet(erc20Token)),
+        ...Coins.getCoinsListByProtocol(Coin.PROTOCOLS.TRC20).map(trc20Token => new Trc20TokenWallet(trc20Token)),
+    ];
 
-    static getWalletsForAllSupportedCoins() {
-        return this._WALLETS;
+    static getWalletsForAllEnabledCoins() {
+        try {
+            const enabledCoins = Coins.getEnabledCoinsList() ?? [];
+            return this._WALLETS.filter(w => enabledCoins.find(c => c === w.coin));
+        } catch (e) {
+            improveAndRethrow(e, "getWalletsForAllEnabledCoins");
+        }
     }
 
     /**

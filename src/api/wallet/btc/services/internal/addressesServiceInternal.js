@@ -25,11 +25,13 @@ export default class AddressesServiceInternal {
      * It is better than getting all addresses from server with all other unneeded data and
      * analysing which of them are internal and which are external. It is mostly for internal use.
      *
-     * @return Promise resolving to Object { internal: Array of addresses, external: Array of addresses }
+     * @return {Promise<{ internal: string[], external: string[] }>}
      */
-    static async getAllUsedAddresses() {
+    static async getAllUsedAddresses(indexes = null) {
         try {
-            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
+            if (indexes == null) {
+                indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
+            }
 
             return getAllUsedAddressesByIndexes(getAccountsData(), getCurrentNetwork(), indexes);
         } catch (e) {
@@ -38,7 +40,7 @@ export default class AddressesServiceInternal {
     }
 
     /**
-     * Performs scanning of addresses nodes of wallet to get greatest used nodes index for given networks.
+     * Performs scanning of addresses nodes of wallet to get the greatest used nodes index for given networks.
      * This is very heavy method and should be used accurately. It is for internal use only as normally
      * there is no need to perform exhaustive scanning. We only need it as a part of import process
      * or for maintenance reasons.

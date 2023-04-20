@@ -1,6 +1,6 @@
 import { improveAndRethrow } from "../../common/utils/errorUtils";
 import { ApiCallWrongResponseError, doApiCall, urlWithPrefix } from "../../common/backend-api/utils";
-import AddressesDataApi from "../../wallet/common/backend-api/addressesDataApi";
+import { UserDataAndSettings, UserSettingValue } from "../../wallet/common/models/userDataAndSettings";
 
 // TODO: [tests, moderate] Implement unit tests for these functions
 // TODO: [refactoring, moderate] organize as a class
@@ -61,10 +61,10 @@ export async function saveWalletOnServerAndCreateSession(
 /**
  * Authenticates wallet by walletId and passwordHash and returns object with session or error description.
  *
- * @param walletId - wallet identifier
- * @param passphraseHash - hash needed to check passphrase correctness
- * @param passwordHash - hash of password to check correctness
- * @param ipHash - hash of IP address to verify whitelist matching
+ * @param walletId {string} wallet identifier
+ * @param passphraseHash {string} hash needed to check passphrase correctness
+ * @param passwordHash {string} hash of password to check correctness
+ * @param ipHash {string} hash of IP address to verify whitelist matching
  * @return Promise resolving to authentication result Object
  */
 export async function authenticateAndCreateSession(walletId, passphraseHash, passwordHash, ipHash) {
@@ -73,10 +73,23 @@ export async function authenticateAndCreateSession(walletId, passphraseHash, pas
         const errorMessage = "Failed to perform authentication. ";
         const endpoint = `${urlWithPrefix}/wallets/${walletId}`;
 
-        return await doApiCall(endpoint, "post", requestData, 201, errorMessage, {
+        const result = await doApiCall(endpoint, "post", requestData, 201, errorMessage, {
             doPostEventOnNotAuthenticated: false,
             ipHash,
         });
+        const settingValues = UserDataAndSettings.getAllSettings().map(
+            setting => new UserSettingValue(setting, (result?.settings ?? {})[setting.name])
+        );
+        return !result
+            ? null
+            : {
+                  ...result,
+                  walletData: new UserDataAndSettings(
+                      +result?.creationTime,
+                      +result?.lastPasswordChangeDate,
+                      settingValues
+                  ),
+              };
     } catch (e) {
         improveAndRethrow(e, "authenticateAndCreateSession");
     }
@@ -99,28 +112,6 @@ export async function logoutWallet(walletId) {
             improveAndRethrow(e, "logoutWallet");
         }
     }
-}
-
-/**
- * Performs some get just to check current session.
- *
- * @param walletId - id of wallet to check session for
- * @return Promise resolving to true if the session is valid and false otherwise
- */
-export async function isCurrentClientSessionValidOnServer(walletId) {
-    try {
-        const url = `${urlWithPrefix}/${AddressesDataApi.serverEndpointEntity}/${walletId}/addresses`;
-
-        await doApiCall(url, "get", null, 200, null, { doPostEventOnNotAuthenticated: false });
-    } catch (e) {
-        if (e instanceof ApiCallWrongResponseError && e.isForbiddenError()) {
-            return false;
-        }
-
-        improveAndRethrow(e, "isCurrentClientSessionValidOnServer");
-    }
-
-    return true;
 }
 
 /**

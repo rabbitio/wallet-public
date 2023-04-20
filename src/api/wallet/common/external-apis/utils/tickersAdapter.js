@@ -1,9 +1,13 @@
-import { Coins } from "../../../coins";
-
-export const standardTickerToRabbitTicker = function(ticker) {
-    return ticker.toUpperCase() === "USDT" ? Coins.COINS.USDTERC20.ticker : ticker.toUpperCase();
+export const standardTickerToRabbitTicker = function(ticker, protocol) {
+    return `${ticker}${protocol ?? ""}`.toUpperCase();
 };
 
-export const rabbitTickerToStandardTicker = function(ticker) {
-    return ticker === Coins.COINS.USDTERC20.ticker ? "USDT" : ticker;
+/**
+ * @param ticker {string}
+ * @param protocol {Protocol}
+ * @return {string}
+ */
+export const rabbitTickerToStandardTicker = function(ticker, protocol) {
+    if (protocol) return ticker.split(protocol.protocol)[0];
+    return ticker;
 };

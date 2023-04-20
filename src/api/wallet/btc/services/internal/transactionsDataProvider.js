@@ -19,11 +19,14 @@ import { currentBlockService } from "./currentBlockService";
 import { postponeExecution } from "../../../../common/utils/browserUtils";
 import { MAX_ATTEMPTS_TO_RETRIEVE_TRANSACTIONS_DATA } from "../../../../../properties";
 import {
+    filterTransactionsSpendingTheSameUtxosAsGivenTransaction,
     removeDeclinedDoubleSpendingTransactionsFromList,
     setDoubleSpendFlag,
     setSpendTxId,
 } from "../../lib/transactions/txs-list-calculations";
 import { Logger } from "../../../../support/services/internal/logs/logger";
+import AddressesServiceInternal from "./addressesServiceInternal";
+import { getExtendedTransactionDetails } from "../../lib/transactions/transactions-history";
 
 /**
  * Manages frequent and full scanning for transactions by addresses. Manages transactions data cache filling from
@@ -43,10 +46,12 @@ class TransactionsDataProvider {
          * Period of background data reloading. This interval affects all requests for data as we always return cached data.
          * Depending on using the batch mode for BTC transaction we use different interval timeouts. Internally we do
          * scanning only for frequently used addresses if the batch mode is disabled.
+         * This interval is really critical as we use free APIs to retrieve transactions, and also we have multiple
+         * addresses for BTC so if the batch API is not available we need to do scanning for each address.
          */
         this.dataUpdateTimeoutMS = TransactionsDataRetrieverService.isBatchRetrievalModeWorkingRightNow()
-            ? 35000
-            : 15000;
+            ? 90000
+            : 60000;
 
         /**
          * Max number of polls parameter affect time to fail for long performing requests and also covers max time
@@ -110,10 +115,31 @@ class TransactionsDataProvider {
             const unconfirmedTxsData = await Promise.all(promises);
             const notEmptyData = unconfirmedTxsData.reduce((prev, current, index) => {
                 if (!current) {
-                    this._transactionsData = this._transactionsData.filter(
-                        tx => tx.txid !== unconfirmedTransactions[index].txid
+                    const idOfCheckingTransaction = unconfirmedTransactions[index].txid;
+                    const isThereUnconfirmedDoubleSpendingTxsForCurrentOne = !!filterTransactionsSpendingTheSameUtxosAsGivenTransaction(
+                        current,
+                        unconfirmedTxsData
                     );
-                    return [...prev];
+                    if (!isThereUnconfirmedDoubleSpendingTxsForCurrentOne) {
+                        /**
+                         * Here we are processing case when we have some unconfirmed tx in cache but its data was not
+                         * retrieved from the blockchain above. Normally we need to remove such transaction from the
+                         * list, but we need to take into account RBF case.
+                         *
+                         * When RBF is in progress we have two transactions in cache - old one and new one replacing
+                         * the old tx. Usually replaced transaction is being removed from the mempool right
+                         * after accepting the new replacing one. But from the beginning we decided to show
+                         * both old and new transactions until the new one is confirmed. So we check here whether we
+                         * have not confirmed transaction sending the same UTXO(s) related to this 'detached'
+                         * transaction. And if so we don't remove this 'detached' one from cache as it will be removed
+                         * later in 'removeDeclinedDoubleSpendingTransactionsFromList' method.
+                         * This approach maybe should be reassessed, task_id=4694ca08f41644169b58cd7dad624040
+                         */
+                        this._transactionsData = this._transactionsData.filter(
+                            tx => tx.txid !== idOfCheckingTransaction
+                        );
+                        return [...prev];
+                    }
                 }
 
                 return [...prev, current];
@@ -157,11 +183,16 @@ class TransactionsDataProvider {
             this._transactionsData = improveRetrievedRawTransactionsData(
                 transactionsData,
                 this._transactionsData,
-                true
+                true,
+                false
             );
 
-            // TODO: make below code independent of the above code that can fail and initialization will not be performed
-            await addressesMetadataService.recalculateAddressesMetadataByTransactions(this._transactionsData);
+            try {
+                await addressesMetadataService.recalculateAddressesMetadataByTransactions(this._transactionsData);
+            } catch (e) {
+                logError(e, loggerSource, "Failed to recalculate metadata for addresses");
+            }
+
             if (this._shouldDataRetrievalBeScheduled) {
                 if (TransactionsDataRetrieverService.isBatchRetrievalModeWorkingRightNow()) {
                     this._interval = setInterval(() => this._doFullScanning(), this.dataUpdateTimeoutMS);
@@ -209,6 +240,7 @@ class TransactionsDataProvider {
             this._transactionsData = improveRetrievedRawTransactionsData(
                 transactionsData,
                 this._transactionsData,
+                false,
                 false
             );
             await this._storeConfirmedTransactions();
@@ -271,10 +303,10 @@ class TransactionsDataProvider {
     /**
      * Retrieves a list of Transaction objects for given addresses.
      *
-     * @param addresses - addresses to get transactions for
-     * @param allowDoubleSpend - whether to include double-spending transactions in the returning set, true by default
-     * @param maxPollsCount - max number of data retrieval checks
-     * @return {Promise<Array<Transaction>>} - array of transaction data objects
+     * @param addresses {string[]} addresses to get transactions for
+     * @param [allowDoubleSpend=true] {boolean} whether to include double-spending transactions in the returning set, true by default
+     * @param [maxPollsCount=null] {(number|null)} max number of data retrieval checks
+     * @return {Promise<Transaction[]>} array of transaction data objects
      */
     async getTransactionsByAddresses(addresses, allowDoubleSpend = true, maxPollsCount = null) {
         try {
@@ -302,13 +334,13 @@ class TransactionsDataProvider {
      * Adds new transaction to cache. Useful to add new transaction to cache immediately without waiting for
      * retrieving it from blockchain explorers
      *
-     * @param newTx {Transaction} new tx
-     * @return Promise resolving to undefined
+     * @param newTx {Transaction} new tx data to be added to cache
+     * @return {void}
      */
     pushNewTransactionToCache(newTx) {
         const loggerSource = "pushNewTransactionToCache";
         try {
-            this._transactionsData = improveRetrievedRawTransactionsData([newTx], this._transactionsData);
+            this._transactionsData = improveRetrievedRawTransactionsData([newTx], this._transactionsData, false, false);
             Logger.log(`New transaction pushed to cache: ${newTx.txid}`, loggerSource);
         } catch (e) {
             improveAndRethrow(e, loggerSource);
@@ -379,18 +411,30 @@ class TransactionsDataProvider {
     /**
      * Retrieves details of transaction by its id. The transaction should be inside the local cache.
      *
-     * @param txId - id of tx to get data for
-     * @return {Promise<Transaction>} - Transaction object with details or null if is not found.
+     * @param txId {string} id of tx to get data for
+     * @return {Promise<TransactionsHistoryItem|null>} transaction object with details or null if is not found.
      */
     async getTransactionData(txId) {
         try {
             this._actualizeConfirmationsNumber();
+            const addresses = await AddressesServiceInternal.getAllUsedAddresses();
             if (!this._transactionsData.find(tx => tx.txid === txId)) {
-                const retrievedTx = await retrieveTransactionData(txId, getCurrentNetwork());
-                this._transactionsData = improveRetrievedRawTransactionsData([retrievedTx], this._transactionsData);
+                const gotTx = await retrieveTransactionData(txId, getCurrentNetwork());
+                if (gotTx && Array.isArray(addresses?.internal) && Array.isArray(addresses?.external)) {
+                    const isTransactionRelatedToCurrentWallet = [
+                        ...gotTx.inputs.map(input => input.address),
+                        ...gotTx.outputs.map(output => output.addresses[0]),
+                    ].find(a => addresses.internal.find(int => int === a) || addresses.external.find(ext => ext === a));
+                    if (isTransactionRelatedToCurrentWallet) {
+                        this._transactionsData = improveRetrievedRawTransactionsData([gotTx], this._transactionsData);
+                    }
+                }
             }
-
-            return this._transactionsData.find(tx => tx.txid === txId);
+            let result = this._transactionsData.find(tx => tx.txid === txId);
+            if (result) {
+                result = getExtendedTransactionDetails(result, addresses);
+            }
+            return result ?? null;
         } catch (e) {
             improveAndRethrow(e, "getTransactionData");
         }
@@ -495,7 +539,12 @@ function returnOrPostpone(provider, callback, timeout, resolve, reject, callsCou
     }
 }
 
-const improveRetrievedRawTransactionsData = (newData, oldData, isNewDataStoredOnServer = false) => {
+const improveRetrievedRawTransactionsData = (
+    newData,
+    oldData,
+    isNewDataStoredOnServer = false,
+    sendEventIfThereIsNewTxs = true
+) => {
     newData.forEach(tx => (tx.isStoredOnServer = isNewDataStoredOnServer));
     oldData.forEach(tx => {
         if (!newData.find(newTx => tx.txid === newTx.txid)) {
@@ -508,7 +557,7 @@ const improveRetrievedRawTransactionsData = (newData, oldData, isNewDataStoredOn
     setSpendTxId(newData);
 
     const preparedData = removeDeclinedDoubleSpendingTransactionsFromList(newData);
-    if (preparedData.find(tx => !oldData.find(oldTx => tx.txid === oldTx.txid))) {
+    if (sendEventIfThereIsNewTxs && preparedData.find(tx => !oldData.find(oldTx => tx.txid === oldTx.txid))) {
         EventBus.dispatch(TX_DATA_RETRIEVED_EVENT);
     }
 

@@ -3,7 +3,7 @@ import { Wallet } from "../common/models/wallet";
 import { ethereum } from "./ethereum";
 import { improveAndRethrow } from "../../common/utils/errorUtils";
 import { EthBalanceService } from "./services/ethBalanceService";
-import { EthTransactionsHistoryService } from "./services/ethTransactionsHistoryService";
+import { EthereumTransactionsHistoryService } from "./services/ethereumTransactionsHistoryService";
 import { EthTransactionDetailsService } from "./services/ethTransactionDetailsService";
 import { EthAddressesService } from "./services/ethAddressesService";
 import { EthSendTransactionService } from "./services/ethSendTransactionService";
@@ -18,31 +18,35 @@ class EthereumWallet extends Wallet {
         try {
             return await EthBalanceService.getEthWalletBalance();
         } catch (e) {
-            improveAndRethrow(e, "calculateBalance");
+            improveAndRethrow(e, `${this.coin.ticker}_calculateBalance`);
         }
     }
 
     async getTransactionsList() {
         try {
-            return await EthTransactionsHistoryService.getEthTransactionsHistory();
+            return await EthereumTransactionsHistoryService.getEthereumTransactionsHistory(this.coin);
         } catch (e) {
-            improveAndRethrow(e, "getTransactionsList");
+            improveAndRethrow(e, `${this.coin.ticker}_getTransactionsList`);
         }
     }
 
-    async getTransactionDetails(txId) {
+    async getTransactionDetails(txId, transactionType = null) {
         try {
-            return await EthTransactionDetailsService.getEthTransactionDetails(txId);
+            return await EthTransactionDetailsService.getEthereumBlockchainTransactionDetails(
+                this.coin,
+                txId,
+                transactionType
+            );
         } catch (e) {
-            improveAndRethrow(e, "getTransactionDetails");
+            improveAndRethrow(e, `${this.coin.ticker}_getTransactionDetails`);
         }
     }
 
     async isTxBelongingToWalletsCoin(txId) {
         try {
-            return await EthTransactionDetailsService.isTransactionBelongsToEther(txId);
+            return await EthTransactionDetailsService.isTransactionBelongingToEthereumCoin(this.coin, txId);
         } catch (e) {
-            improveAndRethrow(e, "isTxBelongingToWalletsCoin");
+            improveAndRethrow(e, `${this.coin.ticker}_isTxBelongingToWalletsCoin`);
         }
     }
 
@@ -50,15 +54,15 @@ class EthereumWallet extends Wallet {
         try {
             return EthAddressesService.getCurrentEthAddress();
         } catch (e) {
-            improveAndRethrow(e, "getCurrentAddress");
+            improveAndRethrow(e, `${this.coin.ticker}_getCurrentAddress`);
         }
     }
 
-    isAddressValid(address) {
+    isAddressValidForSending(address) {
         try {
             return { result: ethers.utils.isAddress(address) };
         } catch (e) {
-            improveAndRethrow(e, "isAddressValid");
+            improveAndRethrow(e, `${this.coin.ticker}_isAddressValidForSending`);
         }
     }
 
@@ -73,7 +77,7 @@ class EthereumWallet extends Wallet {
                 balanceCoins
             );
         } catch (e) {
-            improveAndRethrow(e, "createTransactionsWithFakeSignatures");
+            improveAndRethrow(e, `${this.coin.ticker}_createTransactionsWithFakeSignatures`);
         }
     }
 
@@ -86,19 +90,15 @@ class EthereumWallet extends Wallet {
                 txData
             );
         } catch (e) {
-            improveAndRethrow(e, "createTransactionAndBroadcast");
+            improveAndRethrow(e, `${this.coin.ticker}_createTransactionAndBroadcast`);
         }
-    }
-
-    async createNewAddress(label) {
-        throw new Error("New address creation is not supported for " + ethereum.ticker);
     }
 
     async exportWalletData(password) {
         try {
             return EthAddressesService.exportAddressesWithPrivateKeys(password);
         } catch (e) {
-            improveAndRethrow(e, "exportWalletData");
+            improveAndRethrow(e, `${this.coin.ticker}_exportWalletData`);
         }
     }
 
@@ -107,7 +107,7 @@ class EthereumWallet extends Wallet {
             const address = EthAddressesService.getCurrentEthAddress();
             EthTransactionsProvider.actualizeCacheWithNewTransactionSentFromAddress(address, txData, txId);
         } catch (e) {
-            improveAndRethrow(e, "actualizeLocalCachesWithNewTransactionData");
+            improveAndRethrow(e, `${this.coin.ticker}_actualizeLocalCachesWithNewTransactionData`);
         }
     }
 }

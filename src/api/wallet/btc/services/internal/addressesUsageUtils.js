@@ -1,4 +1,3 @@
-import { MAX_COUNT_OF_ATTEMPTS_FOR_DATA_RETRIEVAL } from "../../../../../properties";
 import { transactionsDataProvider } from "./transactionsDataProvider";
 import { improveAndRethrow, logError } from "../../../../common/utils/errorUtils";
 import { TransactionsDataRetrieverService } from "./transactionsDataRetrieverService";
@@ -18,10 +17,11 @@ export class AddressesUsageUtils {
                 network,
                 null,
                 [],
-                MAX_COUNT_OF_ATTEMPTS_FOR_DATA_RETRIEVAL
+                1
             );
 
             try {
+                // Here we push transactions retrieved from external provider to cache so we reduce number of requests inside the cache for actualization
                 await transactionsDataProvider.updateTransactionsCacheAndPushTxsToServer(transactions);
             } catch (e) {
                 logError(e, "getAddressesUsage", "Failed to update transactions cache");

@@ -18,9 +18,9 @@ export const NUMBER_OF_DATES_TO_CHECK_RATES_FOR = 30;
 export const NOTIFICATIONS_API_TOKEN_HASH =
     /* 9958ba11-177b-418c-9de4-bf543439f5cb */ "4b1a9487c102014dfaf1d7ed18792d22c40289eabf5df01de6f121e101d654c4d28b0e8a6f3ccc66e70b51dc22a1270067963410a2475554fc0eb5eae96d727a";
 export const SUPPORT_EMAIL = "support@rabbit.io";
-export const SUPPORT_EMAIL_PASSWORD = "gmd4na8Rka5aOxWJTJLj3Q"; // Set this password for when you run new instance of the Proton Mail Bridge
+export const SUPPORT_EMAIL_PASSWORD = "gTtPRUm1FdICKJ9o-IZORA"; // Set this password for when you run new instance of the Proton Mail Bridge
 export const EMAIL_BRIDGE_PORT = 2025;
-export const EMAIL_BRIDGE_HOST = "127.0.0.1";
+export const EMAIL_BRIDGE_HOST = "159.65.119.168";
 export const RAMP_PUBLIC_KEY =
     "-----BEGIN PUBLIC KEY-----\n" +
     "MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEevN2PMEeIaaMkS4VIfXOqsLebj19kVeu\n" +

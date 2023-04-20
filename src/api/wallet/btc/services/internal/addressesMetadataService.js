@@ -19,24 +19,28 @@ class AddressesMetadataService {
      * @return {Promise<Array<string>>}
      */
     async getAddressesForFrequentScanning() {
-        const addressType = await AddressesService.getAddressesType();
-        const alternativeType =
-            addressType === AddressesService.ADDRESSES_TYPES.SEGWIT
-                ? AddressesService.ADDRESSES_TYPES.LEGACY
-                : AddressesService.ADDRESSES_TYPES.SEGWIT;
-        const lastAddresses = await AddressesService.getLastAddresses([
-            { count: 2, change: false, type: addressType },
-            { count: 1, change: true, type: addressType },
-            { count: 1, change: false, type: alternativeType },
-            { count: 1, change: true, type: alternativeType },
-        ]);
+        try {
+            const addressType = AddressesService.getAddressesType();
+            const alternativeType =
+                addressType === AddressesService.ADDRESSES_TYPES.SEGWIT
+                    ? AddressesService.ADDRESSES_TYPES.LEGACY
+                    : AddressesService.ADDRESSES_TYPES.SEGWIT;
+            const lastAddresses = await AddressesService.getLastAddresses([
+                { count: 2, change: false, type: addressType },
+                { count: 1, change: true, type: addressType },
+                { count: 1, change: false, type: alternativeType },
+                { count: 1, change: true, type: alternativeType },
+            ]);
 
-        const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-        const frequentAddresses = this._addressesMetadata
-            .filter(addressMetadata => addressMetadata.txsCount > 3 && addressMetadata.lastTxTimestamp > monthAgo)
-            .map(addressMetadata => addressMetadata.address);
+            const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+            const frequentAddresses = this._addressesMetadata
+                .filter(addressMetadata => addressMetadata.txsCount > 3 && addressMetadata.lastTxTimestamp > monthAgo)
+                .map(addressMetadata => addressMetadata.address);
 
-        return [...frequentAddresses, ...lastAddresses];
+            return [...frequentAddresses, ...lastAddresses];
+        } catch (e) {
+            improveAndRethrow(e, "getAddressesForFrequentScanning");
+        }
     }
 
     /**

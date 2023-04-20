@@ -1,9 +1,7 @@
 import { setupMediators } from "./common/services/mediators/mediators";
 import ClientIpHashService from "./auth/services/internal/clientIpHashService";
-import CoinsToFiatRatesService from "./wallet/common/services/coinsToFiatRatesService";
 import { registerThisWalletAsBitcoinProtocolHandler } from "./common/utils/browserUtils";
 import { isCurrentSessionValid } from "./auth/services/authService";
-import ChangeAddressUpdateSchedulingService from "./wallet/btc/services/changeAddressUpdateSchedulingService";
 import {
     EventBus,
     THERE_IS_NO_SESSION_ON_APP_INITIALIZATION_EVENT,
@@ -17,6 +15,7 @@ import { IS_TESTING } from "../properties";
 import { ScheduledLogger } from "./support/services/internal/logs/scheduledLogger";
 import { LogsStorage } from "./support/services/internal/logs/logsStorage";
 
+// TODO: [refactoring, moderate] wrap initializers into neat functions for readability
 export function setupAppAndInitializeBackgroundTasks(
     handleNotFoundSession,
     handleLogout,
@@ -27,14 +26,13 @@ export function setupAppAndInitializeBackgroundTasks(
         IS_TESTING ? [] : ClientIpHashService.provideIpHashStoredAndItsUpdate,
         () =>
             (async () => {
-                if (await isCurrentSessionValid()) {
+                if (await isCurrentSessionValid(false)) {
                     EventBus.dispatch(THERE_IS_SESSION_ON_APP_INITIALIZATION_EVENT);
                 } else {
                     EventBus.dispatch(THERE_IS_NO_SESSION_ON_APP_INITIALIZATION_EVENT);
                 }
             })(),
         () => setupMediators(handleNotFoundSession, handleLogout, handleNewNotLocalTxs, handleDiscoveredAuthentication),
-        () => CoinsToFiatRatesService.scheduleCoinsToFiatRatesUpdate(),
         IS_TESTING
             ? []
             : () =>
@@ -42,19 +40,6 @@ export function setupAppAndInitializeBackgroundTasks(
                       PaymentUrlService.URL_PARAMETER_NAME,
                       PaymentUrlService.URL_PATH
                   ),
-        IS_TESTING
-            ? []
-            : async () => {
-                  try {
-                      if (await isCurrentSessionValid()) {
-                          ChangeAddressUpdateSchedulingService.scheduleChangeAddressUpdates();
-                      } else {
-                          ChangeAddressUpdateSchedulingService.removeScheduledChangeAddressUpdating();
-                      }
-                  } catch (e) {
-                      logError(e);
-                  }
-              },
         IS_TESTING ? [] : () => blocksListener.setupListeningForNewBlocks(),
         () => currentBlockService.initialize(),
         IS_TESTING ? [] : ScheduledLogger.logWalletSlicePeriodically,
@@ -67,7 +52,7 @@ export function setupAppAndInitializeBackgroundTasks(
             try {
                 await initializer();
             } catch (e) {
-                logError(e);
+                logError(e, "initializer failed");
             }
         })();
     });

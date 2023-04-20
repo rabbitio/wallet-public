@@ -1,77 +1,19 @@
-import { COINS_TO_FIAT_RATES_LIFETIME, USD_FIAT_RATES_LIFETIME } from "../../../../properties";
-import { getWalletId } from "../../../common/services/internal/storage";
 import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
 import FiatCurrenciesService from "../../../fiat/services/internal/fiatCurrenciesService";
 import USDFiatRatesProvider from "../../../fiat/external-apis/usdFiatRatesExternalAPIs";
 import { Logger } from "../../../support/services/internal/logs/logger";
-import { WalletDataApi } from "../backend-api/walletDataApi";
 import { coinToUSDRatesProvider } from "../external-apis/coinToUSDRatesProvider";
 import { coinToUSDRateAtSpecificDateProvider } from "../external-apis/coinToUSDRateAtSpecificDateProvider";
+import { EventBus, FIAT_CURRENCY_CHANGED_EVENT } from "../../../common/adapters/eventbus";
+import { PreferencesService } from "./preferencesService";
+import { UserDataAndSettings } from "../models/userDataAndSettings";
 
 /**
  * Implements retrieving and caching of Coins to USD and USD to fiat rates data.
  * Caching is used to avoid number of calls of external services to improve performance of the application.
  */
 export default class CoinsToFiatRatesService {
-    static _intervalUpdatingCoinsUSDRate = null;
-    static _intervalUpdatingUSDFiatRates = null;
-
-    static _selectedCurrency = null;
-    static _cache = {
-        // TODO: [featurr, moderate] Switch to using the standard "cache" object and fix tests
-        coinsUsdRate: [],
-        usdFiatRates: [],
-    };
-
     static USD_CURRENCY_CODE = "USD";
-
-    /**
-     * Schedules auto update of coins -> usd and usd -> fiat rates.
-     *
-     * This method should be called during the initialization to ensure update of rates data.
-     */
-    static scheduleCoinsToFiatRatesUpdate() {
-        try {
-            this._intervalUpdatingCoinsUSDRate != null && clearInterval(this._intervalUpdatingCoinsUSDRate);
-            this._intervalUpdatingUSDFiatRates != null && clearInterval(this._intervalUpdatingUSDFiatRates);
-
-            this._intervalUpdatingCoinsUSDRate = setInterval(() => {
-                (async () => await this._tryToUpdateCachedCoinsUSDRate())();
-            }, COINS_TO_FIAT_RATES_LIFETIME);
-
-            this._intervalUpdatingUSDFiatRates = setInterval(() => {
-                (async () => await this._tryToUpdateCachedUSDFiatRates())();
-            }, USD_FIAT_RATES_LIFETIME);
-        } catch (e) {
-            improveAndRethrow(e, "scheduleCoinsToFiatRatesUpdate");
-        }
-    }
-
-    static async _tryToUpdateCachedCoinsUSDRate() {
-        try {
-            const newRates = await coinToUSDRatesProvider.getCoinsToUSDRates();
-            if (newRates != null) {
-                this._cache.coinsUsdRate = newRates;
-            } else {
-                throw new Error("Failed to retrieve new coins-usd rates.");
-            }
-        } catch (e) {
-            logError(e, null, "Failed to update coins-usd rates. ");
-        }
-    }
-
-    static async _tryToUpdateCachedUSDFiatRates() {
-        try {
-            const newRates = await USDFiatRatesProvider.getUSDFiatRates();
-            if (newRates != null && newRates.length) {
-                this._cache.usdFiatRates = newRates.filter(item => FiatCurrenciesService.isCodeValid(item.currency));
-            } else {
-                throw new Error("Failed to retrieve new usd-fiat rates.");
-            }
-        } catch (e) {
-            logError(e, null, "Failed to update usd-fiat rates data. ");
-        }
-    }
 
     /**
      * Returns coin-usd rate data
@@ -86,9 +28,8 @@ export default class CoinsToFiatRatesService {
      */
     static async getCoinToUSDRate(coin) {
         try {
-            await this._fillCacheIfNeeded();
-
-            const coinUsdRate = this._cache.coinsUsdRate.find(item => item.coin.ticker === coin.ticker);
+            const rates = await coinToUSDRatesProvider.getCoinsToUSDRates();
+            const coinUsdRate = rates.find(item => item.coin.ticker === coin.ticker);
             if (!coinUsdRate?.usdRate) {
                 throw new Error("No rate for given coin: " + coin.ticker);
             }
@@ -120,9 +61,8 @@ export default class CoinsToFiatRatesService {
      */
     static async getListOfFiatCurrencies() {
         try {
-            await this._fillCacheIfNeeded();
-
-            const currenciesList = this._cache.usdFiatRates.map(rate => rate.currency);
+            const rates = await USDFiatRatesProvider.getUSDFiatRates();
+            const currenciesList = rates.map(rate => rate.currency);
             !currenciesList.includes(this.USD_CURRENCY_CODE) && currenciesList.push(this.USD_CURRENCY_CODE);
 
             return currenciesList.map(code => {
@@ -152,14 +92,13 @@ export default class CoinsToFiatRatesService {
      */
     static async getListOfMostPopularFiatCurrencies(numberOfCurrencies = 7) {
         try {
-            await this._fillCacheIfNeeded();
-
             const mostPopular = [this.USD_CURRENCY_CODE, "EUR", "CNH", "GBP", "CHF", "CAD", "JPY"].slice(
                 0,
                 numberOfCurrencies
             );
+            const usdFiatRates = await USDFiatRatesProvider.getUSDFiatRates();
             const codesList = mostPopular.filter(
-                c => c === this.USD_CURRENCY_CODE || this._cache.usdFiatRates.find(rate => rate.currency === c)
+                code => code === this.USD_CURRENCY_CODE || usdFiatRates.find(rate => rate.currency === code)
             );
             return codesList.map(code => {
                 return {
@@ -177,16 +116,18 @@ export default class CoinsToFiatRatesService {
     /**
      * Retrieves currently selected fiat currency data
      *
-     * @return {Promise<{
+     * @return {{
      *              currency: string,
      *              currencyName: string,
      *              symbol: string,
      *              decimalCount: number
-     *          }>}
+     *          }}
      */
-    static async getCurrentFiatCurrencyData() {
+    static getCurrentFiatCurrencyData() {
         try {
-            const currencyCode = await this._getAndSaveFiatCurrencyCodeIfNeeded();
+            const currencyCode =
+                PreferencesService.getUserSettingValue(UserDataAndSettings.SETTINGS.CURRENCY_CODE) ??
+                this.USD_CURRENCY_CODE;
             return {
                 currency: currencyCode,
                 currencyName: FiatCurrenciesService.getFullCurrencyNameByCode(currencyCode),
@@ -233,69 +174,11 @@ export default class CoinsToFiatRatesService {
                 throw new Error("Code is not valid.");
             }
 
-            await WalletDataApi.savePreference(getWalletId(), "currencyCode", code);
-            this._selectedCurrency = code;
+            await PreferencesService.cacheAndSaveSetting(UserDataAndSettings.SETTINGS.CURRENCY_CODE, code);
+
+            EventBus.dispatch(FIAT_CURRENCY_CHANGED_EVENT);
         } catch (e) {
             improveAndRethrow(e, "saveCurrentFiatCurrency");
-        }
-    }
-
-    static async _fillCacheIfNeeded() {
-        if (this._cache.coinsUsdRate == null || !this._cache.coinsUsdRate.length) {
-            try {
-                await this._tryToUpdateCachedCoinsUSDRate();
-            } catch (e) {
-                logError(e, "_fillCacheIfNeeded", "Failed to save coins-usd rates to local service cache.");
-            }
-        }
-
-        if (this._cache.usdFiatRates == null || !this._cache.usdFiatRates.length) {
-            try {
-                await this._tryToUpdateCachedUSDFiatRates();
-            } catch (e) {
-                logError(e, "_fillCacheIfNeeded", "Failed to save usd-fiat rates to local service cache.");
-            }
-        }
-    }
-
-    static async _getAndSaveFiatCurrencyCodeIfNeeded() {
-        try {
-            await this._fillCacheIfNeeded();
-
-            if (this._selectedCurrency != null && this._selectedCurrency !== this.USD_CURRENCY_CODE) {
-                const rateData = this._cache.usdFiatRates.find(rate => rate.currency === this._selectedCurrency);
-                // TODO: [feature, moderate] Notify user that we changed the currency automatically
-                !rateData && (await this._saveDefaultCurrencyCode());
-            } else if (!this._selectedCurrency) {
-                try {
-                    const walletData = await WalletDataApi.getWalletData(getWalletId());
-                    const code = (walletData?.settings?.currencyCode || "").toUpperCase();
-                    const rateData = this._cache.usdFiatRates.find(rate => rate.currency === code);
-                    if (rateData != null) {
-                        this._selectedCurrency = code;
-                    }
-                } catch (e) {
-                    this._selectedCurrency = null;
-                    logError(e, "_getAndSaveFiatCurrencyCodeIfNeeded", "Failed to get saved currency code.");
-                } finally {
-                    if (!this._selectedCurrency) {
-                        await this._saveDefaultCurrencyCode();
-                    }
-                }
-            }
-
-            return this._selectedCurrency;
-        } catch (e) {
-            improveAndRethrow(e, "_getAndSaveFiatCurrencyCodeIfNeeded");
-        }
-    }
-
-    static async _saveDefaultCurrencyCode() {
-        this._selectedCurrency = this.USD_CURRENCY_CODE;
-        try {
-            await WalletDataApi.savePreference(getWalletId(), "currencyCode", this.USD_CURRENCY_CODE);
-        } catch (e) {
-            logError(e, "_saveDefaultCurrencyCode", "Failed to save USD currency code.");
         }
     }
 
@@ -306,13 +189,18 @@ export default class CoinsToFiatRatesService {
      */
     static async getUSDtoCurrentSelectedFiatCurrencyRate() {
         try {
-            await Promise.all([
-                this._fillCacheIfNeeded().catch(e => logError(e, null, "Failed to fill cache.")),
-                this._getAndSaveFiatCurrencyCodeIfNeeded(),
-            ]);
-
-            if (this._selectedCurrency !== this.USD_CURRENCY_CODE) {
-                const rate = this._cache.usdFiatRates.find(item => item.currency === this._selectedCurrency)?.rate;
+            let currentlySelectedFiatCurrencyCode;
+            try {
+                currentlySelectedFiatCurrencyCode = PreferencesService.getUserSettingValue(
+                    UserDataAndSettings.SETTINGS.CURRENCY_CODE
+                );
+            } catch (e) {
+                logError(e, null, "Failed to fill cache.");
+                currentlySelectedFiatCurrencyCode = this.USD_CURRENCY_CODE;
+            }
+            if (currentlySelectedFiatCurrencyCode !== this.USD_CURRENCY_CODE) {
+                const usdFiatRates = await USDFiatRatesProvider.getUSDFiatRates();
+                const rate = usdFiatRates.find(item => item.currency === currentlySelectedFiatCurrencyCode)?.rate;
                 if (rate) {
                     return rate;
                 }
@@ -344,32 +232,35 @@ export default class CoinsToFiatRatesService {
         let dateString;
         try {
             dateString = new Date(timestamp).toDateString();
-            Logger.log(`Start getting rate: ${dateString} ${coin.ticker}`, loggerSource);
-            await this._fillCacheIfNeeded();
+
             let coinUsdRate;
             if (new Date().toDateString() === new Date(timestamp).toDateString()) {
-                coinUsdRate = this._cache.coinsUsdRate.find(item => item.coin.ticker === coin.ticker)?.usdRate;
-                Logger.log(`Got for current date for ${coin.ticker}: ${coinUsdRate}`, loggerSource);
+                const coinsUsdRates = await coinToUSDRatesProvider.getCoinsToUSDRates();
+                coinUsdRate = coinsUsdRates.find(item => item.coin.ticker === coin.ticker)?.usdRate;
             } else {
                 coinUsdRate = await coinToUSDRateAtSpecificDateProvider.getCoinToUSDRateAtSpecificDate(coin, timestamp);
                 Logger.log(`Got for ${dateString} for ${coin.ticker}: ${coinUsdRate}`, loggerSource);
             }
 
-            if (!coinUsdRate) {
+            if (coinUsdRate == null) {
                 Logger.log(`Not found for ${coin.ticker} at ${dateString}: ${coinUsdRate}`, loggerSource);
                 throw new Error("No rate for given coin: " + coin.ticker);
             }
 
-            let currentFiatCurrency = (await this._getAndSaveFiatCurrencyCodeIfNeeded()) || this.USD_CURRENCY_CODE;
-            let usdToFiatRate = this._cache.usdFiatRates.find(rate => rate.currency === currentFiatCurrency)?.rate ?? 1;
-            (!usdToFiatRate || usdToFiatRate === 1) && (currentFiatCurrency = this.USD_CURRENCY_CODE);
+            let currentFiatCurrency =
+                PreferencesService.getUserSettingValue(UserDataAndSettings.SETTINGS.CURRENCY_CODE) ??
+                this.USD_CURRENCY_CODE;
+            const usdFiatRates = await USDFiatRatesProvider.getUSDFiatRates();
+            let usdToFiatRate = usdFiatRates.find(rate => rate.currency === currentFiatCurrency)?.rate ?? null;
+            if (usdToFiatRate == null) {
+                currentFiatCurrency = this.USD_CURRENCY_CODE;
+                usdToFiatRate = 1;
+            }
 
             return {
                 currency: currentFiatCurrency,
                 currencyName: FiatCurrenciesService.getFullCurrencyNameByCode(currentFiatCurrency),
-                rate: +(coinUsdRate * usdToFiatRate).toFixed(
-                    FiatCurrenciesService.getCurrencyDecimalCountByCode(currentFiatCurrency)
-                ),
+                rate: +coinUsdRate * usdToFiatRate,
                 decimals: FiatCurrenciesService.getCurrencyDecimalCountByCode(currentFiatCurrency),
                 symbol: FiatCurrenciesService.getCurrencySymbolByCode(currentFiatCurrency),
             };

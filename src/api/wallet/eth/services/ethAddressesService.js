@@ -4,20 +4,20 @@ import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { getAccountsData, getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
 import { getDecryptedWalletCredentials } from "../../../auth/services/authService";
-import { EthKeys } from "../lib/ethKeys";
+import { KeysBip44 } from "../../common/lib/keysBip44";
 
 export class EthAddressesService {
     /**
      * Retrieves ethereum address for current wallet. Derivation path: m/44'/60'/0'/0/0
      *
-     * @returns {string} ethereum address
+     * @returns {string} ethereum address string
      */
     static getCurrentEthAddress() {
         try {
             const ethNetwork = getCurrentNetwork(Coins.COINS.ETH);
             const accountsData = getAccountsData();
             const accountData = accountsData.getAccountData(bip44Scheme, ethNetwork, 0);
-            const publicKey = EthKeys.generateAddressPublicKeyByAccountPublicKey(accountData);
+            const publicKey = KeysBip44.generateAddressPublicKeyByAccountPublicKey(accountData);
 
             return ethers.utils.computeAddress(publicKey).toLowerCase();
         } catch (e) {
@@ -35,7 +35,7 @@ export class EthAddressesService {
         try {
             const ethNetwork = getCurrentNetwork(Coins.COINS.ETH);
             const { mnemonic, passphrase } = getDecryptedWalletCredentials(password);
-            const { publicKey, privateKey } = EthKeys.generateKeysForAccountAddressByWalletCredentials(
+            const { publicKey, privateKey } = KeysBip44.generateKeysForAccountAddressByWalletCredentials(
                 mnemonic,
                 passphrase,
                 ethNetwork

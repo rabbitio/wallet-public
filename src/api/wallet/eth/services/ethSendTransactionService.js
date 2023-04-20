@@ -5,7 +5,7 @@ import { Logger } from "../../../support/services/internal/logs/logger";
 import { TxData } from "../../common/models/tx-data";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
-import { EthKeys } from "../lib/ethKeys";
+import { KeysBip44 } from "../../common/lib/keysBip44";
 import { ethFeeRatesProvider } from "../external-apis/ethFeeRatesProvider";
 import { EthBalanceService } from "./ethBalanceService";
 import { Erc20transactionUtils } from "../../erc20token/lib/erc20transactionUtils";
@@ -36,12 +36,6 @@ export class EthSendTransactionService {
      *                 }[],
      *             isFeeCoinBalanceZero: boolean,
      *             isFeeCoinBalanceNotEnoughForAllOptions: boolean,
-     *         }
-     *         |
-     *         {
-     *             result: false,
-     *             errorDescription: string,
-     *             howToFix: string
      *         }>}
      *         Each correctly calculated TxData contain "rate" filed filled with the object
      *         { rate: string, maxPriorityFeePerGasWei: BigNumber } (rate in wei)
@@ -117,7 +111,7 @@ export class EthSendTransactionService {
         try {
             const network = getCurrentNetwork(coin);
             const provider = new ethers.providers.AlchemyProvider(network.key, ETH_PR_K);
-            const { privateKey } = EthKeys.generateKeysForAccountAddressByWalletCredentials(
+            const { privateKey } = KeysBip44.generateKeysForAccountAddressByWalletCredentials(
                 mnemonic,
                 passphrase,
                 network

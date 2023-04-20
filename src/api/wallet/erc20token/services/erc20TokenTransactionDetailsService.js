@@ -1,6 +1,5 @@
 import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
 import { EthTransactionDetailsService } from "../../eth/services/ethTransactionDetailsService";
-import { Erc20transactionUtils } from "../lib/erc20transactionUtils";
 
 export class Erc20TokenTransactionDetailsService {
     /**
@@ -8,17 +7,12 @@ export class Erc20TokenTransactionDetailsService {
      *
      * @param coin {Coin} coin the tx belongs to
      * @param txId {string} id of transaction (hash)
+     * @param type {("in"|"out"|null)}} tx type
      * @returns {Promise<TransactionsHistoryItem>} history item
      */
-    static async getErc20TransactionDetails(coin, txId) {
+    static async getErc20TransactionDetails(coin, txId, type = null) {
         try {
-            const ethTxItem = await EthTransactionDetailsService.getEthTransactionDetails(txId);
-
-            if (!Erc20transactionUtils.isEthereumTransactionErc20TokenTransfer(coin, ethTxItem)) {
-                throw new Error(`The transaction doesn't correspond to given coin: ${ethTxItem.txid} ${coin.ticker}`);
-            }
-
-            return Erc20transactionUtils.etherTransactionsHistoryItemToErc20TransactionsHistoryItem(coin, ethTxItem);
+            return await EthTransactionDetailsService.getEthereumBlockchainTransactionDetails(coin, txId, type);
         } catch (e) {
             improveAndRethrow(e, "getErc20TransactionDetails");
         }
@@ -33,8 +27,8 @@ export class Erc20TokenTransactionDetailsService {
      */
     static async doesTxBelongToErc20Token(coin, txId) {
         try {
-            const ethereumHistoryItem = await EthTransactionDetailsService.getEthTransactionDetails(txId);
-            return Erc20transactionUtils.isEthereumTransactionErc20TokenTransfer(coin, ethereumHistoryItem);
+            const tx = await EthTransactionDetailsService.getEthereumBlockchainTransactionDetails(coin, txId, null);
+            return !!tx;
         } catch (e) {
             logError(
                 e,

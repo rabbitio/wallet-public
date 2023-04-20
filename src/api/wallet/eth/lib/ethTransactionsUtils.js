@@ -15,4 +15,9 @@ export class EthTransactionsUtils {
             improveAndRethrow(e, "isEthereumTransactionAEtherTransfer");
         }
     }
+
+    static estimateEthereumConfirmationsByTimestamp(timestamp) {
+        const averageBlockTimeMs = 13000;
+        return Math.ceil((Date.now() - timestamp) / averageBlockTimeMs);
+    }
 }

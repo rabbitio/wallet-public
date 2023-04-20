@@ -1,49 +1,51 @@
-import { doApiCall, urlWithPrefix } from "../../../common/backend-api/utils";
+import { ApiCallWrongResponseError, doApiCall, urlWithPrefix } from "../../../common/backend-api/utils";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
+import { UserDataAndSettings, UserSettingValue } from "../models/userDataAndSettings";
 
+// TODO: [refactoring, high] Rename to AccountDataApi
 export class WalletDataApi {
     /**
      * Saves preference on server
      *
-     * @param walletId - id of wallet
-     * @param preferenceName - name of preference to be saved
-     * @param preferenceValue - string value of preference to be saved
-     * @return Promise resolving to void
+     * @param walletId {string} id of wallet
+     * @param preferenceName {string} name of preference to be saved
+     * @param preferenceValue {string} string value of preference to be saved
+     * @return {Promise<void>}
      */
-    static async savePreference(walletId, preferenceName, preferenceValue) {
+    static async saveUserSetting(walletId, preferenceName, preferenceValue) {
         try {
             const url = `${urlWithPrefix}/wallets/${walletId}/settings`;
 
             await doApiCall(url, "put", { [preferenceName]: preferenceValue }, 204, "Failed to save preference");
         } catch (e) {
-            improveAndRethrow(e, "savePreference");
+            improveAndRethrow(e, "saveUserSetting");
         }
     }
 
     /**
-     * Retrieves wallet data
+     * Retrieves account data or null if failed to authenticate
      *
-     * @param walletId - id of wallet to get data for
-     * @return Promise resolving to data object:
-     *         {
-     *             walletId: string,
-     *             creationTime: timestamp(number),
-     *             lastPasswordChangeDate: timestamp(number),
-     *             settings: {
-     *                  currencyCode: string | null,
-     *                  addressesType: string | null,
-     *                  lastNotificationsViewTimestamp: timestamp(number),
-     *                  showFeeRates: boolean,
-     *             },
-     *         }
+     * @param walletId {string} id of wallet to get data for
+     * @param [doNotNotifyForNoSession=false] {boolean} whether to notify app about missing session for request requiring session
+     * @return {Promise<UserDataAndSettings|null>}
+     *         null means forbidden error
      */
-    static async getWalletData(walletId) {
+    static async getAccountData(walletId, doNotNotifyForNoSession = false) {
         try {
             const url = `${urlWithPrefix}/wallets/${walletId}`;
 
-            return await doApiCall(url, "get", null, 200);
+            const result = await doApiCall(url, "get", null, 200, "", {
+                doPostEventOnNotAuthenticated: doNotNotifyForNoSession,
+            });
+            const settingValues = UserDataAndSettings.getAllSettings().map(
+                setting => new UserSettingValue(setting, (result?.settings ?? {})[setting.name])
+            );
+            return new UserDataAndSettings(result.creationTime, result.lastPasswordChangeDate, settingValues);
         } catch (e) {
-            improveAndRethrow(e, "getWalletData");
+            if (e instanceof ApiCallWrongResponseError && e.isForbiddenError()) {
+                return null;
+            }
+            improveAndRethrow(e, "getAccountData");
         }
     }
 }

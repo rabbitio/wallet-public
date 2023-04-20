@@ -1,42 +1,44 @@
 import { ethers } from "ethers";
 import { Coin } from "../../common/models/coin";
 import { Network } from "../../common/models/networks";
-import { NumbersUtils } from "../../common/utils/numbersUtils";
 import { bip44Scheme } from "../../btc/lib/addresses-schemes";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
+import { ethereum } from "../../eth/ethereum";
+import { NumbersUtils } from "../../common/utils/numbersUtils";
 
-class UsdtErc20 extends Coin {
-    constructor() {
+export class Erc20Token extends Coin {
+    constructor(latinName, tickerPrintable, digitsCountAfterComma, contractAddress, atomName = "", maxValue = null) {
         super(
-            "Tether ERC20",
-            "USDTERC20",
-            "USDT",
-            6,
-            null,
-            "milli-cent",
+            latinName,
+            `${tickerPrintable}${Coin.PROTOCOLS.ERC20.protocol}`,
+            tickerPrintable,
+            digitsCountAfterComma,
+            maxValue,
+            atomName,
             new Network("mainnet", 60, 0, 1, 24, [bip44Scheme]),
             new Network("goerli", 60, 0, 1, 24, [bip44Scheme]),
             16,
             "gas",
             ["30min", "5min", "3.5min", "2min"],
             60000,
-            "ERC20",
-            "0xdac17f958d2ee523a2206206994597c13d831ec7"
+            Coin.BLOCKCHAINS.ETHEREUM,
+            Coin.PROTOCOLS.ERC20,
+            contractAddress
         );
+        this.feeCoin = ethereum;
     }
 
     atomsToCoinAmount(atoms) {
-        return NumbersUtils.removeRedundantRightZerosFromNumberString((+atoms / 1000000).toFixed(this.digits));
+        return ethers.utils.formatUnits("" + atoms, this.digits);
     }
 
-    atomsToCoinAmountSignificantString(atoms) {
-        return NumbersUtils.removeRedundantRightZerosFromNumberString(
-            (+atoms / 1000000).toFixed(Math.min(this.digits, this._significantDigits))
-        );
+    atomsToCoinAmountSignificantString(atoms, maxNumberLength = null) {
+        const coinAmountString = ethers.utils.formatUnits("" + atoms, this.digits);
+        return NumbersUtils.trimCurrencyAmount(coinAmountString, this.digits, maxNumberLength);
     }
 
     coinAmountToAtoms(coinsAmount) {
-        return NumbersUtils.removeRedundantRightZerosFromNumberString("" + Math.floor(+coinsAmount * 1000000));
+        return ethers.utils.parseUnits("" + coinsAmount, this.digits).toString();
     }
 
     composeUrlToTransactionExplorer(txId) {
@@ -49,5 +51,3 @@ class UsdtErc20 extends Coin {
         return (+ethers.utils.formatUnits("" + coinAtomsString, "gwei")).toFixed(1) + " gw/gas";
     }
 }
-
-export const usdtErc20 = new UsdtErc20();

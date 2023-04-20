@@ -8,18 +8,27 @@ import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { ExternalBlocksApiCaller } from "./blocksAPI";
 import { Coins } from "../../coins";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
+import { ApiGroups } from "../../../common/external-apis/apiGroups";
 
-const providers = [
-    {
-        endpoint: "https://blockstream.info/",
-        httpMethod: "get",
-        composeQueryString: params => {
+class BlockstreamTransactionDetailsProvider extends ExternalApiProvider {
+    constructor() {
+        super("https://blockstream.info/", "get", 15000, ApiGroups.BLOCKSTREAM);
+    }
+
+    composeQueryString(params, subRequestIndex = 0) {
+        try {
             const network = params[0];
             const txid = params[1];
             const networkPath = network.key === Coins.COINS.BTC.testnet.key ? "testnet/" : "";
             return `${networkPath}api/tx/${txid}`;
-        },
-        getDataByResponse: (response, params) => {
+        } catch (e) {
+            improveAndRethrow(e, "blockstreamTransactionDetailsProvider.composeQueryString");
+        }
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        try {
             const currentBlockNumber = params[2];
             const tx = response.data;
             const mapType = type =>
@@ -57,22 +66,32 @@ const providers = [
                 inputs,
                 outputs
             );
-        },
-    },
-    {
+        } catch (e) {
+            improveAndRethrow(e, "blockstreamTransactionDetailsProvider.getDataByResponse", "tx details");
+        }
+    }
+}
+
+class BitapsTransactionDetailsProvider extends ExternalApiProvider {
+    constructor() {
         /**
          * API docs https://developer.bitaps.com/blockchain
          */
-        timeout: 10000,
-        RPS: 2, // Docs say that RPS is 3 but using it causes frequent 429 HTTP errors
-        endpoint: "https://api.bitaps.com/btc/",
-        httpMethod: "get",
-        composeQueryString: params => {
+        super("https://api.bitaps.com/btc/", "get", 10000, ApiGroups.BITAPS);
+    }
+
+    composeQueryString(params, subRequestIndex = 0) {
+        try {
             const [network, txid] = params;
             const networkPath = network.key === Coins.COINS.BTC.testnet.key ? "testnet/" : "";
             return `${networkPath}v1/blockchain/transaction/${txid}`;
-        },
-        getDataByResponse: (response, params) => {
+        } catch (e) {
+            improveAndRethrow(e, "BitapsTransactionDetailsProvider.composeQueryString");
+        }
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        try {
             const currentBlockNumber = params[2];
             const tx = response.data;
             const mapType = type =>
@@ -116,14 +135,27 @@ const providers = [
                 inputs,
                 outputs
             );
-        },
-    },
-    {
-        // TODO: [feature, low] Remove this provider as it has small RPS and does not provide unconfirmed transactions by address
-        endpoint: "https://chain.api.btc.com/v3/tx/",
-        httpMethod: "get",
-        composeQueryString: params => params[1], // second one is txid
-        getDataByResponse: (response, params) => {
+        } catch (e) {
+            improveAndRethrow(e, "BitapsTransactionDetailsProvider.getDataByResponse");
+        }
+    }
+}
+
+class BtcDotComTransactionDetailsProvider extends ExternalApiProvider {
+    constructor() {
+        super("https://chain.api.btc.com/v3/tx/", "get", 15000, ApiGroups.BTCCOM);
+    }
+
+    composeQueryString(params, subRequestIndex = 0) {
+        try {
+            return params[1]; // second one is txid
+        } catch (e) {
+            improveAndRethrow(e, "TransactionDetailsProvider.composeQueryString");
+        }
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        try {
             const tx = response.data.data;
             const mapType = type =>
                 type === "P2WPKH_V0" ? P2WPKH_SCRIPT_TYPE : type === "P2PKH" ? P2PKH_SCRIPT_TYPE : P2SH_SCRIPT_TYPE;
@@ -154,18 +186,31 @@ const providers = [
                 inputs,
                 outputs
             );
-        },
-    },
-];
+        } catch (e) {
+            improveAndRethrow(e, "TransactionDetailsProvider.getDataByResponse");
+        }
+    }
+}
 
 const transactionDataAPICaller = new CachedRobustExternalApiCallerService(
     "transactionDataAPICaller",
-    providers,
+    [
+        new BlockstreamTransactionDetailsProvider(),
+        new BitapsTransactionDetailsProvider(),
+        new BtcDotComTransactionDetailsProvider(),
+    ],
     120000,
     50,
     3000
 );
 
+/**
+ * Retrieves transaction details by id and network.
+ *
+ * @param txid {string} id of transaction
+ * @param network {Network} network to search for transaction in
+ * @return {Promise<Transaction|null>} null if not found
+ */
 export async function retrieveTransactionData(txid, network) {
     try {
         const currentBlock = await ExternalBlocksApiCaller.retrieveCurrentBlockNumber(network);
@@ -174,7 +219,8 @@ export async function retrieveTransactionData(txid, network) {
             15000,
             null,
             1,
-            () => txid
+            () => `btc-tx-details-${txid}`,
+            true
         );
     } catch (e) {
         improveAndRethrow(e, "retrieveTransactionData");

@@ -45,7 +45,7 @@ export default class TransactionsNotificationsService extends DedicatedNotificat
 
     async _actualizeTransactionsData(forceFetchData = false) {
         try {
-            const params = [Coins.getSupportedCoinsTickers(), Number.MAX_SAFE_INTEGER];
+            const params = [Coins.getEnabledCoinsTickers(), Number.MAX_SAFE_INTEGER];
             if (forceFetchData) {
                 TransactionsHistoryService.invalidateCaches(...params);
             }

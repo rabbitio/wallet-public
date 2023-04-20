@@ -127,7 +127,7 @@ export default class InvoicesService {
      */
     // TODO: [ether, critical] add support for other coins
     static async getInvoicesList(
-        // coinTickersList = Coins.getSupportedCoinsTickers(), // TODO: uncomment after actualizing the addresses list API
+        // coinTickersList = Coins.getEnabledCoinsTickers(), // TODO: uncomment after actualizing the addresses list API
         numberOfInvoicesToReturn,
         filterBy,
         searchCriteria,

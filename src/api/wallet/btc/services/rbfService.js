@@ -2,9 +2,8 @@ import bip39 from "bip39";
 
 import { getAccountsData, getCurrentNetwork, getWalletId } from "../../../common/services/internal/storage";
 import { getCurrentFeeRate } from "./feeRatesService";
-import { btcToSatoshi, satoshiToBtc } from "../lib/btc-utils";
 import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import { MIN_FEE_RATES } from "../lib/fees";
+import { DEFAULT_RATES, MIN_FEE_RATES } from "../lib/fees";
 import AddressesService from "./addressesService";
 import { getSortedListOfCandidateUtxosForRbf } from "../lib/utxos";
 import { getAllUTXOs } from "./utils/utxosUtils";
@@ -22,7 +21,10 @@ import { getDecryptedWalletCredentials } from "../../../auth/services/authServic
 import CoinsToFiatRatesService from "../../common/services/coinsToFiatRatesService";
 import { Coins } from "../../coins";
 import { retrieveTransactionData } from "../external-apis/transactionDataAPI";
-import { bitcoin } from "../bitcoin";
+import { TxData } from "../../common/models/tx-data";
+import { Wallets } from "../../common/wallets";
+import { EventBus, INCREASE_FEE_IS_FINISHED_EVENT } from "../../../common/adapters/eventbus";
+import { BalancesService } from "../../common/services/balancesService";
 
 export default class RbfService {
     static BLOCKS_COUNTS_FOR_RBF_OPTIONS = [1, 2, 5, 10];
@@ -48,20 +50,18 @@ export default class RbfService {
         try {
             Logger.log(`Start getting fee options for txid: ${oldTxId}`, loggerSource);
             const network = getCurrentNetwork();
+            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
             const resolvedPromises = await Promise.all([
                 ...this.BLOCKS_COUNTS_FOR_RBF_OPTIONS.map(blocksCount => getCurrentFeeRate(network, blocksCount)),
                 retrieveTransactionData(oldTxId, network),
-                AddressesServiceInternal.getAllUsedAddresses(),
+                AddressesServiceInternal.getAllUsedAddresses(indexes),
                 AddressesService.getCurrentChangeAddress(),
-                AddressesDataApi.getAddressesIndexes(getWalletId()),
             ]);
             const rates = resolvedPromises.slice(0, this.BLOCKS_COUNTS_FOR_RBF_OPTIONS.length);
-            const [oldTransaction, allAddresses, changeAddress, indexes] = resolvedPromises.slice(
-                resolvedPromises.length - 4
-            );
+            const [oldTransaction, allAddresses, changeAddress] = resolvedPromises.slice(resolvedPromises.length - 3);
 
             Logger.log(
-                `Addresses: internal: ${allAddresses.internal.length}, external: ${allAddresses.external.length}`,
+                `Addresses internal: ${allAddresses?.internal?.length}, external: ${allAddresses?.external?.length}, replacing tx: ${oldTransaction?.txid}, change: ${changeAddress}`,
                 loggerSource
             );
 
@@ -105,12 +105,18 @@ export default class RbfService {
             Logger.log(`Validating fee: ${oldTxId}. Fee: ${inputtedFeeBtc}`, loggerSource);
 
             const currentNetwork = getCurrentNetwork();
-            const [oldTx, allAddresses, changeAddress, indexes] = await Promise.all([
+            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
+            const [oldTx, allAddresses, changeAddress] = await Promise.all([
                 retrieveTransactionData(oldTxId, currentNetwork),
-                AddressesServiceInternal.getAllUsedAddresses(),
+                AddressesServiceInternal.getAllUsedAddresses(indexes),
                 AddressesService.getCurrentChangeAddress(),
-                AddressesDataApi.getAddressesIndexes(getWalletId()),
             ]);
+
+            Logger.log(
+                `Addresses internal: ${allAddresses?.internal?.length}, external: ${allAddresses?.external?.length}, replacing tx: ${oldTx?.txid}, change: ${changeAddress}`,
+                loggerSource
+            );
+
             const accountsData = getAccountsData();
             const minFeeRate = MIN_FEE_RATES.find(rate => rate.network === currentNetwork.key);
             const allUtxos = await getAllUTXOs(allAddresses.internal, allAddresses.external, currentNetwork);
@@ -165,15 +171,15 @@ export default class RbfService {
             const { mnemonic, passphrase } = getDecryptedWalletCredentials(password);
             const seedHex = bip39.mnemonicToSeedHex(mnemonic, passphrase);
             const accountsData = getAccountsData();
-            const [oldTx, changeAddress, allAddresses, indexes] = await Promise.all([
+            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
+            const [oldTx, changeAddress, allAddresses] = await Promise.all([
                 retrieveTransactionData(oldTxId, network),
                 AddressesService.getCurrentChangeAddress(),
-                AddressesServiceInternal.getAllUsedAddresses(),
-                AddressesDataApi.getAddressesIndexes(getWalletId()),
+                AddressesServiceInternal.getAllUsedAddresses(indexes),
             ]);
 
             Logger.log(
-                `Data was retrieved. Addresses external: ${allAddresses.external.length}, internal: ${allAddresses.internal.length}`,
+                `Addresses internal: ${allAddresses?.internal?.length}, external: ${allAddresses?.external?.length}, replacing tx: ${oldTx?.txid}, change: ${changeAddress}`,
                 loggerSource
             );
 
@@ -183,9 +189,10 @@ export default class RbfService {
             const candidateUtxos = getSortedListOfCandidateUtxosForRbf(accountsData, indexes, allUtxos, network);
             Logger.log(`Candidate UTXOS: ${JSON.stringify(candidateUtxos)}`, loggerSource);
 
-            const txOrErrorObject = createTransactionWithChangedFee(
+            const newFeeSatoshi = +Coins.COINS.BTC.coinAmountToAtoms("" + newFee);
+            const creationResult = createTransactionWithChangedFee(
                 oldTx,
-                btcToSatoshi(newFee),
+                newFeeSatoshi,
                 seedHex,
                 changeAddress,
                 network,
@@ -195,21 +202,32 @@ export default class RbfService {
                 isFinalPrice
             );
 
-            if (txOrErrorObject.errorDescription) {
-                Logger.log(`Failed to create new transaction: ${JSON.stringify(txOrErrorObject)}`, loggerSource);
-                return txOrErrorObject;
+            if (creationResult.errorDescription) {
+                Logger.log(`Failed to create new transaction: ${JSON.stringify(creationResult)}`, loggerSource);
+                return creationResult;
             }
 
             Logger.log("Transaction was created, pushing it", loggerSource);
 
-            const newTransactionId = await broadcastTransaction(txOrErrorObject, network);
+            const newTransactionId = await broadcastTransaction(creationResult.bitcoinJsTx, network);
 
             Logger.log(`Transaction was pushed: ${newTransactionId}`, loggerSource);
 
-            await saveNoteForNewTransaction(oldTxId, newTransactionId);
+            EventBus.dispatch(INCREASE_FEE_IS_FINISHED_EVENT);
+
+            await saveNoteForNewTransactionWithoutFailing(oldTxId, newTransactionId);
+
+            actualizeTransactionsCacheWithoutFailing(
+                creationResult.params,
+                oldTx.fee_satoshis,
+                newFeeSatoshi,
+                network,
+                newTransactionId,
+                oldTxId
+            );
 
             const result = {
-                oldFee: satoshiToBtc(oldTx.fee_satoshis),
+                oldFee: +Coins.COINS.BTC.atomsToCoinAmount("" + oldTx.fee_satoshis),
                 newFee,
                 newTransactionId,
             };
@@ -222,14 +240,45 @@ export default class RbfService {
     }
 }
 
-async function saveNoteForNewTransaction(oldTxId, newTxId) {
+async function saveNoteForNewTransactionWithoutFailing(oldTxId, newTxId) {
     try {
         const data = await TransactionsDataService.getTransactionsData([oldTxId]);
         if (data[0]?.note?.length > 0) {
             await TransactionsDataService.saveTransactionData(newTxId, { note: data[0].note });
         }
     } catch (e) {
-        logError(e, "saveNoteForNewTransaction", "Failed to save old note for new transaction after RBF");
+        logError(e, "saveNoteForNewTransactionWithoutFailing", "Failed to save old note for new transaction after RBF");
+    }
+}
+
+function actualizeTransactionsCacheWithoutFailing(params, oldFee, newFee, network, newTransactionId) {
+    const loggerSource = "actualizeTransactionsCacheWithoutFailing";
+    try {
+        const anyStubRate = DEFAULT_RATES[0];
+        const txData = new TxData(
+            params.amount,
+            params.targetAddress,
+            params.newChange,
+            newFee,
+            params.currentChangeAddress,
+            params.utxos,
+            network,
+            { rate: anyStubRate }
+        );
+
+        Wallets.getWalletByCoin(Coins.COINS.BTC)?.actualizeLocalCachesWithNewTransactionData(
+            Coins.COINS.BTC,
+            txData,
+            newTransactionId
+        );
+        BalancesService.actualizeCachedBalancesAccordingToJustSentTransaction(
+            Coins.COINS.BTC,
+            txData,
+            newTransactionId,
+            { previousFee: oldFee }
+        );
+    } catch (e) {
+        logError(e, loggerSource, `Failed to actualize cache for rbf new tx ${newTransactionId}`);
     }
 }
 
@@ -239,7 +288,7 @@ async function convertToBtcAmountAndAddFiatAmount(ratesToFeeMapping) {
             return null;
         }
 
-        return satoshiToBtc(item.fee);
+        return +Coins.COINS.BTC.atomsToCoinAmount("" + item.fee);
     });
 
     const fiatFees = await CoinsToFiatRatesService.convertCoinAmountsToFiat(Coins.COINS.BTC, btcFees);
@@ -259,7 +308,7 @@ async function validateFinalNewFee(inputtedFeeBtc, minFeeSatoshis) {
             };
         }
 
-        const minFeeBtc = +bitcoin.atomsToCoinAmount("" + minFeeSatoshis);
+        const minFeeBtc = +Coins.COINS.BTC.atomsToCoinAmount("" + minFeeSatoshis);
         if (+inputtedFeeBtc < minFeeBtc) {
             return {
                 result: false,
@@ -273,7 +322,7 @@ async function validateFinalNewFee(inputtedFeeBtc, minFeeSatoshis) {
         const balanceSatoshi = (await UtxosService.calculateBalance())?.spendable;
         if (balanceSatoshi == null || typeof balanceSatoshi !== "number")
             throw new Error("Failed to calculate balance for rbf amount validation");
-        const balanceBtc = +bitcoin.atomsToCoinAmount("" + balanceSatoshi);
+        const balanceBtc = +Coins.COINS.BTC.atomsToCoinAmount("" + balanceSatoshi);
         if (inputtedFeeBtc > balanceBtc) {
             return {
                 result: false,

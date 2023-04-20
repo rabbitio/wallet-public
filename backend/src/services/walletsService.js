@@ -149,8 +149,9 @@ export default class WalletsService {
                 log.debug("Wallet was found, return its data.");
                 return {
                     walletId,
-                    creationTime: wallet.creationTime,
-                    lastPasswordChangeDate: wallet.lastPasswordChangeDate,
+                    // TODO: [bug, critical] check that not local timestamp task_id=2b9f7ff27b5f4350a3f67368dd35c716
+                    creationTime: +wallet.creationTime,
+                    lastPasswordChangeDate: +wallet.lastPasswordChangeDate,
                     settings: wallet.settings,
                 };
             } else {
@@ -188,6 +189,7 @@ export default class WalletsService {
     static _checkSession(wallets, sessionId) {
         if (wallets.length === 1) {
             log.debug(`One wallet found with session id: ${sessionId}, returning it's expiration`);
+            // TODO: [bug, critical] comparing to local timestamp task_id=2b9f7ff27b5f4350a3f67368dd35c716
             return wallets[0].sessionExpirationTime > new Date() ? "session_valid" : "session_expired";
         } else if (wallets.length > 1) {
             const errorMessage = "There are more then one wallet found for specified sessionId";

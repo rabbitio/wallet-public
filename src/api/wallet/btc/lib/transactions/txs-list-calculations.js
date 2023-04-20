@@ -12,16 +12,7 @@ export function removeDeclinedDoubleSpendingTransactionsFromList(transactions) {
         const doubleSpending = transactions.filter(tx => tx.double_spend);
         const stillRelevantDoubleSpending = [];
         doubleSpending.forEach(tx => {
-            const utxosData = tx.inputs.map(input => ({ txid: input.txid, number: input.output_number }));
-            const spendingTheSameUTXO = doubleSpending.filter(
-                candidate =>
-                    candidate.txid !== tx.txid &&
-                    candidate.inputs.find(candidateInput =>
-                        utxosData.find(
-                            utxo => utxo.txid === candidateInput.txid && utxo.number === candidateInput.output_number
-                        )
-                    )
-            );
+            const spendingTheSameUTXO = filterTransactionsSpendingTheSameUtxosAsGivenTransaction(tx, doubleSpending);
             const doubleSpendingGroup = [tx, ...spendingTheSameUTXO];
             const confirmedOne = doubleSpendingGroup.find(tx => tx.confirmations > 0);
             if (confirmedOne) {
@@ -39,6 +30,22 @@ export function removeDeclinedDoubleSpendingTransactionsFromList(transactions) {
     }
 }
 
+export function filterTransactionsSpendingTheSameUtxosAsGivenTransaction(tx, txs) {
+    try {
+        const utxosData = tx.inputs.map(input => ({ txid: input.txid, number: input.output_number }));
+        return txs.filter(
+            candidate =>
+                candidate.txid !== tx.txid &&
+                candidate.inputs.find(candidateInput =>
+                    utxosData.find(
+                        utxo => utxo.txid === candidateInput.txid && utxo.number === candidateInput.output_number
+                    )
+                )
+        );
+    } catch (e) {
+        improveAndRethrow(e, "filterTransactionsSpendingTheSameUtxosAsGivenTransaction");
+    }
+}
 /**
  * Analyses given transactions list to recognize double spending ones and fills the double_spend flag. If each
  * double spend group does not contain confirmed transaction than the is_most_probable_double_spend

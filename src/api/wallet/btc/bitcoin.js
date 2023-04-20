@@ -18,7 +18,8 @@ class Bitcoin extends Coin {
             3,
             "byte",
             ["3.5 h", "1.5 h", "50 min", "10 min"],
-            300000
+            300000,
+            Coin.BLOCKCHAINS.BITCOIN
         );
     }
 
@@ -26,10 +27,8 @@ class Bitcoin extends Coin {
         return NumbersUtils.removeRedundantRightZerosFromNumberString((+atoms / 100000000).toFixed(this.digits));
     }
 
-    atomsToCoinAmountSignificantString(atoms) {
-        return NumbersUtils.removeRedundantRightZerosFromNumberString(
-            (+atoms / 100000000).toFixed(Math.min(this.digits, this._significantDigits))
-        );
+    atomsToCoinAmountSignificantString(atoms, maxNumberLength = null) {
+        return NumbersUtils.trimCurrencyAmount(+atoms / 100000000, this.digits, maxNumberLength);
     }
 
     coinAmountToAtoms(coinsAmount) {

@@ -19,7 +19,8 @@ class Ethereum extends Coin {
             16,
             "gas",
             ["30min", "5min", "3.5min", "2min"],
-            60000
+            60000,
+            Coin.BLOCKCHAINS.ETHEREUM
         );
     }
 
@@ -27,11 +28,9 @@ class Ethereum extends Coin {
         return NumbersUtils.removeRedundantRightZerosFromNumberString(ethers.utils.formatEther(atoms));
     }
 
-    atomsToCoinAmountSignificantString(atoms) {
-        const parts = ethers.utils.formatEther(atoms).split(".");
-        return NumbersUtils.removeRedundantRightZerosFromNumberString(
-            `${parts[0]}.${parts[1].slice(0, Math.min(this.digits, this._significantDigits))}`
-        );
+    atomsToCoinAmountSignificantString(atoms, maxNumberLength = null) {
+        const coinAmountString = ethers.utils.formatEther(atoms);
+        return NumbersUtils.trimCurrencyAmount(coinAmountString, this.digits, maxNumberLength);
     }
 
     coinAmountToAtoms(coinsAmount) {

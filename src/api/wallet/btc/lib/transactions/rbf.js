@@ -19,8 +19,23 @@ import { Coins } from "../../../coins";
  * @param allAddresses - all used/current addresses of wallet
  * @param candidateUtxos - list of currently available utxos (sorted by amount descending)
  * @param isFinalPrice - flag signalling whether to set sequence for transaction prohibiting further RBFing
-
- * @returns Object - bitcoinjs transaction or error Object { errorDescription: string, howToFix: string }
+ * @returns {
+ *              {
+ *                  bitcoinJsTx: Object,
+ *                  params: {
+ *                      amount: number,
+ *                      targetAddress: string,
+ *                      newChange: number,
+ *                      currentChangeAddress: string,
+ *                      utxos: Utxo[],
+ *                  }
+ *              }
+ *              |
+ *              {
+ *                  errorDescription: string,
+ *                  howToFix: string
+ *              }
+ *          }
  */
 export function createTransactionWithChangedFee(
     oldTransaction,
@@ -72,7 +87,7 @@ export function createTransactionWithChangedFee(
         const ecPairsMapping = getEcPairsToAddressesMapping(getAddresses(utxos), seedHex, network, indexes);
 
         const sequence = (isFinalPrice && FORBID_RBF_SEQUENCE) || MAX_RBF_SEQUENCE;
-        return buildTransaction(
+        const bitcoinJsTxOrError = buildTransaction(
             amount,
             targetAddress,
             newChange,
@@ -82,6 +97,20 @@ export function createTransactionWithChangedFee(
             network,
             sequence
         );
+        if (bitcoinJsTxOrError.errorDescription) {
+            return bitcoinJsTxOrError;
+        }
+
+        return {
+            bitcoinJsTx: bitcoinJsTxOrError,
+            params: {
+                amount: amount,
+                targetAddress: targetAddress,
+                newChange: newChange,
+                currentChangeAddress: currentChangeAddress,
+                utxos: utxos,
+            },
+        };
     } catch (e) {
         improveAndRethrow(e, "createTransactionWithChangedFee");
     }

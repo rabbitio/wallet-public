@@ -1,6 +1,5 @@
 import { logError } from "../../../../common/utils/errorUtils";
 import { Logger } from "./logger";
-import { isCurrentSessionValid } from "../../../../auth/services/authService";
 import { externalServicesStatsCollector } from "../../../../common/services/utils/robustExteranlApiCallerService/externalServicesStatsCollector";
 import { WalletSliceService } from "../../../../wallet/common/services/utils/walletSliceService";
 
@@ -31,13 +30,10 @@ export class ScheduledLogger {
 
 export async function logExternalServicesStats() {
     try {
-        const isSessionValid = await isCurrentSessionValid();
-        if (isSessionValid) {
-            Logger.log(
-                `EXTERNAL SERVICES STATS:\n${JSON.stringify(externalServicesStatsCollector.getStats())}`,
-                "logExternalServicesStats"
-            );
-        }
+        Logger.log(
+            `EXTERNAL SERVICES STATS:\n${JSON.stringify(externalServicesStatsCollector.getStats())}`,
+            "logExternalServicesStats"
+        );
     } catch (e) {
         logError(e, "logExternalServicesStats");
     }
@@ -45,11 +41,8 @@ export async function logExternalServicesStats() {
 
 export async function logWalletDataSlice() {
     try {
-        const isSessionValid = await isCurrentSessionValid();
-        if (isSessionValid) {
-            const dataSliceString = await WalletSliceService.getCurrentWalletDataSliceString();
-            Logger.log(`WALLET DATA SLICE:\n${dataSliceString}`, "logWalletDataSlice");
-        }
+        const dataSliceString = await WalletSliceService.getCurrentWalletDataSliceString();
+        Logger.log(`WALLET DATA SLICE:\n${dataSliceString}`, "logWalletDataSlice");
     } catch (e) {
         logError(e, "logWalletDataSlice");
     }

@@ -127,7 +127,7 @@ export default class WalletsController {
      *      - 500 for internal errors
      *    Body:
      *      - for 201 status:
-     *        { result: "true", sessionId: "<sessionId>"}
+     *        { result: "true", sessionId: "<sessionId>", walletData: { walletId: string, creationTime: number, lastPasswordChangeDate: timestamp, settings: Object } }
      *      - for 403 status one of two objects:
      *        { description: <message_string>, errorCodeInternal: <number>, howToFix: <message_string>,
      *          authorizationError: { result: false, reason: "forbidden_ip" } }
@@ -171,7 +171,13 @@ export default class WalletsController {
                     log.debug("Authenticated with new session id, setting cookies and sending 201 with check result.");
                     res.cookie("sessionId", checkResult.sessionId, { maxAge: SESSION_EXPIRATION_TIME });
                     res.cookie("walletId", req.body.walletId); // TODO: [refactoring, low/maybe] Remove it from cookies
-                    processSuccess(res, 201, checkResult);
+                    let walletData = {};
+                    try {
+                        walletData = await WalletsService.getWalletData(data.walletId);
+                    } catch (e) {
+                        log.error("Failed to add wallet data to response after authentication", e);
+                    }
+                    processSuccess(res, 201, { ...checkResult, walletData: walletData });
                 } else {
                     log.info("Authentication failed, sending 403 and error object. ");
                     processFailedAuthentication(res, endpointNumber, checkResult);
@@ -514,6 +520,7 @@ export default class WalletsController {
      *        "lastNotificationsViewTimestamp": string,
      *        "showFeeRates": string,
      *        "doNotRemoveClientLogsWhenSignedOut": string,
+     *        "enabledCoinsList": string
      *    }
      *
      * It sends:

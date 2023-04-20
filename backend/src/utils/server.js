@@ -24,7 +24,7 @@ export function configureAndStartServer() {
     const app = express();
     app.use(connectLogger(getLogger("http"), { level: "auto" }));
     app.use(cookieParser());
-    app.use(bodyParser.text({ limit: "5mb" })); // for parsing text/plain
+    app.use(bodyParser.text({ limit: "10mb" })); // for parsing text/plain
     app.use(bodyParser.json({ limit: "1mb" })); // for parsing application/json
     app.use(bodyParser.urlencoded({ extended: true, limit: "100kb" })); // for parsing application/x-www-Form-urlencoded
     app.use(WalletsRoutes);

@@ -1,19 +1,157 @@
-import { ethers } from "ethers";
+import { BigNumber } from "ethers";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
-import { ETH_PR_K_ETHSCAN } from "../../../../properties";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { EthersJsAdapter } from "../adapters/ethersJsAdapter";
 import { EthTransactionsUtils } from "../lib/ethTransactionsUtils";
-import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
+import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
+import {
+    actualizeCacheWithNewTransactionSentFromAddress,
+    mergeTwoArraysByItemIdFieldName,
+} from "../../common/utils/cacheActualizationUtils";
+import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
+import { ApiGroups } from "../../../common/external-apis/apiGroups";
+
+class EtherscanEthTransactionsProvider extends ExternalApiProvider {
+    constructor() {
+        /**
+         * This provider actually returns 10000 txs per request.
+         * Also, we can use API key providing 100000 monthly free requests.
+         * But we are using it without API key to not pay for it.
+         *
+         * Also note that this provider uses two endpoints for ordinary and internal transactions,
+         * so we use two http methods and further processing.
+         */
+        super("", ["get", "get"], 15000, ApiGroups.ETHERSCAN, null, 10000);
+    }
+
+    doesSupportPagination() {
+        return true;
+    }
+
+    composeQueryString(params, subRequestIndex = 0) {
+        try {
+            const networkPrefix = getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet ? "" : "-goerli";
+            const address = params[0];
+            const page = params[1] ?? 1;
+            const offset = this.maxPageLength * (page - 1);
+            const moduleForSubRequest = subRequestIndex === 0 ? "txlist" : "txlistinternal";
+            // NOTE: add api key if you decide to use paid API '&apikey=YourApiKeyToken'
+            return `https://api${networkPrefix}.etherscan.io/api?module=account&action=${moduleForSubRequest}&address=${address}&page=${page}&offset=${offset}&sort=asc`;
+        } catch (e) {
+            improveAndRethrow(e, "etherscanTransactionsProvider.composeQueryString");
+        }
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        try {
+            const myAddress = params[0].toLowerCase();
+            const txsList = response?.data?.result;
+            if (!Array.isArray(txsList)) {
+                throw new Error("Wrong format of transactions list for etherscan provider ETH");
+            }
+            if (subRequestIndex === 0) {
+                return txsList
+                    .map(tx => {
+                        if (tx.value === "0" || (tx.to !== myAddress && tx.from !== myAddress)) {
+                            // Means this transaction is not ETH transfer or not related to this address
+                            return [];
+                        }
+                        const type = tx.to === myAddress ? "in" : "out";
+                        const fee =
+                            tx.gasUsed && tx.gasPrice
+                                ? BigNumber.from(tx.gasUsed)
+                                      .mul(tx.gasPrice)
+                                      .toString()
+                                : null;
+                        const isSendingAndReceiving = tx.to === tx.from;
+                        const timestamp = tx.timeStamp ? +tx.timeStamp * 1000 : provideFirstSeenTime(tx.hash);
+                        const composeTx = type =>
+                            new TransactionsHistoryItem(
+                                tx.hash,
+                                Coins.COINS.ETH.ticker,
+                                Coins.COINS.ETH.tickerPrintable,
+                                type,
+                                tx.value,
+                                tx.confirmations,
+                                timestamp,
+                                tx.to,
+                                fee,
+                                tx,
+                                false,
+                                isSendingAndReceiving
+                            );
+                        return isSendingAndReceiving ? [composeTx("in"), composeTx("out")] : [composeTx(type)];
+                    })
+                    .flat();
+            } else {
+                // Adding internal transactions sending/receiving ETH
+                return txsList
+                    .map(tx => {
+                        const type = tx.to === myAddress ? "in" : "out";
+                        const confirmations =
+                            tx.timeStamp && tx.blockNumber
+                                ? EthTransactionsUtils.estimateEthereumConfirmationsByTimestamp(+tx.timeStamp * 1000)
+                                : 0;
+                        const fee = null; // As this provider doesn't return clear fee for internal transactions
+                        const isSendingAndReceiving = tx.to === tx.from;
+                        const timestamp = tx.timeStamp ? +tx.timeStamp * 1000 : provideFirstSeenTime(tx.hash);
+                        const internalTxItem = type =>
+                            new TransactionsHistoryItem(
+                                tx.hash,
+                                Coins.COINS.ETH.ticker,
+                                Coins.COINS.ETH.tickerPrintable,
+                                type,
+                                tx.value,
+                                confirmations,
+                                timestamp,
+                                tx.to,
+                                fee,
+                                tx,
+                                false,
+                                isSendingAndReceiving
+                            );
+                        return isSendingAndReceiving
+                            ? [internalTxItem("in"), internalTxItem("out")]
+                            : [internalTxItem(type)];
+                    })
+                    .flat();
+            }
+        } catch (e) {
+            improveAndRethrow(e, "etherscanTransactionsProvider.getDataByResponse");
+        }
+    }
+
+    changeQueryParametersForPageNumber(params, previousResponse, pageNumber, subRequestIndex = 0) {
+        try {
+            const address = params[0];
+            return [address, pageNumber];
+        } catch (e) {
+            improveAndRethrow(e, "etherscanTransactionsProvider.changeQueryParametersForPageNumber");
+        }
+    }
+
+    checkWhetherResponseIsForLastPage(previousResponse, currentResponse, currentPageNumber, subRequestIndex = 0) {
+        try {
+            return (currentResponse?.data?.result?.length ?? 0) < this.maxPageLength;
+        } catch (e) {
+            improveAndRethrow(e, "etherscanTransactionsProvider.checkWhetherResponseIsForLastPage");
+        }
+    }
+}
 
 // TODO: [tests, moderate] implement units/integration tests
 export class EthTransactionsProvider {
-    static _provider = new ethers.providers.EtherscanProvider(getCurrentNetwork(Coins.COINS.ETH).key, ETH_PR_K_ETHSCAN);
-    static _cacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver("ethTransactionsProvider", 0, 20, 1000);
-    static _cacheTtlMs = 30000;
-    static _cacheId = address => `${address}_b94059fd-2170-46f1-8917-b9611c22ef11`;
-    static _lastUpdateTimestampByAddress = new Map();
+    static _provider = new CachedRobustExternalApiCallerService(
+        "ethTransactionsProvider",
+        [new EtherscanEthTransactionsProvider()],
+        60000,
+        70,
+        1000,
+        false,
+        mergeTwoArraysByItemIdFieldName
+    );
 
     /**
      * Retrieves ethereum transactions sending ether for given address
@@ -23,52 +161,9 @@ export class EthTransactionsProvider {
      */
     static async getEthTransactionsByAddress(address) {
         try {
-            const cached = await this._cacheAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
-                this._cacheId(address)
-            );
-            const expirationTimestamp = (this._lastUpdateTimestampByAddress.get(address) ?? 0) + this._cacheTtlMs;
-            let transactions;
-            if (cached && Date.now() < expirationTimestamp) {
-                transactions = cached;
-            } else {
-                // TODO: [feature, critical] check for pagination. task_id=b10ff856bea04ebca54a1d284d24196d
-                const actualizedTxs = await this._provider.getHistory(address);
-                this._lastUpdateTimestampByAddress.set(address, Date.now());
-                if (cached?.length && actualizedTxs?.length) {
-                    // Add cached transactions missing in the returned transactions list. This is useful when we push just sent transaction to cache
-                    cached.forEach(cachedTx => {
-                        if (!actualizedTxs.find(newTx => newTx.hash === cachedTx.hash)) {
-                            actualizedTxs.push(cachedTx);
-                        }
-                    });
-                }
-                this._cacheAndRequestsResolver.saveCachedData(this._cacheId(address), actualizedTxs);
-                transactions = actualizedTxs;
-            }
-
-            /**
-             * We so not use block retrieval as EtherScan provider gives us the timestamp in TransactionResponse.
-             * Also, we pass null fee as fee is not mandatory for history item. Fee calculation for ether
-             * is not trivial and requires 1 additional request per transaction as we need to ask for the tx receipt.
-             */
-            const historyItems = transactions
-                .map(tx => {
-                    const firstItem = EthersJsAdapter.transactionToEthHistoryItem(tx, null, address, null);
-                    if (firstItem.isSendingAndReceiving) {
-                        const secondItem = EthersJsAdapter.transactionToEthHistoryItem(tx, null, address, null);
-                        secondItem.type = firstItem.type === "in" ? "out" : "in";
-                        return [firstItem, secondItem];
-                    }
-
-                    return firstItem;
-                })
-                .flat();
-
-            return historyItems.filter(tx => EthTransactionsUtils.isEthereumTransactionAEtherTransfer(tx));
+            return await this._provider.callExternalAPICached([address], 15000, null, 1, customHashFunctionForParams);
         } catch (e) {
             improveAndRethrow(e, "getEthTransactionsByAddress");
-        } finally {
-            this._cacheAndRequestsResolver.markActiveCalculationAsFinished(this._cacheId(address));
         }
     }
 
@@ -81,27 +176,33 @@ export class EthTransactionsProvider {
      */
     static actualizeCacheWithNewTransactionSentFromAddress(address, txData, txId) {
         try {
-            const txForCache = {
-                hash: txId,
-                to: txData.address,
-                value: txData.amount,
-                from: address,
-                confirmations: 0,
-                timestamp: Date.now(),
-            };
-            this._cacheAndRequestsResolver.actualizeCachedData(this._cacheId(address), currentCache => {
-                try {
-                    currentCache.push(txForCache);
-                    return {
-                        data: currentCache,
-                        isModified: true,
-                    };
-                } catch (e) {
-                    improveAndRethrow(e, "cacheActualizationHandler for ethTransactionsProvider");
-                }
-            });
+            actualizeCacheWithNewTransactionSentFromAddress(
+                this._provider,
+                [address],
+                customHashFunctionForParams,
+                Coins.COINS.ETH,
+                address,
+                txData,
+                txId
+            );
         } catch (e) {
             improveAndRethrow(e, "actualizeCacheWithNewTransactionSentFromAddress");
         }
     }
+
+    static actualizeCacheWithTransactionsReturnedByAnotherProvider(address, transactions) {
+        try {
+            this._provider.actualizeCachedData(
+                [address],
+                cache => mergeTwoArraysByItemIdFieldName(cache, transactions),
+                customHashFunctionForParams,
+                true,
+                Date.now()
+            );
+        } catch (e) {
+            improveAndRethrow(e, "actualizeCacheWithTransactionsReturnedByAnotherProvider");
+        }
+    }
 }
+
+const customHashFunctionForParams = params => `eth_txs_list_${params[0]}_b94059fd-2170-46f1-8917-b9611c22ef11`;

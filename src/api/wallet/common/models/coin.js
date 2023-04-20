@@ -1,3 +1,6 @@
+import { Blockchain } from "./blockchain";
+import { Protocol } from "./protocol";
+
 /**
  * The model for cryptocurrency coins
  */
@@ -20,8 +23,10 @@ export class Coin {
      * @param payableEntityStringForFeeRate {string|null} the payable fee entity like byte for bitcoin or gas for ether if present
      * @param feeOptionsTimeStringsSortedDesc {string[]} array of 4 strings for fee options when sending coins. Should be sorted from the highest time to the smallest
      * @param feeRatesExpirationTimeMs {number} number of milliseconds to treat the fee rates as expired
-     * @param [protocol] {string|null} string representing the token/coin protocol if relevant e.g. ERC20 or TRC20
+     * @param blockchain {Blockchain} blockchain object
+     * @param [protocol] {Protocol|null} token/coin protocol if relevant
      * @param [tokenAddress] {string|null} address of contract of this token (if the coin is token)
+     * @param [doesUseLowerCaseAddresses] {boolean} flag to clarify whether we can use lower case addresses to ensure more robust comparisons
      */
     constructor(
         latinName,
@@ -36,8 +41,10 @@ export class Coin {
         payableEntityStringForFeeRate,
         feeOptionsTimeStringsSortedDesc,
         feeRatesExpirationTimeMs,
+        blockchain,
         protocol = null,
-        tokenAddress = null
+        tokenAddress = null,
+        doesUseLowerCaseAddresses = true
     ) {
         this.latinName = latinName;
         this.ticker = ticker;
@@ -52,11 +59,24 @@ export class Coin {
         this.feeOptionsTimeStringsSortedDesc = feeOptionsTimeStringsSortedDesc;
         this.feeRatesExpirationTimeMs = feeRatesExpirationTimeMs;
         this.protocol = protocol;
+        this.blockchain = blockchain;
         // TODO: [bug, critical] use testnet property for testnet contract address as it blocks the app work in testnets
         this.tokenAddress = tokenAddress;
         this.feeCoin = this;
         this._significantDigits = 8;
+        this.doesUseLowerCaseAddresses = doesUseLowerCaseAddresses;
     }
+
+    static PROTOCOLS = {
+        ERC20: new Protocol("ERC20"),
+        TRC20: new Protocol("TRC20"),
+    };
+
+    static BLOCKCHAINS = {
+        BITCOIN: new Blockchain("Bitcoin blockchain", []),
+        ETHEREUM: new Blockchain("Ethereum blockchain", [this.PROTOCOLS.ERC20]),
+        TRON: new Blockchain("Tron blockchain", [this.PROTOCOLS.TRC20]),
+    };
 
     /**
      * Sets fee coin
@@ -94,9 +114,10 @@ export class Coin {
      * number with only significant digits after the dot
      *
      * @param atoms {string} atoms positive integer amount
+     * @param [maxNumberLength=null] {number|null} max length of target formatted number
      * @return {string} coin amount floating point number as a string having only significant digits after the dot
      */
-    atomsToCoinAmountSignificantString(atoms) {
+    atomsToCoinAmountSignificantString(atoms, maxNumberLength = null) {
         throw new Error("Not implemented in base Coin");
     }
 
@@ -130,5 +151,14 @@ export class Coin {
      */
     coinAtomsFeeRateToCommonlyUsedAmountFormatWithDenominationString(coinAtomsString) {
         throw new Error("Not implemented in base Coin");
+    }
+
+    /**
+     * Check whether this coin support transaction prioritisation during the sending process.
+     *
+     * @return {boolean} true if support transaction prioritisation and false otherwise
+     */
+    doesSupportTransactionPrioritisation() {
+        return Array.isArray(this.feeOptionsTimeStringsSortedDesc);
     }
 }

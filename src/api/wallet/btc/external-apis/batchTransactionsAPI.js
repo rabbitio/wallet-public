@@ -9,15 +9,13 @@ import { getHash } from "../../../common/adapters/crypto-utils";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { getOutputTypeByAddress } from "../lib/utxos";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
+import { ApiGroups } from "../../../common/external-apis/apiGroups";
 
 const mappingOfTxIndexesToHashes = new Map();
 
 class BlockchainComBatchBtcTransactionsProvider extends ExternalApiProvider {
     constructor() {
-        super(...arguments);
-        this.timeout = 13000;
-        this.maxPageLength = 100; // The provider's requirement
-        this.RPS = 1;
+        super("https://blockchain.info/multiaddr", "get", 15000, ApiGroups.BLOCKCHAIN_INFO, {}, 100);
     }
 
     composeQueryString(params) {
@@ -29,7 +27,7 @@ class BlockchainComBatchBtcTransactionsProvider extends ExternalApiProvider {
         return `?n=${this.maxPageLength}&offset=${offset}&cors=true&active=${(addresses ?? []).join(",")}`;
     }
 
-    getDataByResponse(response, params) {
+    getDataByResponse(response, params, subRequestIndex = 0, iterationsData = []) {
         const currentBlockNumber = params[3];
         return (response?.data?.txs ?? []).map(tx => {
             const inputs = tx.inputs.map(
@@ -44,16 +42,20 @@ class BlockchainComBatchBtcTransactionsProvider extends ExternalApiProvider {
                     )
             );
 
-            const outputs = tx.out.map(
-                output =>
-                    new Output(
-                        [output.addr],
-                        output.value,
-                        getOutputTypeByAddress(output.addr),
-                        output?.spending_outpoints ? output?.spending_outpoints[0]?.tx_index : null, // txid is not provided by blockchain.com, so we use tx_index as it is not critical
-                        output.n
-                    )
-            );
+            const outputs = tx.out
+                .map(
+                    output =>
+                        output.addr
+                            ? new Output(
+                                  [output.addr],
+                                  output.value,
+                                  getOutputTypeByAddress(output.addr),
+                                  output?.spending_outpoints ? output?.spending_outpoints[0]?.tx_index : null, // txid is not provided by blockchain.com, so we use tx_index as it is not critical
+                                  output.n
+                              )
+                            : [] // For outputs having no address like OP_RETURN outputs
+                )
+                .flat();
 
             mappingOfTxIndexesToHashes.set(tx.tx_index, tx.hash);
 
@@ -97,7 +99,7 @@ function composeParametersArray(network, addresses, offset, currentBlocksCount) 
 
 export const externalBatchTransactionsDataAPICaller = new RobustExternalAPICallerService(
     "batchBtcTransactionsDataRetriever",
-    [new BlockchainComBatchBtcTransactionsProvider("https://blockchain.info/multiaddr", "get")]
+    [new BlockchainComBatchBtcTransactionsProvider()]
 );
 
 export async function performBatchTransactionsDataRetrieval(

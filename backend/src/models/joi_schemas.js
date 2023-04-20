@@ -243,6 +243,7 @@ export default {
             lastNotificationsViewTimestamp: Joi.string().min(1),
             showFeeRates: Joi.string().min(1),
             doNotRemoveClientLogsWhenSignedOut: Joi.string().min(1),
+            enabledCoinsList: Joi.string().allow(""),
         }),
     }),
     saveTransactionDataScheme: Joi.object().keys({

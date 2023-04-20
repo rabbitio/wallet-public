@@ -1,3 +1,5 @@
+import { Coins } from "../../coins";
+
 /**
  * Model representing the transaction as history item of a wallet
  */
@@ -48,7 +50,9 @@ export class TransactionsHistoryItem {
         this.amount = amount;
         this.confirmations = confirmations;
         this.time = time;
-        this.address = (address || "").toLowerCase();
+        this.address = Coins.getCoinByTicker(ticker).doesUseLowerCaseAddresses
+            ? (address ?? "").toLowerCase()
+            : address ?? "";
         this.fees = fees;
         this.isRbfAble = isRbfAble;
         this.full_tx = full_tx;

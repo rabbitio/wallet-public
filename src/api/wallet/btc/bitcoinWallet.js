@@ -19,7 +19,7 @@ class BitcoinWallet extends Wallet {
         try {
             return (await BalanceService.getSpendableWalletBalance()).btcAmount;
         } catch (e) {
-            improveAndRethrow(e, "calculateBalance");
+            improveAndRethrow(e, `${this.coin.ticker}_calculateBalance`);
         }
     }
 
@@ -27,15 +27,15 @@ class BitcoinWallet extends Wallet {
         try {
             return await BtcTransactionsHistoryService.getBtcTransactionsHistory();
         } catch (e) {
-            improveAndRethrow(e, "getTransactionsList");
+            improveAndRethrow(e, `${this.coin.ticker}_getTransactionsList`);
         }
     }
 
-    async getTransactionDetails(txId) {
+    async getTransactionDetails(txId, transactionType = null) {
         try {
             return await BtcTransactionDetailsService.getBTCTransactionDetails(txId);
         } catch (e) {
-            improveAndRethrow(e, "getTransactionDetails");
+            improveAndRethrow(e, `${this.coin.ticker}_getTransactionDetails`);
         }
     }
 
@@ -43,7 +43,7 @@ class BitcoinWallet extends Wallet {
         try {
             return await BtcTransactionDetailsService.isTransactionBelongsToBitcoin(txId);
         } catch (e) {
-            improveAndRethrow(e, "isTxBelongingToWalletsCoin");
+            improveAndRethrow(e, `${this.coin.ticker}_isTxBelongingToWalletsCoin`);
         }
     }
 
@@ -51,15 +51,15 @@ class BitcoinWallet extends Wallet {
         try {
             return await AddressesService.getCurrentExternalAddress();
         } catch (e) {
-            improveAndRethrow(e, "getCurrentAddress");
+            improveAndRethrow(e, `${this.coin.ticker}_getCurrentAddress`);
         }
     }
 
-    isAddressValid(address) {
+    isAddressValidForSending(address) {
         try {
             return PaymentService.isAddressValidForSending(address);
         } catch (e) {
-            improveAndRethrow(e, "isAddressValid");
+            improveAndRethrow(e, `${this.coin.ticker}_isAddressValidForSending`);
         }
     }
 
@@ -72,7 +72,7 @@ class BitcoinWallet extends Wallet {
                 currentNetwork
             );
         } catch (e) {
-            improveAndRethrow(e, "createTransactionsWithFakeSignatures");
+            improveAndRethrow(e, `${this.coin.ticker}_createTransactionsWithFakeSignatures`);
         }
     }
 
@@ -80,7 +80,7 @@ class BitcoinWallet extends Wallet {
         try {
             return await PaymentService.createTransactionAndBroadcast(mnemonic, passphrase, txData);
         } catch (e) {
-            improveAndRethrow(e, "createTransactionAndBroadcast");
+            improveAndRethrow(e, `${this.coin.ticker}_createTransactionAndBroadcast`);
         }
     }
 
@@ -88,7 +88,7 @@ class BitcoinWallet extends Wallet {
         try {
             return await AddressesService.createNewExternalAddress(label);
         } catch (e) {
-            improveAndRethrow(e, "createNewAddress");
+            improveAndRethrow(e, `${this.coin.ticker}_createNewAddress`);
         }
     }
 
@@ -96,7 +96,7 @@ class BitcoinWallet extends Wallet {
         try {
             return await AddressesServiceInternal.exportAddressesWithPrivateKeysByPassword(password);
         } catch (e) {
-            improveAndRethrow(e, "exportWalletData");
+            improveAndRethrow(e, `${this.coin.ticker}_exportWalletData`);
         }
     }
 
@@ -105,7 +105,7 @@ class BitcoinWallet extends Wallet {
             const tx = Transaction.fromTxData(txData, txId);
             transactionsDataProvider.pushNewTransactionToCache(tx);
         } catch (e) {
-            improveAndRethrow(e, "actualizeLocalCachesWithNewTransactionData");
+            improveAndRethrow(e, `${this.coin.ticker}_actualizeLocalCachesWithNewTransactionData`);
         }
     }
 }

@@ -1,6 +1,7 @@
 /**
  * Class to memorize data for transaction that has been checked with fake signatures.
  * Useful to build real transaction from the validated data without any checks.
+ * // TODO: [refactoring, low] use BtcTxData, EthTxData etc. subclasses to avoid using unneeded fields for all coins. task_id=4898a69bd8e442eaba676c0bb76f3f10
  */
 export class TxData {
     /**

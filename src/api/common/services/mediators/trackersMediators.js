@@ -49,7 +49,7 @@ export const setupAnalyticsMediators = () => {
         setTimeout(async () => {
             try {
                 const result = await TransactionsHistoryService.getTransactionsList(
-                    Coins.getSupportedCoinsTickers(),
+                    Coins.getEnabledCoinsTickers(),
                     Number.MAX_SAFE_INTEGER
                 );
                 result.transactions.forEach(tx => {

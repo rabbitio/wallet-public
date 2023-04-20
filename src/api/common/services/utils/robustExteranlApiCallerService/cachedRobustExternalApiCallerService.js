@@ -12,7 +12,7 @@ import { safeStringify } from "../../../utils/browserUtils";
 export class CachedRobustExternalApiCallerService {
     /**
      * @param bio {string} unique service identifier
-     * @param providersData {Object[]|ExternalApiProvider[]} array of providers data TODO: [refactoring, moderate] All providers data should be implemented using class instances
+     * @param providersData {ExternalApiProvider[]} array of providers
      * @param [cacheTtlMs=10000] {number} time to live for cache ms
      * @param [maxCallAttemptsToWaitForAlreadyRunningRequest=50] {number} number of request allowed to do waiting for result before we fail the original request
      * @param [timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished=3000] {number} timeout ms for polling for a result
@@ -33,12 +33,12 @@ export class CachedRobustExternalApiCallerService {
         this._cacheTtlMs = cacheTtlMs;
         this._cahceAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
             bio,
-            removeExpiredCacheAutomatically ? cacheTtlMs : null,
+            cacheTtlMs,
             maxCallAttemptsToWaitForAlreadyRunningRequest,
-            timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished
+            timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished,
+            removeExpiredCacheAutomatically
         );
         this._cahceIds = [];
-        this._lastUpdateTimestampByCacheId = new Map();
         this._mergeCachedAndNewlyRetrievedData = mergeCachedAndNewlyRetrievedData;
     }
 
@@ -68,13 +68,12 @@ export class CachedRobustExternalApiCallerService {
         let cacheId;
         try {
             cacheId = this._calculateCacheId(parametersValues, customHashFunctionForParams);
-            const cached = await this._cahceAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
+            const result = await this._cahceAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
                 cacheId
             );
 
-            const expirationTime = (this._lastUpdateTimestampByCacheId.get(cacheId) ?? 0) + this._cacheTtlMs;
-            if (cached && Date.now() < expirationTime) {
-                return cached;
+            if (!result.canStartDataRetrieval) {
+                return result?.cachedData;
             }
 
             let data = await this._provider.callExternalAPI(
@@ -86,11 +85,12 @@ export class CachedRobustExternalApiCallerService {
             );
 
             if (typeof this._mergeCachedAndNewlyRetrievedData === "function") {
-                data = this._mergeCachedAndNewlyRetrievedData(cached, data);
+                data = this._mergeCachedAndNewlyRetrievedData(result?.cachedData, data);
             }
-            this._cahceAndRequestsResolver.saveCachedData(cacheId, data);
-            this._cahceIds.indexOf(cacheId) < 0 && this._cahceIds.push(cacheId);
-            this._lastUpdateTimestampByCacheId.set(cacheId, Date.now());
+            if (data != null) {
+                this._cahceAndRequestsResolver.saveCachedData(cacheId, data);
+                this._cahceIds.indexOf(cacheId) < 0 && this._cahceIds.push(cacheId);
+            }
 
             return data;
         } catch (e) {
@@ -108,7 +108,8 @@ export class CachedRobustExternalApiCallerService {
         params,
         synchronousCurrentCacheProcessor,
         customHashFunctionForParams = null,
-        sessionDependent = true
+        sessionDependent = true,
+        actualizedAtTimestamp
     ) {
         const cacheId = this._calculateCacheId(params, customHashFunctionForParams);
         this._cahceAndRequestsResolver.actualizeCachedData(cacheId, synchronousCurrentCacheProcessor, sessionDependent);

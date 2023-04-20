@@ -6,24 +6,43 @@ import { improveAndRethrow, logError } from "../../../utils/errorUtils";
  * This util helps to avoid duplicated calls to the same resource for the same data.
  * This service tracks is there currently active calculation for resource and cache id and make all other requests
  * to the same resource with the same cache id waiting for this active calculation. When the calculation ends
- * the resolver allows all the waiting requesters to get the data from cache.
- * TODO: [tests, critical] Massively used logic - add unit tests
+ * the resolver allows all the waiting requesters to get the data from cache start its own calculation.
+ * TODO: [tests, critical++] add unit tests - massively used logic and can produce sophisticated concurrency bugs
  */
 export class CacheAndConcurrentRequestsResolver {
     /**
      * @param bio {string} unique identifier for the exact service
-     * @param cacheTtl {number|null} time to live for cache ms. 0 or null means the cache cannot expire (if you need to clean it externally)
-     * @param maxCallAttemptsToWaitForAlreadyRunningRequest {number} number of request allowed to do waiting for result before we fail the original request
-     * @param timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished {number} timeout ms for polling for a result
+     * @param cacheTtl {number|null} time to live for cache ms. 0 or null means the cache cannot expire
+     * @param [maxCallAttemptsToWaitForAlreadyRunningRequest=100] {number} number of request allowed to do waiting for result before we fail the original request
+     * @param [timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished=1000] {number} timeout ms for polling for a result
+     * @param [removeExpiredCacheAutomatically=true] {boolean}
      */
     constructor(
         bio,
         cacheTtl,
         maxCallAttemptsToWaitForAlreadyRunningRequest = 100,
-        timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished = 1000
+        timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished = 1000,
+        removeExpiredCacheAutomatically = true
     ) {
+        if (cacheTtl != null && cacheTtl < timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished * 2) {
+            /*
+             * During the lifetime of this service e.g. if the data is being retrieved slowly we can get
+             * RACE CONDITION when we constantly retrieve data and during retrieval it is expired, so we are trying
+             * to retrieve it again and again.
+             * We have a protection mechanism that we will wait no more than
+             * maxCallAttemptsToWaitForAlreadyRunningRequest * timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished
+             * but this additional check is aimed to reduce potential loading time for some requests.
+             */
+            throw new Error(
+                `DEV: Wrong parameters passed to construct ${bio} - TTL ${cacheTtl} should be 2 times greater than ${timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished}`
+            );
+        }
         this._bio = bio;
         this._cacheTtlMs = cacheTtl ? cacheTtl : null;
+        this._maxExecutionTimeMs =
+            maxCallAttemptsToWaitForAlreadyRunningRequest *
+            timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished;
+        this._removeExpiredCacheAutomatically = removeExpiredCacheAutomatically;
         this._requestsManager = new ManagerOfRequestsToTheSameResource(
             bio,
             maxCallAttemptsToWaitForAlreadyRunningRequest,
@@ -31,19 +50,54 @@ export class CacheAndConcurrentRequestsResolver {
         );
     }
 
+    /**
+     * When using this service this is the major method you should call to get data by cache id.
+     * This method checks is there cached data and ether return you id of new calculation (just abstract id signalling for
+     * other requesters that you started to calculate/request) or if there is already calculation id waits until it is
+     * removed. This means it is removed because finished.
+     *
+     * @param cacheId {string}
+     * @return {Promise<({ canStartDataRetrieval: true, cachedData: any }|{ cachedData: any })>}
+     */
     async getCachedResultOrWaitForItIfThereIsActiveCalculation(cacheId) {
         try {
+            const startedAtTimestamp = Date.now();
             let cached = cache.get(cacheId);
-            if (!cached) {
-                await this._requestsManager.startCalculationOrWaitForActiveToFinish(cacheId);
+            let cachedDataBackupIsPresentButExpired = null;
+            if (cache != null && !this._removeExpiredCacheAutomatically) {
+                const lastUpdateTimestamp = cache.getLastUpdateTimestamp(cacheId);
+                if ((lastUpdateTimestamp ?? 0) + this._cacheTtlMs < Date.now()) {
+                    /*
+                     * Here we are manually clearing 'cached' value retrieved from cache to force data loading.
+                     * But we save its value first to the backup variable to be able to return this value if ongoing
+                     * requesting fails.
+                     */
+                    cachedDataBackupIsPresentButExpired = cached;
+                    cached = null;
+                }
+            }
+            let calculationId = null;
+            let isRetrievedCacheExpired = true;
+            let isWaitingForActiveCalculationSucceeded;
+            let weStillHaveSomeTimeToProceedExecution = true;
+            while (
+                calculationId == null &&
+                cached == null &&
+                isRetrievedCacheExpired &&
+                weStillHaveSomeTimeToProceedExecution
+            ) {
+                const result = await this._requestsManager.startCalculationOrWaitForActiveToFinish(cacheId);
+                calculationId = typeof result === "string" ? result : null;
+                isWaitingForActiveCalculationSucceeded = typeof result === "boolean" ? result : null;
                 cached = cache.get(cacheId);
+                isRetrievedCacheExpired = isWaitingForActiveCalculationSucceeded && cached == null;
+                weStillHaveSomeTimeToProceedExecution = Date.now() - startedAtTimestamp < this._maxExecutionTimeMs;
+            }
+            if (calculationId) {
+                return { canStartDataRetrieval: true, cachedData: cached ?? cachedDataBackupIsPresentButExpired };
             }
 
-            if (cached) {
-                return cached;
-            }
-
-            return null;
+            return { canStartDataRetrieval: false, cachedData: cached ?? cachedDataBackupIsPresentButExpired };
         } catch (e) {
             improveAndRethrow(e, `${this._bio}.getCachedResultOrWaitForItIfThereIsActiveCalculation`);
         }
@@ -52,9 +106,13 @@ export class CacheAndConcurrentRequestsResolver {
     saveCachedData(cacheId, data, sessionDependentData = true) {
         try {
             if (sessionDependentData) {
-                cache.putSessionDependentData(cacheId, data, this._cacheTtlMs);
+                cache.putSessionDependentData(
+                    cacheId,
+                    data,
+                    this._removeExpiredCacheAutomatically ? this._cacheTtlMs : null
+                );
             } else {
-                cache.put(cacheId, data, this._cacheTtlMs);
+                cache.put(cacheId, data, this._removeExpiredCacheAutomatically ? this._cacheTtlMs : null);
             }
         } catch (e) {
             improveAndRethrow(e, `${this._bio}.saveCachedData`);
@@ -93,9 +151,13 @@ export class CacheAndConcurrentRequestsResolver {
             const cached = cache.get(cacheId);
             const result = synchronousCurrentCacheProcessor(cached);
             if (sessionDependent) {
-                cache.putSessionDependentData(cacheId, result?.data, this._cacheTtlMs);
+                cache.putSessionDependentData(
+                    cacheId,
+                    result?.data,
+                    this._removeExpiredCacheAutomatically ? this._cacheTtlMs : null
+                );
             } else {
-                cache.put(cacheId, result?.data, this._cacheTtlMs);
+                cache.put(cacheId, result?.data, this._removeExpiredCacheAutomatically ? this._cacheTtlMs : null);
             }
 
             if (finishActiveCalculation && result?.isModified) {
@@ -127,7 +189,7 @@ class ManagerOfRequestsToTheSameResource {
      * @param [maxCallsCount] {number} max number of attempts to wait for a calculation that initiated
      * @param [timeoutDuration] {number} timeout m between the checking attempts for active calculation to finish
      */
-    constructor(bio, maxCallsCount = 100, timeoutDuration = 3000) {
+    constructor(bio, maxCallsCount = 100, timeoutDuration = 1000) {
         this.bio = bio;
         this.maxCallsCount = maxCallsCount;
         this.timeoutDuration = timeoutDuration;
@@ -138,18 +200,20 @@ class ManagerOfRequestsToTheSameResource {
      * If there is no active calculation just creates uuid and returns it.
      * If there is active calculation waits until it removed from the active calculation uuid variable.
      *
-     * @return {Promise<string|true>} returns uuid of new active calculation or true if waiting for it to be finished succeed
+     * @param requestHash {string}
+     * @return {Promise<string|boolean>} returns uuid of new active calculation or true if waiting for active
+     *         calculation succeed or false if max attempts count exceeded
      */
-    async startCalculationOrWaitForActiveToFinish(paramsHash = "default") {
+    async startCalculationOrWaitForActiveToFinish(requestHash = "default") {
         try {
-            const activeCalculationIdForHash = this._activeCalculationsIds.get(paramsHash);
+            const activeCalculationIdForHash = this._activeCalculationsIds.get(requestHash);
             if (activeCalculationIdForHash == null) {
                 const id = v4();
-                this._activeCalculationsIds.set(paramsHash, id);
+                this._activeCalculationsIds.set(requestHash, id);
                 return id;
             }
 
-            return await this._waitForCalculationIdToFinish(paramsHash, activeCalculationIdForHash, 0);
+            return await this._waitForCalculationIdToFinish(requestHash, activeCalculationIdForHash, 0);
         } catch (e) {
             logError(e, "startCalculationOrWaitForActiveToFinish" + this.bio);
         }
@@ -160,11 +224,11 @@ class ManagerOfRequestsToTheSameResource {
     /**
      * Clears active calculation id.
      * WARNING: if you forget to call this method the start* one will perform maxCallsCount attempts before finishing
-     * @param paramsHash {string} hash of parameters of requests. Helps to distinct the request for the same resource but
+     * @param requestHash {string} hash of request. Helps to distinct the request for the same resource but
      *        having different request parameters and hold a dedicated calculation id per this hash
      */
-    finishActiveCalculation(paramsHash = "default") {
-        this._activeCalculationsIds.delete(paramsHash);
+    finishActiveCalculation(requestHash = "default") {
+        this._activeCalculationsIds.delete(requestHash);
     }
 
     finishAllActiveCalculations(keyPart = "") {
@@ -174,24 +238,30 @@ class ManagerOfRequestsToTheSameResource {
         );
     }
 
-    async _waitForCalculationIdToFinish(paramsHash, activeCalculationId, attemptIndex = 0) {
-        if (attemptIndex + 1 > this.maxCallsCount) {
-            throw new Error("Max count of attempts to wait for the calculation exceeded: " + activeCalculationId);
-        }
+    async _waitForCalculationIdToFinish(requestHash, activeCalculationId, attemptIndex = 0) {
+        try {
+            if (attemptIndex + 1 > this.maxCallsCount) {
+                throw new Error("Max count of attempts to wait for the calculation exceeded: " + activeCalculationId);
+            }
 
-        if (this._activeCalculationsIds.get(paramsHash) !== activeCalculationId) {
-            return true;
-        } else {
-            const it = this;
-            return new Promise((resolve, reject) => {
-                setTimeout(function() {
-                    try {
-                        resolve(it._waitForCalculationIdToFinish(paramsHash, activeCalculationId, attemptIndex + 1));
-                    } catch (e) {
-                        reject(e);
-                    }
-                }, this.timeoutDuration);
-            });
+            if (this._activeCalculationsIds.get(requestHash) !== activeCalculationId) {
+                return true;
+            } else {
+                const it = this;
+                return new Promise((resolve, reject) => {
+                    setTimeout(function() {
+                        try {
+                            resolve(
+                                it._waitForCalculationIdToFinish(requestHash, activeCalculationId, attemptIndex + 1)
+                            );
+                        } catch (e) {
+                            reject(e);
+                        }
+                    }, this.timeoutDuration);
+                });
+            }
+        } catch (e) {
+            return false;
         }
     }
 }

@@ -1,4 +1,4 @@
 # This file tracks version of the service
 # Version format is MAJOR.MINOR.PATCH
-VERSION=0.7.3
+VERSION=0.8.0
 

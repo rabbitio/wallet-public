@@ -4,9 +4,9 @@ import { SupportedSchemes } from "../lib/addresses-schemes";
 import { transactionsDataProvider } from "./internal/transactionsDataProvider";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 
-export class ImportWalletService {
-    static async grabWalletHistoricalDataAndSave() {
-        const loggerSource = "grabWalletHistoricalDataAndSave";
+export class ImportBtcWalletService {
+    static async grabBtcWalletHistoricalDataAndSave() {
+        const loggerSource = "grabBtcWalletHistoricalDataAndSave";
         try {
             await AddressesServiceInternal.performScanningOfAddresses([getCurrentNetwork()], SupportedSchemes);
 

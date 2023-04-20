@@ -1,7 +1,5 @@
 import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
 import { transactionsDataProvider } from "./internal/transactionsDataProvider";
-import AddressesServiceInternal from "./internal/addressesServiceInternal";
-import { getExtendedTransactionDetails } from "../lib/transactions/transactions-history";
 import { retrieveTransactionData } from "../external-apis/transactionDataAPI";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 
@@ -14,18 +12,9 @@ export class BtcTransactionDetailsService {
      */
     static async getBTCTransactionDetails(txId) {
         try {
-            const [transaction, addresses] = await Promise.all([
-                transactionsDataProvider.getTransactionData(txId),
-                AddressesServiceInternal.getAllUsedAddresses(),
-            ]);
-
-            if (transaction) {
-                return getExtendedTransactionDetails(transaction, addresses);
-            }
-
-            return null;
+            return await transactionsDataProvider.getTransactionData(txId);
         } catch (e) {
-            improveAndRethrow(e);
+            improveAndRethrow(e, "getBTCTransactionDetails");
         }
     }
 

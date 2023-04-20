@@ -1,56 +1,68 @@
 import { CachedRobustExternalApiCallerService } from "../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
 import { improveAndRethrow } from "../../common/utils/errorUtils";
+import { ExternalApiProvider } from "../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
+import { ApiGroups } from "../../common/external-apis/apiGroups";
 
-/**
- * We use several providers to ensure the IP address is retrieved in case of unavailability of one of services
- */
-const providers = [
-    {
-        endpoint: "https://api.bigdatacloud.net/data/client-ip",
-        httpMethod: "get",
-        composeQueryString: () => "",
-        getDataByResponse: response => {
-            return response?.data && response.data?.ipString;
-        },
-    },
-    {
-        endpoint: "https://www.trackip.net/ip",
-        httpMethod: "get",
-        composeQueryString: () => "",
-        getDataByResponse: response => {
-            return response?.data;
-        },
-    },
-    {
-        endpoint: "https://api6.ipify.org/?format=json",
-        httpMethod: "get",
-        composeQueryString: () => "",
-        getDataByResponse: response => {
-            return response?.data && response.data?.ip;
-        },
-    },
-    {
-        endpoint: "https://api.ipify.org/?format=json",
-        httpMethod: "get",
-        composeQueryString: () => "",
-        getDataByResponse: response => {
-            return response?.data && response.data?.ip;
-        },
-    },
-    {
-        endpoint: "http://bot.whatismyipaddress.com/",
-        httpMethod: "get",
-        composeQueryString: () => "",
-        getDataByResponse: response => {
-            return response?.data;
-        },
-    },
-];
+class BigdatacloudIpAddressProvider extends ExternalApiProvider {
+    constructor() {
+        super("https://api.bigdatacloud.net/data/client-ip", "get", 15000, ApiGroups.BIGDATACLOUD);
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        return response?.data && response.data?.ipString;
+    }
+}
+
+class TrackipIpAddressProvider extends ExternalApiProvider {
+    constructor() {
+        super("https://www.trackip.net/ip", "get", 15000, ApiGroups.TRACKIP);
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        return response?.data;
+    }
+}
+
+class IpifyV6IpAddressProvider extends ExternalApiProvider {
+    constructor() {
+        super("https://api6.ipify.org/?format=json", "get", 15000, ApiGroups.IPIFY);
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        return response?.data && response.data?.ip;
+    }
+}
+
+class IpifyIpAddressProvider extends ExternalApiProvider {
+    constructor() {
+        super("https://api.ipify.org/?format=json", "get", 15000, ApiGroups.IPIFY);
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        return response?.data && response.data?.ip;
+    }
+}
+
+class WhatismyipaddressIpAddressProvider extends ExternalApiProvider {
+    constructor() {
+        super("http://bot.whatismyipaddress.com/", "get", 15000, ApiGroups.WHATISMYIPADDRESS);
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        return response?.data;
+    }
+}
 
 export default class IpAddressProvider {
     static externalIPAddressAPICaller = new CachedRobustExternalApiCallerService(
         "externalIPAddressAPICaller",
-        providers,
+        [
+            new BigdatacloudIpAddressProvider(),
+            new TrackipIpAddressProvider(),
+            new IpifyV6IpAddressProvider(),
+            new IpifyIpAddressProvider(),
+            new WhatismyipaddressIpAddressProvider(),
+        ],
         30000,
         30,
         2000

@@ -35,7 +35,8 @@ export default class ClientIpHashService {
         try {
             return await provideIpHash();
         } catch (e) {
-            improveAndRethrow(e, "provideIpHashStored");
+            // TODO: [bug, moderate] setup retrying for IP address retrieval task_id=9e8398855f6b43ad83875fe475c6110e
+            logError(e, "provideIpHashStored");
         }
     }
 
