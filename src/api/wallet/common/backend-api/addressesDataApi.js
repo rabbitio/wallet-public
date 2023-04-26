@@ -2,6 +2,7 @@ import is from "is_js";
 
 import { ApiCallWrongResponseError, doApiCall, urlWithPrefix } from "../../../common/backend-api/utils";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
+import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
 
 export default class AddressesDataApi {
     static serverEndpointEntity = "addressesData";
@@ -65,6 +66,15 @@ export default class AddressesDataApi {
         }
     }
 
+    static addressesIndexesCacheKey = "90a35f1b-14a9-4eb6-9cb2";
+    static _cacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
+        "addressesIndexesResolver",
+        600000,
+        50,
+        1000,
+        false
+    );
+
     /**
      * Gets indexes for addresses paths.
      *
@@ -72,12 +82,22 @@ export default class AddressesDataApi {
      */
     static async getAddressesIndexes(walletId) {
         try {
+            const cached = await this._cacheAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
+                this.addressesIndexesCacheKey
+            );
+            if (!cached.canStartDataRetrieval) {
+                return cached.cachedData;
+            }
             const errorMessage = "Failed to get address indexes. ";
             const endpoint = `${urlWithPrefix}/addressesData/${walletId}/indexes`;
 
-            return await doApiCall(endpoint, "get", null, 200, errorMessage);
+            const result = await doApiCall(endpoint, "get", null, 200, errorMessage);
+            this._cacheAndRequestsResolver.saveCachedData(this.addressesIndexesCacheKey, result);
+            return result;
         } catch (e) {
             improveAndRethrow(e, "getAddressesIndexes");
+        } finally {
+            this._cacheAndRequestsResolver.markActiveCalculationAsFinished(this.addressesIndexesCacheKey);
         }
     }
 
@@ -92,6 +112,7 @@ export default class AddressesDataApi {
      */
     static async incrementAddressesIndexOnServer(walletId, path, incrementWith, baseIndex) {
         try {
+            this._cacheAndRequestsResolver.invalidate(this.addressesIndexesCacheKey);
             const endpoint = `${urlWithPrefix}/addressesData/${walletId}/indexes`;
             const errorMessage = "Failed to increment address index.";
             const data = { path, newIndexValue: baseIndex + incrementWith };
@@ -113,6 +134,7 @@ export default class AddressesDataApi {
      */
     static async incrementAddressesIndexAndSaveAddressesData(walletId, path, addressesData, baseIndex) {
         try {
+            this._cacheAndRequestsResolver.invalidate(this.addressesIndexesCacheKey);
             const endpoint = `${urlWithPrefix}/addressesData/${walletId}`;
             const errorMessage = "Failed to increment address index and save addresses.";
             const data = { path, addressesData, baseIndex };

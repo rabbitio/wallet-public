@@ -250,7 +250,12 @@ async function loginIntoWalletAndCreateSession(mnemonic, passphrase, password, w
 
         Logger.log(`Authentication result ${JSON.stringify(authResult)}`, loggerSource);
 
-        const accountsData = new AccountsData(mnemonic, passphrase, SupportedSchemes, Coins.getSupportedNetworks());
+        const accountsData = new AccountsData(
+            mnemonic,
+            passphrase,
+            SupportedSchemes,
+            Coins.getUniqueSupportedNetworks()
+        );
         saveAccountsData(accountsData);
         saveEncryptedWalletCredentials(encrypt(mnemonic, password), encrypt(passphrase, password));
         saveWalletId(mnemonicToWalletId(mnemonic));
@@ -366,7 +371,12 @@ async function saveNewWalletAndProvideLocalData(mnemonic, passphrase = "", passw
 
         const passwordHash = getHash(password);
         const passphraseHash = getHash(passphrase);
-        const accountsData = new AccountsData(mnemonic, passphrase, SupportedSchemes, Coins.getSupportedNetworks());
+        const accountsData = new AccountsData(
+            mnemonic,
+            passphrase,
+            SupportedSchemes,
+            Coins.getUniqueSupportedNetworks()
+        );
         const dataPassword = mnemonicToDataPassword(mnemonic);
         const { initialIndexesData, initialAddressesData } = AddressesService.createInitialAddressesData(
             accountsData,

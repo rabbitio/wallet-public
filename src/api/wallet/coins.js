@@ -234,6 +234,30 @@ export class Coins {
     }
 
     /**
+     * Returns unique networks for all coins. Choose current network (according to app configuration - main or test).
+     * Distinction is made by coin id and network key.
+     * @return {Network[]}
+     */
+    static getUniqueSupportedNetworks() {
+        try {
+            const allNetworks = Object.keys(this.COINS).map(key => getCurrentNetwork(this.COINS[key]));
+            const uniqueNetworksByCoinId = [];
+            for (let i = 0; i < allNetworks.length; ++i) {
+                if (
+                    !uniqueNetworksByCoinId.find(
+                        net => net.coinIndex === allNetworks[i].coinIndex && net.key === allNetworks[i].key
+                    )
+                ) {
+                    uniqueNetworksByCoinId.push(allNetworks[i]);
+                }
+            }
+            return uniqueNetworksByCoinId;
+        } catch (e) {
+            improveAndRethrow(e, "getUniqueSupportedNetworks");
+        }
+    }
+
+    /**
      * @param protocol {Protocol}
      * @return {Coin[]}
      */
