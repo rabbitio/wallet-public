@@ -156,12 +156,14 @@ export function getFeeRatesExpirationTime() {
     return storageProvider.getItem("feeExpirationTime");
 }
 
-export function saveShownNotificationPushesCount(shownNotificationPushesCount) {
-    storageProvider.setItem("shownNotificationPushesCount", shownNotificationPushesCount);
+export function saveShownNotificationPushesCount(shownNotificationPushesCount, walletId) {
+    const walletIdPart = walletId.slice(0, 8);
+    storageProvider.setItem("shownNotificationPushesCount_" + walletIdPart, shownNotificationPushesCount);
 }
 
-export function getShownNotificationPushesCount() {
-    return storageProvider.getItem("shownNotificationPushesCount");
+export function getShownNotificationPushesCount(walletId) {
+    const walletIdPart = walletId.slice(0, 8);
+    return storageProvider.getItem("shownNotificationPushesCount_" + walletIdPart);
 }
 
 export function saveIsNotFoundSessionMessageShownForLastLostSession(value) {

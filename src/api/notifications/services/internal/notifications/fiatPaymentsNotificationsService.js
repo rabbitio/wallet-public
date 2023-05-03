@@ -3,6 +3,7 @@ import { EncryptedWalletPaymentIdsService } from "../../../../purchases/services
 import Notification, { NOTIFICATIONS_TYPES } from "../../../models/notification";
 import FiatPaymentsService from "../../../../purchases/services/FiatPaymentsService";
 
+// TODO: [feature, moderate] use it if binance connect support this feature task_id=16127916f375490aa6b526675a6c72e4
 export default class FiatPaymentsNotificationsService {
     /**
      * Returns unseen fiat payments notifications according to given last view timestamp

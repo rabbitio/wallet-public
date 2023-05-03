@@ -5,6 +5,9 @@ import { TransactionDetailsService } from "../../../../wallet/common/services/tr
 import TransactionsHistoryService from "../../../../wallet/common/services/transactionsHistoryService";
 import { Coins } from "../../../../wallet/coins";
 
+/**
+ * disabled @since 0.8.2 task_id=014bd7ea795c49b0b5f38caadabc60df
+ */
 export default class TransactionsNotificationsService extends DedicatedNotificationsService {
     constructor() {
         super();
@@ -16,13 +19,16 @@ export default class TransactionsNotificationsService extends DedicatedNotificat
     async getUnseenNotificationsList(lastViewTimestamp, forceFetchData = false) {
         try {
             await this._actualizeTransactionsData(forceFetchData);
-            const newTransactionsNotifications = this._allTransactions
+            const newIncomingTransactionsNotifications = this._allTransactions
                 .filter(tx => tx.creationTime > lastViewTimestamp && tx.type === "incoming")
-                .map(tx => TransactionsNotificationsService._createNewTransactionNotification(tx));
+                .map(tx => TransactionsNotificationsService._createNewIncomingTransactionNotification(tx));
             const justConfirmedTransactions = this._justConfirmedTransactions.map(tx =>
                 TransactionsNotificationsService._createConfirmedTransactionNotification(tx)
             );
-            const allTransactionsForNotifications = [...newTransactionsNotifications, ...justConfirmedTransactions];
+            const allTransactionsForNotifications = [
+                ...newIncomingTransactionsNotifications,
+                ...justConfirmedTransactions,
+            ];
             allTransactionsForNotifications.sort((t1, t2) => t2.timestamp - t1.timestamp);
 
             return allTransactionsForNotifications;
@@ -32,14 +38,14 @@ export default class TransactionsNotificationsService extends DedicatedNotificat
     }
 
     /**
-     * Returns all "new transaction" notifications
+     * Returns all "new incoming transaction" notifications
      * @param walletCreationTime {number} - wallet creation timestamp
      *
      * @return {Promise<Array<Notification>>}
      */
     async getWholeNotificationsList(walletCreationTime) {
         return this._allTransactions
-            .map(tx => TransactionsNotificationsService._createNewTransactionNotification(tx))
+            .map(tx => TransactionsNotificationsService._createNewIncomingTransactionNotification(tx))
             .sort((t1, t2) => t2.timestamp - t1.timestamp);
     }
 
@@ -49,7 +55,9 @@ export default class TransactionsNotificationsService extends DedicatedNotificat
             if (forceFetchData) {
                 TransactionsHistoryService.invalidateCaches(...params);
             }
-            this._allTransactions = (await TransactionsHistoryService.getTransactionsList(...params))?.transactions;
+            this._allTransactions = (
+                await TransactionsHistoryService.getTransactionsList(...params)
+            )?.transactions.filter(tx => tx.type === "incoming");
             this._justConfirmedTransactions = this._allTransactions
                 .filter(
                     confirmedTx =>
@@ -65,19 +73,18 @@ export default class TransactionsNotificationsService extends DedicatedNotificat
         }
     }
 
-    static _createNewTransactionNotification(tx) {
+    static _createNewIncomingTransactionNotification(tx) {
         return new Notification(
-            tx.type === "incoming" ? NOTIFICATIONS_TYPES.TRANSACTION_IN : NOTIFICATIONS_TYPES.TRANSACTION_OUT,
-            tx.type === "incoming"
-                ? `New incoming ${tx.tickerPrintable} transaction`
-                : `New outgoing ${tx.tickerPrintable} transaction`,
+            NOTIFICATIONS_TYPES.TRANSACTION_IN,
+            `New incoming ${tx.tickerPrintable} transaction`,
             `You've ` +
                 (tx.type === "incoming" ? "got " : "sent ") +
                 `${tx.amountSignificantString} ` +
                 tx.tickerPrintable +
                 (tx.status !== "confirmed" ? ". The transaction is now pending confirmation.." : ""),
             tx.creationTime,
-            { txid: tx.txid, ticker: tx.ticker }
+            { txid: tx.txid, ticker: tx.ticker },
+            true
         );
     }
 
@@ -85,15 +92,7 @@ export default class TransactionsNotificationsService extends DedicatedNotificat
         return new Notification(
             NOTIFICATIONS_TYPES.TRANSACTION_CONFIRMED,
             "Transaction confirmed",
-            (tx.type === "incoming" ? "Incoming" : "Outgoing") +
-                " transaction of " +
-                tx.amountSignificantString +
-                " " +
-                tx.tickerPrintable +
-                " is confirmed.",
-            // `#${tx.txid.slice(0, 10)} ${tx.type === "incoming" ? "sending" : "receiving"} ${
-            //     tx.amountSignificantString
-            // } ${tx.tickerPrintable}`,
+            "Incoming transaction of " + tx.amountSignificantString + " " + tx.tickerPrintable + " is confirmed.",
             /**
              * This is a small hack as confirmation time is not the creation time, and we can avoid calling for
              * confirmation timestamp just by slightly increasing the creation timestamp. It will help when we sort

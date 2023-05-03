@@ -1,7 +1,6 @@
 export const NOTIFICATIONS_TYPES = {
     ADMIN: "admin",
     TRANSACTION_IN: "transaction_in",
-    TRANSACTION_OUT: "transaction_out",
     TRANSACTION_CONFIRMED: "transaction_confirmed",
     FIAT_PAYMENT_COMPLETED: "fiat_payment_completed",
     FIAT_PAYMENT_NOT_COMPLETED: "fiat_payment_not_completed",

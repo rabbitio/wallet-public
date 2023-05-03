@@ -63,7 +63,7 @@ export default class IpAddressProvider {
             new IpifyIpAddressProvider(),
             new WhatismyipaddressIpAddressProvider(),
         ],
-        30000,
+        180000,
         30,
         2000
     );

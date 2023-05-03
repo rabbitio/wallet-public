@@ -49,4 +49,5 @@ export const ApiGroups = {
     BITGO: new ApiGroup("bitgo", 1), // Just assumption for RPS
     BITCOINER: new ApiGroup("bitcoiner", 1), // Just assumption for RPS
     BITCORE: new ApiGroup("bitcore", 1), // Just assumption for RPS
+    BLOCKCHAIR: new ApiGroup("blockchair", 0.04), // 1 req per minute, reduce if you need to use this provider frequently or start using API key (10usd 10000 reqs)
 };

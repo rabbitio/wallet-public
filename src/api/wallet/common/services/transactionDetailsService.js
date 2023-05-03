@@ -1,5 +1,5 @@
 import { Logger } from "../../../support/services/internal/logs/logger";
-import FiatPaymentsService from "../../../purchases/services/FiatPaymentsService";
+// import FiatPaymentsService from "../../../purchases/services/FiatPaymentsService";
 import CoinsToFiatRatesService from "./coinsToFiatRatesService";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { TransactionsDataService } from "./transactionsDataService";
@@ -70,10 +70,10 @@ export class TransactionDetailsService {
             const coinAmount = coin.atomsToCoinAmount(transaction.amount);
             const feeCoinAmount = transaction.fees != null ? coin.feeCoin.atomsToCoinAmount(transaction.fees) : null;
             let fiatCurrencyData = CoinsToFiatRatesService.getCurrentFiatCurrencyData();
-            let [[fiatAmount, fiatFee], coinToCurrentFiatRateAtCreationDate, purchasesData] = await Promise.all([
+            let [[fiatAmount, fiatFee], coinToCurrentFiatRateAtCreationDate /*, purchasesData*/] = await Promise.all([
                 CoinsToFiatRatesService.convertCoinAmountsToFiat(coin, [+coinAmount, +(feeCoinAmount ?? 0)]),
                 CoinsToFiatRatesService.getCoinToCurrentFiatCurrencyRateForSpecificDate(coin, transaction.time),
-                FiatPaymentsService.getPurchaseDataForTransactions([transaction.txid]),
+                // FiatPaymentsService.getPurchaseDataForTransactions([transaction.txid]), // TODO: [feature, moderate] enable if binance connect support this feature task_id=16127916f375490aa6b526675a6c72e4
             ]);
 
             if (coin.doesUseDifferentCoinFee() && transaction.fees != null) {
@@ -91,7 +91,7 @@ export class TransactionDetailsService {
                     : transaction.confirmations >= coin.minConfirmations
                     ? "confirmed"
                     : transaction.confirmations > 0
-                    ? "confirming"
+                    ? "confirming" // TODO: [refactoring, moderate] Since 0.8.0 we no more guarantee the number of confirmations so maybe we should completely remove the "confirming" status logic from whole app. task_id=ad6f057e8a2b4c9ab9addcfda5f172b5
                     : "unconfirmed",
                 unconfirmedTime: transaction.confirmations < coin.minConfirmations ? unconfirmedTime : undefined,
                 confirmations: transaction.confirmations,
@@ -114,7 +114,8 @@ export class TransactionDetailsService {
                         : null,
                 note: note,
                 isRbfAble: transaction.type === "out" && transaction.isRbfAble,
-                purchaseData: purchasesData?.length ? purchasesData[0]?.purchaseData : null,
+                // purchaseData: purchasesData?.length ? purchasesData[0]?.purchaseData : null, // TODO: [feature, moderate] enable if binance connect support this feature task_id=16127916f375490aa6b526675a6c72e4
+                purchaseData: null,
             };
 
             Logger.log(`Returning ${JSON.stringify(result)}`, loggerSource);
@@ -131,7 +132,8 @@ export class TransactionDetailsService {
      * @return {number} minimum confirmations number
      */
     static minConfirmations(ticker) {
-        return Coins.getCoinByTicker(ticker)?.minConfirmations;
+        // TODO: [refactoring, moderate] Since 0.8.0 we no more guarantee the number of confirmations so maybe we should completely remove the "confirming" status logic from whole app. task_id=ad6f057e8a2b4c9ab9addcfda5f172b5
+        return 1;
     }
 
     /**

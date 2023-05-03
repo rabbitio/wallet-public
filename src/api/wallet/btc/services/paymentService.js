@@ -33,7 +33,7 @@ export default class PaymentService {
      * @return {Promise<string>} resolving to transaction id of transaction appeared in the blockchain
      */
     static async createTransactionAndBroadcast(mnemonic, passphrase, txData) {
-        const loggerSource = "createTransactionBroadcast";
+        const loggerSource = "createTransactionAndBroadcast";
         try {
             Logger.log(`Start broadcasting ${txData.amount} satoshi to ${txData.address}`, loggerSource);
             const seedHex = bip39.mnemonicToSeedHex(mnemonic, passphrase);

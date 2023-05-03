@@ -36,6 +36,43 @@ class BlockstreamPostTransactionApiProvider extends ExternalApiProvider {
     }
 }
 
+class BlockchairPostTransactionApiProvider extends ExternalApiProvider {
+    constructor() {
+        super("https://api.blockchair.com/", "post", 20000, ApiGroups.BLOCKCHAIR);
+    }
+
+    composeQueryString(params, subRequestIndex = 0) {
+        try {
+            const network = params[1];
+            let prefix = "bitcoin";
+            if (network === Coins.COINS.BTC.testnet) {
+                prefix = "bitcoin/testnet";
+            }
+            return `${prefix}/push/transaction`;
+        } catch (e) {
+            improveAndRethrow(e, "BlockchairPostTransactionApiProvider.composeQueryString");
+        }
+    }
+
+    composeBody(params, subRequestIndex = 0) {
+        try {
+            const hex = params[0];
+            return `data=${hex}`;
+        } catch (e) {
+            improveAndRethrow(e, "BlockchairPostTransactionApiProvider.composeBody");
+        }
+    }
+
+    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+        try {
+            const data = response?.data?.data;
+            return data?.transaction_hash ?? null;
+        } catch (e) {
+            improveAndRethrow(e, "BlockchairPostTransactionApiProvider.getDataByResponse");
+        }
+    }
+}
+
 class BitcorePostTransactionApiProvider extends ExternalApiProvider {
     constructor() {
         super("https://api.bitcore.io/api/BTC/", "post", 20000, ApiGroups.BITCORE);
@@ -68,7 +105,18 @@ class BitcorePostTransactionApiProvider extends ExternalApiProvider {
     }
 }
 
-export const postTransactionAPICaller = new RobustExternalAPICallerService("postTransactionAPICaller", [
-    new BlockstreamPostTransactionApiProvider(),
-    new BitcorePostTransactionApiProvider(),
-]);
+export class BtcTransactionPushingProvider {
+    static _provider = new RobustExternalAPICallerService("btcTransactionPushingProvider", [
+        new BlockstreamPostTransactionApiProvider(),
+        new BlockchairPostTransactionApiProvider(),
+        new BitcorePostTransactionApiProvider(),
+    ]);
+
+    static async pushRawHexBtcTransaction(hexTransaction, network) {
+        try {
+            return await this._provider.callExternalAPI([hexTransaction, network], 30000, null, 1);
+        } catch (e) {
+            improveAndRethrow(e, "pushRawHexBtcTransaction");
+        }
+    }
+}

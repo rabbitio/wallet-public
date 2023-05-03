@@ -1,12 +1,13 @@
-import TransactionsNotificationsService from "./internal/notifications/transactionsNotificationsService";
+// import TransactionsNotificationsService from "./internal/notifications/transactionsNotificationsService";
 import AdminNotificationsService from "./internal/notifications/adminNotificationsService";
 import {
     getShownNotificationPushesCount,
+    getWalletId,
     saveShownNotificationPushesCount,
 } from "../../common/services/internal/storage";
 import { improveAndRethrow, logError } from "../../common/utils/errorUtils";
 import Notification from "../models/notification";
-import FiatPaymentsNotificationsService from "./internal/notifications/fiatPaymentsNotificationsService";
+// import FiatPaymentsNotificationsService from "./internal/notifications/fiatPaymentsNotificationsService";
 import { Logger } from "../../support/services/internal/logs/logger";
 import { PreferencesService } from "../../wallet/common/services/preferencesService";
 import { UserDataAndSettings } from "../../wallet/common/models/userDataAndSettings";
@@ -14,9 +15,9 @@ import { UserDataAndSettings } from "../../wallet/common/models/userDataAndSetti
 class NotificationsService {
     constructor() {
         this._dedicatedServices = [
-            new TransactionsNotificationsService(),
+            // new TransactionsNotificationsService(), TODO: [feature, low] task_id=014bd7ea795c49b0b5f38caadabc60df
             new AdminNotificationsService(),
-            new FiatPaymentsNotificationsService(),
+            // new FiatPaymentsNotificationsService(), TODO: [feature, moderate] enable or remove when integrating new on ramp service task_id=16127916f375490aa6b526675a6c72e4
         ];
     }
 
@@ -29,13 +30,14 @@ class NotificationsService {
      */
     async getNotificationsCountAndViewPushes(forceFetchData = false) {
         try {
+            const walletId = getWalletId();
             const notifications = await this._getUnseenNotificationsList(false, forceFetchData);
-            const shownPushesCount = +(getShownNotificationPushesCount() || 0);
+            const shownPushesCount = +(getShownNotificationPushesCount(walletId) || 0);
 
             const unseenCount = notifications.filter(notification => !notification.isOnlyPush).length;
             const notYetShownPushesCount = notifications.length - shownPushesCount;
             let notificationsNotYetShownAsPushes = [];
-            saveShownNotificationPushesCount(notifications.length);
+            saveShownNotificationPushesCount(notifications.length, walletId);
             if (notYetShownPushesCount > 0) {
                 notificationsNotYetShownAsPushes = notifications.slice(0, notYetShownPushesCount);
             }
@@ -81,7 +83,7 @@ class NotificationsService {
                     UserDataAndSettings.SETTINGS.LAST_NOTIFICATIONS_VIEW_TIMESTAMP,
                     "" + Date.now()
                 );
-                saveShownNotificationPushesCount(0);
+                saveShownNotificationPushesCount(0, getWalletId());
             }
 
             return notifications;

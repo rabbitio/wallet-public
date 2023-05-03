@@ -1,4 +1,4 @@
-import { postTransactionAPICaller } from "../../external-apis/postTransactionAPI";
+import { BtcTransactionPushingProvider } from "../../external-apis/btcTransactionPushingProvider";
 import { improveAndRethrow } from "../../../../common/utils/errorUtils";
 import { Logger } from "../../../../support/services/internal/logs/logger";
 
@@ -17,7 +17,7 @@ export async function broadcastTransaction(transaction, network) {
     try {
         Logger.log("Start broadcasting the transaction", loggerSource);
         const hexTransaction = transaction.toHex();
-        const id = await postTransactionAPICaller.callExternalAPI([hexTransaction, network], 30000);
+        const id = await BtcTransactionPushingProvider.pushRawHexBtcTransaction(hexTransaction, network);
 
         Logger.log(`Transaction pushed successfully: ${id}`, loggerSource);
         return id;

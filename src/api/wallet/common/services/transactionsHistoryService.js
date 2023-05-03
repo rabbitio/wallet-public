@@ -2,7 +2,7 @@ import is from "is_js";
 
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { TransactionsDataService } from "./transactionsDataService";
-import FiatPaymentsService from "../../../purchases/services/FiatPaymentsService";
+// import FiatPaymentsService from "../../../purchases/services/FiatPaymentsService";
 import { TransactionDetailsService } from "./transactionDetailsService";
 import CoinsToFiatRatesService from "./coinsToFiatRatesService";
 import { Coins } from "../../coins";
@@ -138,8 +138,9 @@ export default class TransactionsHistoryService {
                 loggerSource
             );
 
-            const withLabels = await addPurchaseData(allTransactions);
-            const withFiatAmounts = await addFiatAmounts(filteredCoins, withLabels);
+            // TODO: [feature, moderate] enable if binance connect support this feature task_id=16127916f375490aa6b526675a6c72e4
+            // const withLabels = await addPurchaseData(allTransactions);
+            const withFiatAmounts = await addFiatAmounts(filteredCoins, allTransactions);
             const selectedOnes = getOnlyFiltered(withFiatAmounts, filterBy);
             const searchedOnes = getOnlySearched(selectedOnes, searchCriteria);
             const sorted = sort(searchedOnes, sortBy);
@@ -311,16 +312,16 @@ async function addNotesIgnoringErrors(allTransactions) {
     }
 }
 
-async function addPurchaseData(transactionsList) {
-    const purchasesData = await FiatPaymentsService.getPurchaseDataForTransactions(transactionsList.map(tx => tx.txid));
-
-    transactionsList.forEach(tx => {
-        const data = purchasesData.find(item => item.txid === tx.txid);
-        tx["purchaseData"] = data?.purchaseData;
-    });
-
-    return transactionsList;
-}
+// async function addPurchaseData(transactionsList) {
+//     const purchasesData = await FiatPaymentsService.getPurchaseDataForTransactions(transactionsList.map(tx => tx.txid));
+//
+//     transactionsList.forEach(tx => {
+//         const data = purchasesData.find(item => item.txid === tx.txid);
+//         tx["purchaseData"] = data?.purchaseData;
+//     });
+//
+//     return transactionsList;
+// }
 
 function getOnlyFiltered(transactionsList, filterBy) {
     if (!filterBy || !filterBy.length) {
@@ -492,7 +493,7 @@ function mapToProperReturnFormat(transactionsList) {
             note: transaction.description,
             // TODO: [refactoring, low] use per-coin isRBFAble?
             isRbfAble: transaction.type === "out" && !!transaction.isRbfAble,
-            purchaseData: transaction.purchaseData,
+            purchaseData: transaction.purchaseData ?? null,
             ticker: coin.ticker,
             tickerPrintable: coin.tickerPrintable,
             address: transaction.address,
