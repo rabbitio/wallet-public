@@ -125,7 +125,7 @@ export class Wallet {
      *
      * @param [label] {string|null} optional label for address
      * @throws {Error} if wallet doesn't support multiple addresses (has multipleAddressesSupport === false)
-     * @returns {Promise<{ uuid: string, address: string }>} address and its unique id
+     * @returns {Promise<{ uuid: string, address: string, label: (string|null), creationTime: number }>} address and its data
      */
     async createNewAddress(label) {
         throw new Error("New address creation is not supported for " + this?.coin?.ticker);

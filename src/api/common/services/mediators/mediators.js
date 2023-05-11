@@ -19,7 +19,6 @@ import {
     WALLET_IMPORTED_EVENT,
 } from "../../adapters/eventbus";
 import { improveAndRethrow, logError } from "../../utils/errorUtils";
-import ChangeAddressUpdateSchedulingService from "../../../wallet/btc/services/changeAddressUpdateSchedulingService";
 import { transactionsDataProvider } from "../../../wallet/btc/services/internal/transactionsDataProvider";
 import UtxosService from "../../../wallet/btc/services/internal/utxosService";
 import { getCurrentSmallestFeeRate } from "../../../wallet/btc/services/feeRatesService";
@@ -97,9 +96,6 @@ export function setupMediators(
                             Number.MAX_SAFE_INTEGER
                         );
                     });
-                    EventBus.addEventListener(event, () =>
-                        ChangeAddressUpdateSchedulingService.scheduleChangeAddressUpdates()
-                    );
                     EventBus.addEventListener(event, async function() {
                         await AddressesService.getCurrentExternalAddress();
                     });
@@ -140,7 +136,6 @@ export function setupMediators(
         [LOGGED_OUT_EVENT, NO_AUTHENTICATION_EVENT].forEach(event =>
             EventBus.addEventListener(event, () => {
                 try {
-                    ChangeAddressUpdateSchedulingService.removeScheduledChangeAddressUpdating();
                     transactionsDataProvider.resetState();
                     addressesMetadataService.clearMetadata();
                     PreferencesService.removeWalletDataSyncInterval();
@@ -235,7 +230,6 @@ export function setupMediators(
             EventBus.addEventListener(event, () => {
                 try {
                     LogsStorage.removeAllClientLogs();
-                    ChangeAddressUpdateSchedulingService.removeScheduledChangeAddressUpdating();
                 } catch (e) {
                     logError(e, event + "_handler-remove-logs");
                 }

@@ -2,7 +2,6 @@ export const FEE_LIFETIME = 30 * 1000; // ms
 export const UPDATE_INTERVAL = 60 * 1000; // 1 minute
 export const AUTHENTICATION_LOST_DELAY = 3000; // 3 min
 export const SEND_MODAL_WINDOW_LIFETIME = 3 * 60 * 1000; // 3 minutes
-export const CHANGE_ADDRESS_UPDATE_INTERVAL_SECONDS = 300;
 export const CLIENT_IP_HASH_LIFETIME = 300 * 1000; // ms
 export const COINS_TO_FIAT_RATES_LIFETIME = 30 * 1000; // ms
 export const USD_FIAT_RATES_LIFETIME = 2 * 60 * 60 * 1000; // ms

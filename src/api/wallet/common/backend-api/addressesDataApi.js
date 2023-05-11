@@ -69,7 +69,7 @@ export default class AddressesDataApi {
     static addressesIndexesCacheKey = "90a35f1b-14a9-4eb6-9cb2";
     static _cacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
         "addressesIndexesResolver",
-        600000,
+        600_000_000, // TODO: [refactoring, moderate] Since 0.8.3 we don't support new addresses creation so the indexes are always the same. Refactoring required. task_id=546c83e7f4b64f39b67055a7c4ecaa48
         50,
         1000,
         false

@@ -65,17 +65,21 @@ export default class CurrentAddressUtils {
             let currentAddress = null;
             if (currentAddressIndex !== -1) {
                 currentAddress = getAddressByIndex(scheme, changeNode, currentAddressIndex, network);
-                isCurrentAddressNodeUsed = await isNodeUsed(currentAddress, network);
+                /**
+                 * Since 0.8.3 we disabled bitcoin addresses generation feature. So for simplicity here we just set
+                 * false treating all addresses as unused in terms of this algorithm. But we still leave option to
+                 * scan addresses to recognize their utilisation via doAddressNodesScanning flag - it can be useful for
+                 * dedicated scanning like when importing wallet.
+                 */
+                isCurrentAddressNodeUsed = false;
                 if (!isCurrentAddressNodeUsed && !doAddressNodesScanning) {
                     return currentAddress;
                 }
             }
 
-            /* Possible cases here: (currentAddressIndex, isNodeUsed, doAddressNodesScanning)
+            /* Possible cases here: (currentAddressIndex, isCurrentAddressNodeUsed, doAddressNodesScanning)
              * -1  null  true
              *  0+ false true
-             *  0+ true  true
-             *  0+ true  false
              */
             const newAddresses = await scanForNewMissingAddresses(
                 scheme,
@@ -117,15 +121,6 @@ async function incrementIndexAndSaveAddressesIfNeeded(walletId, path, changeInde
         });
         const baseIndex = AddressesDataAdapter.getIndexByPath(addressesIndexes, path);
         await AddressesDataApi.incrementAddressesIndexAndSaveAddressesData(walletId, path, addressesData, baseIndex);
-    }
-}
-
-async function isNodeUsed(nodeAddress, network) {
-    try {
-        const usage = await AddressesUsageUtils.getAddressesUsage([nodeAddress], network);
-        return usage[0] > 0;
-    } catch (e) {
-        improveAndRethrow(e, "isNodeUsed");
     }
 }
 
