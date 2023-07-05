@@ -58,6 +58,11 @@ import { PreferencesService } from "./common/services/preferencesService";
 import { UserDataAndSettings } from "./common/models/userDataAndSettings";
 
 export class Coins {
+    /**
+     * Use this mapping object to address exact coin like Coins.COIN.BTC.
+     * Keys here are not guarantied to be tickers. Use getCoinByTicker to get coin by ticker.
+     * @type {Coin[]}
+     */
     static COINS = {
         BTC: bitcoin,
         ETH: ethereum,
@@ -286,6 +291,22 @@ export class Coins {
             throw new Error("No coin for given ticker " + ticker);
         } catch (e) {
             improveAndRethrow(e, "getCoinByTicker");
+        }
+    }
+
+    /**
+     * @param address {string}
+     * @return {Coin|null}
+     */
+    static getCoinByContractAddress(address) {
+        try {
+            const coin = Object.values(this.COINS).find(
+                coin =>
+                    coin.tokenAddress === (coin?.doesUseLowerCaseAddresses ? (address ?? "").toLowerCase() : address)
+            );
+            return coin ?? null;
+        } catch (e) {
+            improveAndRethrow(e, "getCoinByContractAddress");
         }
     }
 }

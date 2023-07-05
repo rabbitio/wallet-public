@@ -17,7 +17,7 @@ export class CachedRobustExternalApiCallerService {
      * @param [maxCallAttemptsToWaitForAlreadyRunningRequest=50] {number} number of request allowed to do waiting for result before we fail the original request
      * @param [timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished=3000] {number} timeout ms for polling for a result
      * @param [removeExpiredCacheAutomatically=true] {boolean} whether to remove cached data automatically when ttl exceeds
-     * @param [mergeCachedAndNewlyRetrievedData=null] {function} function accepting cached data and newly retrieved data
+     * @param [mergeCachedAndNewlyRetrievedData=null] {function} function accepting cached data, newly retrieved data and id field name for list items
      *        and merging them. use if needed
      */
     constructor(
@@ -85,7 +85,7 @@ export class CachedRobustExternalApiCallerService {
             );
 
             if (typeof this._mergeCachedAndNewlyRetrievedData === "function") {
-                data = this._mergeCachedAndNewlyRetrievedData(result?.cachedData, data);
+                data = this._mergeCachedAndNewlyRetrievedData(result?.cachedData, data, parametersValues);
             }
             if (data != null) {
                 this._cahceAndRequestsResolver.saveCachedData(cacheId, data);
@@ -113,6 +113,16 @@ export class CachedRobustExternalApiCallerService {
     ) {
         const cacheId = this._calculateCacheId(params, customHashFunctionForParams);
         this._cahceAndRequestsResolver.actualizeCachedData(cacheId, synchronousCurrentCacheProcessor, sessionDependent);
+    }
+
+    markCacheAsExpiredButDontRemove(parametersValues, customHashFunctionForParams) {
+        try {
+            this._cahceAndRequestsResolver.markAsExpiredButDontRemove(
+                this._calculateCacheId(parametersValues, customHashFunctionForParams)
+            );
+        } catch (e) {
+            improveAndRethrow(e, "markCacheAsExpiredButDontRemove");
+        }
     }
 
     _calculateCacheId(parametersValues, customHashFunctionForParams = null) {

@@ -3,7 +3,6 @@ import is from "is_js";
 import { getSumOfOutputsSendingToAddressByTransactionsList } from "../../btc/lib/transactions/transactions-utils";
 import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
 import AddressesService from "../../btc/services/addressesService";
-import { satoshiToBtc } from "../../btc/lib/btc-utils";
 import InvoicesService from "../../../invoices/services/invoicesService";
 import CoinsToFiatRatesService from "./coinsToFiatRatesService";
 import { Coins } from "../../coins";
@@ -201,7 +200,10 @@ async function fillAmounts(addressesDataList) {
             ? getSumOfOutputsSendingToAddressByTransactionsList(addressData.address, transactionsOfAddresses)
             : null;
 
-        return { ...addressData, amountBtc: sumSatoshi != null ? satoshiToBtc(sumSatoshi) : null };
+        return {
+            ...addressData,
+            amountBtc: sumSatoshi != null ? Number(Coins.COINS.BTC.atomsToCoinAmount("" + sumSatoshi)) : null,
+        };
     });
 }
 

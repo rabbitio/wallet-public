@@ -1,6 +1,5 @@
 import { setupMediators } from "./common/services/mediators/mediators";
 import ClientIpHashService from "./auth/services/internal/clientIpHashService";
-import { registerThisWalletAsBitcoinProtocolHandler } from "./common/utils/browserUtils";
 import { isCurrentSessionValid } from "./auth/services/authService";
 import {
     EventBus,
@@ -8,7 +7,6 @@ import {
     THERE_IS_SESSION_ON_APP_INITIALIZATION_EVENT,
 } from "./common/adapters/eventbus";
 import { logError } from "./common/utils/errorUtils";
-import PaymentUrlService from "./wallet/btc/services/paymentUrlService";
 import { blocksListener } from "./wallet/btc/services/internal/blocksListener";
 import { currentBlockService } from "./wallet/btc/services/internal/currentBlockService";
 import { IS_TESTING } from "../properties";
@@ -33,13 +31,6 @@ export function setupAppAndInitializeBackgroundTasks(
                 }
             })(),
         () => setupMediators(handleNotFoundSession, handleLogout, handleNewNotLocalTxs, handleDiscoveredAuthentication),
-        IS_TESTING
-            ? []
-            : () =>
-                  registerThisWalletAsBitcoinProtocolHandler(
-                      PaymentUrlService.URL_PARAMETER_NAME,
-                      PaymentUrlService.URL_PATH
-                  ),
         IS_TESTING ? [] : () => blocksListener.setupListeningForNewBlocks(),
         () => currentBlockService.initialize(),
         IS_TESTING ? [] : ScheduledLogger.logWalletSlicePeriodically,

@@ -11,7 +11,7 @@ export class EthereumTransactionsHistoryService {
      * Get the history of transactions for current wallet.
      * Considers that the wallet has single address.
      *
-     * Tries first eth-only provider as we use fre one under the hood. If it fails tries whole blockchain txs retrieval
+     * Tries first eth-only provider as we use free one under the hood. If it fails tries whole blockchain txs retrieval
      * (under the hood is provider with only few free requests).
      * We use this provider-dependent logic because it allows us to priority use free data providers.
      *
@@ -45,7 +45,7 @@ export class EthereumTransactionsHistoryService {
                 return ethereumBlockchainTransactions.filter(tx => tx.ticker === coin.ticker);
             }
         } catch (e) {
-            improveAndRethrow(e, "getEthTransactionsHistory");
+            improveAndRethrow(e, "getEthereumTransactionsHistory");
         }
     }
 }

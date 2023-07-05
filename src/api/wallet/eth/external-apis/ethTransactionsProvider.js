@@ -9,6 +9,7 @@ import { CachedRobustExternalApiCallerService } from "../../../common/services/u
 import {
     actualizeCacheWithNewTransactionSentFromAddress,
     mergeTwoArraysByItemIdFieldName,
+    mergeTwoTransactionsArraysAndNotifyAboutNewTransactions,
 } from "../../common/utils/cacheActualizationUtils";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
@@ -146,11 +147,11 @@ export class EthTransactionsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "ethTransactionsProvider",
         [new EtherscanEthTransactionsProvider()],
-        60000,
-        70,
+        100000,
+        110,
         1000,
         false,
-        mergeTwoArraysByItemIdFieldName
+        mergeTwoTransactionsArraysAndNotifyAboutNewTransactions
     );
 
     /**
@@ -176,15 +177,13 @@ export class EthTransactionsProvider {
      */
     static actualizeCacheWithNewTransactionSentFromAddress(address, txData, txId) {
         try {
-            actualizeCacheWithNewTransactionSentFromAddress(
-                this._provider,
-                [address],
-                customHashFunctionForParams,
+            const cacheProcessor = actualizeCacheWithNewTransactionSentFromAddress(
                 Coins.COINS.ETH,
                 address,
                 txData,
                 txId
             );
+            this._provider.actualizeCachedData([address], cacheProcessor, customHashFunctionForParams);
         } catch (e) {
             improveAndRethrow(e, "actualizeCacheWithNewTransactionSentFromAddress");
         }
@@ -194,13 +193,24 @@ export class EthTransactionsProvider {
         try {
             this._provider.actualizeCachedData(
                 [address],
-                cache => mergeTwoArraysByItemIdFieldName(cache, transactions),
+                cache => ({ data: mergeTwoArraysByItemIdFieldName(cache, transactions, "txid"), isModified: true }),
                 customHashFunctionForParams,
                 true,
                 Date.now()
             );
         } catch (e) {
             improveAndRethrow(e, "actualizeCacheWithTransactionsReturnedByAnotherProvider");
+        }
+    }
+
+    /**
+     * @param address {string}
+     */
+    static markCacheAsExpired(address) {
+        try {
+            this._provider.markCacheAsExpiredButDontRemove([address], customHashFunctionForParams);
+        } catch (e) {
+            improveAndRethrow(e, "markCacheAsExpired");
         }
     }
 }

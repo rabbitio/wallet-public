@@ -186,6 +186,22 @@ class Cache {
             improveAndRethrow(e, "getClientPersistentData");
         }
     }
+
+    markCacheItemAsExpiredButDontRemove(key, ttlMs = null) {
+        try {
+            const item = this._cache.get(key);
+            const ttlFinalMs = ttlMs ?? item?.ttlMs;
+            if (item != null && ttlFinalMs) {
+                this._cache.set(key, {
+                    data: item.data,
+                    addedMsTimestamp: Date.now() - ttlFinalMs - 1,
+                    ttlMs: ttlFinalMs,
+                });
+            }
+        } catch (e) {
+            improveAndRethrow(e, "markCacheItemAsExpiredButDontRemove");
+        }
+    }
 }
 
 export const cache = new Cache();

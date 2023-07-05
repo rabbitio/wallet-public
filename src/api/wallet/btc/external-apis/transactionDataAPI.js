@@ -40,7 +40,7 @@ class BlockstreamTransactionDetailsProvider extends ExternalApiProvider {
                         input.prevout.value,
                         input.txid,
                         input.vout,
-                        mapType(input.prevout.scriptpubkey_type),
+                        mapType(input.prevout.scriptpubkey_type), // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
                         input.sequence
                     )
             );
@@ -50,7 +50,7 @@ class BlockstreamTransactionDetailsProvider extends ExternalApiProvider {
                     new Output(
                         [output.scriptpubkey_address],
                         output.value,
-                        mapType(output.scriptpubkey_type),
+                        mapType(output.scriptpubkey_type), // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
                         null,
                         index
                     )

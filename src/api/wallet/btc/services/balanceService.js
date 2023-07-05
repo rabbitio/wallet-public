@@ -1,7 +1,6 @@
 import UtxosService from "./internal/utxosService";
 import PaymentService from "./paymentService";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { satoshiToBtc } from "../lib/btc-utils";
 import { getCurrentSmallestFeeRate } from "./feeRatesService";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Logger } from "../../../support/services/internal/logs/logger";
@@ -39,8 +38,8 @@ export default class BalanceService {
             );
 
             const balanceData = await UtxosService.calculateBalance(currentSmallestFeeRate, forceCalculate);
-            const spendableBtcAmount = satoshiToBtc(balanceData.spendable);
-            const btcDustAmount = satoshiToBtc(balanceData.dust);
+            const spendableBtcAmount = Number(Coins.COINS.BTC.atomsToCoinAmount("" + balanceData.spendable));
+            const btcDustAmount = Number(Coins.COINS.BTC.atomsToCoinAmount("" + balanceData.dust));
             const [spendableFiatAmount, fiatDustAmount] = await CoinsToFiatRatesService.convertCoinAmountsToFiat(
                 Coins.COINS.BTC,
                 [spendableBtcAmount, btcDustAmount]
@@ -58,5 +57,13 @@ export default class BalanceService {
         } catch (e) {
             improveAndRethrow(e, loggerSource);
         }
+    }
+
+    static markBtcBalanceCacheAsExpired() {
+        UtxosService.markBtcBalanceCacheAsExpired();
+    }
+
+    static actualizeBalanceCacheWithAmountAtoms(amountAtoms, sign) {
+        UtxosService.actualizeBalanceCacheWithAmountAtoms(amountAtoms, sign);
     }
 }

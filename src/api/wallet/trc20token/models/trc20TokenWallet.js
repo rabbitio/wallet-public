@@ -106,4 +106,29 @@ export class Trc20TokenWallet extends Wallet {
             improveAndRethrow(e, `${this.coin.ticker}_actualizeLocalCachesWithNewTransactionData`);
         }
     }
+
+    markBalanceCacheAsExpired() {
+        try {
+            TronBlockchainBalancesService.markBalancesAsExpired(this.coin);
+        } catch (e) {
+            improveAndRethrow(e, `${this.coin.ticker}_markBalanceCacheAsExpired`);
+        }
+    }
+
+    actualizeBalanceCacheWithAmountAtoms(amountAtoms, sign = -1) {
+        try {
+            TronBlockchainBalancesService.actualizeBalanceCacheWithAmountAtomsForCoin(this.coin, amountAtoms, sign);
+        } catch (e) {
+            improveAndRethrow(e, "actualizeBalanceCacheWithAmountAtoms");
+        }
+    }
+
+    markTransactionsCacheAsExpired() {
+        try {
+            const address = TrxAddressesService.getCurrentTrxAddress();
+            Trc20TransactionsProvider.markCacheAsExpired(address);
+        } catch (e) {
+            improveAndRethrow(e, "markTransactionsCacheAsExpired");
+        }
+    }
 }

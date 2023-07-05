@@ -9,6 +9,7 @@ import { tronUtils } from "../adapters/tronUtils";
 import { computeConfirmationsCountByTimestamp } from "../lib/blocks";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { BigNumber } from "ethers";
 
 class TrongridTransactionDetailsProvider extends ExternalApiProvider {
     constructor() {
@@ -100,7 +101,7 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
                                 );
                                 const addressTo = tronUtils.hexAddressToBase58check("41" + logItem.topics[2].slice(24));
                                 const type = addressFrom === myAddress ? "out" : addressTo === myAddress ? "in" : null;
-                                const amount = "" + +`0x${logItem.data}`;
+                                const amount = BigNumber.from(`0x${logItem.data}`).toString();
                                 if (type) {
                                     return new TransactionsHistoryItem(
                                         id,
@@ -182,15 +183,15 @@ export class TronBlockchainTransactionDetailsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronBlockchainTransactionDetailsProvider",
         [new TrongridTransactionDetailsProvider()],
-        70000,
-        70,
+        100000,
+        110,
         1000,
         false
     );
 
     /**
-     * @param id
-     * @param address
+     * @param id {string}
+     * @param address {string}
      * @return {Promise<(TransactionsHistoryItem[]|null)>}
      */
     static async getTronTransactionDetails(id, address) {

@@ -126,17 +126,6 @@ export class TransactionDetailsService {
     }
 
     /**
-     * Retrieves the minimum confirmations number required to treat the transaction as confirmed
-     *
-     * @param ticker - the ticker of coin to get the nu,ber for
-     * @return {number} minimum confirmations number
-     */
-    static minConfirmations(ticker) {
-        // TODO: [refactoring, moderate] Since 0.8.0 we no more guarantee the number of confirmations so maybe we should completely remove the "confirming" status logic from whole app. task_id=ad6f057e8a2b4c9ab9addcfda5f172b5
-        return 1;
-    }
-
-    /**
      * Checks whether given transaction is replacing one after applying RBF for some another. This check is not robust but
      * is ok in terms of APIs of this app. But note that another usages should be analysed as
      *
@@ -144,7 +133,7 @@ export class TransactionDetailsService {
      * @return {boolean}
      */
     static isIncreasingFee(transaction) {
-        // TODO: [bug, low] not all double spending transactions can be treated as "Increasing Fee"
+        // TODO: [bug, low] not all double spending transactions should be treated as "Increasing Fee"
         return (
             transaction.confirmations === 0 &&
             transaction.double_spend === true &&

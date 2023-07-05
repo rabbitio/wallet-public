@@ -77,6 +77,10 @@ export class TronSendTransactionService {
                 const existingAccount = FeeEstimationUtils.getWalletAddressToUseAsFromAddressForTokenSendingEstimation(
                     Coin.PROTOCOLS.TRC20
                 );
+                /* This value should not exceed tron balance of the hardcoded address we use for estimation. So we
+                 * use the smallest possible. Greater value can add just few bytes to the hex transaction. We handle
+                 * this by increasing the whole estimation a bit below.
+                 */
                 const sendAmountSunsForEstimation = "1";
                 const [hexTrxSendTx, doesTargetAddressExist] = await Promise.all([
                     tronUtils.buildTrxTransferTransactionHex(
@@ -101,10 +105,9 @@ export class TronSendTransactionService {
             ]);
             const bandwidthMultiplier = 1.1; // Because bandwidth is not exactly 1:1 with length, but usually pretty the same
             const requiredBandwidthMultiplied = requiredBandwidth * bandwidthMultiplier;
+            // Tron uses free bandwidth only if it can completely cover the required bandwidth amount
             const bandwidthToPayFor =
-                requiredBandwidthMultiplied > (availableBandwidth ?? 0)
-                    ? requiredBandwidthMultiplied - (availableBandwidth ?? 0)
-                    : 0;
+                requiredBandwidthMultiplied > (availableBandwidth ?? 0) ? requiredBandwidthMultiplied : 0;
             const bandwidthFee = bandwidthToPayFor * bandwidthPriceSuns;
             const energyToPayFor =
                 requiredEnergy > (availableEnergy ?? 0) ? requiredEnergy - (availableEnergy ?? 0) : 0;

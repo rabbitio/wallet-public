@@ -7,6 +7,7 @@ import { CachedRobustExternalApiCallerService } from "../../../common/services/u
 import {
     actualizeCacheWithNewTransactionSentFromAddress,
     mergeTwoArraysByItemIdFieldName,
+    mergeTwoTransactionsArraysAndNotifyAboutNewTransactions,
 } from "../../common/utils/cacheActualizationUtils";
 import { Coins } from "../../coins";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
@@ -106,13 +107,13 @@ export class Erc20TransactionsProvider {
         130,
         1000,
         false,
-        mergeTwoArraysByItemIdFieldName
+        mergeTwoTransactionsArraysAndNotifyAboutNewTransactions
     );
 
     /**
      * Retrieves ethereum transactions sending given erc20 token for given address
      *
-     * @param address {string} ethereum address to gt transactions for
+     * @param address {string} ethereum address to get transactions for
      * @param cancelProcessor {CancelProcessing} canceller if you need to control execution outside
      * @returns {Promise<TransactionsHistoryItem[]>} history items
      */
@@ -140,14 +141,11 @@ export class Erc20TransactionsProvider {
      */
     static actualizeCacheWithNewTransaction(coin, address, txData, txId) {
         try {
-            actualizeCacheWithNewTransactionSentFromAddress(
-                this._provider,
-                this._calculateParamsArray(coin, address),
-                hashFunctionForParams,
-                coin,
-                address,
-                txData,
-                txId
+            const cacheProcessor = actualizeCacheWithNewTransactionSentFromAddress(coin, address, txData, txId);
+            this._provider.actualizeCachedData(
+                this._calculateParamsArray(address),
+                cacheProcessor,
+                hashFunctionForParams
             );
         } catch (e) {
             improveAndRethrow(e, "erc20TransactionsProvider.actualizeCacheWithNewTransaction");
@@ -162,13 +160,24 @@ export class Erc20TransactionsProvider {
         try {
             this._provider.actualizeCachedData(
                 this._calculateParamsArray(address),
-                cache => mergeTwoArraysByItemIdFieldName(cache, transactions),
+                cache => ({ data: mergeTwoArraysByItemIdFieldName(cache, transactions, "txid"), isModified: true }),
                 hashFunctionForParams,
                 true,
                 Date.now()
             );
         } catch (e) {
             improveAndRethrow(e, "actualizeCacheWithTransactionsReturnedByAnotherProvider");
+        }
+    }
+
+    /**
+     * @param address {string}
+     */
+    static markCacheAsExpired(address) {
+        try {
+            this._provider.markCacheAsExpiredButDontRemove(this._calculateParamsArray(address), hashFunctionForParams);
+        } catch (e) {
+            improveAndRethrow(e, "markCacheAsExpired");
         }
     }
 }

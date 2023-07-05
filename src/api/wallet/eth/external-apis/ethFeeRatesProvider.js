@@ -131,7 +131,8 @@ export class EthFeeRatesProvider {
             ],
             30000,
             35,
-            1000
+            1000,
+            false
         );
     }
 

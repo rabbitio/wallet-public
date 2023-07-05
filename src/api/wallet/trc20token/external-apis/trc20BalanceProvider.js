@@ -1,3 +1,4 @@
+import { BigNumber } from "ethers";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
@@ -6,6 +7,10 @@ import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
 import { TRONGR_PR_K } from "../../../../properties";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import {
+    createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
+    mergeSingleBalanceValuesAndNotifyAboutValueChanged,
+} from "../../common/utils/cacheActualizationUtils";
 
 class TrongridTrc20BalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -41,7 +46,7 @@ class TrongridTrc20BalanceProvider extends ExternalApiProvider {
         try {
             const balanceHex = (response?.data?.constant_result ?? [])[0];
             if (balanceHex == null) throw new Error("Wrong balance retrieved for trc20: " + JSON.stringify(params));
-            return "" + +`0x${balanceHex}`;
+            return BigNumber.from(`0x${balanceHex}`).toString();
         } catch (e) {
             improveAndRethrow(e, "trongridTrc20BalanceProvider.getDataByResponse");
         }
@@ -54,7 +59,13 @@ export class Trc20BalanceProvider {
         120000,
         130,
         1000,
-        false
+        false,
+        (cached, newValue, params) =>
+            mergeSingleBalanceValuesAndNotifyAboutValueChanged(
+                cached,
+                newValue,
+                Coins.getCoinByContractAddress(params[0])?.ticker
+            )
     );
 
     /**
@@ -71,10 +82,29 @@ export class Trc20BalanceProvider {
                 20000,
                 null,
                 1,
-                () => `${coin.ticker}-${address}`
+                customHashFunctionForParams
             );
         } catch (e) {
             improveAndRethrow(e, "getTrc20Balance");
         }
     }
+
+    static markTrc20BalanceCacheAsExpired(coin, address) {
+        this._provider.markCacheAsExpiredButDontRemove([coin.tokenAddress, address], customHashFunctionForParams);
+    }
+
+    static actualizeBalanceCacheWithAmount(address, coin, valuesAtoms, sign) {
+        try {
+            const cacheProcessor = createRawBalanceAtomsCacheProcessorForSingleBalanceProvider(valuesAtoms, sign);
+            this._provider.actualizeCachedData(
+                [coin.tokenAddress, address],
+                cacheProcessor,
+                customHashFunctionForParams
+            );
+        } catch (e) {
+            improveAndRethrow(e, "actualizeBalanceCacheWithAmount");
+        }
+    }
 }
+
+const customHashFunctionForParams = params => `trc20_the_only_balance_${params[0]}-${params[1]}`;

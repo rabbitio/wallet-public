@@ -45,6 +45,7 @@ export function createFakeTransaction(amount, address, changeAddress, feeRate, u
                 // Sum is enough at least to cover paying amount
                 let change = currentSum - amount;
 
+                // TODO: [feature, moderate] change can be dust at the first call and not dust at second. task_id=b1bbe260001f4a74ba771b80827420a8
                 let tx = buildTransaction(
                     amount,
                     address,
@@ -57,16 +58,18 @@ export function createFakeTransaction(amount, address, changeAddress, feeRate, u
                 const fee = calculateFeeByFeeRate(tx, feeRate);
 
                 // TODO: [feature, moderate] Implement here the same algorithm as for RBF options calculation - based
-                //       on two transactions one with change and one without
+                //       on two transactions one with change and one without. task_id=b1bbe260001f4a74ba771b80827420a8
+                // TODO: [bug, high] change can be dust before this and after recalculating. task_id=b1bbe260001f4a74ba771b80827420a8
                 if (change >= fee) {
                     change = change - fee;
-                    // TODO: [refactoring, moderate] Maybe remove this call - it is placed just to verify that build is ok
+                    // TODO: [refactoring, moderate] Maybe remove this call - it is placed just to verify that build is ok. task_id=b1bbe260001f4a74ba771b80827420a8
                     buildTransaction(amount, address, change, changeAddress, selectedUtxos, ecPairsMapping, network);
                     return new TxData(amount, address, change, fee, changeAddress, selectedUtxos, network, feeRate);
                 }
             }
         }
 
+        // TODO: [feature, moderate] return TxData here too. task_id=c6771140cfce44049a8ce600032bb3af
         return getFeePlusSendingAmountOverlapsBalanceErrorData();
     } catch (e) {
         improveAndRethrow(e, "createFakeTransaction");
@@ -106,6 +109,7 @@ export function createFakeSendAllTransaction(address, feeRate, utxos, network) {
             return new TxData(finalAmount, address, 0, feeOfGoodUtxos, null, goodUtxos, network, feeRate);
         }
 
+        // TODO: [feature, moderate] return TxData here too. task_id=c6771140cfce44049a8ce600032bb3af
         return getFeePlusSendingAmountOverlapsBalanceErrorData();
     } catch (e) {
         improveAndRethrow(e, "createFakeSendAllTransaction");

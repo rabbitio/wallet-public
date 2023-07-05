@@ -3,6 +3,7 @@ import { EthAddressesService } from "../../eth/services/ethAddressesService";
 import { Logger } from "../../../support/services/internal/logs/logger";
 import { Erc20AllBalancesProvider } from "../external-apis/erc20AllBalancesProvider";
 import { Erc20SingleBalanceProvider } from "../external-apis/erc20SingleBalanceProvider";
+import { Coins } from "../../coins";
 
 export class Erc20TokenBalanceService {
     /**
@@ -23,7 +24,7 @@ export class Erc20TokenBalanceService {
             }
             let balance;
             if (balances != null) {
-                balance = balances.find(b => b.coin === coin)?.balance;
+                balance = balances.find(b => b.ticker === coin.ticker)?.balance;
                 if (balance == null) {
                     /*
                      * If multi coin provider doesn't fail but its result has no specific erc20 coin balance
@@ -51,9 +52,29 @@ export class Erc20TokenBalanceService {
         try {
             const address = EthAddressesService.getCurrentEthAddress();
             const balances = await Erc20AllBalancesProvider.getErc20Balances(address);
-            return balances.filter(item => item.balance !== "0").map(item => item.coin);
+            return balances.filter(item => item.balance !== "0").map(item => Coins.getCoinByTicker(item.ticker));
         } catch (e) {
             improveAndRethrow(e, "getSupportedErc20TokensHavingNonZeroBalance");
+        }
+    }
+
+    static markErc20TokenBalanceAsExpired(token) {
+        try {
+            const address = EthAddressesService.getCurrentEthAddress();
+            Erc20AllBalancesProvider.markErc20BalancesAsExpired(address);
+            Erc20SingleBalanceProvider.markErc20BalanceAsExpired(token, address);
+        } catch (e) {
+            improveAndRethrow(e, "markErc20TokenBalanceAsExpired");
+        }
+    }
+
+    static actualizeBalanceCacheWithAmountAtoms(coin, amountAtoms, sign) {
+        try {
+            const address = EthAddressesService.getCurrentEthAddress();
+            Erc20AllBalancesProvider.actualizeBalanceCacheWithAmountAtoms(coin, address, amountAtoms, sign);
+            Erc20SingleBalanceProvider.actualizeBalanceCacheWithAmountAtoms(coin, address, amountAtoms, sign);
+        } catch (e) {
+            improveAndRethrow(e, "actualizeBalanceCacheWithAmountAtoms");
         }
     }
 }

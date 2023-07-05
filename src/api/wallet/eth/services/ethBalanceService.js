@@ -18,4 +18,22 @@ export class EthBalanceService {
             improveAndRethrow(e, "getEthWalletBalance");
         }
     }
+
+    static markEtherBalanceCacheAsExpired() {
+        try {
+            const address = EthAddressesService.getCurrentEthAddress();
+            EthBalanceProvider.markEthBalanceCacheAsExpiredButDontRemove(address);
+        } catch (e) {
+            improveAndRethrow(e, "markEtherBalanceCacheAsExpired");
+        }
+    }
+
+    static actualizeBalanceCacheWithAmountAtoms(amountAtoms, sign) {
+        try {
+            const address = EthAddressesService.getCurrentEthAddress();
+            EthBalanceProvider.actualizeBalanceCacheWithAmountAtoms(address, amountAtoms, sign);
+        } catch (e) {
+            improveAndRethrow(e, "actualizeBalanceCacheWithAmountAtoms");
+        }
+    }
 }

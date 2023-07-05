@@ -5,6 +5,10 @@ import { Coins } from "../../coins";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { standardTickerToRabbitTicker } from "../../common/external-apis/utils/tickersAdapter";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import {
+    createRawBalanceAtomsCacheProcessorForMultiBalancesProvider,
+    mergeTwoBalancesArraysAndNotifyAboutBalanceValueChange,
+} from "../../common/utils/cacheActualizationUtils";
 import { Coin } from "../../common/models/coin";
 
 class TronscanBlockchainBalanceProvider extends ExternalApiProvider {
@@ -47,10 +51,11 @@ export class TronBlockchainBalancesProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronBlockchainBalanceProvider",
         [new TronscanBlockchainBalanceProvider()],
-        30000,
-        60,
+        100000,
+        110,
         1000,
-        false
+        false,
+        mergeTwoBalancesArraysAndNotifyAboutBalanceValueChange
     );
 
     /**
@@ -61,9 +66,30 @@ export class TronBlockchainBalancesProvider {
      */
     static async getTronBlockchainBalances(accountAddress) {
         try {
-            return await this._provider.callExternalAPICached([accountAddress], 15000, null, 1, params => params[1]);
+            return await this._provider.callExternalAPICached(
+                [accountAddress],
+                15000,
+                null,
+                1,
+                customHashFunctionForParams
+            );
         } catch (e) {
             improveAndRethrow(e, "getTronBlockchainBalances");
         }
     }
+
+    static markTronBlockchainBalancesAsExpiredButDontRemove(address) {
+        this._provider.markCacheAsExpiredButDontRemove([address], customHashFunctionForParams);
+    }
+
+    static actualizeBalanceCacheWithAmount(address, coin, valuesAtoms, sign) {
+        try {
+            const cacheProcessor = createRawBalanceAtomsCacheProcessorForMultiBalancesProvider(coin, valuesAtoms, sign);
+            this._provider.actualizeCachedData([address], cacheProcessor, customHashFunctionForParams);
+        } catch (e) {
+            improveAndRethrow(e, "actualizeBalanceCacheWithAmount");
+        }
+    }
 }
+
+const customHashFunctionForParams = params => `all_tron_blockchain_balances_${params[0]}`;

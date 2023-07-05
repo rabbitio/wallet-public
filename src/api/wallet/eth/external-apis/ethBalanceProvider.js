@@ -6,6 +6,10 @@ import { ETH_PR_ALC_GOERLI_K, ETH_PR_K } from "../../../../properties";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
+import {
+    createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
+    mergeSingleBalanceValuesAndNotifyAboutValueChanged,
+} from "../../common/utils/cacheActualizationUtils";
 
 class AlchemyEthBalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -81,10 +85,12 @@ export class EthBalanceProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "ethBalanceProvider",
         [new EtherscanEthBalanceProvider(), new AlchemyEthBalanceProvider()],
-        90000,
-        100,
+        100000,
+        110,
         1000,
-        false
+        false,
+        (cached, newValue) =>
+            mergeSingleBalanceValuesAndNotifyAboutValueChanged(cached, newValue, Coins.COINS.ETH.ticker)
     );
 
     /**
@@ -95,15 +101,20 @@ export class EthBalanceProvider {
      */
     static async getEthBalanceForAddress(address) {
         try {
-            return await this._provider.callExternalAPICached(
-                [address],
-                15000,
-                null,
-                1,
-                params => `only_eth_balance_${params[0]}`
-            );
+            return await this._provider.callExternalAPICached([address], 15000, null, 1, customHashFunctionForParams);
         } catch (e) {
             improveAndRethrow(e, "getEthBalanceForAddress");
         }
     }
+
+    static markEthBalanceCacheAsExpiredButDontRemove(address) {
+        this._provider.markCacheAsExpiredButDontRemove([address], customHashFunctionForParams);
+    }
+
+    static actualizeBalanceCacheWithAmountAtoms(address, amountAtoms, sign) {
+        const cacheProcessor = createRawBalanceAtomsCacheProcessorForSingleBalanceProvider(amountAtoms, sign);
+        this._provider.actualizeCachedData([address], cacheProcessor, customHashFunctionForParams);
+    }
 }
+
+const customHashFunctionForParams = params => `only_eth_balance_${params[0]}`;

@@ -202,10 +202,18 @@ export default class RobustExternalAPICallerService {
 
                             const waitingTimeMS = provider.getRps() ? 1000 / (provider.getRps() / rpsFactor) : 0;
 
-                            responsesForPages[pageNumber] = await postponeExecution(async () => {
-                                provider.actualizeLastCalledTimestamp();
-                                return await axios[httpMethods[subRequestIndex]](...axiosParams);
-                            }, waitingTimeMS);
+                            const postponeUntilRpsExceeded = async (recursionLevel = 0) => {
+                                return await postponeExecution(async () => {
+                                    const maxCountOfPostponingAttempts = 2;
+                                    if (provider.isRpsExceeded() && recursionLevel < maxCountOfPostponingAttempts) {
+                                        return await postponeUntilRpsExceeded(recursionLevel + 1);
+                                    }
+                                    provider.actualizeLastCalledTimestamp();
+                                    return await axios[httpMethods[subRequestIndex]](...axiosParams);
+                                }, waitingTimeMS);
+                            };
+
+                            responsesForPages[pageNumber] = await postponeUntilRpsExceeded();
                         }
 
                         if (hasNextPage) {

@@ -4,6 +4,10 @@ import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
+import {
+    createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
+    mergeSingleBalanceValuesAndNotifyAboutValueChanged,
+} from "../../common/utils/cacheActualizationUtils";
 
 class EtherscanErc20SingleBalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -41,7 +45,13 @@ export class Erc20SingleBalanceProvider {
         120000,
         130,
         1000,
-        false
+        false,
+        (cached, newValue, params) =>
+            mergeSingleBalanceValuesAndNotifyAboutValueChanged(
+                cached,
+                newValue,
+                Coins.getCoinByContractAddress(params[1])?.ticker
+            )
     );
 
     /**
@@ -54,14 +64,33 @@ export class Erc20SingleBalanceProvider {
     static async getErc20TokenBalance(address, coin) {
         try {
             return this._provider.callExternalAPICached(
-                [address, coin.tokenAddress],
+                this._composeParamsArray(address, coin),
                 15000,
                 null,
                 1,
-                params => `single_token_balance_${params[0]}_${params[1]}`
+                hashFunctionForParams
             );
         } catch (e) {
             improveAndRethrow(e, "getErc20TokenBalance");
         }
     }
+
+    static _composeParamsArray(address, coin) {
+        return [address, coin.tokenAddress];
+    }
+
+    static markErc20BalanceAsExpired(coin, address) {
+        this._provider.markCacheAsExpiredButDontRemove(this._composeParamsArray(address, coin), hashFunctionForParams);
+    }
+
+    static actualizeBalanceCacheWithAmountAtoms(coin, address, amountAtoms, sign) {
+        const cacheProcessor = createRawBalanceAtomsCacheProcessorForSingleBalanceProvider(amountAtoms, sign);
+        this._provider.actualizeCachedData(
+            this._composeParamsArray(address, coin),
+            cacheProcessor,
+            hashFunctionForParams
+        );
+    }
 }
+
+const hashFunctionForParams = params => `single_token_balance_${params[0]}_${params[1]}`;

@@ -27,6 +27,7 @@ export class Coin {
      * @param [protocol] {Protocol|null} token/coin protocol if relevant
      * @param [tokenAddress] {string|null} address of contract of this token (if the coin is token)
      * @param [doesUseLowerCaseAddresses] {boolean} flag to clarify whether we can use lower case addresses to ensure more robust comparisons
+     * @param [doesCalculateBalanceInternally=false] fkag signalling that for this coin we don't retrieve balance value from external sources - we calculate it on base of transactions set
      */
     constructor(
         latinName,
@@ -44,7 +45,8 @@ export class Coin {
         blockchain,
         protocol = null,
         tokenAddress = null,
-        doesUseLowerCaseAddresses = true
+        doesUseLowerCaseAddresses = true,
+        doesCalculateBalanceInternally = false
     ) {
         this.latinName = latinName;
         this.ticker = ticker;
@@ -65,6 +67,7 @@ export class Coin {
         this.feeCoin = this;
         this._significantDigits = 8;
         this.doesUseLowerCaseAddresses = doesUseLowerCaseAddresses;
+        this.doesCalculateBalanceInternally = doesCalculateBalanceInternally;
     }
 
     static PROTOCOLS = {

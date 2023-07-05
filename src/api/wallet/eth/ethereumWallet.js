@@ -110,6 +110,31 @@ class EthereumWallet extends Wallet {
             improveAndRethrow(e, `${this.coin.ticker}_actualizeLocalCachesWithNewTransactionData`);
         }
     }
+
+    markBalanceCacheAsExpired() {
+        try {
+            EthBalanceService.markEtherBalanceCacheAsExpired();
+        } catch (e) {
+            improveAndRethrow(e, `${this.coin.ticker}_markBalanceCacheAsExpired`);
+        }
+    }
+
+    actualizeBalanceCacheWithAmountAtoms(amountAtoms, sign = -1) {
+        try {
+            EthBalanceService.actualizeBalanceCacheWithAmountAtoms(amountAtoms, sign);
+        } catch (e) {
+            improveAndRethrow(e, "actualizeBalanceCacheWithAmountAtoms");
+        }
+    }
+
+    markTransactionsCacheAsExpired() {
+        try {
+            const address = EthAddressesService.getCurrentEthAddress();
+            EthTransactionsProvider.markCacheAsExpired(address);
+        } catch (e) {
+            improveAndRethrow(e, "markTransactionsCacheAsExpired");
+        }
+    }
 }
 
 export const ethereumWallet = new EthereumWallet();

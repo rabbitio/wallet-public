@@ -1,7 +1,6 @@
 import DedicatedNotificationsService from "./dedicatedNotificationsService";
 import { improveAndRethrow } from "../../../../common/utils/errorUtils";
 import Notification, { NOTIFICATIONS_TYPES } from "../../../models/notification";
-import { TransactionDetailsService } from "../../../../wallet/common/services/transactionDetailsService";
 import TransactionsHistoryService from "../../../../wallet/common/services/transactionsHistoryService";
 import { Coins } from "../../../../wallet/coins";
 
@@ -61,12 +60,12 @@ export default class TransactionsNotificationsService extends DedicatedNotificat
             this._justConfirmedTransactions = this._allTransactions
                 .filter(
                     confirmedTx =>
-                        confirmedTx.confirmations >= TransactionDetailsService.minConfirmations(confirmedTx.ticker) &&
+                        confirmedTx.confirmations >= Coins.getCoinByTicker(confirmedTx.ticker).minConfirmations &&
                         this._confirmingTransactions.find(unconfirmedTx => unconfirmedTx.txid === confirmedTx.txid)
                 )
                 .map(tx => ({ ...tx, approximateConfirmationTimestamp: Date.now() }));
             this._confirmingTransactions = this._allTransactions.filter(
-                tx => tx.confirmations < TransactionDetailsService.minConfirmations(tx.ticker)
+                tx => tx.confirmations < Coins.getCoinByTicker(tx.ticker).minConfirmations
             );
         } catch (e) {
             improveAndRethrow(e, "_actualizeTransactionsData");

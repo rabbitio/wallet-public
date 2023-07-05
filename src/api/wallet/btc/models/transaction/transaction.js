@@ -56,6 +56,7 @@ export class Transaction {
                     new Input(utxo.address, utxo.value_satoshis, utxo.txid, utxo.number, utxo.type, MAX_RBF_SEQUENCE)
             );
             const to = txData.address;
+            // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
             const outputs = [new Output([to], txData.amount, getOutputTypeByAddress(to), null, 0)];
             const change = txData.utxos.reduce((p, c) => p + c.value_satoshis, 0) - txData.amount - txData.fee;
             if (change > getDustThreshold(to)) {

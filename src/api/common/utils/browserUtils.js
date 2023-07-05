@@ -37,19 +37,6 @@ export function saveTextToFile(text, filename) {
 }
 
 /**
- * Registers this application as Bitcoin protocol handler for the browser. Pass parameter name to be used for bitcoin URL
- */
-export function registerThisWalletAsBitcoinProtocolHandler(paymentUrlParameterName = "paymentURL", path = "send") {
-    if (navigator.registerProtocolHandler) {
-        const url = window.location.href;
-        const scheme = url.indexOf("//") > -1 ? url.split("/")[0] : "https:";
-        const domain = url.indexOf("//") > -1 ? url.split("/")[2] : url.split("/")[0];
-        const appUrl = `${scheme}//${domain}/${path}?${paymentUrlParameterName}=%s`;
-        navigator.registerProtocolHandler("bitcoin", appUrl, "rabbit.io");
-    }
-}
-
-/**
  * Retrieves path with params from URL
  *
  * @return {string}
@@ -62,7 +49,7 @@ export function getPathWithParams() {
     }
     const pathIndex = fullURL.lastIndexOf(path);
 
-    return fullURL.substr(pathIndex, fullURL.length - pathIndex);
+    return fullURL.slice(pathIndex);
 }
 
 /**

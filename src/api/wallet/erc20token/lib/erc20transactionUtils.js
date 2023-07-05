@@ -81,7 +81,7 @@ export class Erc20transactionUtils {
     static composeEthereumTransactionDataForGivenParams(receiver, amountAtoms) {
         try {
             const erc20Interface = new ethers.utils.Interface(erc20abi);
-            return erc20Interface.encodeFunctionData("transfer", [receiver, ethers.BigNumber.from(amountAtoms)]);
+            return erc20Interface.encodeFunctionData("transfer", [receiver, BigNumber.from(amountAtoms)]);
         } catch (e) {
             improveAndRethrow(e, "composeEthereumTransactionDataForGivenParams");
         }

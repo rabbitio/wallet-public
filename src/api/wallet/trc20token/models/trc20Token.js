@@ -17,7 +17,7 @@ export class Trc20Token extends Coin {
             atomName,
             new Network("mainnet", 195, 0, 1, 20, [bip44Scheme]),
             new Network("nile", 195, 0, 1, 20, [bip44Scheme]),
-            20,
+            1,
             null,
             null,
             60000,

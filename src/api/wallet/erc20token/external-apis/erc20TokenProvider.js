@@ -80,7 +80,7 @@ class Erc20TokenTransactionsDataProvider {
         const defaultMaxGasAmountForErc20Transfer = 120000;
         try {
             const data = Erc20transactionUtils.composeEthereumTransactionDataForGivenParams(receiver, amountAtoms);
-            const providerUrl = `https://eth-${network.key}.alchemyapi.io/v2/${ETH_PR_K}`; // TODO: [feature, critical] Use network-dependent key
+            const providerUrl = `https://eth-${network.key}.alchemyapi.io/v2/${ETH_PR_K}`; // TODO: [feature, moderate] Use network-dependent key
             const transactionData = {
                 from: sender,
                 to: this.tokenAddress,

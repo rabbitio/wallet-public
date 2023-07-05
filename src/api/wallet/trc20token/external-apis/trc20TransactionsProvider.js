@@ -7,7 +7,7 @@ import { TransactionsHistoryItem } from "../../common/models/transactionsHistory
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
 import {
     actualizeCacheWithNewTransactionSentFromAddress,
-    mergeTwoArraysByItemIdFieldName,
+    mergeTwoTransactionsArraysAndNotifyAboutNewTransactions,
 } from "../../common/utils/cacheActualizationUtils";
 import { computeConfirmationsCountByTimestamp } from "../../trx/lib/blocks";
 import { TRONGR_PR_K } from "../../../../properties";
@@ -200,7 +200,7 @@ export class Trc20TransactionsProvider {
         130,
         1000,
         false,
-        mergeTwoArraysByItemIdFieldName
+        mergeTwoTransactionsArraysAndNotifyAboutNewTransactions
     );
 
     static async getTrc20Transactions(address) {
@@ -213,17 +213,21 @@ export class Trc20TransactionsProvider {
 
     static actualizeCacheWithNewTransaction(coin, address, txData, txId) {
         try {
-            actualizeCacheWithNewTransactionSentFromAddress(
-                this._provider,
-                [address],
-                hashFunctionForParams,
-                coin,
-                address,
-                txData,
-                txId
-            );
+            const cacheProcessor = actualizeCacheWithNewTransactionSentFromAddress(coin, address, txData, txId);
+            this._provider.actualizeCachedData([address], cacheProcessor, hashFunctionForParams);
         } catch (e) {
             improveAndRethrow(e, "trc20TransactionsProvider.actualizeCacheWithNewTransaction");
+        }
+    }
+
+    /**
+     * @param address {string}
+     */
+    static markCacheAsExpired(address) {
+        try {
+            this._provider.markCacheAsExpiredButDontRemove([address], hashFunctionForParams);
+        } catch (e) {
+            improveAndRethrow(e, "markCacheAsExpired");
         }
     }
 }

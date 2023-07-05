@@ -170,6 +170,7 @@ function buildTransactionByCheckDustFlag(
             }
         }
 
+        // TODO: [feature, high] add taproot support task_id=436e6743418647dd8bf656cd5e887742
         transactionBuilder.addOutput(address, amount);
         if (!changeDustCheckResult.result) {
             transactionBuilder.addOutput(changeAddress, change);
@@ -183,7 +184,7 @@ function buildTransactionByCheckDustFlag(
             } else if (utxo.type === P2PKH_SCRIPT_TYPE) {
                 transactionBuilder.sign(index, utxo.ecPair);
             } else if (utxo.type === P2SH_SCRIPT_TYPE) {
-                // By implementation we only can get P2SH-P2WPKH utxo here, so enough following:
+                // By design we only can get P2SH-P2WPKH utxo here, so enough following:
                 transactionBuilder.sign(index, utxo.ecPair, utxo.redeemScript, null, utxo.value_satoshis);
             }
         }

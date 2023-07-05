@@ -9,7 +9,7 @@ import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeen
 import { EthTransactionsUtils } from "../lib/ethTransactionsUtils";
 import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { mergeTwoArraysByItemIdFieldName } from "../../common/utils/cacheActualizationUtils";
+import { mergeTwoTransactionsArraysAndNotifyAboutNewTransactions } from "../../common/utils/cacheActualizationUtils";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
 
 class AlchemyEthereumBlockchainTransactionsProvider extends ExternalApiProvider {
@@ -146,11 +146,11 @@ export class EthereumBlockchainTransactionsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "ethereumBlockchainTransactionsProvider",
         [new AlchemyEthereumBlockchainTransactionsProvider()],
-        60000,
-        70,
+        120000,
+        130,
         1000,
         false,
-        mergeTwoArraysByItemIdFieldName
+        mergeTwoTransactionsArraysAndNotifyAboutNewTransactions
     );
 
     static async getEthereumBlockchainTransactions(address) {

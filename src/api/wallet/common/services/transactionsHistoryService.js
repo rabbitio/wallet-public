@@ -10,6 +10,7 @@ import { Wallets } from "../wallets";
 import { Logger } from "../../../support/services/internal/logs/logger";
 import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
 import {
+    BALANCE_CHANGED_EXTERNALLY_EVENT,
     FIAT_CURRENCY_CHANGED_EVENT,
     INCREASE_FEE_IS_FINISHED_EVENT,
     NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
@@ -45,6 +46,7 @@ export default class TransactionsHistoryService {
     static eventsListForcingToClearCache = [
         FIAT_CURRENCY_CHANGED_EVENT,
         NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
+        BALANCE_CHANGED_EXTERNALLY_EVENT,
         TRANSACTION_PUSHED_EVENT,
         INCREASE_FEE_IS_FINISHED_EVENT,
     ];
@@ -394,6 +396,7 @@ function getOnlySearched(transactionsList, searchCriteria) {
             date.toString() + date.toLocaleDateString("en-US", { weekday: "long", month: "long" })
         ).toLowerCase();
 
+        const latinName = (Coins?.getCoinByTicker(transaction.ticker)?.latinName ?? "").toLowerCase();
         return (
             transaction.txid.toLowerCase().includes(searchCriteria) ||
             ((transaction.type === "in" && "incoming") || "").includes(searchCriteria) ||
@@ -402,6 +405,7 @@ function getOnlySearched(transactionsList, searchCriteria) {
             ("" + transaction.fiatAmount).includes(searchCriteria) ||
             ("" + transaction.confirmations).includes(searchCriteria) ||
             ("" + transaction.ticker.toLowerCase()).includes(searchCriteria) ||
+            latinName.includes(searchCriteria) ||
             dateTimeString.includes(searchCriteria) ||
             (transaction.address && transaction.address.toLowerCase().includes(searchCriteria)) ||
             ("" + transaction.fees).includes(searchCriteria) ||

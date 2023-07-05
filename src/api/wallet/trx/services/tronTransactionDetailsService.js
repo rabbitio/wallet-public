@@ -27,7 +27,7 @@ export class TronTransactionDetailsService {
                 txDataItems = await TronBlockchainTransactionDetailsProvider.getTronTransactionDetails(txId, address);
                 detailsProviderWasCalled = true;
             }
-            if (txDataItems) {
+            if (txDataItems.length) {
                 let result = null;
                 if (txDataItems.length === 1) {
                     result = txDataItems[0];
@@ -50,9 +50,18 @@ export class TronTransactionDetailsService {
                         txId,
                         address
                     );
-                    result =
-                        detailsItemsWithFee.find(item => item.ticker === result.ticker && item.type === result.type) ??
-                        result;
+                    result = detailsItemsWithFee?.find(
+                        item => item.ticker === result.ticker && item.type === result.type
+                    );
+                    if (!result) {
+                        /* This means we have an item in history but no corresponding item when requesting details.
+                         * It can be just the details retrieval error but also can be a mismatch caused by not correct history
+                         * item - tronscan trc20 history returns no contract address, so we check by contract name. So
+                         * the history item can be not for the original token but for a scam token.
+                         * So here we better return null instead of the original history item to not provide a user with the wrong info.
+                         */
+                        return null;
+                    }
                 }
                 return result;
             }

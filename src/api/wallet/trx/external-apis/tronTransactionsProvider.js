@@ -6,7 +6,7 @@ import { CachedRobustExternalApiCallerService } from "../../../common/services/u
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import {
     actualizeCacheWithNewTransactionSentFromAddress,
-    mergeTwoArraysByItemIdFieldName,
+    mergeTwoTransactionsArraysAndNotifyAboutNewTransactions,
 } from "../../common/utils/cacheActualizationUtils";
 import { TRONGR_PR_K } from "../../../../properties";
 import { tronUtils } from "../adapters/tronUtils";
@@ -319,11 +319,11 @@ export class TronTransactionsProvider {
         "tronTransactionsProvider",
         // Trongrid used with higher priority because it retrieves internal transaction also
         [new TrongridTronTransactionsProvider(), new TronscanTronTransactionsProvider()],
-        70000,
-        70,
+        120000,
+        130,
         1000,
         false,
-        mergeTwoArraysByItemIdFieldName
+        mergeTwoTransactionsArraysAndNotifyAboutNewTransactions
     );
 
     /**
@@ -342,17 +342,21 @@ export class TronTransactionsProvider {
 
     static actualizeCacheWithNewTransaction(coin, address, txData, txId) {
         try {
-            actualizeCacheWithNewTransactionSentFromAddress(
-                this._provider,
-                [address],
-                cachesHashFunction,
-                coin,
-                address,
-                txData,
-                txId
-            );
+            const cacheProcessor = actualizeCacheWithNewTransactionSentFromAddress(coin, address, txData, txId);
+            this._provider.actualizeCachedData([address], cacheProcessor, cachesHashFunction);
         } catch (e) {
             improveAndRethrow(e, "tronTransactionsProvider.actualizeCacheWithNewTransaction");
+        }
+    }
+
+    /**
+     * @param address {string}
+     */
+    static markCacheAsExpired(address) {
+        try {
+            this._provider.markCacheAsExpiredButDontRemove([address], cachesHashFunction);
+        } catch (e) {
+            improveAndRethrow(e, "markCacheAsExpired");
         }
     }
 }

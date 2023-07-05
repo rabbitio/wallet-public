@@ -22,7 +22,7 @@ export async function broadcastTransaction(transaction, network) {
         Logger.log(`Transaction pushed successfully: ${id}`, loggerSource);
         return id;
     } catch (e) {
-        // TODO: [feature, medium] Parse at least popular broadcasting errors like min relay fee not matched, dust sending etc
+        // TODO: [feature, high] Parse at least popular broadcasting errors like min relay fee not matched, dust sending etc task_id=46a3e279791f49f1a2137949711590af
         improveAndRethrow(e, loggerSource);
     }
 }

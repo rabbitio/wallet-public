@@ -6,7 +6,11 @@ import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
 import { ETH_PR_ALC_GOERLI_K, ETH_PR_K } from "../../../../properties";
 import { BigNumber } from "ethers";
-import { mergeTwoArraysByItemIdFieldName } from "../../common/utils/cacheActualizationUtils";
+import {
+    createRawBalanceAtomsCacheProcessorForMultiBalancesProvider,
+    mergeTwoArraysByItemIdFieldName,
+    mergeTwoBalancesArraysAndNotifyAboutBalanceValueChange,
+} from "../../common/utils/cacheActualizationUtils";
 
 class AlchemyErc20AllBalancesProvider extends ExternalApiProvider {
     constructor() {
@@ -48,7 +52,7 @@ class AlchemyErc20AllBalancesProvider extends ExternalApiProvider {
                     const coin = coins.find(c => c.tokenAddress === balanceData.contractAddress);
                     if (coin) {
                         return {
-                            coin: coin,
+                            ticker: coin.ticker,
                             balance: BigNumber.from(balanceData.tokenBalance).toString(),
                         };
                     }
@@ -69,14 +73,14 @@ export class Erc20AllBalancesProvider {
         130,
         1000,
         false,
-        (cached, data) => mergeTwoArraysByItemIdFieldName(cached, data, "coin")
+        mergeTwoBalancesArraysAndNotifyAboutBalanceValueChange
     );
 
     /**
      * Retrieves balances for all supported erc20 tokens provided by given API
      *
      * @param address {string} address to get balances for
-     * @return {Promise<{ coin: Coin, balance: string }[]>}
+     * @return {Promise<{ ticker: string, balance: string }[]>}
      */
     static async getErc20Balances(address) {
         try {
@@ -90,17 +94,28 @@ export class Erc20AllBalancesProvider {
         try {
             this._provider.actualizeCachedData(
                 [address],
-                currentCache =>
-                    mergeTwoArraysByItemIdFieldName(
+                currentCache => ({
+                    data: mergeTwoArraysByItemIdFieldName(
                         currentCache,
-                        [{ balance: balanceAtomsString, coin: coin }],
-                        "coin"
+                        [{ balance: balanceAtomsString, ticker: coin.ticker }],
+                        "ticker"
                     ),
+                    isModified: true,
+                }),
                 hashFunctionForParams
             );
         } catch (e) {
             improveAndRethrow(e, "addErc20BalanceToCache");
         }
+    }
+
+    static markErc20BalancesAsExpired(address) {
+        this._provider.markCacheAsExpiredButDontRemove([address], hashFunctionForParams);
+    }
+
+    static actualizeBalanceCacheWithAmountAtoms(coin, address, amountAtoms, sign) {
+        const cacheProcessor = createRawBalanceAtomsCacheProcessorForMultiBalancesProvider(coin, amountAtoms, sign);
+        this._provider.actualizeCachedData([address], cacheProcessor, hashFunctionForParams);
     }
 }
 const hashFunctionForParams = params => `all_erc20_balances_${params[0]}`;

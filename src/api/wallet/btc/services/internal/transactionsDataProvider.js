@@ -26,11 +26,15 @@ import {
 } from "../../lib/transactions/txs-list-calculations";
 import { Logger } from "../../../../support/services/internal/logs/logger";
 import AddressesServiceInternal from "./addressesServiceInternal";
-import { getExtendedTransactionDetails } from "../../lib/transactions/transactions-history";
+import {
+    composeTransactionsHistoryItems,
+    getExtendedTransactionDetails,
+} from "../../lib/transactions/transactions-history";
 
 /**
  * Manages frequent and full scanning for transactions by addresses. Manages transactions data cache filling from
  * backend data.
+ * TODO: [refactoring, moderate] Refactor this code using universal robustDataRetrieverService and removed multiple addresses support. task_id=61c12c29b5d648079133523561ce6aa2
  */
 class TransactionsDataProvider {
     constructor() {
@@ -50,8 +54,8 @@ class TransactionsDataProvider {
          * addresses for BTC so if the batch API is not available we need to do scanning for each address.
          */
         this.dataUpdateTimeoutMS = TransactionsDataRetrieverService.isBatchRetrievalModeWorkingRightNow()
-            ? 90000
-            : 60000;
+            ? 100000
+            : 120000;
 
         /**
          * Max number of polls parameter affect time to fail for long performing requests and also covers max time
@@ -67,7 +71,7 @@ class TransactionsDataProvider {
     }
 
     /**
-     * Useful re-setter for tests as we use single instance for the whole app
+     * Useful re-setter for tests as we use single instance of this provider for the whole app
      */
     resetState() {
         this._isInitialized = false;
@@ -213,6 +217,22 @@ class TransactionsDataProvider {
             this._isInitialized = true;
         } catch (e) {
             improveAndRethrow(e, loggerSource, "Failed to initialize the provider");
+        }
+    }
+
+    triggerTransactionsRetrieval() {
+        try {
+            if (this._cancelProcessingHolder) this._cancelProcessingHolder.cancel();
+            if (this._interval) clearInterval(this._interval);
+            if (TransactionsDataRetrieverService.isBatchRetrievalModeWorkingRightNow()) {
+                this._interval = setInterval(() => this._doFullScanning(), this.dataUpdateTimeoutMS);
+                this._doFullScanning(); // this method is safe, and we don't need to await it here
+            } else {
+                this._interval = setInterval(() => this._doFrequentScanning(), this.dataUpdateTimeoutMS);
+                this._doFrequentScanning(); // this method is safe, and we don't need to await it here
+            }
+        } catch (e) {
+            improveAndRethrow(e, "triggerTransactionsRetrieval");
         }
     }
 
@@ -368,7 +388,7 @@ class TransactionsDataProvider {
                     })
                 );
                 const newData = dataArrays.flat().filter(data => data.txid);
-                this._notifyAboutNewIncomingTransactions(newData);
+                await this._notifyAboutNewIncomingTransactions(newData);
                 this._transactionsData = improveRetrievedRawTransactionsData(newData, this._transactionsData);
                 // We don't wait for storing the transactions to speed up the data retrieval process
                 this._storeConfirmedTransactions();
@@ -443,8 +463,8 @@ class TransactionsDataProvider {
     /**
      * Calculates a set of UTXOs by given addresses
      *
-     * @param addresses - addresses set to get UTXO's for
-     * @return {Promise<Array<Output>>} returns array of Output objects
+     * @param addresses {string[]} addresses set to get UTXO's for
+     * @return {Promise<Array<Utxo>>} returns array of Output objects
      */
     getUTXOsByAddressesArray(addresses) {
         try {
@@ -498,14 +518,16 @@ class TransactionsDataProvider {
      * Notifies about new transactions created not locally. The transaction can be either incoming or
      * externally created outgoing transaction.
      *
-     * @param newData - Array - new retrieved transactions list
+     * @param newData {Transaction[]} - new retrieved transactions list
      * @private
      */
-    _notifyAboutNewIncomingTransactions(newData) {
+    async _notifyAboutNewIncomingTransactions(newData) {
         const newTxs = newData.filter(
             newTx => !this._transactionsData.find(tx => tx.txid === newTx.txid) && newTx.confirmations === 0
         );
-        newTxs.length && EventBus.dispatch(NEW_NOT_LOCAL_TRANSACTIONS_EVENT);
+        const addresses = await AddressesServiceInternal.getAllUsedAddresses();
+        const txHistoryItems = composeTransactionsHistoryItems(addresses, newTxs);
+        newTxs.length && EventBus.dispatch(NEW_NOT_LOCAL_TRANSACTIONS_EVENT, null, txHistoryItems);
     }
 }
 

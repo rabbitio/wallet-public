@@ -20,11 +20,12 @@ export class TronBlockchainBalancesService {
             const address = TrxAddressesService.getCurrentTrxAddress();
             try {
                 const balances = await TronBlockchainBalancesProvider.getTronBlockchainBalances(address);
-                const balanceData = (balances ?? []).find(item => item.ticker === coin.ticker);
-                if (balanceData == null) {
+                const isValidResult = balances.find(item => item?.ticker === Coins.COINS.TRX.ticker);
+                if (!isValidResult) {
                     throw new Error("Trying another retrieval method.");
                 }
-                result = balanceData.balance;
+                const balanceData = (balances ?? []).find(item => item.ticker === coin.ticker);
+                result = balanceData?.balance ?? "0";
             } catch (e) {
                 if (coin.tokenAddress) {
                     result = await Trc20BalanceProvider.getTrc20Balance(coin, address);
@@ -73,6 +74,34 @@ export class TronBlockchainBalancesService {
                 .map(item => Coins.getCoinByTicker(item.ticker));
         } catch (e) {
             improveAndRethrow(e, "");
+        }
+    }
+
+    static markBalancesAsExpired(coin) {
+        try {
+            const address = TrxAddressesService.getCurrentTrxAddress();
+            TronBlockchainBalancesProvider.markTronBlockchainBalancesAsExpiredButDontRemove(address);
+            if (coin === Coins.COINS.TRX) {
+                TronBalanceProvider.markTronBalanceAsExpiredButDontRemove(address);
+            } else {
+                Trc20BalanceProvider.markTrc20BalanceCacheAsExpired(coin, address);
+            }
+        } catch (e) {
+            improveAndRethrow(e, "markBalancesAsExpired");
+        }
+    }
+
+    static actualizeBalanceCacheWithAmountAtomsForCoin(coin, valuesAtoms, sign) {
+        try {
+            const address = TrxAddressesService.getCurrentTrxAddress();
+            TronBlockchainBalancesProvider.actualizeBalanceCacheWithAmount(address, coin, valuesAtoms, sign);
+            if (coin === Coins.COINS.TRX) {
+                TronBalanceProvider.actualizeBalanceCacheWithAmount(address, valuesAtoms, sign);
+            } else {
+                Trc20BalanceProvider.actualizeBalanceCacheWithAmount(address, coin, valuesAtoms, sign);
+            }
+        } catch (e) {
+            improveAndRethrow(e, "actualizeBalanceCacheWithJustSentTransaction");
         }
     }
 }

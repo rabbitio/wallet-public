@@ -3,6 +3,7 @@ import { logError } from "../../utils/errorUtils";
 import { IS_TESTING } from "../../../../properties";
 import { ConsoleLogger } from "../../../support/services/internal/logs/consoleLogger";
 
+// TODO: [refactoring, low] Consider removing this logic task_id=c360f2af75764bde8badd9ff1cc00d48
 class ConcurrentCalculationsMetadataHolder {
     constructor() {
         this._calculations = {};

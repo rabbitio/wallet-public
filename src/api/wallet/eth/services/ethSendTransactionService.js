@@ -17,6 +17,8 @@ export class EthSendTransactionService {
      * Validates address and amount and tries to create transactions for 4 speed options with fake signatures
      * Composes TxData ready for sending for further usage if all is ok.
      *
+     * TxData objects are sorted by gas price descending.
+     *
      * @param coin {Coin} coin to create fake txs options for
      * @param address {string} address to be validated
      * @param coinAmount {string} amount to be validated in coin denomination
@@ -121,7 +123,7 @@ export class EthSendTransactionService {
             const tx = {
                 from: wallet.address,
                 to: coin === Coins.COINS.ETH ? txData.address : coin.tokenAddress,
-                value: coin === Coins.COINS.ETH ? ethers.BigNumber.from(txData.amount) : BigNumber.from("0"),
+                value: coin === Coins.COINS.ETH ? BigNumber.from(txData.amount) : BigNumber.from("0"),
                 maxFeePerGas: BigNumber.from(txData.feeRate.rate),
                 maxPriorityFeePerGas: txData.feeRate.maxPriorityFeePerGasWei,
                 gasLimit: txData.feeRate.gasLimit,
@@ -168,7 +170,7 @@ const chooseAmount = function(
     balanceOfSendingCoinAtoms,
     balanceOfFeeCoinAtoms
 ) {
-    const balanceAtomsBigN = ethers.BigNumber.from(balanceOfFeeCoinAtoms);
+    const balanceAtomsBigN = BigNumber.from(balanceOfFeeCoinAtoms);
     if (!isSendAll) {
         return amountAtoms;
     }
@@ -207,7 +209,7 @@ async function optsForOneRate(
                 })
             ),
         },
-        isAtLeastOneOptionCoverable: ethers.BigNumber.from(feeAtoms)
+        isAtLeastOneOptionCoverable: BigNumber.from(feeAtoms)
             .add(coin.doesUseDifferentCoinFee() ? "0" : correctAtomsAmount)
             .lte(feeBalanceAtoms),
     };
@@ -237,7 +239,7 @@ function optsForSeveralRates(
         };
     });
     const feeIsCoverableFlags = feeData.map(d => {
-        return ethers.BigNumber.from(d.feeWeiString)
+        return BigNumber.from(d.feeWeiString)
             .add(coin.doesUseDifferentCoinFee() ? "0" : d.correctedAtomsAmount)
             .lte(feeBalanceAtoms);
     });

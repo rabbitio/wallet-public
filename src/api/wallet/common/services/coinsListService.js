@@ -7,6 +7,13 @@ import CoinsToFiatRatesService from "./coinsToFiatRatesService";
 import { Wallets } from "../wallets";
 import { NumbersUtils } from "../utils/numbersUtils";
 import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
+import {
+    BALANCE_CHANGED_EXTERNALLY_EVENT,
+    FIAT_CURRENCY_CHANGED_EVENT,
+    INCREASE_FEE_IS_FINISHED_EVENT,
+    NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
+    TRANSACTION_PUSHED_EVENT,
+} from "../../../common/adapters/eventbus";
 
 /**
  * Provides API to get the coins list with related data
@@ -35,6 +42,14 @@ export class CoinsListService {
             this._cacheAndRequestsResolver.invalidate(this._cacheKey(coins));
         }
     }
+
+    static eventsListForcingToClearCache = [
+        FIAT_CURRENCY_CHANGED_EVENT,
+        NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
+        BALANCE_CHANGED_EXTERNALLY_EVENT,
+        TRANSACTION_PUSHED_EVENT,
+        INCREASE_FEE_IS_FINISHED_EVENT,
+    ];
 
     /**
      * Retrieves coins list and calculates balance, rate, fiat equivalents for each coin.

@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from "ethers";
+import { BigNumber } from "ethers";
 
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { Logger } from "../../../support/services/internal/logs/logger";
@@ -92,7 +92,7 @@ export class Erc20TokenSendTransactionService {
             let sentTx;
             try {
                 // WARNING: We don't pass the fee option here, it is just ignored
-                sentTx = await rwContract.transfer(txData.address, ethers.BigNumber.from(txData.amount));
+                sentTx = await rwContract.transfer(txData.address, BigNumber.from(txData.amount));
             } catch (e) {
                 Logger.log("Failed to send ERC20 tx. Trying to extract determined error from " + JSON.stringify(e));
                 const determinedError = tryToGetDeterminedErrorFromEtherSendError(e);

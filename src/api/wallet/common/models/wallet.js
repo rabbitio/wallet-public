@@ -73,7 +73,9 @@ export class Wallet {
      * TODO: [feature, critical] add constant for speed options count for all coins
      *
      * Creates 4 fake transactions options with different fee rates for confirmation speed selection.
-     * Also can return one option - it means this wallet doesn't support prioritisation for transactions.
+     * Order of fee options is descending sorted by fee rate per option.
+     *
+     * Also, can return one option - it means this wallet doesn't support prioritisation for transactions.
      *
      * @param address {string} address to be validated
      * @param coinAmount {string} amount to be validated in coin denomination
@@ -150,6 +152,39 @@ export class Wallet {
      * @returns {void}
      */
     actualizeLocalCachesWithNewTransactionData(sentCoin, txData, txId) {
+        throw new Error("Not implemented in base Wallet class");
+    }
+
+    /**
+     * Marks cache for balance of this wallet as expired.
+     * This method helps e.g. when you need to force this wallet to perform
+     * balance retrieval/calculation despite on cache availability. But in case
+     * of fail the cached value still can be used.
+     */
+    markBalanceCacheAsExpired() {
+        throw new Error("Not implemented in base Wallet class");
+    }
+
+    /**
+     * Marks cache for transactions of this wallet as expired.
+     * This method helps e.g. when you need to force this wallet to perform
+     * transactions retrieval/calculation despite on cache availability. But in case
+     * of fail the cached value still can be used.
+     */
+    markTransactionsCacheAsExpired() {
+        throw new Error("Not implemented in base Wallet class");
+    }
+
+    /**
+     * Adds given amount of coin atoms to the cached balance.
+     * Useful when we need to have the manually actualized balance for in-app
+     * usage until the balance is requested from external services in background.
+     *
+     * @param amountAtoms {string} atoms number string to be added
+     * @param [sign=-1] {number} sign of the amount passed to decide add it to cache or reduce the cache with it
+     * @return {void}
+     */
+    actualizeBalanceCacheWithAmountAtoms(amountAtoms, sign = -1) {
         throw new Error("Not implemented in base Wallet class");
     }
 }

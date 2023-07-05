@@ -15,11 +15,15 @@ class Bitcoin extends Coin {
             "satoshi",
             new Network("mainnet", 0, 0, 20, 3, SupportedSchemes),
             new Network("testnet", 1, 0, 20, 3, SupportedSchemes),
-            3,
+            1,
             "byte",
             ["3.5 h", "1.5 h", "50 min", "10 min"],
             300000,
-            Coin.BLOCKCHAINS.BITCOIN
+            Coin.BLOCKCHAINS.BITCOIN,
+            null,
+            null,
+            true,
+            true
         );
     }
 

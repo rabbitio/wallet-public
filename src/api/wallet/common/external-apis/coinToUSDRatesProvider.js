@@ -127,13 +127,12 @@ class CoingeckoCoinsToUsdRatesProvider extends ExternalApiProvider {
          * Coingecko is strict in terms of abusing API and blocks by IP for >=1 minutes if you abuse it.
          */
         // https://www.coingecko.com/en/api/documentation
-        super("https://api.coingecko.com/api/v3/coins/markets", "get", 15000, ApiGroups.COINGECKO);
+        super("https://api.coingecko.com/api/v3/coins/markets", "get", 15000, ApiGroups.COINGECKO, {}, 250);
     }
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const baseQuery =
-                "vs_currency=USD&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h";
+            const baseQuery = `vs_currency=USD&order=market_cap_desc&per_page=${this.maxPageLength}&page=1&sparkline=false&price_change_percentage=24h`;
             // We use all supported coins because coingecko supports all our coins currently
             const allSupportedCoins = params[1];
             const coinIdsClearForProvider = ApiGroupCoinIdAdapters.getCoinIdsListByCoinsListForApiGroup(

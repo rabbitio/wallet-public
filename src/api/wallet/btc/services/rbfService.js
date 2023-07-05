@@ -24,7 +24,6 @@ import { retrieveTransactionData } from "../external-apis/transactionDataAPI";
 import { TxData } from "../../common/models/tx-data";
 import { Wallets } from "../../common/wallets";
 import { EventBus, INCREASE_FEE_IS_FINISHED_EVENT } from "../../../common/adapters/eventbus";
-import { BalancesService } from "../../common/services/balancesService";
 
 export default class RbfService {
     static BLOCKS_COUNTS_FOR_RBF_OPTIONS = [1, 2, 5, 10];
@@ -266,17 +265,9 @@ function actualizeTransactionsCacheWithoutFailing(params, oldFee, newFee, networ
             { rate: anyStubRate }
         );
 
-        Wallets.getWalletByCoin(Coins.COINS.BTC)?.actualizeLocalCachesWithNewTransactionData(
-            Coins.COINS.BTC,
-            txData,
-            newTransactionId
-        );
-        BalancesService.actualizeCachedBalancesAccordingToJustSentTransaction(
-            Coins.COINS.BTC,
-            txData,
-            newTransactionId,
-            { previousFee: oldFee }
-        );
+        const btcWallet = Wallets.getWalletByCoin(Coins.COINS.BTC);
+        btcWallet.actualizeLocalCachesWithNewTransactionData(Coins.COINS.BTC, txData, newTransactionId);
+        btcWallet.actualizeBalanceCacheWithAmountAtoms("" + (newFee - oldFee), -1);
     } catch (e) {
         logError(e, loggerSource, `Failed to actualize cache for rbf new tx ${newTransactionId}`);
     }

@@ -1,5 +1,6 @@
 import {
     AUTHENTICATION_DISCOVERED_EVENT,
+    BALANCE_CHANGED_EXTERNALLY_EVENT,
     CURRENT_PREFERENCES_EVENT,
     EventBus,
     FIAT_CURRENCY_CHANGED_EVENT,
@@ -43,6 +44,8 @@ import TransactionsHistoryService from "../../../wallet/common/services/transact
 import { Coins } from "../../../wallet/coins";
 import { UserDataAndSettings } from "../../../wallet/common/models/userDataAndSettings";
 import { PreferencesService } from "../../../wallet/common/services/preferencesService";
+import { BalancesService } from "../../../wallet/common/services/balancesService";
+import { Wallets } from "../../../wallet/common/wallets";
 
 function initializeTransactionsProvider() {
     const loggerSource = "initializeTransactionsProvider";
@@ -160,31 +163,49 @@ export function setupMediators(
                 })();
             });
 
-        EventBus.addEventListener(NEW_NOT_LOCAL_TRANSACTIONS_EVENT, function() {
-            try {
-                AddressesService.invalidateCaches();
-            } catch (e) {
-                logError(e, NEW_NOT_LOCAL_TRANSACTIONS_EVENT + "_handler");
-            }
+        [NEW_NOT_LOCAL_TRANSACTIONS_EVENT, BALANCE_CHANGED_EXTERNALLY_EVENT].forEach(eventType => {
+            EventBus.addEventListener(eventType, (event, data) => {
+                try {
+                    // Here we are clearing high level caches for services providing data for all coins
+                    BalancesService.invalidateCaches();
+                    CoinsListService.invalidateCaches();
+                    TransactionsHistoryService.invalidateCaches();
+
+                    // Here we are marking as expired low level caches for services providing data for specific coins
+                    if (event.type === NEW_NOT_LOCAL_TRANSACTIONS_EVENT) {
+                        const coins = (data ?? []).map(tx => Coins.getCoinByTicker(tx.ticker));
+                        const processedCoins = [];
+                        for (let i = 0; i < coins.length; ++i) {
+                            if (!processedCoins.find(procCoin => procCoin === coins[i])) {
+                                Wallets.getWalletByCoin(coins[i]).markBalanceCacheAsExpired();
+                            }
+                            processedCoins.push(coins[i]);
+                        }
+                    } else if (event.type === BALANCE_CHANGED_EXTERNALLY_EVENT) {
+                        const coins = (data ?? []).map(ticker => Coins.getCoinByTicker(ticker));
+                        const processedCoins = [];
+                        for (let i = 0; i < coins.length; ++i) {
+                            if (!processedCoins.find(procCoin => procCoin === coins[i])) {
+                                Wallets.getWalletByCoin(coins[i]).markTransactionsCacheAsExpired();
+                            }
+                            processedCoins.push(coins[i]);
+                        }
+                    }
+
+                    // Then we call UI action at last order to use results of all the processing performed above (caches removal/expiration)
+                    handleNewNotLocalTxs();
+                } catch (e) {
+                    logError(e, `${event.type}_handler`);
+                }
+            });
         });
 
-        EventBus.addEventListener(NEW_NOT_LOCAL_TRANSACTIONS_EVENT, () => {
-            try {
-                handleNewNotLocalTxs();
-            } catch (e) {
-                logError(e, `${NEW_NOT_LOCAL_TRANSACTIONS_EVENT}_handler`);
-            }
-        });
-
-        [
-            TRANSACTION_PUSHED_EVENT,
-            TX_DATA_RETRIEVED_EVENT,
-            NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
-            FIAT_CURRENCY_CHANGED_EVENT,
-        ].forEach(event => {
+        [TRANSACTION_PUSHED_EVENT, TX_DATA_RETRIEVED_EVENT, FIAT_CURRENCY_CHANGED_EVENT].forEach(event => {
             EventBus.addEventListener(event, function() {
                 try {
+                    BalancesService.invalidateCaches();
                     CoinsListService.invalidateCaches();
+                    TransactionsHistoryService.invalidateCaches();
                 } catch (e) {
                     logError(e, event + "_handler");
                 }

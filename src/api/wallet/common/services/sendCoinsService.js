@@ -9,7 +9,6 @@ import CoinsToFiatRatesService from "./coinsToFiatRatesService";
 import { getDecryptedWalletCredentials } from "../../../auth/services/authService";
 import { EventBus, TRANSACTION_PUSHED_EVENT } from "../../../common/adapters/eventbus";
 import { TransactionsDataService } from "./transactionsDataService";
-import { BalancesService } from "./balancesService";
 
 export class SendCoinsService {
     /**
@@ -264,15 +263,28 @@ export class SendCoinsService {
     }
 
     static _actualizeCaches(wallet, coin, txData, txId) {
+        const loggerSource = "sendCoinsService._actualizeCaches";
         try {
             wallet.actualizeLocalCachesWithNewTransactionData(coin, txData, txId);
         } catch (e) {
-            logError(e, "sendCoinsService._actualizeCaches", "Failed to actualize wallet caches");
+            logError(e, loggerSource, "Failed to actualize wallet caches");
         }
         try {
-            BalancesService.actualizeCachedBalancesAccordingToJustSentTransaction(coin, txData, txId);
+            if (coin.doesUseDifferentCoinFee()) {
+                try {
+                    wallet.actualizeBalanceCacheWithAmountAtoms("" + txData.amount, -1);
+                } catch (e) {
+                    logError(e, loggerSource);
+                }
+                Wallets.getWalletByCoin(coin.feeCoin).actualizeBalanceCacheWithAmountAtoms("" + txData.fee, -1);
+            } else {
+                const sumAtomsString = BigNumber.from("" + txData.amount)
+                    .add(BigNumber.from("" + txData.fee))
+                    .toString();
+                wallet.actualizeBalanceCacheWithAmountAtoms(sumAtomsString, -1);
+            }
         } catch (e) {
-            logError(e, "sendCoinsService._actualizeCaches", "Failed to actualize balances caches");
+            logError(e, loggerSource, "Failed to actualize balances caches");
         }
     }
 }

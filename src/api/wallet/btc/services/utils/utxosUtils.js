@@ -1,6 +1,12 @@
 import { improveAndRethrow } from "../../../../common/utils/errorUtils";
 import { transactionsDataProvider } from "../internal/transactionsDataProvider";
 
+/**
+ * @param internalAddresses {string[]}
+ * @param externalAddresses {string[]}
+ * @param network {Network}
+ * @return {Promise<{internal: Utxo[], external: Utxo[]}>}
+ */
 export async function getAllUTXOs(internalAddresses, externalAddresses, network) {
     try {
         const allAddresses = [...internalAddresses, ...externalAddresses];

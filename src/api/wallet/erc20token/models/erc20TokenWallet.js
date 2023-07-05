@@ -110,4 +110,29 @@ export class Erc20TokenWallet extends Wallet {
             improveAndRethrow(e, `${this.coin.ticker}_actualizeLocalCachesWithNewTransactionData`);
         }
     }
+
+    markBalanceCacheAsExpired() {
+        try {
+            Erc20TokenBalanceService.markErc20TokenBalanceAsExpired(this.coin);
+        } catch (e) {
+            improveAndRethrow(e, `${this.coin.ticker}_markBalanceCacheAsExpired`);
+        }
+    }
+
+    actualizeBalanceCacheWithAmountAtoms(amountAtoms, sign = -1) {
+        try {
+            Erc20TokenBalanceService.actualizeBalanceCacheWithAmountAtoms(this.coin, amountAtoms, sign);
+        } catch (e) {
+            improveAndRethrow(e, "actualizeBalanceCacheWithAmountAtoms");
+        }
+    }
+
+    markTransactionsCacheAsExpired() {
+        try {
+            const address = EthAddressesService.getCurrentEthAddress();
+            Erc20TransactionsProvider.markCacheAsExpired(address);
+        } catch (e) {
+            improveAndRethrow(e, "markTransactionsCacheAsExpired");
+        }
+    }
 }

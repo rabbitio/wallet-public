@@ -6,6 +6,10 @@ import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { tronUtils } from "../adapters/tronUtils";
 import { TRONGR_PR_K } from "../../../../properties";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import {
+    createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
+    mergeSingleBalanceValuesAndNotifyAboutValueChanged,
+} from "../../common/utils/cacheActualizationUtils";
 
 class TrongridTronBalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -43,23 +47,46 @@ export class TronBalanceProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronBalanceProvider",
         [new TrongridTronBalanceProvider()],
-        60000,
-        60,
+        120000,
+        130,
         1000,
-        false
+        false,
+        (cached, newValue) =>
+            mergeSingleBalanceValuesAndNotifyAboutValueChanged(cached, newValue, Coins.COINS.TRX.ticker)
     );
 
+    /**
+     * @param address {string}
+     * @return {Promise<string>}
+     */
     static async getTronBalance(address) {
         try {
-            return await this._provider.callExternalAPICached(
-                [address],
-                15000,
-                null,
-                1,
-                () => `${Coins.COINS.TRX.ticker}-${address}`
-            );
+            return await this._provider.callExternalAPICached([address], 15000, null, 1, customHashFunctionForParams);
         } catch (e) {
             improveAndRethrow(e, "getTronBalance");
         }
     }
+
+    /**
+     * @param address {string}
+     */
+    static markTronBalanceAsExpiredButDontRemove(address) {
+        this._provider.markCacheAsExpiredButDontRemove([address], customHashFunctionForParams);
+    }
+
+    /**
+     * @param address {string}
+     * @param valueAtoms {string}
+     * @param sign {number}
+     */
+    static actualizeBalanceCacheWithAmount(address, valueAtoms, sign) {
+        try {
+            const processor = createRawBalanceAtomsCacheProcessorForSingleBalanceProvider(valueAtoms, sign);
+            this._provider.actualizeCachedData([address], processor, customHashFunctionForParams);
+        } catch (e) {
+            improveAndRethrow(e, "actualizeBalanceCacheWithAmount");
+        }
+    }
 }
+
+const customHashFunctionForParams = params => `balance_${Coins.COINS.TRX.ticker}-${params[0]}`;

@@ -7,6 +7,7 @@ import { improveAndRethrow, logError } from "../../../utils/errorUtils";
  * This service tracks is there currently active calculation for resource and cache id and make all other requests
  * to the same resource with the same cache id waiting for this active calculation. When the calculation ends
  * the resolver allows all the waiting requesters to get the data from cache start its own calculation.
+ *
  * TODO: [tests, critical++] add unit tests - massively used logic and can produce sophisticated concurrency bugs
  */
 export class CacheAndConcurrentRequestsResolver {
@@ -150,18 +151,20 @@ export class CacheAndConcurrentRequestsResolver {
         try {
             const cached = cache.get(cacheId);
             const result = synchronousCurrentCacheProcessor(cached);
-            if (sessionDependent) {
-                cache.putSessionDependentData(
-                    cacheId,
-                    result?.data,
-                    this._removeExpiredCacheAutomatically ? this._cacheTtlMs : null
-                );
-            } else {
-                cache.put(cacheId, result?.data, this._removeExpiredCacheAutomatically ? this._cacheTtlMs : null);
-            }
+            if (result?.isModified && result?.data != null) {
+                if (sessionDependent) {
+                    cache.putSessionDependentData(
+                        cacheId,
+                        result?.data,
+                        this._removeExpiredCacheAutomatically ? this._cacheTtlMs : null
+                    );
+                } else {
+                    cache.put(cacheId, result?.data, this._removeExpiredCacheAutomatically ? this._cacheTtlMs : null);
+                }
 
-            if (finishActiveCalculation && result?.isModified) {
-                this._requestsManager.finishActiveCalculation(cacheId);
+                if (finishActiveCalculation) {
+                    this._requestsManager.finishActiveCalculation(cacheId);
+                }
             }
         } catch (e) {
             improveAndRethrow(e, `${this._bio}.actualizeCachedData`);
@@ -176,6 +179,11 @@ export class CacheAndConcurrentRequestsResolver {
     invalidateContaining(keyPart) {
         cache.invalidateContaining(keyPart);
         this._requestsManager.finishAllActiveCalculations(keyPart);
+    }
+
+    markAsExpiredButDontRemove(key) {
+        cache.markCacheItemAsExpiredButDontRemove(key, this._cacheTtlMs);
+        this._requestsManager.finishAllActiveCalculations(key);
     }
 }
 

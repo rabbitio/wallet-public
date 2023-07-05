@@ -108,6 +108,30 @@ class BitcoinWallet extends Wallet {
             improveAndRethrow(e, `${this.coin.ticker}_actualizeLocalCachesWithNewTransactionData`);
         }
     }
+
+    markBalanceCacheAsExpired() {
+        try {
+            BalanceService.markBtcBalanceCacheAsExpired();
+        } catch (e) {
+            improveAndRethrow(e, `${this.coin.ticker}_markBalanceCacheAsExpired`);
+        }
+    }
+
+    actualizeBalanceCacheWithAmountAtoms(amountAtoms, sign = -1) {
+        try {
+            BalanceService.actualizeBalanceCacheWithAmountAtoms(amountAtoms, sign);
+        } catch (e) {
+            improveAndRethrow(e, "actualizeBalanceCacheWithAmountAtoms");
+        }
+    }
+
+    markTransactionsCacheAsExpired() {
+        try {
+            transactionsDataProvider.triggerTransactionsRetrieval();
+        } catch (e) {
+            improveAndRethrow(e, "markTransactionsCacheAsExpired");
+        }
+    }
 }
 
 export const bitcoinWallet = new BitcoinWallet();

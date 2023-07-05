@@ -8,6 +8,7 @@ import { Coins } from "../../coins";
 
 /**
  * Script types for internal use
+ * TODO: [feature, high] add UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
  */
 export const P2WPKH_SCRIPT_TYPE = "witness_v0_keyhash";
 export const P2PKH_SCRIPT_TYPE = "pubkeyhash";
@@ -31,11 +32,11 @@ export const SEGWIT_DUST_THRESHOLD = 294;
  *   - not signable utxos (see docs for getSignableUtxos function)
  *   - dust utxos
  *
- * @param accountsData - accounts data of the wallet
- * @param allUtxos - utxos of the wallet
- * @param indexes - indexes of addresses of the wallet
- * @param network - network to work in
- * @returns Array of Utxo
+ * @param accountsData {AccountsData} accounts data of the wallet
+ * @param allUtxos {{ internal: string[], external: string[] }} utxos of the wallet
+ * @param indexes {Object} indexes of addresses of the wallet
+ * @param network {Network} network to work in
+ * @returns {Utxo[]}
  */
 export function getAllSpendableUtxosByWalletData(accountsData, allUtxos, indexes, network) {
     try {
@@ -57,8 +58,8 @@ export function getAllSpendableUtxosByWalletData(accountsData, allUtxos, indexes
  * Note that there is no check for P2SH-P2WPKH as it is not needed here due to bitcoin protocol implementation
  * considering P2SH as just non-segwit and using the same dust threshold as for P2PKH.
  *
- * @param utxos - utxos to be checked
- * @returns Array of Utxo
+ * @param utxos {Utxo[]} utxos to be checked
+ * @returns {Utxo[]}
  */
 // TODO: [tests, low] Write unit tests for payment logic
 function getNotDustUtxos(utxos) {
@@ -68,6 +69,7 @@ function getNotDustUtxos(utxos) {
         utxo.type === P2WPKH_SCRIPT_TYPE && (threshold = SEGWIT_DUST_THRESHOLD);
         utxo.type === P2SH_SCRIPT_TYPE && (threshold = NON_SEGWIT_DUST_THRESHOLD);
 
+        // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
         threshold == null &&
             (threshold = isSegWitAddress(utxo.address) ? SEGWIT_DUST_THRESHOLD : NON_SEGWIT_DUST_THRESHOLD);
 
@@ -78,12 +80,13 @@ function getNotDustUtxos(utxos) {
 /**
  * Verifies given utxos for type to be signable in the wallet.
  * As we only support signing of P2PKH, P2WPKH and P2SH-P2WPKH outputs.
+ * Returns array of signable Utxo.
  *
- * @param accountsData - accounts data
- * @param utxos - array of utxos to be filtered
- * @param indexes - indexes of addresses
- * @param network - network of given utxos
- * @return Array of signable Utxo
+ * @param accountsData {AccountsData} accounts data
+ * @param utxos {Utxo[]} array of utxos to be filtered
+ * @param indexes {Object} indexes of addresses
+ * @param network {Network} network of given utxos
+ * @return {Utxo[]}
  */
 // TODO: [tests, low] Write unit tests for payment logic
 function getSignableUtxos(accountsData, utxos, indexes, network) {
@@ -104,18 +107,18 @@ function getSignableUtxos(accountsData, utxos, indexes, network) {
 
 /**
  * Calculates balance for given accounts data.
- * Calculates:
+ * Calculates satoshi amounts:
  *   - unconfirmed balance (sum of all values of utxos)
  *   - spendable balance (sum of all values of internal utxos plus sum of values of external utxos with at least
- *                        min number of confirmations of block to which a utxo belongs)
+ *                        min number of confirmations of block to which the utxo belongs)
  *   - signable balance (sum of all values of utxos that can be signed by our wallet)
  *   - confirmed balance (sum of all values of utxos belonging to blocks with at least min number of confirmations)
  *
- * @param accountsData - accounts data
- * @param allUtxos - all utxos of the wallet (without duplicates)
- * @param indexes - indexes of addresses of the wallet
- * @param network - network to look for utxos in
- * @return Object {unconfirmed: number of satoshies, spendable: number of satoshies, signable: number of satoshies, confirmed: number of satoshies}
+ * @param accountsData {AccountsData} accounts data
+ * @param allUtxos {{ internal: string[], external: string[] }} all utxos of the wallet (without duplicates)
+ * @param indexes {Object} indexes of addresses of the wallet
+ * @param network {Network} network to look for utxos in
+ * @return {{unconfirmed: number, spendable: number, signable: number, confirmed: number}}
  */
 // TODO: [tests, low] Write unit tests for payment logic
 export function calculateBalanceByWalletData(accountsData, allUtxos, indexes, network) {
@@ -145,9 +148,9 @@ export function calculateBalanceByWalletData(accountsData, allUtxos, indexes, ne
  * Calculates dust balance for given fee rate and set of utxos.
  * WARNING: we do not check whether the UTXO is signable TODO: [feature, low] does not count non signable UTXOs here
  *
- * @param allUTXOs - all utxos of the wallet (we expect no duplicates here)
- * @param feeRate - feeRate to calculate dust UTXOs for
- * @param network - network to look for utxos in
+ * @param allUTXOs {{ internal: string[], external: string[] }} all utxos of the wallet (we expect no duplicates here)
+ * @param feeRate {FeeRate} feeRate to calculate dust UTXOs for
+ * @param network {Network} network to look for utxos in
  * @return {number} Sum of dust UTXOs
  */
 // TODO: [tests, low] Write unit tests for payment logic
@@ -178,9 +181,9 @@ export function calculateDustBalanceByWalletData(allUTXOs, feeRate, network) {
  *   - utxos belonging to blocks with less than min confirmations if confirmedOnly flag is given
  *   - dust utxos
  *
- * @param utxos - utxos to count balance for
- * @param confirmedOnly - flag signalling whether to count only confirmed utxos
- * @returns Number - sum of given utxos (according to flag)
+ * @param utxos {Utxo[]} utxos to count balance for
+ * @param confirmedOnly {boolean} flag signalling whether to count only confirmed utxos
+ * @returns {number} sum of given utxos (according to flag)
  */
 function calculateBalanceByUtxos(utxos, confirmedOnly) {
     const onlyNotDustUtxos = getNotDustUtxos(utxos);
@@ -193,6 +196,10 @@ function calculateBalanceByUtxos(utxos, confirmedOnly) {
     }, 0 /* Initial Sum */);
 }
 
+/**
+ * @param utxos {Utxo[]}
+ * @return {string[]}
+ */
 export function getAddresses(utxos) {
     return utxos.map(utxo => utxo.address);
 }
@@ -208,11 +215,11 @@ export function getAddresses(utxos) {
  *   - not signable utxos (see docs for getSignableUtxos function)
  *   - dust utxos
  *
- * @param accountsData - account data needed to check signable utxos
- * @param indexes - indexes of addresses of the wallet
- * @param candidateUtxos - all utxos to get only allowed candidates
- * @param network - network to get utxos for
- * @returns Array of Utxo
+ * @param accountsData {AccountsData} account data needed to check signable utxos
+ * @param indexes {Object} indexes of addresses of the wallet
+ * @param candidateUtxos {{ internal: string[], external: string[] }} all utxos to get only allowed candidates
+ * @param network {Network} network to get utxos for
+ * @returns {Utxo[]}
  */
 // TODO: [tests, low] Write unit tests for payment logic
 export function getSortedListOfCandidateUtxosForRbf(accountsData, indexes, candidateUtxos, network) {
@@ -242,7 +249,9 @@ export function getSortedListOfCandidateUtxosForRbf(accountsData, indexes, candi
 export function isAmountDustForAddress(amount, address) {
     if (is.not.number(amount) && !(amount instanceof BigNumber))
         throw new Error("Amount should be a number or BigNumber.");
+    // TODO: [feature, high] add taproot support task_id=436e6743418647dd8bf656cd5e887742
 
+    // TODO: [feature, high] handle UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
     if (isSegWitAddress(address)) {
         return {
             result:
@@ -266,8 +275,8 @@ export function isAmountDustForAddress(amount, address) {
  * Returns dust threshold amount corresponding to type of given address.
  * Throws error if given address is invalid.
  *
- * @param targetAddress - address to get threshold for
- * @returns number - threshold amount
+ * @param targetAddress {string} address to get threshold for
+ * @returns {number} threshold amount satoshi
  */
 // TODO: [tests, critical] Write unit tests for payment logic
 export function getDustThreshold(targetAddress) {
@@ -286,10 +295,10 @@ export function getDustThreshold(targetAddress) {
  * Retrieves id of transaction sending given output.
  * Returns null if there is no transaction sending this output.
  *
- * @param output - Output object
- * @param outputTxId -  of transaction owning the given output
- * @param transactions - Array<Transaction>
- * @return {string|null} - txid
+ * @param output {Output} object
+ * @param outputTxId {string} of transaction owning the given output
+ * @param transactions {Transaction[]}
+ * @return {string|null} txid
  */
 export function getTXIDSendingGivenOutput(output, outputTxId, transactions) {
     const correspondingTx = transactions.find(tx =>
@@ -308,11 +317,12 @@ export function getTXIDSendingGivenOutput(output, outputTxId, transactions) {
  * Returns type of output according to given address.
  * WARNING: This function analyse only few types of outputs so make sure it is ok for you.
  *          We ignore P2WSH and other types here. P2PKH will by used by default.
- * @param address - address to get type of Output for
+ * @param address {string} address to get type of Output for
  * @return {string} one of constants P2PKH_SCRIPT_TYPE|P2WPKH_SCRIPT_TYPE|P2SH_SCRIPT_TYPE
  */
 // TODO: [tests, low] Write unit tests for payment logic
 export function getOutputTypeByAddress(address) {
+    // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
     let type = P2PKH_SCRIPT_TYPE;
     if (isSegWitAddress(address)) {
         type = P2WPKH_SCRIPT_TYPE;

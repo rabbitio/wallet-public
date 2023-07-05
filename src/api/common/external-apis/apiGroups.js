@@ -25,7 +25,7 @@ export const ApiGroups = {
      * Currently we use free version of etherscan provider with 0.2 RPS. But we have API key with 100k requests free
      * per month. So we can add it if not enough current RPS.
      */
-    ETHERSCAN: new ApiGroup("etherscan", 0.2),
+    ETHERSCAN: new ApiGroup("etherscan", 0.17), // Actually 0.2 but fails sometime, so we use smaller
     ALCHEMY: new ApiGroup("alchemy", 0.3),
     BLOCKSTREAM: new ApiGroup("blockstream", 0.2),
     BLOCKCHAIN_INFO: new ApiGroup("blockchain.info", 1),

@@ -16,7 +16,7 @@ class Ethereum extends Coin {
             "wei",
             new Network("mainnet", 60, 0, 1, 24, [bip44Scheme]),
             new Network("goerli", 60, 0, 1, 24, [bip44Scheme]),
-            16,
+            1,
             "gas",
             ["30min", "5min", "3.5min", "2min"],
             60000,

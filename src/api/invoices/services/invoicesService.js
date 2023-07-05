@@ -2,7 +2,6 @@ import is from "is_js";
 
 import { improveAndRethrow } from "../../common/utils/errorUtils";
 import { getDataPassword, getWalletId } from "../../common/services/internal/storage";
-import { btcToSatoshi } from "../../wallet/btc/lib/btc-utils";
 import { getSumOfOutputsSendingToAddressByTransactionsList } from "../../wallet/btc/lib/transactions/transactions-utils";
 import InvoicesApi from "../backend-api/invoicesApi";
 import AddressesService from "../../wallet/btc/services/addressesService";
@@ -68,7 +67,6 @@ export default class InvoicesService {
             const invoice = new Invoice(name, amountBtc, address);
             message && (invoice.message = message);
             label && (invoice.label = label);
-            invoice.recalculatePaymentUrl();
 
             await InvoicesApi.saveInvoice(getWalletId(), invoice.uuid, invoice.serializeAndEncrypt(getDataPassword()));
 
@@ -116,7 +114,6 @@ export default class InvoicesService {
      *                      address: address string,
      *                      label: string,
      *                      message: string,
-     *                      paymentUrl: string
      *                  }, ... ],
      *              isWholeList: boolean,
      *              minAmount: number, // min amount throughout all invoices
@@ -232,7 +229,6 @@ export default class InvoicesService {
      *              address: address string,
      *              label: string,
      *              message: string,
-     *              paymentUrl: string
      *          }
      */
     static async getInvoiceDetails(invoiceUuid) {
@@ -376,7 +372,7 @@ async function fillInvoicesStatuses(invoices) {
 function isInvoicePaid(invoice, transactionsList) {
     const paidSumSatoshis = getSumOfOutputsSendingToAddressByTransactionsList(invoice.address, transactionsList);
 
-    return paidSumSatoshis >= btcToSatoshi(invoice.amountBtc);
+    return paidSumSatoshis >= Coins.COINS.BTC.coinAmountToAtoms(invoice.amountBtc);
 }
 
 function getOnlyFiltered(invoicesList, filterBy) {
@@ -443,8 +439,7 @@ function getOnlySearched(invoicesList, searchCriteria) {
             ((invoice.isPaid && "paid") || "pending").includes(searchCriteria) ||
             dateTimeString.includes(searchCriteria) ||
             (invoice.label && invoice.label.toLowerCase().includes(searchCriteria)) ||
-            (invoice.message && invoice.message.toLowerCase().includes(searchCriteria)) ||
-            (invoice.paymentUrl && invoice.paymentUrl.toLowerCase().includes(searchCriteria))
+            (invoice.message && invoice.message.toLowerCase().includes(searchCriteria))
         );
     });
 }
@@ -501,7 +496,6 @@ function mapToProperReturnFormat(invoicesList) {
             address: invoice.address,
             label: invoice.label,
             message: invoice.message,
-            paymentUrl: invoice.paymentUrl,
         };
     });
 }

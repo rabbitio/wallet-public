@@ -1,7 +1,6 @@
 import bip39 from "bip39";
 
 import { getCurrentNetwork, getWalletId } from "../../../common/services/internal/storage";
-import { btcToSatoshi } from "../lib/btc-utils";
 import {
     getEcPairsToAddressesMapping,
     isAddressValid,
@@ -20,9 +19,10 @@ import { buildTransaction } from "../lib/transactions/build-transaction";
 import { createFakeSendAllTransaction, createFakeTransaction } from "../lib/transactions/fake-transactions";
 import { broadcastTransaction } from "./internal/transactionsBroadcastingService";
 import { Logger } from "../../../support/services/internal/logs/logger";
+import { Coins } from "../../coins";
 
 export default class PaymentService {
-    static BLOCKS_COUNTS_FOR_OPTIONS = [1, 5, 10, 25];
+    static BLOCKS_COUNTS_FOR_OPTIONS = [1, 5, 10, 25]; // WARNING: changing order will cause wrong fee options calculation
 
     /**
      * Creates transaction and broadcasts it to the network. Saves its description if present on successful broadcasting.
@@ -62,6 +62,7 @@ export default class PaymentService {
     /**
      * Tries to create transactions for 4 speed options with fake signatures
      * Composes TxData ready for sending for further usage.
+     * Positions of items in the array of TxData is the same as in BLOCKS_COUNTS_FOR_OPTIONS (sorted by fee rate descending).
      *
      * @param address {string} target address
      * @param amountBtc {string} amount in coin denomination
@@ -103,7 +104,7 @@ export default class PaymentService {
                 if (isSendAll) {
                     txData = createFakeSendAllTransaction(address, feeRate, utxos, network);
                 } else {
-                    const satoshies = btcToSatoshi(amountBtc);
+                    const satoshies = Number(Coins.COINS.BTC.coinAmountToAtoms(amountBtc));
                     txData = createFakeTransaction(satoshies, address, changeAddress, feeRate, utxos, network);
                 }
 
@@ -161,7 +162,7 @@ export default class PaymentService {
     }
 }
 
-// TODO: [tests, moderate] Extract from tests of methods using this one
+// TODO: [tests, moderate] Extract from tests of methods using this one. task_id=c744fff79f8f4904b803730bf24548e8
 function validateTargetAddress(address, currentNetwork) {
     if (!address) {
         return {
@@ -171,6 +172,7 @@ function validateTargetAddress(address, currentNetwork) {
         };
     }
 
+    // TODO: [feature, high] add taproot support task_id=436e6743418647dd8bf656cd5e887742
     if (isAddressValid(address, currentNetwork)) {
         if (isP2pkhAddress(address) || isP2shAddress(address) || isSegWitAddress(address)) {
             return {

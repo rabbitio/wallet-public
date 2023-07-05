@@ -15,7 +15,7 @@ class Tron extends Coin {
             "sun",
             new Network("mainnet", 195, 0, 1, 20, [bip44Scheme]),
             new Network("nile", 195, 0, 1, 20, [bip44Scheme]),
-            20,
+            1,
             "energy",
             null, // Doesn't provide an option to prioritise the transactions
             60000,
