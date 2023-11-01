@@ -14,8 +14,8 @@ export class CachedRobustExternalApiCallerService {
      * @param bio {string} unique service identifier
      * @param providersData {ExternalApiProvider[]} array of providers
      * @param [cacheTtlMs=10000] {number} time to live for cache ms
-     * @param [maxCallAttemptsToWaitForAlreadyRunningRequest=50] {number} number of request allowed to do waiting for result before we fail the original request
-     * @param [timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished=3000] {number} timeout ms for polling for a result
+     * @param [maxCallAttemptsToWaitForAlreadyRunningRequest=50] {number} see details in CacheAndConcurrentRequestsResolver
+     * @param [timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished=3000] {number} see details in CacheAndConcurrentRequestsResolver
      * @param [removeExpiredCacheAutomatically=true] {boolean} whether to remove cached data automatically when ttl exceeds
      * @param [mergeCachedAndNewlyRetrievedData=null] {function} function accepting cached data, newly retrieved data and id field name for list items
      *        and merging them. use if needed
@@ -24,19 +24,19 @@ export class CachedRobustExternalApiCallerService {
         bio,
         providersData,
         cacheTtlMs = 10000,
-        maxCallAttemptsToWaitForAlreadyRunningRequest = 50,
-        timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished = 3000,
         removeExpiredCacheAutomatically = true,
-        mergeCachedAndNewlyRetrievedData = null
+        mergeCachedAndNewlyRetrievedData = null,
+        maxCallAttemptsToWaitForAlreadyRunningRequest = 100,
+        timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished = 1000
     ) {
         this._provider = new RobustExternalAPICallerService(`cached_${bio}`, providersData, logError);
         this._cacheTtlMs = cacheTtlMs;
         this._cahceAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
             bio,
             cacheTtlMs,
+            removeExpiredCacheAutomatically,
             maxCallAttemptsToWaitForAlreadyRunningRequest,
-            timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished,
-            removeExpiredCacheAutomatically
+            timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished
         );
         this._cahceIds = [];
         this._mergeCachedAndNewlyRetrievedData = mergeCachedAndNewlyRetrievedData;
@@ -66,13 +66,11 @@ export class CachedRobustExternalApiCallerService {
     ) {
         const loggerSource = `${this._provider.bio}.callExternalAPICached`;
         let cacheId;
+        let result;
         try {
             cacheId = this._calculateCacheId(parametersValues, customHashFunctionForParams);
-            const result = await this._cahceAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
-                cacheId
-            );
-
-            if (!result.canStartDataRetrieval) {
+            result = await this._cahceAndRequestsResolver.getCachedOrWaitForCachedOrAcquireLock(cacheId);
+            if (!result?.canStartDataRetrieval) {
                 return result?.cachedData;
             }
 
@@ -84,11 +82,13 @@ export class CachedRobustExternalApiCallerService {
                 doNotFailForNowData
             );
 
-            if (typeof this._mergeCachedAndNewlyRetrievedData === "function") {
-                data = this._mergeCachedAndNewlyRetrievedData(result?.cachedData, data, parametersValues);
+            const canPerformMerge = typeof this._mergeCachedAndNewlyRetrievedData === "function";
+            if (canPerformMerge) {
+                const mostRecentCached = this._cahceAndRequestsResolver.getCached(cacheId);
+                data = this._mergeCachedAndNewlyRetrievedData(mostRecentCached, data, parametersValues);
             }
             if (data != null) {
-                this._cahceAndRequestsResolver.saveCachedData(cacheId, data);
+                this._cahceAndRequestsResolver.saveCachedData(cacheId, result?.lockId, data, true, canPerformMerge);
                 this._cahceIds.indexOf(cacheId) < 0 && this._cahceIds.push(cacheId);
             }
 
@@ -96,7 +96,7 @@ export class CachedRobustExternalApiCallerService {
         } catch (e) {
             improveAndRethrow(e, loggerSource);
         } finally {
-            this._cahceAndRequestsResolver.markActiveCalculationAsFinished(cacheId);
+            this._cahceAndRequestsResolver.releaseLock(cacheId, result?.lockId);
         }
     }
 

@@ -1,0 +1,25 @@
+.initial-loader {
+    width: 98vw;
+    height: 98vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.initial-loader-icon {
+    width: 85px;
+    animation: 0.8s ease-in-out 0s alternate infinite initial-loader-icon-animation;
+}
+
+@keyframes initial-loader-icon-animation {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(0.85);
+        opacity: 0.6;
+    }
+}

@@ -7,6 +7,12 @@ import { Erc20TokenWallet } from "../erc20token/models/erc20TokenWallet";
 import { Coin } from "./models/coin";
 import { Trc20TokenWallet } from "../trc20token/models/trc20TokenWallet";
 
+/**
+ * This is the main service to manage wallets.
+ * You should access wallet singletons via this service.
+ * Wallet objects are being compared by references to singletons all over the app so use only singletons
+ * and never instantiate Wallet or its descendants manually.
+ */
 export class Wallets {
     static _WALLETS = [
         bitcoinWallet,
@@ -16,12 +22,27 @@ export class Wallets {
         ...Coins.getCoinsListByProtocol(Coin.PROTOCOLS.TRC20).map(trc20Token => new Trc20TokenWallet(trc20Token)),
     ];
 
+    /**
+     * @return {Wallet[]}
+     */
     static getWalletsForAllEnabledCoins() {
         try {
             const enabledCoins = Coins.getEnabledCoinsList() ?? [];
             return this._WALLETS.filter(w => enabledCoins.find(c => c === w.coin));
         } catch (e) {
             improveAndRethrow(e, "getWalletsForAllEnabledCoins");
+        }
+    }
+
+    /**
+     * @return {Wallet[]}
+     */
+    static getWalletsForAllSupportedCoins() {
+        try {
+            const supportedCoins = Coins.getSupportedCoinsList() ?? [];
+            return this._WALLETS.filter(w => supportedCoins.find(c => c === w.coin));
+        } catch (e) {
+            improveAndRethrow(e, "getWalletsForAllSupportedCoins");
         }
     }
 
@@ -36,12 +57,25 @@ export class Wallets {
         try {
             const wallet = this._WALLETS.find(wallet => wallet.coin === coin);
             if (!wallet) {
-                throw new Error("No wallet for coin: " + coin.ticker);
+                throw new Error("No wallet for coin: " + coin?.ticker);
             }
 
             return wallet;
         } catch (e) {
             improveAndRethrow(e, "getWalletByCoin");
+        }
+    }
+
+    /**
+     * @param coins {Coin[]}
+     * @return {Wallet[]}
+     * @throws {Error} if any coin is not supported
+     */
+    static getWalletsByCoins(coins) {
+        try {
+            return coins.map(coin => this.getWalletByCoin(coin));
+        } catch (e) {
+            improveAndRethrow(e, "getWalletsByCoins");
         }
     }
 }

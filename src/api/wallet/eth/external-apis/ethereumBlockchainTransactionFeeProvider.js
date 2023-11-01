@@ -1,11 +1,10 @@
 import { BigNumber } from "ethers";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { ETH_PR_ALC_GOERLI_K, ETH_PR_K } from "../../../../properties";
-import { Coins } from "../../coins";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
+import { PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
 
 class AlchemyTransactionReceiptProvider extends ExternalApiProvider {
     constructor() {
@@ -14,10 +13,7 @@ class AlchemyTransactionReceiptProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const isMainnet = getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet;
-            const networkPrefix = isMainnet ? "mainnet" : "goerli";
-            const apiKey = isMainnet ? ETH_PR_K : ETH_PR_ALC_GOERLI_K;
-            return `https://eth-${networkPrefix}.g.alchemy.com/v2/${apiKey}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}`;
         } catch (e) {
             improveAndRethrow(e, "alchemyTransactionReceiptProvider.composeQueryString");
         }
@@ -55,10 +51,10 @@ export class EthereumBlockchainTransactionFeeProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "ethereumBlockchainTransactionFeeProvider",
         [new AlchemyTransactionReceiptProvider()],
-        30 * 60000, // Such a great ttl as receipt is constant for committed transactions
-        20,
-        1000,
-        false
+        PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS, // As receipt is constant for committed transactions
+        false,
+        null,
+        20 // It is not critical to fail fast for this provider
     );
 
     static async getEthereumBlockchainTransactionFee(txId) {

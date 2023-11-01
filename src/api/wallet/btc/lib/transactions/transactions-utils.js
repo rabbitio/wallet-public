@@ -11,41 +11,48 @@ import { Coins } from "../../../coins";
  * TODO: [feature, low] Algorithm is not optimal as it is using greatest utxo as base for tx due to main algorithm
                         of utxos selection for transaction (just descending order for now). So the algorithm should be
                         updated in case of modification of main algorithm.
- * @param utxos - utxos to select proper ones from
- * @param feeRate - desired fee rate
- * @param address - target address for sending specified amount
- * @param ecPairsMapping - mapping for addresses of all given utxos to random ecPair
- * @param network - network to operate in
- * @returns Array of utxos
+ * @param utxos {Utxo[]} utxos to select proper ones from
+ * @param feeRate {FeeRate} desired fee rate
+ * @param address {string} target address for sending specified amount
+ * @param ecPairsMapping {EcPairsMappingEntry[]} mapping for addresses of all given utxos to random ecPair
+ * @param network {Network} network to operate in
+ * @returns {Utxo[]}
  */
 export function getSortedNotDustUtxosInTermsOfSpecificFeeRate(utxos, feeRate, address, ecPairsMapping, network) {
-    if (!utxos.length) return [];
+    try {
+        if (!utxos.length) return [];
 
-    const sortedUtxos = utxos.sort((utxo1, utxo2) => utxo2.value_satoshis - utxo1.value_satoshis);
-    const goodUtxos = [sortedUtxos[0]];
-    const txOfBiggestUtxo = buildTransactionUnsafe(
-        sortedUtxos[0].value_satoshis,
-        address,
-        0,
-        null,
-        goodUtxos,
-        ecPairsMapping,
-        network
-    );
-    const feeOfBiggestUtxo = calculateFeeByFeeRate(txOfBiggestUtxo, feeRate);
-    for (let i = 1; i < sortedUtxos.length; ++i) {
-        const tempUtxos = [sortedUtxos[0], sortedUtxos[i]];
-        const tempAmount = sortedUtxos[0].value_satoshis + sortedUtxos[i].value_satoshis;
-        const newTx = buildTransactionUnsafe(tempAmount, address, 0, null, tempUtxos, ecPairsMapping, network);
-        const newFee = calculateFeeByFeeRate(newTx, feeRate);
-        if (newFee - feeOfBiggestUtxo <= sortedUtxos[i].value_satoshis) {
-            goodUtxos.push(sortedUtxos[i]);
+        const sortedUtxos = utxos.sort((utxo1, utxo2) => utxo2.value_satoshis - utxo1.value_satoshis);
+        const goodUtxos = [sortedUtxos[0]];
+        const txOfBiggestUtxo = buildTransactionUnsafe(
+            sortedUtxos[0].value_satoshis,
+            address,
+            0,
+            null,
+            goodUtxos,
+            ecPairsMapping,
+            network
+        );
+        const feeOfBiggestUtxo = calculateFeeByFeeRate(txOfBiggestUtxo, feeRate);
+        for (let i = 1; i < sortedUtxos.length; ++i) {
+            const tempUtxos = [sortedUtxos[0], sortedUtxos[i]];
+            const tempAmount = sortedUtxos[0].value_satoshis + sortedUtxos[i].value_satoshis;
+            const newTx = buildTransactionUnsafe(tempAmount, address, 0, null, tempUtxos, ecPairsMapping, network);
+            const newFee = calculateFeeByFeeRate(newTx, feeRate);
+            if (newFee - feeOfBiggestUtxo <= sortedUtxos[i].value_satoshis) {
+                goodUtxos.push(sortedUtxos[i]);
+            }
         }
-    }
 
-    return goodUtxos;
+        return goodUtxos;
+    } catch (e) {
+        improveAndRethrow(e, "getSortedNotDustUtxosInTermsOfSpecificFeeRate");
+    }
 }
 
+/**
+ * @return {{result: boolean, errorDescription: string, howToFix: string}}
+ */
 export function getFeePlusSendingAmountOverlapsBalanceErrorData() {
     return {
         result: false,
@@ -106,12 +113,12 @@ export function getSumOfOutputsSendingToAddressByTransactionsList(address, trans
  * Filters given list for UTXOs that are not dust in terms of sending to given fee rate.
  * We use random address of P2WPKH to perform the calculation. It is because such outputs are the smallest comparin to
  * other address types when adding output to a transaction. It can change in the future but it is not critical.
- * Also Segwit addresses are preferred ones now so this adds even more to this address choice.
+ * Also, Segwit addresses are preferred ones now so this adds even more to this address choice.
  *
- * @param utxos - list of UTXOs
- * @param feeRate - rate to be used for fee calculation
- * @param network - network to work in
- * @return {Array<Utxo>} - list of not dust UTXOs in terms of given rate
+ * @param utxos {Utxo[]} list of UTXOs
+ * @param feeRate {FeeRate} rate to be used for fee calculation
+ * @param network {Network} network to work in
+ * @return {Utxo[]} list of not dust UTXOs in terms of given rate
  */
 export function getNotDustUTXOsInTermsOfSpecificFeeRateConsideringSendingP2WPKH(utxos, feeRate, network) {
     try {

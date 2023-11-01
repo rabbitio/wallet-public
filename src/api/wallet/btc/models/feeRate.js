@@ -1,4 +1,9 @@
 export class FeeRate {
+    /**
+     * @param network {string} Network.key
+     * @param blocksCount {number}
+     * @param rate {number}
+     */
     constructor(network, blocksCount, rate) {
         this.network = network;
         this.blocksCount = blocksCount;

@@ -17,7 +17,8 @@ class BitcoinWallet extends Wallet {
 
     async calculateBalance() {
         try {
-            return (await BalanceService.getSpendableWalletBalance()).btcAmount;
+            // TODO: [feature, high] We should add confirmed balance displaying for sending and swapping task_id=952f713a09ac4a04882e5ede9bd5fbc9
+            return await BalanceService.getUnconfirmedWalletBalance();
         } catch (e) {
             improveAndRethrow(e, `${this.coin.ticker}_calculateBalance`);
         }
@@ -63,7 +64,14 @@ class BitcoinWallet extends Wallet {
         }
     }
 
-    async createTransactionsWithFakeSignatures(address, coinAmount, isSendAll, currentNetwork, balanceCoins) {
+    async createTransactionsWithFakeSignatures(
+        address,
+        coinAmount,
+        isSendAll,
+        currentNetwork,
+        balanceCoins,
+        isAddressFake = false
+    ) {
         try {
             return await PaymentService.createTransactionsWithFakeSignatures(
                 address,
@@ -103,7 +111,7 @@ class BitcoinWallet extends Wallet {
     actualizeLocalCachesWithNewTransactionData(sentCoin, txData, txId) {
         try {
             const tx = Transaction.fromTxData(txData, txId);
-            transactionsDataProvider.pushNewTransactionToCache(tx);
+            transactionsDataProvider.updateTransactionsCache([tx]);
         } catch (e) {
             improveAndRethrow(e, `${this.coin.ticker}_actualizeLocalCachesWithNewTransactionData`);
         }
@@ -127,11 +135,18 @@ class BitcoinWallet extends Wallet {
 
     markTransactionsCacheAsExpired() {
         try {
-            transactionsDataProvider.triggerTransactionsRetrieval();
+            transactionsDataProvider.markDataAsExpired();
         } catch (e) {
             improveAndRethrow(e, "markTransactionsCacheAsExpired");
         }
     }
+
+    async getCurrentChangeAddressIfSupported() {
+        return await AddressesService.getCurrentChangeAddress();
+    }
 }
 
+/**
+ * WARNING: we use singleton wallet objects all over the app. Don't create custom instances.
+ */
 export const bitcoinWallet = new BitcoinWallet();

@@ -10,6 +10,7 @@ import {
     mergeTwoBalancesArraysAndNotifyAboutBalanceValueChange,
 } from "../../common/utils/cacheActualizationUtils";
 import { Coin } from "../../common/models/coin";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
 class TronscanBlockchainBalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -51,9 +52,7 @@ export class TronBlockchainBalancesProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronBlockchainBalanceProvider",
         [new TronscanBlockchainBalanceProvider()],
-        100000,
-        110,
-        1000,
+        STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,
         mergeTwoBalancesArraysAndNotifyAboutBalanceValueChange
     );

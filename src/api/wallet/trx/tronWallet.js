@@ -62,7 +62,14 @@ class TronWallet extends Wallet {
         }
     }
 
-    async createTransactionsWithFakeSignatures(address, coinAmount, isSendAll, currentNetwork, balanceCoins) {
+    async createTransactionsWithFakeSignatures(
+        address,
+        coinAmount,
+        isSendAll,
+        currentNetwork,
+        balanceCoins,
+        isAddressFake = false
+    ) {
         try {
             return await TronSendTransactionService.createTronBlockchainCoinTransactionsWithFakeSignatures(
                 this.coin,
@@ -70,7 +77,8 @@ class TronWallet extends Wallet {
                 coinAmount,
                 isSendAll,
                 getCurrentNetwork(this.coin),
-                balanceCoins
+                balanceCoins,
+                isAddressFake
             );
         } catch (e) {
             improveAndRethrow(e, `${this.coin.ticker}_createTransactionsWithFakeSignatures`);
@@ -133,4 +141,7 @@ class TronWallet extends Wallet {
     }
 }
 
+/**
+ * WARNING: we use singleton coins objects all over the app. Don't create custom instances.
+ */
 export const tronWallet = new TronWallet();

@@ -4,11 +4,12 @@ import TronWebLib from "tronweb";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { TRONGR_PR_K } from "../../../../properties";
 import { safeStringify } from "../../../common/utils/browserUtils";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
+import { ApiGroups } from "../../../common/external-apis/apiGroups";
 
-const url = "https://api.trongrid.io";
-const urlTestnet = "https://nile.trongrid.io";
+const url = `${API_KEYS_PROXY_URL}/${ApiGroups.TRONGRID.backendProxyIdGenerator(Coins.COINS.TRX.mainnet)}`;
+const urlTestnet = `${API_KEYS_PROXY_URL}/${ApiGroups.TRONGRID.backendProxyIdGenerator(Coins.COINS.TRX.testnet)}`;
 
 class TronUtils {
     constructor() {
@@ -16,20 +17,30 @@ class TronUtils {
         const solidityNode = new TronWebLib.providers.HttpProvider(url);
         const eventServer = new TronWebLib.providers.HttpProvider(url);
         this._lib = new TronWebLib(fullNode, solidityNode, eventServer);
-        this._lib.setHeader({ "TRON-PRO-API-KEY": TRONGR_PR_K });
-        const fullNodeTestnet = new TronWebLib.providers.HttpProvider(urlTestnet);
-        const solidityNodeTestnet = new TronWebLib.providers.HttpProvider(urlTestnet);
-        const eventServerTestnet = new TronWebLib.providers.HttpProvider(urlTestnet);
-        this._libTestnet = new TronWebLib(fullNodeTestnet, solidityNodeTestnet, eventServerTestnet);
-        this._libTestnet.setHeader({ "TRON-PRO-API-KEY": TRONGR_PR_K });
+        this._libTestnet = null; // Will be initialized lazily
     }
 
     _getLibByCurrentNetwork() {
-        return getCurrentNetwork(Coins.COINS.TRX) === Coins.COINS.TRX.mainnet ? this._lib : this._libTestnet;
+        try {
+            if (getCurrentNetwork(Coins.COINS.TRX) === Coins.COINS.TRX.mainnet) {
+                return this._lib;
+            }
+            if (this._libTestnet == null) {
+                // Lazy initializing the testnet only if it is requested
+                const fullNodeTestnet = new TronWebLib.providers.HttpProvider(urlTestnet);
+                const solidityNodeTestnet = new TronWebLib.providers.HttpProvider(urlTestnet);
+                const eventServerTestnet = new TronWebLib.providers.HttpProvider(urlTestnet);
+                this._libTestnet = new TronWebLib(fullNodeTestnet, solidityNodeTestnet, eventServerTestnet);
+            }
+            return this._libTestnet;
+        } catch (e) {
+            improveAndRethrow(e, "_getLibByCurrentNetwork");
+        }
     }
 
     /**
      * Converts the standard Tron blockchain address to hex format used by some APIs
+     *
      * @param address {string} base58check address string (starts with 'T')
      * @returns {string} hex address string (starts with '41')
      */
@@ -39,6 +50,7 @@ class TronUtils {
 
     /**
      * Converts the hex tron address to base58 format (mostly used)
+     *
      * @param address {string} hex address string (starts with '41')
      * @returns {string} base58check address string (starts with 'T')
      */
@@ -104,7 +116,7 @@ class TronUtils {
      * @private
      * @description https://developers.tron.network/docs/parameter-and-return-value-encoding-and-decoding
      */
-    async _decodeParams(types, output, ignoreMethodHash = true) {
+    _decodeParams(types, output, ignoreMethodHash = true) {
         try {
             const ADDRESS_PREFIX = "41";
             if (!output || typeof output === "boolean") {

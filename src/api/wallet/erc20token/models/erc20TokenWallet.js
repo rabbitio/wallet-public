@@ -10,6 +10,9 @@ import { Erc20TransactionsProvider } from "../external-apis/erc20TransactionsPro
 import { EthereumTransactionsHistoryService } from "../../eth/services/ethereumTransactionsHistoryService";
 
 export class Erc20TokenWallet extends Wallet {
+    /**
+     * WARNING: we use singleton wallet objects all over the app. Don't create custom instances.
+     */
     constructor(coin) {
         super(coin, false);
     }
@@ -66,7 +69,14 @@ export class Erc20TokenWallet extends Wallet {
         }
     }
 
-    async createTransactionsWithFakeSignatures(address, coinAmount, isSendAll, currentNetwork, balanceCoins) {
+    async createTransactionsWithFakeSignatures(
+        address,
+        coinAmount,
+        isSendAll,
+        currentNetwork,
+        balanceCoins,
+        isAddressFake = false
+    ) {
         try {
             return await Erc20TokenSendTransactionService.createErc20TransactionsWithFakeSignatures(
                 this.coin,

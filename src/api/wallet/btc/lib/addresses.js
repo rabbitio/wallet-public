@@ -6,6 +6,7 @@ import { bip44Scheme, bip49Scheme, bip84Scheme, SupportedSchemes } from "./addre
 import AddressesDataAdapter from "../../common/backend-api/adapters/addressesDataAdapter";
 import { BitcoinJsAdapter } from "../adapters/bitcoinJsAdapter";
 import { Coins } from "../../coins";
+import { Network } from "../../common/models/networks";
 
 export const GAP_LIMIT = 20; // See BIP44 for details on gap limit
 export const EXTERNAL_CHANGE_INDEX = 0;
@@ -22,13 +23,15 @@ const Buffer = buffer.Buffer;
  * Uses bitcoinjs ouput script creation function which fails in case of invalid address given.
  * (see https://github.com/bitcoinjs/bitcoinjs-lib/issues/890#issuecomment-329371169 for details).
  *
- * @param address - bitcoin address of any type (mandatory)
- * @param network - bitcoin network to which given address belongs (optional)
- * @return Boolean - true if address is valid and false otherwise
+ * @param address {string} bitcoin address of any type (mandatory)
+ * @param [network=null] {Network|null} bitcoin network to which given address belongs (optional)
+ * @return {boolean} true if address is valid and false otherwise
  */
-export function isAddressValid(address, network) {
+export function isAddressValid(address, network = null) {
     try {
-        !network && (network = getNetworkByAddress(address));
+        if (!(network instanceof Network)) {
+            network = getNetworkByAddress(address);
+        }
         bitcoinJs.address.toOutputScript(address, BitcoinJsAdapter.toBitcoinJsNetwork(network.key));
         return true;
     } catch (e) {
@@ -41,11 +44,12 @@ export function isAddressValid(address, network) {
  * Note that this method is not validating correctness of address, it is just checking by prefixes.
  *
  * See all prefixes at https://en.bitcoin.it/wiki/List_of_address_prefixes
- * @param address - address to be checked
- * @return boolean - true if address is of P2PKH format and false otherwise
+ *
+ * @param address {string} address to be checked
+ * @return {boolean} true if address is of P2PKH format and false otherwise
  */
 export function isP2pkhAddress(address) {
-    return address && (address.match(/^1/g) || address.match(/^[mn]/g));
+    return typeof address === "string" && (address.match(/^1/g) || address.match(/^[mn]/g));
 }
 
 /**
@@ -65,11 +69,25 @@ export function isP2shAddress(address) {
  * Note that this method is not validating correctness of address, it is just checking by prefixes.
  *
  * See all prefixes at https://en.bitcoin.it/wiki/List_of_address_prefixes
- * @param address - address to be checked
- * @return boolean - true if address is of SegWit format and false otherwise
+ *
+ * @param address {string} address to be checked
+ * @return {boolean} true if address is of SegWit format and false otherwise
  */
 export function isSegWitAddress(address) {
-    return address && (address.match(/^bc1/g) || address.match(/^tb1/g));
+    return typeof address === "string" && (address.match(/^bc1/g) || address.match(/^tb1/g));
+}
+
+/**
+ * Checks whether address is of P2WPKH format.
+ * Note that this method is not validating correctness of address, it is just checking by prefixes/length.
+ *
+ * See all prefixes at https://en.bitcoin.it/wiki/List_of_address_prefixes
+ *
+ * @param address {string} address to be checked
+ * @return {boolean} true if address is of P2WPKH format and false otherwise
+ */
+export function isP2wpkhAddress(address) {
+    return typeof address === "string" && address.length === 42 && (address.match(/^bc1q/g) || address.match(/^tb1q/g));
 }
 
 /**
@@ -79,8 +97,9 @@ export function isSegWitAddress(address) {
  *
  * Throws error if prefix is not supported (actually there are a lot of prefixes, we use just only relevant,
  * see https://en.bitcoin.it/wiki/List_of_address_prefixes for details).
- * @param address
- * @returns Network
+ *
+ * @param address {string}
+ * @returns {Network}
  */
 export function getNetworkByAddress(address) {
     if (address.match(/^1/g) || address.match(/^3/g) || address.match(/^bc1/g)) {
@@ -97,11 +116,11 @@ export function getNetworkByAddress(address) {
 /**
  * Generates address by given params
  *
- * @param scheme - scheme to generate address for
- * @param changeNode - change node to derive address node from
- * @param addressIndex - index of an address to be derived from passed change node
- * @param network - notwork to work with
- * @returns String - generated address
+ * @param scheme {Scheme} scheme to generate address for
+ * @param changeNode {Object} change node to derive address node from
+ * @param addressIndex {number} index of an address to be derived from passed change node
+ * @param network {Network} notwork to work with
+ * @returns {string} generated address
  */
 export function getAddressByIndex(scheme, changeNode, addressIndex, network) {
     const { publicKey } = changeNode.derive(addressIndex);
@@ -117,12 +136,12 @@ export function getAddressByIndex(scheme, changeNode, addressIndex, network) {
  * Creates new external address for given accounts data, network, addresses indexes and scheme.
  * TODO: [feature, moderate/maybe] Check that GAP_LIMIT is not exceeded, maybe schedule it
  *
- * @param accountsData - accounts data of the wallet
- * @param network - network to work in
- * @param addressNodesIndexes - addresses indexes of the wallet
- * @param scheme - scheme to create address for
- * @param incrementWith - value to increment current address index with, default is 1
- * @return Object {accountIndex, coinIndex: number, changeIndex: number, newAddress: *}
+ * @param accountsData {AccountsData} accounts data of the wallet
+ * @param network {Network} network to work in
+ * @param addressNodesIndexes {Object} addresses indexes of the wallet
+ * @param scheme {Scheme} scheme to create address for
+ * @param incrementWith {number} value to increment current address index with, default is 1
+ * @return {{accountIndex: number, coinIndex: number, changeIndex: number, newAddress: string}}
  */
 export function createNewExternalAddressByScheme(
     accountsData,
@@ -191,14 +210,14 @@ function getUsedSchemesByAddressesPathsArray(allSchemes, addressesPaths) {
  * Gets all addresses used in given scheme's account's change node in specified network.
  * Address is considered as used only if its index is less than index of address in
  * addressesNodesIndexes (by specified path). This method does not perform any stuff like scanning of addresses or
- * checking whether address used or not actually.
+ * checking whether address is used or not.
  *
- * @param accountsData - accounts data to get addresses by
- * @param schemes - schemes to get addresses for
- * @param network - network to get addresses in
- * @param changeNodeIndex - index of change node (ip32, bip44) to get addresses for
- * @param addressesNodesIndexes - object of indexes of addresses by paths
- * @return Array of all used addresses for specified path
+ * @param accountsData {AccountsData} accounts data to get addresses by
+ * @param schemes {Scheme[]} schemes to get addresses for
+ * @param network {Network} network to get addresses in
+ * @param changeNodeIndex {number} index of change node (ip32, bip44) to get addresses for
+ * @param addressesNodesIndexes {Object} object of indexes of addresses by paths
+ * @return {string[]} all used addresses for specified path
  */
 function getAllUsedAddressesForBranch(accountsData, schemes, network, changeNodeIndex, addressesNodesIndexes) {
     try {
@@ -242,13 +261,13 @@ export class EcPairsMappingEntry {
  * with passed addresses. When match is found corresponding address with ECPair (bitcoinjs lib) are being added
  * to mapping (and address scheme also).
  *
- * @param mappingAddresses - addresses for which ECPairs are searched. Note that addresses are not
+ * @param mappingAddresses {string[]} addresses for which ECPairs are searched. Note that addresses are not
  *                           being validated here, it is up to client
- * @param seedHex - hex seed of wallet
- * @param network - BTC network to create ECPairs for
- * @param indexes - indexes of addresses of the wallet
- * @param schemes - derivation schemes to be scanned for addresses
- * @returns Array of EcPairsMappingEntry
+ * @param seedHex {string} hex seed of wallet
+ * @param network {Network} BTC network to create ECPairs for
+ * @param indexes {Object[]} indexes of addresses of the wallet
+ * @param schemes {Scheme[]} derivation schemes to be scanned for addresses
+ * @returns {EcPairsMappingEntry[]}
  */
 export function getEcPairsToAddressesMapping(mappingAddresses, seedHex, network, indexes, schemes = SupportedSchemes) {
     try {
@@ -297,10 +316,10 @@ export function getEcPairsToAddressesMapping(mappingAddresses, seedHex, network,
 /**
  * Maps given addresses to random ecPair. Useful for fee estimation.
  *
- * @param mappingAddresses - addresses for which ECPairs are searched. Note that addresses are not
+ * @param mappingAddresses {string[]} addresses for which ECPairs are searched. Note that addresses are not
  *                           being validated here, it is up to client
- * @param network - BTC network to create ECPairs for
- * @returns Promise resolving in array of EcPairsMappingEntry
+ * @param network {Network} BTC network to create ECPairs for
+ * @returns {EcPairsMappingEntry[]}
  */
 export function getMappingOfAddressesToRandomEcPair(mappingAddresses, network) {
     try {
@@ -319,11 +338,11 @@ export function getMappingOfAddressesToRandomEcPair(mappingAddresses, network) {
  * Gets all addresses from default account of given network by accounts data and current indexes of used addresses,
  * then compares given addresses with got addresses and fills mapping for bip49 addresses from given array.
  *
- * @param accountsData - accounts data to get account data from
- * @param addresses - list of addresses to be checked
- * @param addressIndexes - indexes of addresses
- * @param network - network to get addresses for
- * @return Object { address: true, ... }
+ * @param accountsData {AccountsData} accounts data to get account data from
+ * @param addresses {string[]} list of addresses to be checked
+ * @param addressIndexes {Object[]} indexes of addresses
+ * @param network {Network} network to get addresses for
+ * @return {{ [string]: boolean }}
  */
 export function isBip49Addresses(accountsData, addresses, addressIndexes, network) {
     try {
@@ -361,10 +380,12 @@ export function isBip49Addresses(accountsData, addresses, addressIndexes, networ
 }
 
 /**
- * Returns standard path for external addresses for specific network
- * @param network - network to get path for
- * @return String - final path
+ * Returns standard path for external addresses for specific network.
+ *
+ * @param network {Network} network to get path for
+ * @param [scheme] {Scheme}
+ * @return {string} final path
  */
-export function getExternalAddressPath(network) {
-    return EXTERNAL_SCHEME.getChangeNodePath(network.coinIndex, network.defaultAccountIndex, EXTERNAL_CHANGE_INDEX);
+export function getExternalAddressPath(network, scheme = EXTERNAL_SCHEME) {
+    return scheme.getChangeNodePath(network.coinIndex, network.defaultAccountIndex, EXTERNAL_CHANGE_INDEX);
 }

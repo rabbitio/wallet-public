@@ -2,7 +2,18 @@ import { ApiCallWrongResponseError } from "../backend-api/utils";
 import { safeStringify } from "./browserUtils";
 import { Logger } from "../../support/services/internal/logs/logger";
 
-export function improveAndRethrow(e, settingFunction, additionalMessage) {
+/**
+ * This function improves the passed error object (its message) by adding the passed function name
+ * and additional message to it.
+ * This is useful as Javascript doesn't guarantee the stack-traces, so we should manually add these details to errors
+ * to be able to troubleshoot.
+ *
+ * @param e {Error}
+ * @param settingFunction {string}
+ * @param [additionalMessage=""] {string|undefined}
+ * @throws {Error} always rethrows the original passed error but with an improved message
+ */
+export function improveAndRethrow(e, settingFunction, additionalMessage = "") {
     const message = improvedErrorMessage(e, settingFunction, additionalMessage);
     if (e) {
         e.message = message;

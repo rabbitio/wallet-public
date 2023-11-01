@@ -2,9 +2,10 @@ import { ExternalApiProvider } from "../../../common/services/utils/robustExtera
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
-import { TRONGR_PR_K } from "../../../../properties";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
+import { MODERATE_TTL_FOR_RELATIVELY_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
 
 class TronscanAccountExistenceProvider extends ExternalApiProvider {
     constructor() {
@@ -33,13 +34,13 @@ class TronscanAccountExistenceProvider extends ExternalApiProvider {
 
 class TrongridAccountExistenceProvider extends ExternalApiProvider {
     constructor() {
-        super("", "post", 10000, ApiGroups.TRONGRID, { "TRON-PRO-API-KEY": TRONGR_PR_K });
+        super("", "post", 10000, ApiGroups.TRONGRID);
     }
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const network = getCurrentNetwork(Coins.COINS.TRX);
-            return `https://${network === Coins.COINS.TRX.mainnet ? "api" : "nile"}.trongrid.io/wallet/getaccount`;
+            const originalApiPath = "/wallet/getaccount";
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
         } catch (e) {
             improveAndRethrow(e, "trongridAccountExistenceProvider.composeQueryString");
         }
@@ -71,9 +72,7 @@ export class TronAccountExistenceProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronAccountExistenceProvider",
         [new TronscanAccountExistenceProvider(), new TrongridAccountExistenceProvider()],
-        90000,
-        100,
-        1000
+        MODERATE_TTL_FOR_RELATIVELY_FREQ_CHANGING_DATA_MS
     );
 
     static async doesTronAccountExist(address) {

@@ -145,6 +145,7 @@ export function validateMnemonic(mnemonic, allowedLengths = ALLOWED_MNEMONIC_LEN
 export function createNewMnemonic() {
     try {
         // TODO: [feature, moderate] Support other words counts (currently buf size is for 12 words)
+        // TODO: [feature, critical] Use some robust random generator task_id=e3bcf02b8fbc40b1a5eeda2b27156829
         const entropyForMnemonic = secureRandom.randomBuffer(16).toString("hex");
         return bip39.entropyToMnemonic(entropyForMnemonic);
     } catch (e) {

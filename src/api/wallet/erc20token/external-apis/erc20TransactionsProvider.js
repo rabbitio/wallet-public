@@ -13,10 +13,11 @@ import { Coins } from "../../coins";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
 /**
  * Currently we use free version of this provider. But we have API key with 100k requests free per month.
- * If we decide to use paid option add API key to query string: '&apikey=${ETH_PR_K_ETHSCAN}'
+ * If we decide to use paid option add API key to query string: '&apikey=${"api_key"}'
  *
  * Params for this provider's endpoint are:
  *   params[0] {string} address to get txs for
@@ -103,9 +104,7 @@ export class Erc20TransactionsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "erc20TransactionsProvider",
         [new EtherScanErc20TransactionsProvider()],
-        120000,
-        130,
-        1000,
+        STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,
         mergeTwoTransactionsArraysAndNotifyAboutNewTransactions
     );

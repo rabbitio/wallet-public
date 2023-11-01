@@ -1,5 +1,8 @@
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 
+// TODO: [refactoring, moderate] we decided to use AmountUtils as the source of all numbers-printing-related operations.
+//       So this class should be refactored/removed task_id=70c1984b622847cd9e3e771822b1fc31
+//       Also currently this implementation suffers from the same problems as the AmountUtils, see the mentioned task for details.
 export class NumbersUtils {
     /**
      * Is enough for most coins to represent valuable amount. Recognized practically.
@@ -10,6 +13,8 @@ export class NumbersUtils {
     static _defaultMaxNumberLength = 13;
 
     /**
+     * @deprecated use AmountUtils instead
+     *
      * Reduces the long amount:
      * 1. trims right part of floating point number if its length is greater than the maxDigitsAfterDot and lefts the smallest digits count of maxDigitsAfterDot and coinSignificantDigits
      * 2. removes redundant zeros from trimmed number string
@@ -66,6 +71,10 @@ export class NumbersUtils {
         }
     }
 
+    /**
+     * @param numberAsAString {string}
+     * @return {string}
+     */
     static removeRedundantRightZerosFromNumberString(numberAsAString) {
         try {
             const parts = ("" + numberAsAString).split(".");

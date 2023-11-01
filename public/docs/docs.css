@@ -1,0 +1,63 @@
+.landing {
+    background-color: #232d42;
+}
+
+.landing-top {
+    background: unset;
+}
+
+.landing-top-title {
+    margin-top: 10px;
+}
+
+.landing-top-subtitle {
+    margin-bottom: 0;
+}
+
+.white-box {
+    margin-top: 40px;
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+}
+
+@media (max-width: 900px) {
+    .white-box {
+        margin-top: 20px;
+        padding: 20px;
+    }
+}
+
+.sticky-background {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    background: url("../landing/images/illustration-head.svg") no-repeat;
+    background-size: cover;
+}
+
+.docs {
+    text-align: justify;
+    font-size: 0.9rem;
+    font-weight: 300;
+    line-height: 1.3em;
+    font-size: 14px;
+    line-height: 24px;
+    color: #073A3F;
+}
+
+.docs-title {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.6em;
+}
+
+a {
+    color: #073A3F;
+}
+
+h3 {
+    color: #073A3F;
+}

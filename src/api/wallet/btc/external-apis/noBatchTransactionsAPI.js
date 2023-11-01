@@ -2,7 +2,6 @@ import { CachedRobustExternalApiCallerService } from "../../../common/services/u
 import { Input } from "../models/transaction/input";
 import { Output } from "../models/transaction/output";
 import { Transaction } from "../models/transaction/transaction";
-import { P2PKH_SCRIPT_TYPE, P2SH_SCRIPT_TYPE, P2WPKH_SCRIPT_TYPE } from "../lib/utxos";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
 import { getHash } from "../../../common/adapters/crypto-utils";
@@ -11,13 +10,16 @@ import { Coins } from "../../coins";
 import { mergeTwoArraysByItemIdFieldName } from "../../common/utils/cacheActualizationUtils";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { mappingsPerProvider } from "./outputTypeMappings";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
 // TODO: [feature, moderate] Add blockchyper provider https://api.blockcypher.com/v1/btc/main/addrs/bc1qqdxrd3708yaph7zzjmqumglhxjf6qrvprgm8jn/full task_id=a8370ae7b99049b092f31f761a95b54d
+// TODO: [feature, moderate] Add mempool.space provider https://mempool.space/docs/api/rest#post-transaction task_id=a8370ae7b99049b092f31f761a95b54d task_id=a8370ae7b99049b092f31f761a95b54d
 /**
  * Params array for each provider should contain exactly 3 parameters:
- *     params[0] {Network} - Network object to get transactions for
- *     params[1] {string} - address string
- *     params[2] {number} - current block number
+ *     params[0] {Network} Network object to get transactions for
+ *     params[1] {string} address string
+ *     params[2] {number} current block number
  */
 class BlockstreamNoBatchTransactionsProvider extends ExternalApiProvider {
     constructor() {
@@ -82,31 +84,18 @@ class BlockstreamNoBatchTransactionsProvider extends ExternalApiProvider {
 
             const currentBlockNumber = params[2];
             return (response?.data ?? []).map(tx => {
-                const mapType = type =>
-                    type === "v0_p2wpkh" ? P2WPKH_SCRIPT_TYPE : type === "p2pkh" ? P2PKH_SCRIPT_TYPE : P2SH_SCRIPT_TYPE;
-                const inputs = tx.vin.map(
-                    input =>
-                        new Input(
-                            input.prevout.scriptpubkey_address,
-                            input.prevout.value,
-                            input.txid,
-                            input.vout,
-                            mapType(input.prevout.scriptpubkey_type), // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
-                            input.sequence
-                        )
-                );
+                const typesMap = mappingsPerProvider.get(ApiGroups.BLOCKSTREAM);
+                const inputs = tx.vin.map(input => {
+                    const address = input.prevout.scriptpubkey_address;
+                    const type = typesMap.get(input.prevout.scriptpubkey_type) ?? null;
+                    return new Input(address, input.prevout.value, input.txid, input.vout, type, input.sequence);
+                });
 
                 const outputs = tx.vout
                     .map((output, index) => {
-                        // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
-                        if (output.scriptpubkey_type === "op_return") return []; // OP RETURN case
-                        return new Output(
-                            [output.scriptpubkey_address],
-                            output.value,
-                            mapType(output.scriptpubkey_type),
-                            null,
-                            index
-                        );
+                        const outputType = typesMap.get(output.scriptpubkey_type) ?? null;
+                        if (outputType == null) return [];
+                        return new Output([output.scriptpubkey_address], output.value, outputType, null, index);
                     })
                     .flat();
 
@@ -129,6 +118,11 @@ class BlockstreamNoBatchTransactionsProvider extends ExternalApiProvider {
     }
 }
 
+/**
+ * @deprecated @since 0.10.0 - on 22.09.23 it was figured out that this explorer returns no data
+ * TODO: [refactoring, moderate] remove after the scheduled check task_id=fd3c94ece28740b5b401567bb4f77657
+ */
+// eslint-disable-next-line no-unused-vars
 class BitapsNoBatchTransactionsProvider extends ExternalApiProvider {
     constructor() {
         /**
@@ -188,27 +182,15 @@ class BitapsNoBatchTransactionsProvider extends ExternalApiProvider {
 
             const currentBlockNumber = params[2];
             return (response?.data?.data?.list ?? []).map(tx => {
-                const mapType = type =>
-                    type === "P2WPKH"
-                        ? P2WPKH_SCRIPT_TYPE
-                        : type === "P2PKH"
-                        ? P2PKH_SCRIPT_TYPE
-                        : type === "P2SH"
-                        ? P2SH_SCRIPT_TYPE
-                        : null;
+                const typesMap = mappingsPerProvider.get(ApiGroups.BITAPS);
                 const inputs = [];
                 while (tx.vIn[inputs.length]) {
                     const key = inputs.length + "";
-                    inputs.push(
-                        new Input(
-                            tx.vIn[key].address,
-                            tx.vIn[key].amount,
-                            tx.vIn[key].txId,
-                            tx.vIn[key].vOut,
-                            mapType(tx.vIn[key].type), // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
-                            tx.vIn[key].sequence
-                        )
-                    );
+                    const address = tx.vIn[key].address;
+                    const amount = tx.vIn[key].amount;
+                    const id = tx.vIn[key].txId;
+                    const type = typesMap.get(tx.vIn[key].type) ?? null;
+                    inputs.push(new Input(address, amount, id, tx.vIn[key].vOut, type, tx.vIn[key].sequence));
                 }
 
                 const outputs = [];
@@ -216,7 +198,7 @@ class BitapsNoBatchTransactionsProvider extends ExternalApiProvider {
                 while (tx.vOut[index]) {
                     const output = tx.vOut[index];
                     index++;
-                    const type = mapType(output.type); // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
+                    const type = typesMap.get(output.type) ?? null;
                     if (type) {
                         // We treat only supported output types
                         outputs.push(new Output([output.address], output.value, type, output.spent?.txId, index - 1));
@@ -295,30 +277,20 @@ class BtcDotComNoBatchTransactionsProvider extends ExternalApiProvider {
 
             const currentBlockNumber = params[2];
             return (response?.data?.data?.list ?? []).map(tx => {
-                const mapType = type =>
-                    type === "P2WPKH_V0" ? P2WPKH_SCRIPT_TYPE : type === "P2PKH" ? P2PKH_SCRIPT_TYPE : P2SH_SCRIPT_TYPE;
-                const inputs = tx.inputs.map(
-                    input =>
-                        new Input(
-                            input.prev_addresses[0],
-                            input.prev_value,
-                            input.prev_tx_hash,
-                            input.prev_position,
-                            mapType(input.prev_type), // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
-                            input.sequence
-                        )
-                );
+                const typesMap = mappingsPerProvider.get(ApiGroups.BTCCOM);
+                const inputs = tx.inputs.map(input => {
+                    const address = input.prev_addresses[0];
+                    const id = input.prev_tx_hash;
+                    const type = typesMap.get(input.prev_type) ?? null;
+                    return new Input(address, input.prev_value, id, input.prev_position, type, input.sequence);
+                });
 
                 const outputs = tx.outputs
                     .map((output, index) => {
-                        if (output.type === "NULL_DATA") return []; // OP_RETURN case
-                        return new Output(
-                            output.addresses,
-                            output.value,
-                            mapType(output.type), // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
-                            output.spent_by_tx || null,
-                            index
-                        );
+                        const outputType = typesMap.get(output.type) ?? null;
+                        if (outputType == null) return [];
+                        const spendId = output.spent_by_tx || null;
+                        return new Output(output.addresses, output.value, outputType, spendId, index);
                     })
                     .flat();
 
@@ -341,16 +313,14 @@ class BtcDotComNoBatchTransactionsProvider extends ExternalApiProvider {
 
 export const noBatchTransactionsProviders = [
     new BlockstreamNoBatchTransactionsProvider(),
-    new BitapsNoBatchTransactionsProvider(),
+    // new BitapsNoBatchTransactionsProvider(),
     new BtcDotComNoBatchTransactionsProvider(),
 ];
 
 const externalTransactionsDataAPICaller = new CachedRobustExternalApiCallerService(
     "noBatchTransactionsDataAPICaller",
     noBatchTransactionsProviders,
-    70000,
-    90,
-    1000,
+    STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
     false,
     (cachedList, newList) => mergeTwoArraysByItemIdFieldName(cachedList, newList, "txid")
 );
@@ -371,7 +341,7 @@ export async function performNoBatchTransactionsDataRetrieval(
                     return externalTransactionsDataAPICaller
                         .callExternalAPICached(
                             [network, address, currentBlock],
-                            10000,
+                            15000,
                             cancelProcessingHolder && cancelProcessingHolder.getToken(),
                             maxAttemptsCountToGetDataForEachAddress,
                             () => `no_batch_txs_list_btc_${address}`,

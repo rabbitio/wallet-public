@@ -26,10 +26,12 @@ export class TronSendTransactionService {
      *
      * @param coin {Coin} coin to be sent
      * @param addressToBase58 {string} target Tron blockchain address base58
-     * @param coinAmount {string} amount to be sent, ignored for send all
+     * @param coinAmount {string|null} amount to be sent, ignored for send all
      * @param isSendAll {boolean} true if we need to send all available coins except fee
      * @param network {Network} network to work in
      * @param balanceCoins {string} sending coin balance
+     * @param [isAddressFake=false] {boolean} whether given target address is not the one you will send the coins
+     *                                        to using the result of this estimation
      * @return {Promise<
      *             {
      *                 result: true,
@@ -44,26 +46,45 @@ export class TronSendTransactionService {
         coinAmount,
         isSendAll,
         network,
-        balanceCoins
+        balanceCoins,
+        isAddressFake = false
     ) {
         try {
-            const amountToSendAtoms = coin.coinAmountToAtoms(coinAmount);
+            const usesDifferentCoinFee = coin.doesUseDifferentCoinFee();
+            if (isSendAll && usesDifferentCoinFee) {
+                /* We set sending amount to balance if the coin is not Tron itself.
+                 * We need this for sendAll case as the actually passed coinAmount is null.
+                 * But we also should set correct coinAmount for send all case when sending TRX -
+                 * we will do this later below because we can do this only after the fee calculation
+                 * and before this we actually use the coinAmount only for not Tron coin cases.
+                 */
+                coinAmount = balanceCoins;
+            }
+            const amountToSendAtoms = coin.coinAmountToAtoms("" + coinAmount);
             const addressFromBase58 = TrxAddressesService.getCurrentTrxAddress();
             let requiredBandwidth = 0;
             let requiredEnergy = 0;
             let priceForTargetAccountCreationSuns = 0;
             if (coin.protocol === Coin.PROTOCOLS.TRC20) {
+                /* If the passed address is fake we use random not activated valid address as empirically we discovered
+                 * that not activated tron addresses require significantly more energy to send to them.
+                 *
+                 * NOTE: we are ok to use really random address here as it is used only for estimation and isn't being
+                 * saved for any further steps.
+                 */
+                const randomNotActivatedAddressBase58 = "TKSrBySJ5LKzwDiwhMMqtwt8T7FL766ZfU";
+                const addressForEstimation = isAddressFake ? randomNotActivatedAddressBase58 : addressToBase58;
                 const resolvedPromises = await Promise.all([
                     await Trc20TransferEnergyEstimationProvider.estimateTrc20TransferEnergy(
                         coin,
                         addressFromBase58,
-                        addressToBase58,
+                        addressForEstimation,
                         amountToSendAtoms
                     ),
                     await tronUtils.buildTrc20TransferTransactionHex(
                         coin.tokenAddress,
                         addressFromBase58,
-                        addressToBase58,
+                        addressForEstimation,
                         amountToSendAtoms
                     ),
                 ]);
@@ -82,16 +103,27 @@ export class TronSendTransactionService {
                  * this by increasing the whole estimation a bit below.
                  */
                 const sendAmountSunsForEstimation = "1";
-                const [hexTrxSendTx, doesTargetAddressExist] = await Promise.all([
-                    tronUtils.buildTrxTransferTransactionHex(
-                        existingAccount,
-                        addressToBase58,
-                        sendAmountSunsForEstimation
-                    ),
-                    TronAccountExistenceProvider.doesTronAccountExist(addressToBase58),
-                ]);
+                const hexTrxSendTx = await tronUtils.buildTrxTransferTransactionHex(
+                    existingAccount,
+                    addressToBase58,
+                    sendAmountSunsForEstimation
+                );
                 requiredBandwidth = hexTrxSendTx.length;
-                priceForTargetAccountCreationSuns = doesTargetAddressExist ? 0 : 1_000_000; // If user sends TRX to not activated account he/she should pay 1 TRX to activate it
+                /* We set 1 TRX fee if we don't know exact address the transaction will be sent to as the actual target
+                 * address can be 'not activated' and for such addresses we should add 1 TRX fee to the whole estimation.
+                 * And if we know the exact target address we check its existence and add 1 TRX fee if it is
+                 * not activated.
+                 *
+                 * Note that this works only for TRX-TRX transfers. This is not applicable for TRC20 transfers.
+                 */
+                if (isAddressFake) {
+                    priceForTargetAccountCreationSuns = 1_000_000;
+                } else {
+                    const doesTargetAddressExist = await TronAccountExistenceProvider.doesTronAccountExist(
+                        addressToBase58
+                    );
+                    priceForTargetAccountCreationSuns = doesTargetAddressExist ? 0 : 1_000_000;
+                }
             } else {
                 throw new Error("Not supported coin passed: " + coin?.ticker);
             }
@@ -116,9 +148,18 @@ export class TronSendTransactionService {
             const totalFeeSuns =
                 Math.round((bandwidthFee + energyFee) * multiplierToMinimizeTheRiskOfStackingDueToNotEnoughFee) +
                 priceForTargetAccountCreationSuns;
+
             let sendingCoinBalanceAtoms = coin.coinAmountToAtoms(balanceCoins);
+            let finalAmountAtoms = amountToSendAtoms;
+            if (isSendAll && !usesDifferentCoinFee) {
+                /* Here we finally set correct sending amount for send all case for Tron coin case.
+                 * Now this is possible as we have fee value here.
+                 */
+                finalAmountAtoms = BigNumber.from(sendingCoinBalanceAtoms)
+                    .sub(totalFeeSuns)
+                    .toString();
+            }
             let feeBalanceAtoms = sendingCoinBalanceAtoms;
-            const usesDifferentCoinFee = coin.doesUseDifferentCoinFee();
             if (usesDifferentCoinFee) {
                 const feeBalanceCoins = await TronBlockchainBalancesService.getBalance(coin.feeCoin);
                 feeBalanceAtoms = coin.feeCoin.coinAmountToAtoms(feeBalanceCoins);
@@ -138,17 +179,6 @@ export class TronSendTransactionService {
                 isEnoughBalance = BigNumber.from(sendingCoinBalanceAtoms).gte(
                     BigNumber.from(amountToSendAtoms).add(totalFeeSuns)
                 );
-            }
-
-            let finalAmountAtoms = amountToSendAtoms;
-            if (isSendAll) {
-                if (usesDifferentCoinFee) {
-                    finalAmountAtoms = sendingCoinBalanceAtoms;
-                } else {
-                    finalAmountAtoms = BigNumber.from(sendingCoinBalanceAtoms)
-                        .sub(totalFeeSuns)
-                        .toString();
-                }
             }
 
             // TODO: [refactoring, critical] remove this after testing

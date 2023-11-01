@@ -57,7 +57,15 @@ export default class RbfService {
                 AddressesService.getCurrentChangeAddress(),
             ]);
             const rates = resolvedPromises.slice(0, this.BLOCKS_COUNTS_FOR_RBF_OPTIONS.length);
-            const [oldTransaction, allAddresses, changeAddress] = resolvedPromises.slice(resolvedPromises.length - 3);
+            let [oldTransaction, allAddresses, changeAddress] = resolvedPromises.slice(resolvedPromises.length - 3);
+            if (oldTransaction == null) {
+                /* When trying to change fee for recently created transaction the retrieveTransactionData
+                 * can return null as the providers we use under the hood possibly still have no
+                 * transaction (that we just sent) inside the mempool they use.
+                 * So here we are retrying to retrieve the details as we cannot go further without them.
+                 */
+                oldTransaction = await retrieveTransactionData(oldTxId, network);
+            }
 
             Logger.log(
                 `Addresses internal: ${allAddresses?.internal?.length}, external: ${allAddresses?.external?.length}, replacing tx: ${oldTransaction?.txid}, change: ${changeAddress}`,

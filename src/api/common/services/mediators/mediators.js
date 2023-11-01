@@ -13,7 +13,6 @@ import {
     THERE_IS_NO_SESSION_ON_APP_INITIALIZATION_EVENT,
     THERE_IS_SESSION_ON_APP_INITIALIZATION_EVENT,
     TRANSACTION_PUSHED_EVENT,
-    TX_DATA_RETRIEVED_EVENT,
     USER_READY_TO_SEND_TRANSACTION_EVENT,
     WALLET_DATA_EXPORTED_EVENT,
     WALLET_DELETED_EVENT,
@@ -30,9 +29,7 @@ import {
     setDoNotRemoveClientLogsWhenSignedOut,
 } from "../internal/storage";
 import PaymentService from "../../../wallet/btc/services/paymentService";
-import AddressesServiceInternal from "../../../wallet/btc/services/internal/addressesServiceInternal";
 import { isJustLoggedOut } from "../../../auth/services/authService";
-import { addressesMetadataService } from "../../../wallet/btc/services/internal/addressesMetadataService";
 import { IS_TESTING } from "../../../../properties";
 import { setupAnalyticsMediators } from "./trackersMediators";
 import { Logger } from "../../../support/services/internal/logs/logger";
@@ -53,12 +50,7 @@ function initializeTransactionsProvider() {
         try {
             Logger.log("Start initializing transactions provider", loggerSource);
 
-            const addresses = await AddressesServiceInternal.getAllUsedAddresses();
-            const allAddresses = [...addresses.internal, ...addresses.external];
-
-            Logger.log(`Initializing for ${allAddresses.length} addresses`, loggerSource);
-
-            await transactionsDataProvider.initialize(allAddresses);
+            await transactionsDataProvider.initialize();
 
             Logger.log("Successfully initialized", loggerSource);
         } catch (e) {
@@ -140,7 +132,6 @@ export function setupMediators(
             EventBus.addEventListener(event, () => {
                 try {
                     transactionsDataProvider.resetState();
-                    addressesMetadataService.clearMetadata();
                     PreferencesService.removeWalletDataSyncInterval();
                 } catch (e) {
                     logError(e, event + "_handler");
@@ -149,16 +140,20 @@ export function setupMediators(
         );
 
         !IS_TESTING &&
-            EventBus.addEventListener(TX_DATA_RETRIEVED_EVENT, () => {
+            EventBus.addEventListener(NEW_NOT_LOCAL_TRANSACTIONS_EVENT, (event, data) => {
                 (async () => {
                     try {
-                        const rate = await getCurrentSmallestFeeRate(
-                            getCurrentNetwork(),
-                            PaymentService.BLOCKS_COUNTS_FOR_OPTIONS
-                        );
-                        await UtxosService.calculateBalance(rate, true);
+                        const coins = (data ?? []).map(tx => Coins.getCoinByTicker(tx.ticker));
+                        const thereAreNewBtcTransactions = coins.find(coin => coin.ticker === Coins.COINS.BTC.ticker);
+                        if (thereAreNewBtcTransactions) {
+                            const rate = await getCurrentSmallestFeeRate(
+                                getCurrentNetwork(),
+                                PaymentService.BLOCKS_COUNTS_FOR_OPTIONS
+                            );
+                            await UtxosService.calculateBalance(rate, true);
+                        }
                     } catch (e) {
-                        logError(e, `${TX_DATA_RETRIEVED_EVENT}_handler`);
+                        logError(e, `${NEW_NOT_LOCAL_TRANSACTIONS_EVENT}_handler`);
                     }
                 })();
             });
@@ -200,7 +195,7 @@ export function setupMediators(
             });
         });
 
-        [TRANSACTION_PUSHED_EVENT, TX_DATA_RETRIEVED_EVENT, FIAT_CURRENCY_CHANGED_EVENT].forEach(event => {
+        [TRANSACTION_PUSHED_EVENT, FIAT_CURRENCY_CHANGED_EVENT].forEach(event => {
             EventBus.addEventListener(event, function() {
                 try {
                     BalancesService.invalidateCaches();

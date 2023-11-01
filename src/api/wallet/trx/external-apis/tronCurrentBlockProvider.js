@@ -3,17 +3,18 @@ import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { TRONGR_PR_K, GETBL_PR_K } from "../../../../properties";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
 class TrongridCurrentBlockProvider extends ExternalApiProvider {
     constructor() {
-        super("", "post", 15000, ApiGroups.TRONGRID, { "TRON-PRO-API-KEY": TRONGR_PR_K });
+        super("", "post", 15000, ApiGroups.TRONGRID);
     }
 
     composeQueryString(params, subRequestIndex = 0) {
-        const network = getCurrentNetwork(Coins.COINS.TRX);
-        return `https://${network === Coins.COINS.TRX.mainnet ? "api" : "nile"}.trongrid.io/wallet/getnowblock`;
+        const originalApiPath = "/wallet/getnowblock";
+        return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
     }
 
     getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
@@ -40,20 +41,21 @@ class TronscanCurrentBlockProvider extends ExternalApiProvider {
     }
 }
 
-class GetblockTronCurrentBlockProvider extends ExternalApiProvider {
-    constructor() {
-        super("", "get", 15000, ApiGroups.GETBLOCK);
-    }
-
-    composeQueryString(params, subRequestIndex = 0) {
-        const network = getCurrentNetwork(Coins.COINS.TRX) === Coins.COINS.TRX.mainnet ? "mainnet" : "testnet";
-        return `https://trx.getblock.io/${GETBL_PR_K}/${network}/wallet/getnowblock`;
-    }
-
-    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
-        return response.data;
-    }
-}
+// NOTE: disabled as not needed now. If you want to use it add proxying via backend as this service requires private API key
+// class GetblockTronCurrentBlockProvider extends ExternalApiProvider {
+//     constructor() {
+//         super("", "get", 15000, ApiGroups.GETBLOCK);
+//     }
+//
+//     composeQueryString(params, subRequestIndex = 0) {
+//         const network = getCurrentNetwork(Coins.COINS.TRX) === Coins.COINS.TRX.mainnet ? "mainnet" : "testnet";
+//         return `https://trx.getblock.io/${GETBL_PR_K}/${network}/wallet/getnowblock`;
+//     }
+//
+//     getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
+//         return response.data;
+//     }
+// }
 
 /**
  * @deprecated
@@ -64,12 +66,10 @@ export class TronCurrentBlockProvider {
         "tronCurrentBlockProvider",
         [
             new TronscanCurrentBlockProvider(),
-            new GetblockTronCurrentBlockProvider(),
+            // new GetblockTronCurrentBlockProvider(),
             new TrongridCurrentBlockProvider(),
         ],
-        70000,
-        60,
-        2000,
+        STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false
     );
     static async getCurrentTronBlock() {

@@ -66,7 +66,14 @@ class EthereumWallet extends Wallet {
         }
     }
 
-    async createTransactionsWithFakeSignatures(address, coinAmount, isSendAll, currentNetwork, balanceCoins) {
+    async createTransactionsWithFakeSignatures(
+        address,
+        coinAmount,
+        isSendAll,
+        currentNetwork,
+        balanceCoins,
+        isAddressFake = false
+    ) {
         try {
             return await EthSendTransactionService.createEthereumBlockchainCoinTransactionsWithFakeSignatures(
                 ethereum,
@@ -137,4 +144,7 @@ class EthereumWallet extends Wallet {
     }
 }
 
+/**
+ * WARNING: we use singleton coins objects all over the app. Don't create custom instances.
+ */
 export const ethereumWallet = new EthereumWallet();

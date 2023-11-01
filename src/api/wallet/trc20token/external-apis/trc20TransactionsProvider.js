@@ -10,8 +10,9 @@ import {
     mergeTwoTransactionsArraysAndNotifyAboutNewTransactions,
 } from "../../common/utils/cacheActualizationUtils";
 import { computeConfirmationsCountByTimestamp } from "../../trx/lib/blocks";
-import { TRONGR_PR_K } from "../../../../properties";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
 class TronscanTrc20TransactionsProvider extends ExternalApiProvider {
     constructor() {
@@ -120,7 +121,7 @@ class TronscanTrc20TransactionsProvider extends ExternalApiProvider {
 
 class TrongridTrc20TransactionsProvider extends ExternalApiProvider {
     constructor() {
-        super("", "get", 20000, ApiGroups.TRONGRID, { "TRON-PRO-API-KEY": TRONGR_PR_K }, 200);
+        super("", "get", 20000, ApiGroups.TRONGRID, {}, 200);
     }
 
     doesSupportPagination() {
@@ -129,13 +130,15 @@ class TrongridTrc20TransactionsProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
+            const address = params[0];
             const nextPageLink = params[1];
+            let originalApiPathAndQuery = `/v1/accounts/${address}/transactions/trc20?limit=${this.maxPageLength}`;
             if (nextPageLink) {
-                // Means this is call for second or more page, and we already added the link to next page provided by the provider
-                return nextPageLink;
+                // Means this is call for second or more page, and we need the link to next page provided by the tronscan
+                const parts = nextPageLink.split("trongrid.io");
+                originalApiPathAndQuery = parts[1]; // Take the path and query returned by trongrid
             }
-            const networkPrefix = getCurrentNetwork(Coins.COINS.TRX) === Coins.COINS.TRX.mainnet ? "api" : "nile";
-            return `https://${networkPrefix}.trongrid.io/v1/accounts/${params[0]}/transactions/trc20?limit=${this.maxPageLength}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPathAndQuery}`;
         } catch (e) {
             improveAndRethrow(e, "trongridTrc20TransactionsProvider.composeQueryString");
         }
@@ -196,9 +199,7 @@ export class Trc20TransactionsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "trc20TransactionsProvider",
         [new TronscanTrc20TransactionsProvider(), new TrongridTrc20TransactionsProvider()],
-        120000,
-        130,
-        1000,
+        STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,
         mergeTwoTransactionsArraysAndNotifyAboutNewTransactions
     );

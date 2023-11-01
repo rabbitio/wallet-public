@@ -5,6 +5,7 @@ import { ApiGroups } from "../../../common/external-apis/apiGroups";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
 import { safeStringify } from "../../../common/utils/browserUtils";
+import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
 
 class EthFeeRatesBlockNativeProvider extends ExternalApiProvider {
     constructor() {
@@ -129,9 +130,7 @@ export class EthFeeRatesProvider {
                 new EthFeeRatesEthGasStationProvider(),
                 new EtherscanEthFeeRatesProvider(),
             ],
-            30000,
-            35,
-            1000,
+            SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS,
             false
         );
     }

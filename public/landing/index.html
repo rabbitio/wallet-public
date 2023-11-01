@@ -1,0 +1,673 @@
+<html lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <meta charset="utf-8" />
+        <title>Secure Non-Custodial Crypto Wallet - Rabbit.io</title>
+        <meta
+            name="keywords"
+            content="crypto wallet, non-custodial crypto wallet, self-custodial crypto wallet, swap crypto, exchange cryptocurrency, secure crypto wallet, open-source wallet, cryptocurrency wallet, multi-asset wallet, multi-coin wallet, non-custodial wallets, blockchain, bitcoin wallet, ethereum wallet, usdt wallet, tron wallet, switzerland, swiss crypto wallet"
+        />
+        <meta
+            name="description"
+            content="Rabbit Wallet lets you safely send, receive, and swap your cryptocurrencies. Open-source and non-custodial for the highest level of security and control."
+        />
+        <link rel="icon" type="image/png" href="../apple-touch-icon.png" sizes="any" />
+        <link rel="apple-touch-icon" href="../apple-touch-icon.png" sizes="any" />
+        <link rel="shortcut icon" href="../favicon.ico?v=4" />
+        <meta name="theme-color" content="#232d42" />
+        <meta name="msapplication-TileColor" content="#FFFFFF" />
+        <meta name="msapplication-TileImage" content="apple-touch-icon.png" />
+        <meta name="msapplication-square70x70logo" content="../apple-touch-icon.png" />
+        <meta name="msapplication-square150x150logo" content="../apple-touch-icon.png" />
+        <meta name="msapplication-wide310x150logo" content="../apple-touch-icon.png" />
+        <meta name="msapplication-square310x310logo" content="../apple-touch-icon.png" />
+        <meta name="application-name" content="Rabbit" />
+        <link rel="stylesheet" href="../landing/styles/flickity.min.css" />
+        <link rel="stylesheet" href="../landing/styles/styles.css" />
+        <script src="../landing/js/index.js"></script>
+        <link rel="manifest" href="../manifest.json" crossorigin="use-credentials" />
+    </head>
+
+    <body>
+        <div class="landing">
+            <!-- Hero section -->
+            <section class="hero">
+                <div class="content">
+                    <nav class="navbar">
+                        <a href="/" class="logo-dark"></a>
+                        <div class="navbar-nav">
+                            <div class="navbar-nav-item show-on-desktop">
+                                <a
+                                    class="button button-default-flat button-text-small button-flat"
+                                    href="/support"
+                                    onclick="handleLandingLeaving"
+                                >
+                                    <div class="button-item">Help</div>
+                                </a>
+                            </div>
+                            <div class="navbar-nav-item">
+                                <a
+                                    type="button"
+                                    class="button button-outline button-small button-text-small"
+                                    href="/signin"
+                                    onclick="handleLandingLeaving"
+                                >
+                                    <div class="button-item">Sign In</div>
+                                </a>
+                            </div>
+                        </div>
+                    </nav>
+                    <div class="content-zigzag reversed">
+                        <img src="../landing/images/illustrations/1-hero.png" class="content-zigzag-image" />
+                        <div class="content-zigzag-text">
+                            <h2 class="section-title">
+                                Safely send, receive, and swap your cryptocurrencies
+                            </h2>
+                            <div class="section-subtitle">
+                                Open-source, self-custodial crypto wallet with swift coin swaps and top-notch security.
+                                Create your wallet and dive in.
+                            </div>
+                            <div class="hero-buttons">
+                                <a class="button button-primary" href="/signup" onclick="handleLandingLeaving">
+                                    <div class="button-item">
+                                        <span class="button-icon">
+                                            <span class="icon icon-add-wallet icon-mask"></span>
+                                        </span>
+                                    </div>
+                                    <div class="button-item">Create a wallet</div>
+                                </a>
+                                <a class="button button-transparent" href="/import" onclick="handleLandingLeaving">
+                                    <div class="button-item">
+                                        <span class="button-icon">
+                                            <img src="../landing/images/import-wallet-icon.svg" />
+                                        </span>
+                                    </div>
+                                    <div class="button-item">Import existing</div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="learn-more" onclick="learnMoreClick()">
+                        <div class="button button-default-flat button-text-small button-flat">
+                            <div class="button-item">Learn more</div>
+                        </div>
+                        <img src="../landing/images/down-arrow.svg" height="22" />
+                    </div>
+                </div>
+            </section>
+
+            <!-- Self-custody -->
+            <section id="secondSection">
+                <div class="content">
+                    <div class="content-zigzag reversed">
+                        <img
+                            src="../landing/images/illustrations/2-self-custody.png"
+                            loading="lazy"
+                            class="content-zigzag-image"
+                        />
+                        <div class="content-zigzag-text">
+                            <h2 class="section-title">
+                                Self-custody
+                            </h2>
+                            <div class="section-subtitle">
+                                Your private keys never leave your device. You have complete control over your digital
+                                assets.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Secure & Private -->
+            <section>
+                <div class="content">
+                    <div class="content-zigzag">
+                        <img
+                            src="../landing/images/illustrations/3-secure-and-private.png"
+                            loading="lazy"
+                            class="content-zigzag-image"
+                        />
+                        <div class="content-zigzag-text">
+                            <h2 class="section-title">
+                                Secure & Private
+                            </h2>
+                            <div class="section-subtitle">
+                                Unlike most other wallets, Rabbit’s architecture ensures your wallet is encrypted even
+                                while using it.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Open-source -->
+            <section>
+                <div class="content">
+                    <div class="content-zigzag reversed">
+                        <img
+                            src="../landing/images/illustrations/4-open-source.svg"
+                            loading="lazy"
+                            class="content-zigzag-image"
+                        />
+                        <div class="content-zigzag-text">
+                            <h2 class="section-title">
+                                Open-source
+                            </h2>
+                            <div class="section-subtitle">
+                                Transparency is paramount. The open-source approach ensures trust and accountability.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Simplicity -->
+            <section>
+                <div class="content">
+                    <div class="content-zigzag">
+                        <img
+                            src="../landing/images/illustrations/5-simplicity.svg"
+                            loading="lazy"
+                            class="content-zigzag-image"
+                        />
+                        <div class="content-zigzag-text">
+                            <h2 class="section-title">
+                                Simplicity
+                            </h2>
+                            <div class="section-subtitle">
+                                This is the wallet you will use as easily as your messenger. The most difficult
+                                technologies are packed in a surprisingly intuitive way.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- What is a self-custodial wallet? -->
+            <section class="dimmed">
+                <div class="content">
+                    <h2 class="section-title">What is a self-custodial wallet?</h2>
+                    <div class="section-subtitle increased-margin">
+                        Unlike traditional banks or custodial wallets that hold your assets for you, Rabbit Wallet lets
+                        you store, manage, and trade cryptocurrencies independently. Here's why you should consider
+                        going self-custodial:
+                    </div>
+                    <div class="content-grid">
+                        <div class="content-grid-column">
+                            <div class="content-grid-column-item">
+                                <div class="content-grid-column-item-icon">
+                                    <img src="../landing/images/fa-icons/key.svg" alt="coins" />
+                                </div>
+                                <h4 class="content-grid-column-item-title">Full control</h4>
+                                <div class="content-grid-column-item-content">
+                                    With a self-custodial wallet, you hold the keys to your assets, meaning that nobody,
+                                    even Rabbit, could ever access your funds or interfere with your transactions.
+                                </div>
+                            </div>
+                            <div class="content-grid-column-item">
+                                <div class="content-grid-column-item-icon">
+                                    <img src="../landing/images/fa-icons/blockchain.svg" alt="exchange" />
+                                </div>
+                                <h4 class="content-grid-column-item-title">
+                                    Direct access to public blockchains
+                                </h4>
+                                <div class="content-grid-column-item-content">
+                                    Having a self-custodial wallet also means direct access to public blockchains,
+                                    resulting in faster transactions, no third-party fees, and increased flexibility.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="content-grid-column">
+                            <div class="content-grid-column-item">
+                                <div class="content-grid-column-item-icon">
+                                    <img src="../landing/images/fa-icons/lock.svg" alt="card" />
+                                </div>
+                                <h4 class="content-grid-column-item-title">Enhanced cryptocurrency security</h4>
+                                <div class="content-grid-column-item-content">
+                                    Using exchanges like Binance or FTX means trusting them to keep your assets safe.
+                                    However, they could be hacked, face financial trouble, or ban you unexpectedly. This
+                                    could lead to a sudden loss of access to your funds. In contrast, a non-custodial
+                                    wallet like Rabbit puts your funds directly in your control, greatly lowering the
+                                    risk of losing them. Trust cryptography, not corporations.
+                                </div>
+                            </div>
+                            <div class="content-grid-column-item">
+                                <div class="content-grid-column-item-icon">
+                                    <img src="../landing/images/fa-icons/fingerprint.svg" alt="coins" />
+                                </div>
+                                <h4 class="content-grid-column-item-title">Forget about selfies</h4>
+                                <div class="content-grid-column-item-content">
+                                    No need for email addresses, phone numbers, or selfies. Enjoy the freedom of a
+                                    system not controlled by anyone.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-subtitle muted">
+                        Friendly tip: Having your passphrase on a sticky note under a keyboard might not be the best way
+                        to store it.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lightning-fast coin swap -->
+            <section>
+                <div class="content">
+                    <div class="content-zigzag reversed">
+                        <img
+                            src="../landing/images/illustrations/6-coin-swap.png"
+                            loading="lazy"
+                            class="content-zigzag-image"
+                        />
+                        <div class="content-zigzag-text">
+                            <h2 class="section-title">Lightning-fast coin swap</h2>
+                            <div class="section-subtitle">
+                                Rabbit offers top-notch exchange rates and limits by dynamically comparing and selecting
+                                the most optimal exchange services in real-time. Swap assets within your wallet for the
+                                best rates with just a few clicks.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Extensive coin support -->
+            <section>
+                <div class="content">
+                    <div class="content-zigzag">
+                        <img
+                            src="../landing/images/illustrations/7-coin-support.png"
+                            loading="lazy"
+                            class="content-zigzag-image"
+                        />
+                        <div class="content-zigzag-text">
+                            <h2 class="section-title">Extensive coin support</h2>
+                            <div class="section-subtitle">
+                                Rabbit Wallet supports over 50 of the most popular coins and tokens on Bitcoin,
+                                Ethereum, and Tron blockchains, covering almost 90% of the entire crypto market
+                                capitalization.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hosted in Switzerland -->
+            <section class="dimmed">
+                <div class="content">
+                    <h2 class="section-title">Hosted and Incorporated in Switzerland</h2>
+                    <div class="section-subtitle no-margin">
+                        Merely having perfect security algorithms and open sourceness is not sufficient. To ensure the
+                        utmost security for our wallet, Rabbit is located in the safest bay in the world – Switzerland.
+                        All data is encrypted using AES-256 and protected by the Swiss Federal Data Protection Act (DPA)
+                        and the Swiss Federal Data Protection Ordinance (DPO). These comprehensive measures provide one
+                        of the highest levels of privacy protection available.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Support -->
+            <section>
+                <div class="content">
+                    <div class="content-zigzag reversed">
+                        <img
+                            src="../landing/images/illustrations/8-support.png"
+                            loading="lazy"
+                            class="content-zigzag-image"
+                        />
+                        <div class="content-zigzag-text">
+                            <h2 class="section-title">Support from developers</h2>
+                            <div class="section-subtitle">
+                                Never feel stranded with Rabbit Wallet. You can always ask a question and get help.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Easy migration -->
+            <section>
+                <div class="content">
+                    <div class="content-zigzag">
+                        <img
+                            src="../landing/images/illustrations/9-easy-migration.png"
+                            loading="lazy"
+                            class="content-zigzag-image"
+                        />
+                        <div class="content-zigzag-text">
+                            <h2 class="section-title">Easy migration</h2>
+                            <div class="section-subtitle increased-margin">
+                                The migration process to Rabbit Wallet takes only a few clicks, and it does not revoke
+                                access to your old wallet.
+                            </div>
+                            <a class="button button-primary" href="/import" onclick="handleLandingLeaving">
+                                <div class="button-item">Import your wallet</div>
+                                <div class="button-item">
+                                    <span class="button-icon">
+                                        <span class="icon icon-arrow-right icon-mask"></span>
+                                    </span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Protect your coins -->
+            <section class="dimmed">
+                <div class="content">
+                    <h2 class="section-title">
+                        Don’t wait until the next FTX gets away with all your coins. Protect them now with Rabbit
+                        Wallet
+                    </h2>
+                    <div class="section-subtitle increased-margin">
+                        Crypto exchanges can be vulnerable to hacks, regulatory issues, or even bankruptcy. By keeping
+                        your funds in a self-custodial wallet, you reduce the risk of losing your assets due to the
+                        failure of malpractice of a third-party service.
+                    </div>
+                    <a class="button button-primary" href="/signup" onclick="handleLandingLeaving">
+                        <div class="button-item">Create your wallet</div>
+                        <div class="button-item">
+                            <span class="button-icon">
+                                <span class="icon icon-arrow-right icon-mask"></span>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Intuitively designed for security and comfort -->
+            <section>
+                <div class="content">
+                    <h2 class="section-title">
+                        Intuitively designed for security and comfort
+                    </h2>
+                    <div class="section-subtitle increased-margin">
+                        Rabbit is everything you need to receive, store, send, and swap assets in a simple, beautiful,
+                        and functional package.
+                    </div>
+                    <div class="content-screenshot-slider">
+                        <img
+                            class="content-screenshot-slider-browser-header"
+                            src="../landing/images/screenshots-header.jpg"
+                            alt="browser header"
+                        />
+                        <img
+                            class="content-screenshot-slider-browser-header-mobile"
+                            src="../landing/images/screenshots-header-mobile.jpg"
+                            alt="browser header"
+                        />
+                        <div class="content-screenshot-slider-wrapper">
+                            <div class="content-screenshot-slider-wrapper-item">
+                                <img
+                                    class="show-on-desktop"
+                                    data-flickity-lazyload="../landing/images/slider-images/desktop/1_dashboard.jpg"
+                                />
+                                <img
+                                    class="show-on-mobiles"
+                                    data-flickity-lazyload="../landing/images/slider-images/mobile/1_dashboard.jpg"
+                                />
+                            </div>
+                            <div class="content-screenshot-slider-wrapper-item">
+                                <img
+                                    class="show-on-desktop"
+                                    data-flickity-lazyload="../landing/images/slider-images/desktop/2_asset_management.jpg"
+                                />
+                                <img
+                                    class="show-on-mobiles"
+                                    data-flickity-lazyload="../landing/images/slider-images/mobile/2_asset_management.jpg"
+                                />
+                            </div>
+                            <div class="content-screenshot-slider-wrapper-item">
+                                <img
+                                    class="show-on-desktop"
+                                    data-flickity-lazyload="../landing/images/slider-images/desktop/3_send_coins.jpg"
+                                />
+                                <img
+                                    class="show-on-mobiles"
+                                    data-flickity-lazyload="../landing/images/slider-images/mobile/3_send_coins.jpg"
+                                />
+                            </div>
+                            <div class="content-screenshot-slider-wrapper-item">
+                                <img
+                                    class="show-on-desktop"
+                                    data-flickity-lazyload="../landing/images/slider-images/desktop/4_filter.jpg"
+                                />
+                                <img
+                                    class="show-on-mobiles"
+                                    data-flickity-lazyload="../landing/images/slider-images/mobile/4_filter.jpg"
+                                />
+                            </div>
+                            <div class="content-screenshot-slider-wrapper-item">
+                                <img
+                                    class="show-on-desktop"
+                                    data-flickity-lazyload="../landing/images/slider-images/desktop/5_settings.jpg"
+                                />
+                                <img
+                                    class="show-on-mobiles"
+                                    data-flickity-lazyload="../landing/images/slider-images/mobile/5_settings.jpg"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-screenshot-slider-texts">
+                        <span class="section-subtitle slide-text" id="slide-text-1">
+                            <!-- Screenshot 1 (default screenshot, dashboard): -->
+                            Rabbit is designed to balance functionality and ease of use, so you have a wide set of
+                            features without sacrificing simplicity. As long as you can access a browser, you can
+                            securely access your coins.
+                        </span>
+                        <span class="section-subtitle" id="slide-text-2" hidden>
+                            <!-- Screenshot 2 (asset management page): -->
+                            With Rabbit Wallet, you can securely manage more than 50 of the most popular coins and
+                            tokens on the Bitcoin, Ethereum and Tron blockchains, and have a dedicated dashboard for
+                            each one.
+                        </span>
+                        <span class="section-subtitle" id="slide-text-3" hidden>
+                            <!-- Screenshot 3 (send coins page): -->
+                            Rabbit uses its own algorithm to calculate the optimal network fee, making each transaction
+                            as fast and cheap as possible.
+                        </span>
+                        <span class="section-subtitle" id="slide-text-4" hidden>
+                            <!-- Screenshot 4 (transactions filter): -->
+                            The most powerful user interface on the market among any other wallets. Full of features
+                            with no compromises.
+                        </span>
+                        <span class="section-subtitle" id="slide-text-5" hidden>
+                            <!-- Screenshot 5 (settings): -->
+                            Rabbit allows you to customize your wallet and tweak it the way you want it. You can choose
+                            to export or delete your wallet at any time.
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scheduled new features -->
+            <section class="dimmed">
+                <div class="content">
+                    <h2 class="section-title">Scheduled new features</h2>
+                    <div class="section-subtitle increased-margin">
+                        Keep your eyes peeled! Rabbit will be updated with new features soon.
+                    </div>
+                </div>
+                <div class="cards-wrapper">
+                    <div
+                        class="cards"
+                        data-flickity='{ "freeScroll": true, "contain": true, "prevNextButtons": false, "pageDots": false }'
+                    >
+                        <div class="cards-card">
+                            <div class="card card-done">
+                                <div class="card-icon">
+                                    <img src="../landing/images/fa-icons/exchange.svg" alt="exchange" />
+                                </div>
+                                <div class="card-title">Coin swap</div>
+                                <div class="card-text">Feature released in October 2023</div>
+                            </div>
+                        </div>
+                        <div class="cards-card">
+                            <div class="card ">
+                                <div class="card-icon">
+                                    <img src="../landing/images/fa-icons/credit-card.svg" alt="card" />
+                                </div>
+                                <div class="card-title">Buy crypto with card</div>
+                                <div class="card-text">Feature expected in November 2023</div>
+                            </div>
+                        </div>
+                        <div class="cards-card">
+                            <div class="card">
+                                <div class="card-icon">
+                                    <img src="../landing/images/fa-icons/gears.svg" alt="coins" />
+                                </div>
+                                <div class="card-title">Bitcoin taproot</div>
+                                <div class="card-text">Feature expected in November 2023</div>
+                            </div>
+                        </div>
+                        <div class="cards-card">
+                            <div class="card">
+                                <div class="card-icon">
+                                    <img src="../landing/images/fa-icons/coins.svg" alt="coins" />
+                                </div>
+                                <div class="card-title">Donation collection</div>
+                                <div class="card-text">Feature expected in February 2024</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- The new financial era -->
+            <section
+                class="background-image"
+                style="background-image: url(../landing/images/illustrations/10-future.svg);"
+            >
+                <div class="content">
+                    <h2 class="section-title">
+                        The new financial era is already here
+                    </h2>
+                    <div class="section-subtitle increased-margin">
+                        In a world where everything moves at the speed of light, why should our financial system lag
+                        behind? Imagine a world where no one should have the power to disapprove your transactions or
+                        freeze your funds. Where there are no more queues to bulky ATMs cluttering our streets. Where
+                        your finances shouldn't be a puppet to political whims or misguided government decisions. Where
+                        you can forget about outdated compliance procedures that eat up your time and energy. And where
+                        transferring any amount of money between any countries is as easy as sending a text message.
+                        Step into the new world of finance together with Rabbit Wallet.
+                    </div>
+                    <a class="button button-primary" href="/signup" onclick="handleLandingLeaving">
+                        <div class="button-item">Enter the future</div>
+                        <div class="button-item">
+                            <span class="button-icon">
+                                <span class="icon icon-arrow-right icon-mask"></span>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <section class="footer">
+                <div class="content">
+                    <div class="footer-title">Rabbit is open. Completely.</div>
+                    <a class="button button-default" href="https://github.com/rabbitio/wallet-public" target="_blank">
+                        <div class="button-item">
+                            <span class="button-icon"><span class="icon icon-github icon-mask"></span></span>
+                        </div>
+                        <div class="button-item">Our Repository on GitHub</div>
+                    </a>
+                    <div class="footer-row">
+                        <div class="footer-contacts">
+                            <div class="footer-contacts-item">
+                                <div class="footer-logo">
+                                    <a href="/" class="logo"></a>
+                                </div>
+                            </div>
+                            <div class="footer-contacts-item">
+                                <div class="footer-contact">Rue du Rhône 118, 1204 Genève, Switzerland</div>
+                                <div class="footer-contact">support@rabbit.io</div>
+                            </div>
+                        </div>
+                        <div class="footer-nav">
+                            <div class="footer-nav-item-group">
+                                <div class="footer-link">
+                                    <a
+                                        type="button"
+                                        class="button button-default-flat button-text-small button-flat"
+                                        target="_blank"
+                                        href="/docs/legal/terms-of-use.html"
+                                    >
+                                        <div class="button-item">Terms &amp; Conditions</div>
+                                    </a>
+                                </div>
+                                <div class="footer-link">
+                                    <a
+                                        type="button"
+                                        class="button button-default-flat button-text-small button-flat"
+                                        target="_blank"
+                                        href="/docs/legal/privacy-policy.html"
+                                    >
+                                        <div class="button-item">Privacy Policy</div>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="footer-nav-item-group">
+                                <div class="footer-link">
+                                    <a
+                                        type="button"
+                                        class="button button-default-flat button-text-small button-flat"
+                                        href="/support"
+                                        onclick="handleLandingLeaving"
+                                    >
+                                        <div class="button-item">Help</div>
+                                    </a>
+                                </div>
+                                <div class="footer-link">
+                                    <a
+                                        type="button"
+                                        class="button button-primary button-small button-text-small"
+                                        href="/signin"
+                                        onclick="handleLandingLeaving"
+                                    >
+                                        <div class="button-item">Sign In</div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <script src="../landing/js/flickity.pkgd.min.js"></script>
+        <script>
+            var landingSectionSlider = new Flickity(".content-screenshot-slider-wrapper", {
+                adaptiveHeight: true,
+                imagesLoaded: true,
+                draggable: true,
+                lazyLoad: 1,
+            });
+
+            landingSectionSlider.on("change", function(index) {
+                for (var i = 1; i <= landingSectionSlider.slides.length; i++) {
+                    document.getElementById("slide-text-" + i).setAttribute("hidden", "");
+                }
+                document.getElementById("slide-text-" + (index + 1)).removeAttribute("hidden");
+            });
+
+            var newFeaturesSlider = new Flickity(".cards", {
+                freeScroll: true,
+                contain: true,
+                prevNextButtons: false,
+                pageDots: false,
+                draggable: true,
+            });
+
+            function learnMoreClick() {
+                scroll({
+                    top: document.getElementById("secondSection").offsetTop - 20,
+                    behavior: "smooth",
+                });
+            }
+        </script>
+        <script src="../landing/js/horizontal-scroll.js"></script>
+    </body>
+</html>

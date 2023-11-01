@@ -1,5 +1,4 @@
 import { BigNumber, ethers } from "ethers";
-import { ETH_PR_K } from "../../../../properties";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { Logger } from "../../../support/services/internal/logs/logger";
 import { TxData } from "../../common/models/tx-data";
@@ -9,6 +8,11 @@ import { KeysBip44 } from "../../common/lib/keysBip44";
 import { ethFeeRatesProvider } from "../external-apis/ethFeeRatesProvider";
 import { EthBalanceService } from "./ethBalanceService";
 import { Erc20transactionUtils } from "../../erc20token/lib/erc20transactionUtils";
+import { EthereumPushTransactionProvider } from "../external-apis/ethereumPushTransactionProvider";
+import { safeStringify } from "../../../common/utils/browserUtils";
+import { EthereumTransactionsCountProvider } from "../external-apis/ethereumTransactionsCountProvider";
+import { EthAddressesService } from "./ethAddressesService";
+import { EthereumBlockchainFeeDataProvider } from "../external-apis/ethereumBlockchainFeeDataProvider";
 
 export class EthSendTransactionService {
     static GAS_LIMIT_FOR_ETHER_TRANSFER = BigNumber.from("21000");
@@ -21,7 +25,7 @@ export class EthSendTransactionService {
      *
      * @param coin {Coin} coin to create fake txs options for
      * @param address {string} address to be validated
-     * @param coinAmount {string} amount to be validated in coin denomination
+     * @param coinAmount {string|null} amount to be validated in coin denomination, null for isSendAll=true
      * @param isSendAll {boolean} whether transaction should send all available coins or not
      * @param network {Network} coin to create the fake transaction for
      * @param balanceCoins {number|string} balance of coin we are creating transactions for
@@ -52,7 +56,6 @@ export class EthSendTransactionService {
         gasLimit = this.GAS_LIMIT_FOR_ETHER_TRANSFER
     ) {
         try {
-            const atomsAmount = coin.coinAmountToAtoms(coinAmount);
             const sendBalanceAtoms = coin.coinAmountToAtoms("" + balanceCoins);
             let feeBalance = coin.doesUseDifferentCoinFee() ? await EthBalanceService.getEthWalletBalance() : null;
             const feeBalanceAtoms = feeBalance == null ? sendBalanceAtoms : coin.feeCoin.coinAmountToAtoms(feeBalance);
@@ -64,7 +67,7 @@ export class EthSendTransactionService {
                 const data = await optsForOneRate(
                     network,
                     gasLimit,
-                    atomsAmount,
+                    coinAmount,
                     isSendAll,
                     sendBalanceAtoms,
                     feeBalanceAtoms,
@@ -78,7 +81,7 @@ export class EthSendTransactionService {
                     optionsForMaxPriorityFeePerGas,
                     baseFeePerGas,
                     gasLimit,
-                    atomsAmount,
+                    coinAmount,
                     isSendAll,
                     sendBalanceAtoms,
                     feeBalanceAtoms,
@@ -110,24 +113,28 @@ export class EthSendTransactionService {
      *         appeared in the blockchain or to a determined error object
      */
     static async createEthTransactionAndBroadcast(coin, mnemonic, passphrase, txData) {
+        const loggerSource = "createEthTransactionAndBroadcast";
         try {
             const network = getCurrentNetwork(coin);
-            const provider = new ethers.providers.AlchemyProvider(network.key, ETH_PR_K);
             const { privateKey } = KeysBip44.generateKeysForAccountAddressByWalletCredentials(
                 mnemonic,
                 passphrase,
                 network
             );
 
-            const wallet = new ethers.Wallet(privateKey).connect(provider);
+            const wallet = new ethers.Wallet(privateKey);
+            const myAddress = EthAddressesService.getCurrentEthAddress();
+            const txsCount = await EthereumTransactionsCountProvider.getEthereumTransactionsCount(myAddress);
             const tx = {
-                from: wallet.address,
+                type: 0x02, // EIP-1559 - transactions supporting new fee calculation
+                from: myAddress,
                 to: coin === Coins.COINS.ETH ? txData.address : coin.tokenAddress,
                 value: coin === Coins.COINS.ETH ? BigNumber.from(txData.amount) : BigNumber.from("0"),
                 maxFeePerGas: BigNumber.from(txData.feeRate.rate),
                 maxPriorityFeePerGas: txData.feeRate.maxPriorityFeePerGasWei,
                 gasLimit: txData.feeRate.gasLimit,
-                nonce: await wallet.getTransactionCount("latest"),
+                nonce: txsCount,
+                chainId: ethers.providers.getNetwork(network.key).chainId,
             };
             if (coin !== Coins.COINS.ETH) {
                 tx.data = Erc20transactionUtils.composeEthereumTransactionDataForGivenParams(
@@ -136,44 +143,38 @@ export class EthSendTransactionService {
                 );
             }
 
-            Logger.log(`Sending ethereum tx: ${JSON.stringify(tx)}`);
+            Logger.log(`Sending ethereum tx: ${JSON.stringify(tx)}`, loggerSource);
 
-            let sentTx;
+            let sentTxId;
+            let rawSignedTx = await wallet.signTransaction(tx);
             try {
-                sentTx = await wallet.sendTransaction(tx);
+                sentTxId = await EthereumPushTransactionProvider.pushRawEthereumTransaction(rawSignedTx);
             } catch (e) {
-                Logger.log("Failed to send ethereum tx. Trying to extract determined error from " + JSON.stringify(e));
+                Logger.log(`Failed to send ethereum tx. Error is: ${safeStringify(e)}`, loggerSource);
                 const determinedError = tryToGetDeterminedErrorFromEtherSendError(e);
                 if (determinedError) return determinedError;
 
                 throw e;
             }
 
-            if (!sentTx.hash) {
-                throw new Error("Sent ethereum tx has null hash: " + JSON.stringify(sentTx));
+            if (!sentTxId) {
+                throw new Error(`Sent ethereum tx has null hash: ${sentTxId}`);
             }
 
-            Logger.log("Successfully sent a ethereum transaction: " + JSON.stringify(sentTx.hash));
-            return sentTx.hash;
+            Logger.log(`Successfully sent a ethereum transaction: ${sentTxId}`, loggerSource);
+            return sentTxId;
         } catch (e) {
-            Logger.log("Failed to send ethereum transaction: " + JSON.stringify(e));
-            improveAndRethrow(e, "createEthTransactionAndBroadcast");
+            Logger.log(`Failed to send ethereum transaction: ${safeStringify(e)}`, loggerSource);
+            improveAndRethrow(e, loggerSource);
         }
     }
 }
 
-const chooseAmount = function(
-    coin,
-    amountAtoms,
-    isSendAll,
-    feeAtoms,
-    balanceOfSendingCoinAtoms,
-    balanceOfFeeCoinAtoms
-) {
-    const balanceAtomsBigN = BigNumber.from(balanceOfFeeCoinAtoms);
+const chooseAmount = function(coin, coinAmount, isSendAll, feeAtoms, balanceOfSendingCoinAtoms, balanceOfFeeCoinAtoms) {
     if (!isSendAll) {
-        return amountAtoms;
+        return coin.coinAmountToAtoms(coinAmount);
     }
+    const balanceAtomsBigN = BigNumber.from(balanceOfFeeCoinAtoms);
     return coin.doesUseDifferentCoinFee()
         ? balanceOfSendingCoinAtoms
         : balanceAtomsBigN.gte(feeAtoms)
@@ -184,7 +185,7 @@ const chooseAmount = function(
 async function optsForOneRate(
     network,
     gasLimit,
-    atomsAmount,
+    coinsAmount,
     isSendAll,
     sendBalanceAtoms,
     feeBalanceAtoms,
@@ -192,10 +193,9 @@ async function optsForOneRate(
     coin
 ) {
     // Fallback logic to return 4 identical fee options calculated by single option Alchemy data if major rates retrieval fails
-    const provider = new ethers.providers.AlchemyProvider(network.key, ETH_PR_K);
-    const { maxFeePerGas, maxPriorityFeePerGas } = await provider.getFeeData();
+    const { maxFeePerGas, maxPriorityFeePerGas } = await EthereumBlockchainFeeDataProvider.getEthereumFeeData();
     const feeAtoms = maxFeePerGas.mul(gasLimit).toString();
-    const correctAtomsAmount = chooseAmount(coin, atomsAmount, isSendAll, feeAtoms, sendBalanceAtoms, feeBalanceAtoms);
+    const correctAtomsAmount = chooseAmount(coin, coinsAmount, isSendAll, feeAtoms, sendBalanceAtoms, feeBalanceAtoms);
     const rateAtoms = maxFeePerGas.toString();
 
     return {
@@ -219,7 +219,7 @@ function optsForSeveralRates(
     ratesGWei,
     baseFeePerGas,
     gasLimit,
-    atomsAmount,
+    coinsAmount,
     isSendAll,
     sendBalanceAtoms,
     feeBalanceAtoms,
@@ -235,7 +235,7 @@ function optsForSeveralRates(
         return {
             maxPriorityFeePerGasOption: maxPriorityFeePerGasOption,
             feeWeiString: fee,
-            correctedAtomsAmount: chooseAmount(coin, atomsAmount, isSendAll, fee, sendBalanceAtoms, feeBalanceAtoms),
+            correctedAtomsAmount: chooseAmount(coin, coinsAmount, isSendAll, fee, sendBalanceAtoms, feeBalanceAtoms),
         };
     });
     const feeIsCoverableFlags = feeData.map(d => {

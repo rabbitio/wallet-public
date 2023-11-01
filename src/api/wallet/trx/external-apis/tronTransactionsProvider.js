@@ -8,11 +8,12 @@ import {
     actualizeCacheWithNewTransactionSentFromAddress,
     mergeTwoTransactionsArraysAndNotifyAboutNewTransactions,
 } from "../../common/utils/cacheActualizationUtils";
-import { TRONGR_PR_K } from "../../../../properties";
 import { tronUtils } from "../adapters/tronUtils";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
 import { computeConfirmationsCountByTimestamp } from "../lib/blocks";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
 /**
  * WARNING: this provider returns internal transactions in non-recognizable format, and we don't process them,
@@ -121,21 +122,20 @@ class TronscanTronTransactionsProvider extends ExternalApiProvider {
 
 class TrongridTronTransactionsProvider extends ExternalApiProvider {
     constructor() {
-        super("", "get", 15000, ApiGroups.TRONGRID, { "TRON-PRO-API-KEY": TRONGR_PR_K }, 200);
+        super("", "get", 15000, ApiGroups.TRONGRID, {}, 200);
     }
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
             const address = params[0];
             const nextPageLink = params[1];
+            let originalApiPathAndQuery = `/v1/accounts/${address}/transactions?limit=${this.maxPageLength}`;
             if (nextPageLink) {
-                // Means this is call for second or more page, and we already added the link to next page provided by the tronscan
-                return nextPageLink;
+                // Means this is call for second or more page, and we need the link to next page provided by the tronscan
+                const parts = nextPageLink.split("trongrid.io");
+                originalApiPathAndQuery = parts[1]; // Take the path and query returned by trongrid
             }
-            const network = getCurrentNetwork(Coins.COINS.TRX);
-            return `https://${
-                network === Coins.COINS.TRX.mainnet ? "api" : "nile"
-            }.trongrid.io/v1/accounts/${address}/transactions?limit=${this.maxPageLength}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPathAndQuery}`;
         } catch (e) {
             improveAndRethrow(e, "trongridTronTransactionsProvider.composeQueryString");
         }
@@ -317,11 +317,10 @@ class TrongridTronTransactionsProvider extends ExternalApiProvider {
 export class TronTransactionsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronTransactionsProvider",
+        // TODO: [feature, high] add more providers or implement rare reordering to request trongrid rarer. task_id=c246262b0e7f43dfa2a9b0e30c947ad7
         // Trongrid used with higher priority because it retrieves internal transaction also
         [new TrongridTronTransactionsProvider(), new TronscanTronTransactionsProvider()],
-        120000,
-        130,
-        1000,
+        STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,
         mergeTwoTransactionsArraysAndNotifyAboutNewTransactions
     );

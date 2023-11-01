@@ -8,6 +8,7 @@ import {
     createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
     mergeSingleBalanceValuesAndNotifyAboutValueChanged,
 } from "../../common/utils/cacheActualizationUtils";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
 class EtherscanErc20SingleBalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -42,9 +43,7 @@ export class Erc20SingleBalanceProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "erc20SingleBalanceProvider",
         [new EtherscanErc20SingleBalanceProvider()],
-        120000,
-        130,
-        1000,
+        STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,
         (cached, newValue, params) =>
             mergeSingleBalanceValuesAndNotifyAboutValueChanged(

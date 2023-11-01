@@ -1,23 +1,15 @@
-import { getTXIDSendingGivenOutput } from "../../lib/utxos";
 import { getCurrentNetwork } from "../../../../common/services/internal/storage";
 import { improveAndRethrow, logError } from "../../../../common/utils/errorUtils";
-import { Utxo } from "../../models/transaction/utxo";
 import { retrieveTransactionData } from "../../external-apis/transactionDataAPI";
 import {
     EventBus,
     NEW_BLOCK_DEDUPLICATED_EVENT,
     NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
-    TX_DATA_RETRIEVED_EVENT,
 } from "../../../../common/adapters/eventbus";
-import TransactionsApi from "../../../common/backend-api/transactionsApi";
 import { getNetworkByAddress } from "../../lib/addresses";
-import { addressesMetadataService } from "./addressesMetadataService";
 import { TransactionsDataRetrieverService } from "./transactionsDataRetrieverService";
 import { CancelProcessing } from "../../../../common/services/utils/robustExteranlApiCallerService/cancelProcessing";
-import { ExternalBlocksApiCaller } from "../../external-apis/blocksAPI";
 import { currentBlockService } from "./currentBlockService";
-import { postponeExecution } from "../../../../common/utils/browserUtils";
-import { MAX_ATTEMPTS_TO_RETRIEVE_TRANSACTIONS_DATA } from "../../../../../properties";
 import {
     filterTransactionsSpendingTheSameUtxosAsGivenTransaction,
     removeDeclinedDoubleSpendingTransactionsFromList,
@@ -30,68 +22,45 @@ import {
     composeTransactionsHistoryItems,
     getExtendedTransactionDetails,
 } from "../../lib/transactions/transactions-history";
+import { CacheAndConcurrentRequestsResolver } from "../../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
+import AddressesService from "../addressesService";
+import { Transaction } from "../../models/transaction/transaction";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../../common/utils/ttlConstants";
 
 /**
- * Manages frequent and full scanning for transactions by addresses. Manages transactions data cache filling from
- * backend data.
- * TODO: [refactoring, moderate] Refactor this code using universal robustDataRetrieverService and removed multiple addresses support. task_id=61c12c29b5d648079133523561ce6aa2
+ * Manages BTC transactions cache and its actualization.
+ *
+ * TODO: [tests, moderate] write unit tests
+ * TODO: [refactoring, low] reorder methods
  */
 class TransactionsDataProvider {
     constructor() {
-        this._isInitialized = false;
-        this._transactionsData = [];
-
-        /**
-         * Interval of frequent transactions data retrieval
-         */
-        this.pollingIntervalMS = 1000;
-
-        /**
-         * Period of background data reloading. This interval affects all requests for data as we always return cached data.
-         * Depending on using the batch mode for BTC transaction we use different interval timeouts. Internally we do
-         * scanning only for frequently used addresses if the batch mode is disabled.
-         * This interval is really critical as we use free APIs to retrieve transactions, and also we have multiple
-         * addresses for BTC so if the batch API is not available we need to do scanning for each address.
-         */
-        this.dataUpdateTimeoutMS = TransactionsDataRetrieverService.isBatchRetrievalModeWorkingRightNow()
-            ? 100000
-            : 120000;
-
-        /**
-         * Max number of polls parameter affect time to fail for long performing requests and also covers max time
-         * for several APIs calling in case of errors with one of external APIs. Some APIs of this provider allows to pass
-         * custom count of polls
-         */
-        this.maxPollsCount = MAX_ATTEMPTS_TO_RETRIEVE_TRANSACTIONS_DATA;
         this._interval = null;
         this._eventListener = null;
         this._shouldDataRetrievalBeScheduled = true;
         this._cancelProcessingHolder = null;
         this._lastActualizedBlock = 0;
+
+        this._cacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
+            "btcTransactionsDataResolver",
+            STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
+            false
+        );
+        this._cacheKey = "6f22584a-f979-4a07-b565-6d6d903cb832";
     }
 
     /**
-     * Useful re-setter for tests as we use single instance of this provider for the whole app
+     * Useful re-setter for tests as we use single instance of this provider for the whole app.
      */
     resetState() {
-        this._isInitialized = false;
-        this._transactionsData = [];
         clearInterval(this._interval);
         EventBus.removeEventListener(NEW_BLOCK_DEDUPLICATED_EVENT, this._eventListener);
         this._cancelProcessingHolder && this._cancelProcessingHolder.cancel();
         this._cancelProcessingHolder = null;
+        this._cacheAndRequestsResolver.invalidate(this._cacheKey);
     }
 
-    async _doFrequentScanning() {
-        try {
-            const frequentAddresses = await addressesMetadataService.getAddressesForFrequentScanning();
-            await this._retrieveData(frequentAddresses);
-        } catch (e) {
-            logError(e, "_doFrequentScanning");
-        }
-    }
-
-    async _doFullScanning() {
+    async _doFullScanning(notifyAboutNewTxs = true) {
         try {
             if (this._cancelProcessingHolder) {
                 this._cancelProcessingHolder.cancel();
@@ -101,22 +70,43 @@ class TransactionsDataProvider {
             logError(e, "_doFullScanning", "Failed to cancel previous full scanning");
         }
 
+        let lockAcquisitionResult;
         try {
-            const addresses = addressesMetadataService.getAddressesSortedByLastUpdateDate();
             this._cancelProcessingHolder = CancelProcessing.instance();
-            await this._retrieveData(addresses, this._cancelProcessingHolder);
+            lockAcquisitionResult = await this._cacheAndRequestsResolver.acquireLock(this._cacheKey);
+            if (!lockAcquisitionResult?.result) {
+                return this._cacheAndRequestsResolver.getCached(this._cacheKey) ?? [];
+            }
+            let addresses = await AddressesServiceInternal.getAllUsedAddresses();
+            addresses = [...addresses.internal, ...addresses.external];
+            const finalTxsList = await this._requestTransactionsDataAndMergeWithCached(
+                addresses,
+                this._cancelProcessingHolder,
+                notifyAboutNewTxs
+            );
+            this._cacheAndRequestsResolver.saveCachedData(
+                this._cacheKey,
+                lockAcquisitionResult?.lockId,
+                finalTxsList,
+                true,
+                true
+            );
+            return finalTxsList;
         } catch (e) {
             logError(e, "_doFullScanning");
         } finally {
-            this._cancelProcessingHolder = null; // TODO: [bug, moderate] can this affect another call of this method?
+            this._cacheAndRequestsResolver.releaseLock(this._cacheKey, lockAcquisitionResult?.lockId);
+            this._cancelProcessingHolder = null;
         }
     }
 
     async _actualizeUnconfirmedTransactions() {
         try {
-            const unconfirmedTransactions = this._transactionsData.filter(tx => tx.confirmations === 0);
+            const transactionsData = this._cacheAndRequestsResolver.getCached(this._cacheKey) ?? [];
+            const unconfirmedTransactions = transactionsData.filter(tx => tx.confirmations === 0);
             const promises = unconfirmedTransactions.map(tx => retrieveTransactionData(tx.txid, getCurrentNetwork()));
-            const unconfirmedTxsData = await Promise.all(promises);
+            const unconfirmedTxsData = ((await Promise.all(promises)) ?? []).filter(tx => tx instanceof Transaction);
+            const transactionIdsToBeRemovedFromCache = [];
             const notEmptyData = unconfirmedTxsData.reduce((prev, current, index) => {
                 if (!current) {
                     const idOfCheckingTransaction = unconfirmedTransactions[index].txid;
@@ -131,17 +121,15 @@ class TransactionsDataProvider {
                          * list, but we need to take into account RBF case.
                          *
                          * When RBF is in progress we have two transactions in cache - old one and new one replacing
-                         * the old tx. Usually replaced transaction is being removed from the mempool right
+                         * the old tx. Usually the replaced transaction is being removed from the mempool right
                          * after accepting the new replacing one. But from the beginning we decided to show
                          * both old and new transactions until the new one is confirmed. So we check here whether we
-                         * have not confirmed transaction sending the same UTXO(s) related to this 'detached'
-                         * transaction. And if so we don't remove this 'detached' one from cache as it will be removed
+                         * have the not confirmed transaction sending the same UTXO(s) related to this 'detached'
+                         * transaction. And if so we don't remove this 'detached' one from the cache as it will be removed
                          * later in 'removeDeclinedDoubleSpendingTransactionsFromList' method.
-                         * This approach maybe should be reassessed, task_id=4694ca08f41644169b58cd7dad624040
+                         * TODO: [feature, moderate] This approach maybe should be reassessed, task_id=4694ca08f41644169b58cd7dad624040
                          */
-                        this._transactionsData = this._transactionsData.filter(
-                            tx => tx.txid !== idOfCheckingTransaction
-                        );
+                        transactionIdsToBeRemovedFromCache.push(idOfCheckingTransaction);
                         return [...prev];
                     }
                 }
@@ -149,96 +137,85 @@ class TransactionsDataProvider {
                 return [...prev, current];
             }, []);
 
-            await this.updateTransactionsCacheAndPushTxsToServer(notEmptyData);
+            await this.updateTransactionsCache(notEmptyData, transactionIdsToBeRemovedFromCache);
         } catch (e) {
             improveAndRethrow(e, "_actualizeUnconfirmedTransactions");
         }
     }
 
+    _setupRareFullScanInterval() {
+        this._interval = setInterval(() => this._doFullScanning(), 7 * 60000);
+    }
+
     /**
-     * Retrieves transactions stored on server. Also schedules frequent scanning and creates new blocks listener to
-     * start full scanning.
-     * This method should be called only ones when the app is loaded.
-     *
-     * (and there is wallet dats) or after successful login.
-     *
-     * @param addresses - list of addresses to get transactions from server for. Usually this list should contain all
-     *                    addresses of the wallet
-     *
-     * @return {boolean} - whether the operation was successful
+     * This method should be called before accessing other methods in this class.
+     * Here we schedule rare scanning for all addresses and setup event listener for new blocks.
+     * Also, we call txs loading here for all addresses to fill the cache when starting the app.
      */
-    async initialize(addresses) {
+    async initialize() {
         const loggerSource = "initialize";
         Logger.log("Start initializing transactions provider", loggerSource);
-        if (this._isInitialized) {
+
+        const currentTxsCache = this._cacheAndRequestsResolver.getCached(this._cacheKey);
+        if (currentTxsCache != null) {
             Logger.log("Transactions provider already initialized", loggerSource);
             return;
         }
 
         try {
-            const currentBlockHeight = await ExternalBlocksApiCaller.retrieveCurrentBlockNumber(getCurrentNetwork());
-
-            Logger.log(`Initializing for block height ${currentBlockHeight}`, loggerSource);
-
-            const transactionsData = await TransactionsApi.getTransactionsByAddresses(addresses, currentBlockHeight);
-
-            Logger.log(`Retrieved ${transactionsData.length} transactions`, loggerSource);
-
-            this._transactionsData = improveRetrievedRawTransactionsData(
-                transactionsData,
-                this._transactionsData,
-                true,
-                false
-            );
-
-            try {
-                await addressesMetadataService.recalculateAddressesMetadataByTransactions(this._transactionsData);
-            } catch (e) {
-                logError(e, loggerSource, "Failed to recalculate metadata for addresses");
-            }
-
             if (this._shouldDataRetrievalBeScheduled) {
-                if (TransactionsDataRetrieverService.isBatchRetrievalModeWorkingRightNow()) {
-                    this._interval = setInterval(() => this._doFullScanning(), this.dataUpdateTimeoutMS);
-                } else {
-                    this._interval = setInterval(() => this._doFrequentScanning(), this.dataUpdateTimeoutMS);
-                }
                 this._eventListener = () => {
-                    this._doFullScanning();
+                    this._actualizeConfirmationsNumber();
+                    this.markDataAsExpired();
                     this._actualizeUnconfirmedTransactions();
                 };
                 EventBus.addEventListener(NEW_BLOCK_DEDUPLICATED_EVENT, this._eventListener);
 
-                await this._doFullScanning();
-                Logger.log(`Full scanning performed, count: ${this._transactionsData.length}`, loggerSource);
-            }
+                /* We set an interval for the rare full scanning to cover cases when there are many addresses
+                 * used in a wallet.
+                 * Also here we perform the full scanning ones when initializing the app. After the initialization
+                 * we will perform scanning rarely using the interval that we set here. Such a rare scanning is affordable
+                 * as the full scanning tries to find the new transactions at the old bitcoin addresses.
+                 * But this is just a compatibility feature to support users that have old wallets with lots
+                 * of transactions sent to/from the different addresses belonging to the same wallet (this approach
+                 * was popular at first Bitcoin wallets for 'anonymity' but makes almost no effect on anonymity now).
+                 */
+                this._setupRareFullScanInterval();
+                await this._doFullScanning(false);
 
-            Logger.log("Successfully initialized", loggerSource);
-            this._isInitialized = true;
-        } catch (e) {
-            improveAndRethrow(e, loggerSource, "Failed to initialize the provider");
-        }
-    }
-
-    triggerTransactionsRetrieval() {
-        try {
-            if (this._cancelProcessingHolder) this._cancelProcessingHolder.cancel();
-            if (this._interval) clearInterval(this._interval);
-            if (TransactionsDataRetrieverService.isBatchRetrievalModeWorkingRightNow()) {
-                this._interval = setInterval(() => this._doFullScanning(), this.dataUpdateTimeoutMS);
-                this._doFullScanning(); // this method is safe, and we don't need to await it here
-            } else {
-                this._interval = setInterval(() => this._doFrequentScanning(), this.dataUpdateTimeoutMS);
-                this._doFrequentScanning(); // this method is safe, and we don't need to await it here
+                Logger.log(
+                    `Full scanning was performed at the initialization, txs count: ${
+                        this._cacheAndRequestsResolver.getCached(this._cacheKey)?.length
+                    }`,
+                    loggerSource
+                );
             }
+            Logger.log("Successfully initialized bitcoin transactions provider", loggerSource);
         } catch (e) {
-            improveAndRethrow(e, "triggerTransactionsRetrieval");
+            improveAndRethrow(e, loggerSource, "Failed to initialize the bitcoin transactions provider");
         }
     }
 
     /**
-     * Use this flag to enable/disable data scheduling
-     * @param value
+     * Marks the cached data as expired so when the next data retrieval is requested
+     * it will be done by actually calling the data providers.
+     */
+    markDataAsExpired() {
+        try {
+            if (this._cancelProcessingHolder) this._cancelProcessingHolder.cancel();
+            if (this._interval) clearInterval(this._interval);
+            this._setupRareFullScanInterval();
+            this._cacheAndRequestsResolver.markAsExpiredButDontRemove(this._cacheKey);
+        } catch (e) {
+            improveAndRethrow(e, "markDataAsExpired");
+        }
+    }
+
+    /**
+     * Use this flag to enable/disable data retrieval.
+     * Useful for testing.
+     *
+     * @param value {boolean}
      */
     setShouldDataRetrievalBeScheduled(value) {
         this._shouldDataRetrievalBeScheduled = !!value;
@@ -246,77 +223,52 @@ class TransactionsDataProvider {
     }
 
     /**
-     * Adds given transactions to the internal cache and saves confirmed ones not present on server to the server.
+     * Adds given transactions to the internal cache.
      *
-     * This can be useful as this provider is used as the only point of
-     * transactions data storing. But at least for checking addresses usage we utilize dedicated service and we retrieve
-     * some transactions there - this method allows to store them inside this provider to become available for the
-     * whole app.
+     * This can be useful as this provider is used as the only point of the bitcoin
+     * transactions data storing. But at least for checking addresses usage we utilize dedicated service,
+     * and we retrieve some transactions there so this method allows to store these transactions inside
+     * the cache to become available for the whole app.
      *
-     * @param transactionsData {Array<Transaction>}
+     * @param transactionsData {Transaction[]} the transactions that should be added to the cache
+     * @param [excludeIds=[]] {string[]} pass transaction ids if you need to exclude them from the cached list
      */
-    async updateTransactionsCacheAndPushTxsToServer(transactionsData) {
+    updateTransactionsCache(transactionsData, excludeIds = []) {
         try {
-            this._transactionsData = improveRetrievedRawTransactionsData(
-                transactionsData,
-                this._transactionsData,
-                false,
-                false
+            this._cacheAndRequestsResolver.actualizeCachedData(
+                this._cacheKey,
+                cached => ({
+                    isModified: true,
+                    data: this._improveRetrievedRawTransactionsData(transactionsData, cached).filter(
+                        tx => !excludeIds.find(id => id === tx.txid)
+                    ),
+                }),
+                true
             );
-            await this._storeConfirmedTransactions();
         } catch (e) {
-            improveAndRethrow(e, "updateTransactionsCacheAndPushTxsToServer");
-        }
-    }
-
-    async _storeConfirmedTransactions() {
-        const loggerSource = "_storeConfirmedTransactions";
-        try {
-            const notStoredTxs = this._transactionsData.filter(tx => !tx.isStoredOnServer && tx.confirmations > 0);
-
-            if (notStoredTxs.length) {
-                notStoredTxs.forEach(tx => (tx.isStoredOnServer = true)); // We set the flag first to avoid concurrent savings
-                try {
-                    await TransactionsApi.saveTransactions(notStoredTxs);
-                    Logger.log(`Stored: ${notStoredTxs.map(tx => tx.txid.slice(0, 7)).join(",")}`, loggerSource);
-                } catch (e) {
-                    Logger.log(`Failed to store transactions data on server: ${e?.message}`, loggerSource);
-                    // Rolling back flag in case of errors to save them later
-                    notStoredTxs.forEach(tx => (tx.isStoredOnServer = false));
-                }
-            }
-        } catch (e) {
-            logError(e, loggerSource, "Failed to store transactions data on server.");
-        }
-    }
-
-    async waitForTransactionsToBeStoredOnServer(waitPeriodMS = 30000) {
-        try {
-            let attemptsCount = Math.floor(waitPeriodMS / 1000);
-            while (
-                this._transactionsData.filter(tx => !tx.isStoredOnServer && tx.confirmations > 0).length > 0 &&
-                attemptsCount
-            ) {
-                // eslint-disable-next-line no-loop-func
-                await postponeExecution(() => --attemptsCount, 1000);
-            }
-        } catch (e) {
-            logError(
-                e,
-                "waitForTransactionsToBeStoredOnServer",
-                "Not all discovered transactions were stored on server for some reason. It is not critical but may cause eventual consistency for transactions history"
-            );
+            improveAndRethrow(e, "updateTransactionsCache");
         }
     }
 
     _actualizeConfirmationsNumber() {
-        // TODO: [feature, low] maybe create an event listener to handle new blocks? otherwise we need to remember about this function to be called inside each data retrieval
-        const currentBlock = currentBlockService.getCurrentBlockHeight();
-        if (this._lastActualizedBlock !== currentBlock) {
-            this._transactionsData.forEach(
-                tx => tx.confirmations > 0 && (tx.confirmations = currentBlock - tx.block_height + 1)
-            );
-            this._lastActualizedBlock = currentBlock;
+        try {
+            const currentBlock = currentBlockService.getCurrentBlockHeight();
+            if (this._lastActualizedBlock !== currentBlock) {
+                this._cacheAndRequestsResolver.actualizeCachedData(
+                    this._cacheKey,
+                    cached => ({
+                        isModified: true,
+                        data: (cached ?? []).map(tx => {
+                            tx.confirmations > 0 && (tx.confirmations = currentBlock - tx.block_height + 1);
+                            return tx;
+                        }),
+                    }),
+                    true
+                );
+                this._lastActualizedBlock = currentBlock;
+            }
+        } catch (e) {
+            improveAndRethrow(e, "_actualizeConfirmationsNumber");
         }
     }
 
@@ -324,121 +276,102 @@ class TransactionsDataProvider {
      * Retrieves a list of Transaction objects for given addresses.
      *
      * @param addresses {string[]} addresses to get transactions for
-     * @param [allowDoubleSpend=true] {boolean} whether to include double-spending transactions in the returning set, true by default
-     * @param [maxPollsCount=null] {(number|null)} max number of data retrieval checks
+     * @param [allowDoubleSpend=true] {boolean} whether to include double-spending transactions in the returning set,
+     *        true by default
      * @return {Promise<Transaction[]>} array of transaction data objects
      */
-    async getTransactionsByAddresses(addresses, allowDoubleSpend = true, maxPollsCount = null) {
+    async getTransactionsByAddresses(addresses, allowDoubleSpend = true) {
+        let result;
         try {
-            this._actualizeConfirmationsNumber();
-            const getData = provider => {
-                const relatedToAddresses = provider._transactionsData.filter(
-                    tx =>
-                        (allowDoubleSpend || !tx.double_spend) &&
-                        (tx.inputs.find(input => addresses.includes(input.address)) ||
-                            tx.outputs.find(output => output.addresses.find(address => addresses.includes(address))))
+            result = await this._cacheAndRequestsResolver.getCachedOrWaitForCachedOrAcquireLock(this._cacheKey);
+            let transactionsForAllAddresses;
+            if (result?.canStartDataRetrieval) {
+                /* Here we request transactions ONLY for current external addresses (segwit and legacy) and current change address.
+                 * This is needed to avoid abusing the underlying data providers APIs. We return the cached
+                 * transactions for all other requested addresses under the hood.
+                 * NOTE: the data retrieval for ALL addresses is being performed by schedule in the background but rarely.
+                 */
+                const currentAddresses = await Promise.all([
+                    AddressesService.getCurrentExternalAddress(AddressesService.ADDRESSES_TYPES.LEGACY),
+                    AddressesService.getCurrentExternalAddress(AddressesService.ADDRESSES_TYPES.SEGWIT),
+                    AddressesService.getCurrentChangeAddress(),
+                ]);
+                transactionsForAllAddresses = await this._requestTransactionsDataAndMergeWithCached(currentAddresses);
+                this._cacheAndRequestsResolver.saveCachedData(
+                    this._cacheKey,
+                    result?.lockId,
+                    transactionsForAllAddresses,
+                    true,
+                    true
                 );
-
-                return relatedToAddresses.map(tx => tx.clone());
-            };
-
-            return new Promise((resolve, reject) =>
-                returnOrPostpone(this, getData, this.pollingIntervalMS, resolve, reject, 0, maxPollsCount)
+            } else {
+                transactionsForAllAddresses = result?.cachedData ?? [];
+            }
+            const relatedToAddresses = transactionsForAllAddresses.filter(
+                tx =>
+                    (allowDoubleSpend || !tx.double_spend) &&
+                    (tx.inputs.find(input => addresses.includes(input.address)) ||
+                        tx.outputs.find(output => output.addresses.find(address => addresses.includes(address))))
             );
+            return relatedToAddresses.map(tx => tx.clone()); // We clone for safety to ensure the original cache isn't touched
         } catch (e) {
             improveAndRethrow(e, "getTransactionsByAddresses");
+        } finally {
+            this._cacheAndRequestsResolver.releaseLock(this._cacheKey, result?.lockId);
         }
     }
 
-    /**
-     * Adds new transaction to cache. Useful to add new transaction to cache immediately without waiting for
-     * retrieving it from blockchain explorers
-     *
-     * @param newTx {Transaction} new tx data to be added to cache
-     * @return {void}
-     */
-    pushNewTransactionToCache(newTx) {
-        const loggerSource = "pushNewTransactionToCache";
-        try {
-            this._transactionsData = improveRetrievedRawTransactionsData([newTx], this._transactionsData, false, false);
-            Logger.log(`New transaction pushed to cache: ${newTx.txid}`, loggerSource);
-        } catch (e) {
-            improveAndRethrow(e, loggerSource);
-        }
-    }
-
-    // TODO: [tests, moderate] write units
-    async _retrieveData(addresses, cancelProcessingHolder) {
+    async _requestTransactionsDataAndMergeWithCached(
+        addresses,
+        cancelProcessingHolder = null,
+        notifyAboutNewTxs = true
+    ) {
         const addressesUpdateTimestamps = [];
+        const loggerSource = "_requestTransactionsDataAndMergeWithCached";
         try {
-            let fetchingErrors = [];
+            const network = getCurrentNetwork();
+            const addressesOfNetwork = addresses.filter(address => getNetworkByAddress(address).key === network.key);
+            // TODO: [refactoring, moderate] We have a duplicated cache expiration logic inside the TransactionsDataRetrieverService
+            let newData = await TransactionsDataRetrieverService.performTransactionsRetrieval(
+                addressesOfNetwork,
+                network,
+                cancelProcessingHolder,
+                addressesUpdateTimestamps
+            );
 
-            try {
-                const dataArrays = await Promise.all(
-                    [getCurrentNetwork()].map(network => {
-                        const addressesOfNetwork = addresses.filter(
-                            address => getNetworkByAddress(address).key === network.key
-                        );
-                        return TransactionsDataRetrieverService.performTransactionsRetrieval(
-                            addressesOfNetwork,
-                            network,
-                            cancelProcessingHolder,
-                            addressesUpdateTimestamps
-                        ).catch(e => fetchingErrors.push(e));
-                    })
-                );
-                const newData = dataArrays.flat().filter(data => data.txid);
-                await this._notifyAboutNewIncomingTransactions(newData);
-                this._transactionsData = improveRetrievedRawTransactionsData(newData, this._transactionsData);
-                // We don't wait for storing the transactions to speed up the data retrieval process
-                this._storeConfirmedTransactions();
-            } catch (e) {
-                fetchingErrors.push(e);
-            } finally {
-                fetchingErrors.forEach(e => logError(e, "_retrieveData", "Transactions data retrieval failed"));
-
-                try {
-                    await addressesMetadataService.recalculateAddressesMetadataByTransactions(
-                        this._transactionsData,
-                        addressesUpdateTimestamps
-                    );
-                } catch (e) {
-                    logError(e, "_retrieveData", "Failed to recalculate metadata for addresses");
-                }
+            newData = newData.filter(dataItem => dataItem?.txid != null);
+            if (notifyAboutNewTxs) {
+                await this._notifyAboutDiscoveredTransactions(newData);
             }
+            const cachedTransactions = this._cacheAndRequestsResolver.getCached(this._cacheKey) ?? [];
+            const finalTxsList = this._improveRetrievedRawTransactionsData(newData, cachedTransactions);
+            Logger.log(`Retrieved ${finalTxsList.length} BTC transactions`, loggerSource);
+            return finalTxsList;
         } catch (e) {
-            improveAndRethrow(e, "_retrieveData");
+            logError(e, loggerSource, "Transactions data retrieval failed");
+            return [];
         }
     }
 
     /**
-     * Retrieves count of transactions for given address
-     *
-     * @param address - address to get count for
-     * @param maxPollsCount - max number of result checking attempts
-     * @return {Promise<number>} - number of transactions
-     */
-    async getTransactionsCountByAddress(address, maxPollsCount = null) {
-        try {
-            this._actualizeConfirmationsNumber();
-            const transactionsList = await this.getTransactionsByAddresses([address], true, maxPollsCount);
-            return transactionsList.length;
-        } catch (e) {
-            improveAndRethrow(e, "getTransactionsCountByAddress");
-        }
-    }
-
-    /**
-     * Retrieves details of transaction by its id. The transaction should be inside the local cache.
+     * Retrieves the details for transaction by its id.
+     * The transaction should be present inside the local cache.
      *
      * @param txId {string} id of tx to get data for
-     * @return {Promise<TransactionsHistoryItem|null>} transaction object with details or null if is not found.
+     * @return {Promise<TransactionsHistoryItem|null>} transaction object with details or null if it is not found.
      */
     async getTransactionData(txId) {
         try {
-            this._actualizeConfirmationsNumber();
             const addresses = await AddressesServiceInternal.getAllUsedAddresses();
-            if (!this._transactionsData.find(tx => tx.txid === txId)) {
+            const dataRes = await this._cacheAndRequestsResolver.getCachedOrWaitForCachedOrAcquireLock(this._cacheKey);
+            if (dataRes?.canStartDataRetrieval) {
+                /* We don't start the whole transactions data retrieval here.
+                 * Because we will start the exact transaction details retrieval below instead.
+                 */
+                await this._cacheAndRequestsResolver.releaseLock(this._cacheKey, dataRes.lockId);
+            }
+            let data = dataRes?.cachedData ?? [];
+            if (!data.find(tx => tx.txid === txId)) {
                 const gotTx = await retrieveTransactionData(txId, getCurrentNetwork());
                 if (gotTx && Array.isArray(addresses?.internal) && Array.isArray(addresses?.external)) {
                     const isTransactionRelatedToCurrentWallet = [
@@ -446,11 +379,14 @@ class TransactionsDataProvider {
                         ...gotTx.outputs.map(output => output.addresses[0]),
                     ].find(a => addresses.internal.find(int => int === a) || addresses.external.find(ext => ext === a));
                     if (isTransactionRelatedToCurrentWallet) {
-                        this._transactionsData = improveRetrievedRawTransactionsData([gotTx], this._transactionsData);
+                        this.updateTransactionsCache([gotTx]);
+                        await this._notifyAboutDiscoveredTransactions([gotTx], addresses);
+                        // Retrieving the cache ones again as we added a new item to cache
+                        data = this._cacheAndRequestsResolver.getCached(this._cacheKey) ?? [];
                     }
                 }
             }
-            let result = this._transactionsData.find(tx => tx.txid === txId);
+            let result = data.find(tx => tx.txid === txId);
             if (result) {
                 result = getExtendedTransactionDetails(result, addresses);
             }
@@ -461,129 +397,43 @@ class TransactionsDataProvider {
     }
 
     /**
-     * Calculates a set of UTXOs by given addresses
-     *
-     * @param addresses {string[]} addresses set to get UTXO's for
-     * @return {Promise<Array<Utxo>>} returns array of Output objects
-     */
-    getUTXOsByAddressesArray(addresses) {
-        try {
-            this._actualizeConfirmationsNumber();
-            const getData = provider => {
-                const outputsData = addresses.map(address => {
-                    const scannedTxs = [];
-                    const outputs = provider._transactionsData.map(tx => {
-                        if (
-                            (tx.double_spend && !(tx.confirmations > 0) && !tx.is_most_probable_double_spend) ||
-                            scannedTxs.includes(tx.txid)
-                        )
-                            return [];
-                        scannedTxs.push(tx.txid);
-
-                        const matchedOutputs = tx.outputs.filter(output => output.addresses.includes(address));
-                        return matchedOutputs
-                            .filter(
-                                output =>
-                                    output.spend_txid == null && // Double check as some providers gives no data about txs spending
-                                    getTXIDSendingGivenOutput(output, tx.txid, provider._transactionsData) == null
-                            )
-                            .map(
-                                output =>
-                                    new Utxo(
-                                        tx.txid,
-                                        output.number,
-                                        output.value_satoshis,
-                                        tx.confirmations,
-                                        output.type,
-                                        output.addresses[0]
-                                    )
-                            );
-                    });
-                    return outputs.flat();
-                });
-                return outputsData
-                    .flat()
-                    .map(d => new Utxo(d.txid, d.number, d.value_satoshis, d.confirmations, d.type, d.address));
-            };
-
-            return new Promise((resolve, reject) =>
-                returnOrPostpone(this, getData, this.pollingIntervalMS, resolve, reject)
-            );
-        } catch (e) {
-            improveAndRethrow(e, "getUTXOsByAddressesArray");
-        }
-    }
-
-    /**
      * Notifies about new transactions created not locally. The transaction can be either incoming or
      * externally created outgoing transaction.
      *
-     * @param newData {Transaction[]} - new retrieved transactions list
+     * @param newData {Transaction[]} new retrieved transactions list
+     * @param allAddresses {{internal: string[], external: string[]}|null}
      * @private
      */
-    async _notifyAboutNewIncomingTransactions(newData) {
-        const newTxs = newData.filter(
-            newTx => !this._transactionsData.find(tx => tx.txid === newTx.txid) && newTx.confirmations === 0
-        );
-        const addresses = await AddressesServiceInternal.getAllUsedAddresses();
-        const txHistoryItems = composeTransactionsHistoryItems(addresses, newTxs);
-        newTxs.length && EventBus.dispatch(NEW_NOT_LOCAL_TRANSACTIONS_EVENT, null, txHistoryItems);
+    async _notifyAboutDiscoveredTransactions(newData, allAddresses = null) {
+        try {
+            const transactionsData = this._cacheAndRequestsResolver.getCached(this._cacheKey) ?? [];
+            const newTxs = newData.filter(newTx => !transactionsData.find(tx => tx.txid === newTx.txid));
+            const addresses = allAddresses ?? (await AddressesServiceInternal.getAllUsedAddresses());
+            const txHistoryItems = composeTransactionsHistoryItems(addresses, newTxs);
+            newTxs.length && EventBus.dispatch(NEW_NOT_LOCAL_TRANSACTIONS_EVENT, null, txHistoryItems);
+        } catch (e) {
+            improveAndRethrow(e, "_notifyAboutDiscoveredTransactions");
+        }
+    }
+
+    _improveRetrievedRawTransactionsData(newData, oldData) {
+        try {
+            newData = newData ?? [];
+            oldData = oldData ?? [];
+            oldData.forEach(tx => {
+                if (!newData.find(newTx => tx.txid === newTx.txid)) {
+                    // Note that declined transactions can be persisted here (like ones replaced by fee, use .double_spend to check)
+                    newData.push(tx);
+                }
+            });
+
+            setDoubleSpendFlag(newData);
+            setSpendTxId(newData);
+            return removeDeclinedDoubleSpendingTransactionsFromList(newData);
+        } catch (e) {
+            improveAndRethrow(e, "_improveRetrievedRawTransactionsData");
+        }
     }
 }
-
-/**
- * Resolves and returns data if data fetching is finished and data array is not empty or schedules
- * new polling iteration.
- *
- * @param provider - the TransactionsDataProvider instance
- * @param callback - callback to get data from the provider
- * @param timeout - polling interval, MS
- * @param resolve - resolve callback of wrapper-promise
- * @param reject - reject callback of wrapper-promise
- * @param callsCount - internal, indicates polling attempt number
- * @param maxPollsCount - custom max number of polls
- */
-function returnOrPostpone(provider, callback, timeout, resolve, reject, callsCount = 0, maxPollsCount = null) {
-    try {
-        const maxCallsCount = maxPollsCount || provider.maxPollsCount;
-        if (provider._isInitialized) {
-            resolve(callback(provider));
-        } else if (callsCount >= maxCallsCount) {
-            reject(new Error("Max calls count exceeded."));
-        } else {
-            setTimeout(
-                () => returnOrPostpone(provider, callback, timeout, resolve, reject, callsCount + 1, maxCallsCount),
-                timeout
-            );
-        }
-    } catch (e) {
-        improveAndRethrow(e, "returnOrPostpone");
-    }
-}
-
-const improveRetrievedRawTransactionsData = (
-    newData,
-    oldData,
-    isNewDataStoredOnServer = false,
-    sendEventIfThereIsNewTxs = true
-) => {
-    newData.forEach(tx => (tx.isStoredOnServer = isNewDataStoredOnServer));
-    oldData.forEach(tx => {
-        if (!newData.find(newTx => tx.txid === newTx.txid)) {
-            // Note that declined transactions can be persisted here (like ones replaced by fee, use .double_spend to check)
-            newData.push(tx);
-        }
-    });
-
-    setDoubleSpendFlag(newData);
-    setSpendTxId(newData);
-
-    const preparedData = removeDeclinedDoubleSpendingTransactionsFromList(newData);
-    if (sendEventIfThereIsNewTxs && preparedData.find(tx => !oldData.find(oldTx => tx.txid === oldTx.txid))) {
-        EventBus.dispatch(TX_DATA_RETRIEVED_EVENT);
-    }
-
-    return preparedData;
-};
 
 export const transactionsDataProvider = new TransactionsDataProvider();

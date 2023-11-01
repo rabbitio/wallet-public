@@ -3,8 +3,9 @@ import { CachedRobustExternalApiCallerService } from "../../../common/services/u
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
-import { TRONGR_PR_K } from "../../../../properties";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
+import { LONG_TTL_FOR_REALLY_RARELY_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
 
 class TronscanNetworkConstantsProvider extends ExternalApiProvider {
     constructor() {
@@ -37,13 +38,13 @@ class TronscanNetworkConstantsProvider extends ExternalApiProvider {
 
 class TrongridNetworkConstantsProvider extends ExternalApiProvider {
     constructor() {
-        super("", "get", 15000, ApiGroups.TRONGRID, { "TRON-PRO-API-KEY": TRONGR_PR_K });
+        super("", "get", 15000, ApiGroups.TRONGRID);
     }
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const networkPrefix = getCurrentNetwork(Coins.COINS.TRX) === Coins.COINS.TRX.mainnet ? "api" : "nile";
-            return `https://${networkPrefix}.trongrid.io/wallet/getchainparameters`;
+            const originalApiPath = "/wallet/getchainparameters";
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
         } catch (e) {
             improveAndRethrow(e, "trongridNetworkConstantsProvider.composeQueryString");
         }
@@ -70,9 +71,7 @@ export class TronNetworkConstantsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronNetworkConstantsProvider",
         [new TronscanNetworkConstantsProvider(), new TrongridNetworkConstantsProvider()],
-        2 * 60 * 60 * 1000, // Not so frequent expiration as the tron network parameters change really rarely
-        100,
-        2000,
+        LONG_TTL_FOR_REALLY_RARELY_CHANGING_DATA_MS, // Long lifetime as the tron network parameters change really rarely
         false
     );
 

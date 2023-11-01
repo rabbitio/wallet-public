@@ -350,49 +350,6 @@ export default {
             .items(Joi.string())
             .required(),
     }),
-    saveEncryptedInvoiceScheme: Joi.object().keys({
-        walletId: Joi.string()
-            .min(1)
-            .required(),
-        sessionId: Joi.string()
-            .min(1)
-            .required(),
-        clientIpHash: Joi.string()
-            .min(1)
-            .required(),
-        invoiceUuid: Joi.string()
-            .min(1)
-            .required(),
-        encryptedInvoiceData: Joi.string()
-            .min(1)
-            .required(),
-    }),
-    getEncryptedInvoicesScheme: Joi.object().keys({
-        walletId: Joi.string()
-            .min(1)
-            .required(),
-        sessionId: Joi.string()
-            .min(1)
-            .required(),
-        clientIpHash: Joi.string()
-            .min(1)
-            .required(),
-        invoicesUuids: Joi.array().items(Joi.string()),
-    }),
-    deleteEncryptedInvoiceScheme: Joi.object().keys({
-        walletId: Joi.string()
-            .min(1)
-            .required(),
-        sessionId: Joi.string()
-            .min(1)
-            .required(),
-        clientIpHash: Joi.string()
-            .min(1)
-            .required(),
-        invoicesUuids: Joi.array()
-            .items(Joi.string())
-            .required(),
-    }),
     saveEncryptedSavedAddress: Joi.object().keys({
         walletId: Joi.string()
             .min(1)

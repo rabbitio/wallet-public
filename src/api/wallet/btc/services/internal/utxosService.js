@@ -13,13 +13,12 @@ import { CacheAndConcurrentRequestsResolver } from "../../../../common/services/
 import { createRawBalanceAtomsCacheProcessorForSingleBalanceProvider } from "../../../common/utils/cacheActualizationUtils";
 import { BALANCE_CHANGED_EXTERNALLY_EVENT, EventBus } from "../../../../common/adapters/eventbus";
 import { Coins } from "../../../coins";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../../common/utils/ttlConstants";
 
 export default class UtxosService {
     static _balanceCacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
         "btc_utxosService",
-        100000,
-        110,
-        1000,
+        STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false
     );
     static _balanceCacheId = "balances_03682d38-6c21-49d7-a1cf-c24a8ecfe3e7";
@@ -34,18 +33,29 @@ export default class UtxosService {
 
     static actualizeBalanceCacheWithAmountAtoms(amountAtoms, sign) {
         try {
-            const cacheProcessorForSingleValue = createRawBalanceAtomsCacheProcessorForSingleBalanceProvider(
+            const balanceCacheProcessor = createRawBalanceAtomsCacheProcessorForSingleBalanceProvider(
                 amountAtoms,
                 sign
             );
             const cacheProcessor = cached => {
-                // Here for simplicity we actualize only the "spendable" BTC balance as it is used as major balance value now all over the app
-                const spendable = cached?.spendable;
-                if (spendable) {
-                    const subResult = cacheProcessorForSingleValue(spendable);
-                    return { isModified: true, data: { ...cached, spendable: +subResult.data } };
+                const result = { isModified: false, data: cached };
+                if (cached?.spendable) {
+                    result.isModified = true;
+                    result.data = { ...result.data, spendable: +balanceCacheProcessor(cached?.spendable)?.data };
                 }
-                return { isModified: false, data: cached };
+                if (cached?.unconfirmed) {
+                    result.isModified = true;
+                    result.data = { ...result.data, unconfirmed: +balanceCacheProcessor(cached?.unconfirmed)?.data };
+                }
+                if (cached?.signable) {
+                    result.isModified = true;
+                    result.data = { ...result.data, signable: +balanceCacheProcessor(cached?.signable)?.data };
+                }
+                if (cached?.confirmed) {
+                    result.isModified = true;
+                    result.data = { ...result.data, confirmed: +balanceCacheProcessor(cached?.confirmed)?.data };
+                }
+                return result;
             };
             this._balanceCacheAndRequestsResolver.actualizeCachedData(this._balanceCacheId, cacheProcessor);
         } catch (e) {
@@ -92,11 +102,12 @@ export default class UtxosService {
      */
     static async calculateBalance(feeRate = null, forceCalculate = false) {
         const loggerSource = "calculateBalance";
+        let result;
         try {
-            const result = await this._balanceCacheAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
+            result = await this._balanceCacheAndRequestsResolver.getCachedOrWaitForCachedOrAcquireLock(
                 this._balanceCacheId
             );
-            if (!result.canStartDataRetrieval) {
+            if (!result?.canStartDataRetrieval) {
                 return result?.cachedData;
             }
             const network = getCurrentNetwork();
@@ -121,13 +132,17 @@ export default class UtxosService {
             ) {
                 EventBus.dispatch(BALANCE_CHANGED_EXTERNALLY_EVENT, null, [Coins.COINS.BTC.ticker]);
             }
-            this._balanceCacheAndRequestsResolver.saveCachedData(this._balanceCacheId, balanceValuesAndDust);
+            this._balanceCacheAndRequestsResolver.saveCachedData(
+                this._balanceCacheId,
+                result?.lockId,
+                balanceValuesAndDust
+            );
             Logger.log(`Returning balance: ${JSON.stringify(balanceValuesAndDust)}`, loggerSource);
             return balanceValuesAndDust;
         } catch (e) {
             improveAndRethrow(e, loggerSource);
         } finally {
-            this._balanceCacheAndRequestsResolver.markActiveCalculationAsFinished(this._balanceCacheId);
+            this._balanceCacheAndRequestsResolver.releaseLock(this._balanceCacheId, result?.lockId);
         }
     }
 }

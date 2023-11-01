@@ -2,6 +2,9 @@ export class Wallet {
     /**
      * Creates the wallet
      *
+     * WARNING: we use singleton wallet objects all over the app. Don't create custom instances.
+     * Use only predefined singleton Wallet (or descendants) instances.
+     *
      * @param coin {Coin} - the coin the wallet should correspond to
      * @param multipleAddressesSupport {boolean} - whether this wallet supports multiple addresses
      */
@@ -77,11 +80,13 @@ export class Wallet {
      *
      * Also, can return one option - it means this wallet doesn't support prioritisation for transactions.
      *
-     * @param address {string} address to be validated
-     * @param coinAmount {string} amount to be validated in coin denomination
+     * @param address {string} target address
+     * @param coinAmount {string} amount to be sent
      * @param isSendAll {boolean} whether transaction should send all available coins or not
-     * @param currentNetwork {Network} coin to create the fake transaction for
+     * @param currentNetwork {Network} network to create the fake transaction for
      * @param balanceCoins {number|string} balance of coin we are creating transactions for
+     * @param [isAddressFake=false] use this flag if the target address passed is not the same you plan to actually
+     *                              use when sending transaction. It can affect fee estimation.
      * @return {Promise<
      *             {
      *                  result: true,
@@ -102,11 +107,25 @@ export class Wallet {
      *                  howToFix: string
      *              }>
      *          }
-     *          Returned value is ether object with txData array and optional flags about balance enough to cover fee
-     *          or just error object. Each option can also be error object.
-     *
+     *          Returned value is ether object with txData array and optional flags or just error object.
+     *          1. The result is false and contain error details: means that the calculation process failed
+     *          2. Result is true, isFeeCoinBalanceNotEnoughForAllOptions is false and there are no options
+     *             containing error object: means all options can be used to send a transaction.
+     *          3. Result is true, isFeeCoinBalanceNotEnoughForAllOptions is false and there are some options
+     *             containing error object: means some options can be used and some cannot because e.g. we
+     *             have no enough coins to cover these options.
+     *          4. Result is true and isFeeCoinBalanceNotEnoughForAllOptions is true - all options are not error
+     *             objects but they cannot be used for transaction sending - such options just to demonstrate
+     *             the fee for some standard transaction.
      */
-    async createTransactionsWithFakeSignatures(address, coinAmount, isSendAll, currentNetwork, balanceCoins) {
+    async createTransactionsWithFakeSignatures(
+        address,
+        coinAmount,
+        isSendAll,
+        currentNetwork,
+        balanceCoins,
+        isAddressFake = false
+    ) {
         throw new Error("Not implemented in base Wallet class");
     }
 
@@ -123,6 +142,10 @@ export class Wallet {
     }
 
     /**
+     * @deprecated @since 0.8.0 - we switched to use single address for bitcoin (was the only coin
+     * supporting multiple addresses) but we left the multiple addresses creation under the hood when importing
+     * a bitcoin wallet.
+     *
      * Creates new address if the wallet supports multiple addresses
      *
      * @param [label] {string|null} optional label for address
@@ -186,5 +209,14 @@ export class Wallet {
      */
     actualizeBalanceCacheWithAmountAtoms(amountAtoms, sign = -1) {
         throw new Error("Not implemented in base Wallet class");
+    }
+
+    /**
+     * Returns change address only for wallets supporting outputs. Returns null by default.
+     *
+     * @return {Promise<string|null>}
+     */
+    async getCurrentChangeAddressIfSupported() {
+        return new Promise((resolve, reject) => resolve(null));
     }
 }

@@ -11,6 +11,7 @@ import { postponeExecution, safeStringify } from "../utils/browserUtils";
 
 export const API_VERSION_PREFIX = "/api/v1";
 export const urlWithPrefix = `${API_URL}${API_VERSION_PREFIX}`;
+export const API_KEYS_PROXY_URL = `${API_URL}${API_VERSION_PREFIX}/proxy`;
 
 export const SESSION_COOKIE_NAME = "sessionId";
 

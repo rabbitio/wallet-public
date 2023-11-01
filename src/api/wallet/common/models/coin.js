@@ -2,7 +2,9 @@ import { Blockchain } from "./blockchain";
 import { Protocol } from "./protocol";
 
 /**
- * The model for cryptocurrency coins
+ * The model for cryptocurrency coins.
+ *
+ * WARNING: this class should not be instantiated directly. Use only predefined singleton Coin (or descendants) instances.
  */
 export class Coin {
     /**
@@ -27,7 +29,7 @@ export class Coin {
      * @param [protocol] {Protocol|null} token/coin protocol if relevant
      * @param [tokenAddress] {string|null} address of contract of this token (if the coin is token)
      * @param [doesUseLowerCaseAddresses] {boolean} flag to clarify whether we can use lower case addresses to ensure more robust comparisons
-     * @param [doesCalculateBalanceInternally=false] fkag signalling that for this coin we don't retrieve balance value from external sources - we calculate it on base of transactions set
+     * @param [doesUseOutputs=false] {boolean} true if this coin uses inputs/outputs concept and false if it uses just balances
      */
     constructor(
         latinName,
@@ -46,7 +48,7 @@ export class Coin {
         protocol = null,
         tokenAddress = null,
         doesUseLowerCaseAddresses = true,
-        doesCalculateBalanceInternally = false
+        doesUseOutputs = false
     ) {
         this.latinName = latinName;
         this.ticker = ticker;
@@ -67,7 +69,7 @@ export class Coin {
         this.feeCoin = this;
         this._significantDigits = 8;
         this.doesUseLowerCaseAddresses = doesUseLowerCaseAddresses;
-        this.doesCalculateBalanceInternally = doesCalculateBalanceInternally;
+        this.doesUseOutputs = doesUseOutputs;
     }
 
     static PROTOCOLS = {

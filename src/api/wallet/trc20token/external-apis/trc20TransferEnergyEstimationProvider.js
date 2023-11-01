@@ -1,20 +1,23 @@
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { Coins } from "../../coins";
-import { TRONGR_PR_K } from "../../../../properties";
 import { tronUtils } from "../../trx/adapters/tronUtils";
 import { BigNumber } from "ethers";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
+import { LONG_TTL_FOR_REALLY_RARELY_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
 
 class Trc20TransferEstimationTrongridProvider extends ExternalApiProvider {
     constructor() {
-        super("", "post", 15000, ApiGroups.TRONGRID, { "TRON-PRO-API-KEY": TRONGR_PR_K });
+        super("", "post", 15000, ApiGroups.TRONGRID);
     }
     composeQueryString(params, subRequestIndex = 0) {
-        const prefix = getCurrentNetwork(Coins.COINS.TRX) === Coins.COINS.TRX.mainnet ? "api" : "nile";
-        return `https://${prefix}.trongrid.io/wallet/triggerconstantcontract`;
+        try {
+            const originalApiPath = "/wallet/triggerconstantcontract";
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
+        } catch (e) {
+            improveAndRethrow(e, "Trc20TransferEstimationTrongridProvider.composeQueryString");
+        }
     }
 
     composeBody(params, subRequestIndex = 0) {
@@ -52,9 +55,7 @@ export class Trc20TransferEnergyEstimationProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "trc20TransferEnergyEstimationProvider",
         [new Trc20TransferEstimationTrongridProvider()],
-        90000,
-        100,
-        1000
+        LONG_TTL_FOR_REALLY_RARELY_CHANGING_DATA_MS // Energy estimation should mot change for the same transaction, so we use long TTL
     );
 
     static async estimateTrc20TransferEnergy(coin, addressFrom, addressTo, amountAtoms) {

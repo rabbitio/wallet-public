@@ -85,6 +85,7 @@ export default class PaymentService {
      *             errorDescription: string,
      *             howToFix: string
      *         }>}
+     * TODO: [feature, critical] implement missing standard logic - isFeeCoinBalanceNotEnoughForAllOptions and other task_id=c6771140cfce44049a8ce600032bb3af
      */
     static async createTransactionsWithFakeSignatures(address, amountBtc, isSendAll, network) {
         const loggerSource = "createTransactionsWithFakeSignatures";

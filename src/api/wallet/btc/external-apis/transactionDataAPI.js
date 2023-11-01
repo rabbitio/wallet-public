@@ -1,4 +1,3 @@
-import { P2PKH_SCRIPT_TYPE, P2SH_SCRIPT_TYPE, P2WPKH_SCRIPT_TYPE } from "../lib/utxos";
 import { Input } from "../models/transaction/input";
 import { Output } from "../models/transaction/output";
 import { Transaction } from "../models/transaction/transaction";
@@ -10,7 +9,10 @@ import { Coins } from "../../coins";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { mappingsPerProvider } from "./outputTypeMappings";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
+// TODO: [feature, moderate] Add mempool.space provider https://mempool.space/docs/api/rest#get-transaction task_id=a8370ae7b99049b092f31f761a95b54d
 class BlockstreamTransactionDetailsProvider extends ExternalApiProvider {
     constructor() {
         super("https://blockstream.info/", "get", 15000, ApiGroups.BLOCKSTREAM);
@@ -31,8 +33,7 @@ class BlockstreamTransactionDetailsProvider extends ExternalApiProvider {
         try {
             const currentBlockNumber = params[2];
             const tx = response.data;
-            const mapType = type =>
-                type === "v0_p2wpkh" ? P2WPKH_SCRIPT_TYPE : type === "p2pkh" ? P2PKH_SCRIPT_TYPE : P2SH_SCRIPT_TYPE;
+            const typesMap = mappingsPerProvider.get(ApiGroups.BLOCKSTREAM);
             const inputs = tx.vin.map(
                 input =>
                     new Input(
@@ -40,7 +41,7 @@ class BlockstreamTransactionDetailsProvider extends ExternalApiProvider {
                         input.prevout.value,
                         input.txid,
                         input.vout,
-                        mapType(input.prevout.scriptpubkey_type), // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
+                        typesMap.get(input.prevout.scriptpubkey_type) ?? null,
                         input.sequence
                     )
             );
@@ -50,7 +51,7 @@ class BlockstreamTransactionDetailsProvider extends ExternalApiProvider {
                     new Output(
                         [output.scriptpubkey_address],
                         output.value,
-                        mapType(output.scriptpubkey_type), // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
+                        typesMap.get(output.scriptpubkey_type) ?? null,
                         null,
                         index
                     )
@@ -72,6 +73,11 @@ class BlockstreamTransactionDetailsProvider extends ExternalApiProvider {
     }
 }
 
+/**
+ * @deprecated @since 0.10.0 - on 22.09.23 it was figured out that this explorer returns no data
+ * TODO: [refactoring, moderate] remove after the scheduled check task_id=fd3c94ece28740b5b401567bb4f77657
+ */
+// eslint-disable-next-line no-unused-vars
 class BitapsTransactionDetailsProvider extends ExternalApiProvider {
     constructor() {
         /**
@@ -94,24 +100,11 @@ class BitapsTransactionDetailsProvider extends ExternalApiProvider {
         try {
             const currentBlockNumber = params[2];
             const tx = response.data;
-            const mapType = type =>
-                type === "P2WPKH"
-                    ? P2WPKH_SCRIPT_TYPE
-                    : type === "P2PKH"
-                    ? P2PKH_SCRIPT_TYPE
-                    : type === "P2SH"
-                    ? P2SH_SCRIPT_TYPE
-                    : "";
+            const typesMap = mappingsPerProvider.get(ApiGroups.BITAPS);
             const inputs = Object.keys(tx.vIn).map(inputIndex => {
                 const input = tx.vIn[inputIndex];
-                return new Input(
-                    input.address,
-                    input.amount,
-                    input.txId,
-                    input.vOut,
-                    mapType(input.type),
-                    input.sequence
-                );
+                const type = typesMap.get(input.type) ?? null;
+                return new Input(input.address, input.amount, input.txId, input.vOut, type, input.sequence);
             });
 
             const outputs = Object.keys(tx.vOut).map(outputIndex => {
@@ -119,7 +112,7 @@ class BitapsTransactionDetailsProvider extends ExternalApiProvider {
                 return new Output(
                     [output.address],
                     output.value,
-                    mapType(output.type),
+                    typesMap.get(output.type) ?? null,
                     output.spent[0] ?? null,
                     +outputIndex
                 );
@@ -157,8 +150,7 @@ class BtcDotComTransactionDetailsProvider extends ExternalApiProvider {
     getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
         try {
             const tx = response.data.data;
-            const mapType = type =>
-                type === "P2WPKH_V0" ? P2WPKH_SCRIPT_TYPE : type === "P2PKH" ? P2PKH_SCRIPT_TYPE : P2SH_SCRIPT_TYPE;
+            const typesMap = mappingsPerProvider.get(ApiGroups.BTCCOM);
             const inputs = tx.inputs.map(
                 input =>
                     new Input(
@@ -166,15 +158,15 @@ class BtcDotComTransactionDetailsProvider extends ExternalApiProvider {
                         input.prev_value,
                         input.prev_tx_hash,
                         input.prev_position,
-                        mapType(input.prev_type),
+                        typesMap.get(input.prev_type) ?? null,
                         input.sequence
                     )
             );
 
-            const outputs = tx.outputs.map(
-                (output, index) =>
-                    new Output(output.addresses, output.value, mapType(output.type), output.spent_by_tx || null, index)
-            );
+            const outputs = tx.outputs.map((output, index) => {
+                const spendId = output.spent_by_tx ?? null;
+                return new Output(output.addresses, output.value, typesMap.get(output.type) ?? null, spendId, index);
+            });
 
             return new Transaction(
                 tx.hash,
@@ -196,12 +188,10 @@ const transactionDataAPICaller = new CachedRobustExternalApiCallerService(
     "transactionDataAPICaller",
     [
         new BlockstreamTransactionDetailsProvider(),
-        new BitapsTransactionDetailsProvider(),
+        // new BitapsTransactionDetailsProvider(),
         new BtcDotComTransactionDetailsProvider(),
     ],
-    120000,
-    50,
-    3000
+    STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS
 );
 
 /**

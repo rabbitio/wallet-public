@@ -4,7 +4,9 @@ import { Coins } from "../../coins";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
 
+// TODO: [feature, moderate] Add mempool.space provider https://mempool.space/docs/api/rest#get-recommended-fees task_id=a8370ae7b99049b092f31f761a95b54d
 class BitgoBtcFeeRatesProvider extends ExternalApiProvider {
     constructor() {
         super("https://www.bitgo.com/api/v2/btc/tx/fee", "get", 10000, ApiGroups.BITGO);
@@ -87,9 +89,7 @@ class BlockstreamBtcFeeRatesProvider extends ExternalApiProvider {
 const robustFeeRatsRetriever = new CachedRobustExternalApiCallerService(
     "robustFeeRatsRetriever",
     [new BitgoBtcFeeRatesProvider(), new BitcoinerBtcFeeRatesProvider(), new BlockstreamBtcFeeRatesProvider()],
-    15000,
-    30,
-    2000
+    SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS
 );
 
 export async function getFeesFromExtService() {

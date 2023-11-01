@@ -1,7 +1,5 @@
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
-import { ETH_PR_ALC_GOERLI_K, ETH_PR_K } from "../../../../properties";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { Coin } from "../../common/models/coin";
 import { BigNumber } from "ethers";
@@ -11,6 +9,8 @@ import { TransactionsHistoryItem } from "../../common/models/transactionsHistory
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
 import { mergeTwoTransactionsArraysAndNotifyAboutNewTransactions } from "../../common/utils/cacheActualizationUtils";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
 class AlchemyEthereumBlockchainTransactionsProvider extends ExternalApiProvider {
     constructor() {
@@ -24,16 +24,17 @@ class AlchemyEthereumBlockchainTransactionsProvider extends ExternalApiProvider 
         super("", ["post", "post"], 15000, ApiGroups.ALCHEMY, null, 1000);
     }
 
+    doesRequireSubRequests() {
+        return true;
+    }
+
     doesSupportPagination() {
         return true;
     }
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const isMainnet = getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet;
-            const networkPrefix = isMainnet ? "mainnet" : "goerli";
-            const apiKey = isMainnet ? ETH_PR_K : ETH_PR_ALC_GOERLI_K;
-            return `https://eth-${networkPrefix}.g.alchemy.com/v2/${apiKey}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}`;
         } catch (e) {
             improveAndRethrow(e, "alchemyEthereumBlockchainTransactionsProvider.composeQueryString");
         }
@@ -146,9 +147,7 @@ export class EthereumBlockchainTransactionsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "ethereumBlockchainTransactionsProvider",
         [new AlchemyEthereumBlockchainTransactionsProvider()],
-        120000,
-        130,
-        1000,
+        STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,
         mergeTwoTransactionsArraysAndNotifyAboutNewTransactions
     );

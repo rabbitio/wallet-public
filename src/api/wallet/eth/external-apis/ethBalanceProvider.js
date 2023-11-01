@@ -2,7 +2,6 @@ import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { BigNumber } from "ethers";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
-import { ETH_PR_ALC_GOERLI_K, ETH_PR_K } from "../../../../properties";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
@@ -10,6 +9,8 @@ import {
     createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
     mergeSingleBalanceValuesAndNotifyAboutValueChanged,
 } from "../../common/utils/cacheActualizationUtils";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
 class AlchemyEthBalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -18,10 +19,7 @@ class AlchemyEthBalanceProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const isMainnet = getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet;
-            const networkPrefix = isMainnet ? "mainnet" : "goerli";
-            const apiKey = isMainnet ? ETH_PR_K : ETH_PR_ALC_GOERLI_K;
-            return `https://eth-${networkPrefix}.g.alchemy.com/v2/${apiKey}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}`;
         } catch (e) {
             improveAndRethrow(e, "AlchemyEthBalanceProvider.composeQueryString");
         }
@@ -85,9 +83,7 @@ export class EthBalanceProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "ethBalanceProvider",
         [new EtherscanEthBalanceProvider(), new AlchemyEthBalanceProvider()],
-        100000,
-        110,
-        1000,
+        STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,
         (cached, newValue) =>
             mergeSingleBalanceValuesAndNotifyAboutValueChanged(cached, newValue, Coins.COINS.ETH.ticker)

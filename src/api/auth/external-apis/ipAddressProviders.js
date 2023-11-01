@@ -2,6 +2,7 @@ import { CachedRobustExternalApiCallerService } from "../../common/services/util
 import { improveAndRethrow } from "../../common/utils/errorUtils";
 import { ExternalApiProvider } from "../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { ApiGroups } from "../../common/external-apis/apiGroups";
+import { MODERATE_TTL_FOR_RELATIVELY_FREQ_CHANGING_DATA_MS } from "../../common/utils/ttlConstants";
 
 class BigdatacloudIpAddressProvider extends ExternalApiProvider {
     constructor() {
@@ -63,9 +64,7 @@ export default class IpAddressProvider {
             new IpifyIpAddressProvider(),
             new WhatismyipaddressIpAddressProvider(),
         ],
-        180000,
-        30,
-        2000
+        MODERATE_TTL_FOR_RELATIVELY_FREQ_CHANGING_DATA_MS
     );
 
     /**
@@ -74,12 +73,13 @@ export default class IpAddressProvider {
      * It is easier than manual identification and also (as ip needed for server side to check it) it saves us from
      * issues related to changes of infrastructure configurations (like adding proxies etc.) so we should not configure
      * anything on server side to get correct client's IP.
-     * @returns String - IP address
-     * @throws Error if fails to retrieve IP address from all the services
+     *
+     * @returns {Promise<String>} IP address
+     * @throws {Error} if fails to retrieve IP address from all the services
      */
     static async getClientIpAddress() {
         try {
-            return this.externalIPAddressAPICaller.callExternalAPICached([], 7000);
+            return await this.externalIPAddressAPICaller.callExternalAPICached([], 7000);
         } catch (e) {
             improveAndRethrow(e, "getClientIpAddress");
         }

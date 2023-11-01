@@ -1,5 +1,4 @@
 import bitcoinJs from "bitcoinjs-lib";
-import is from "is_js";
 
 import { isAmountDustForAddress, P2PKH_SCRIPT_TYPE, P2SH_SCRIPT_TYPE, P2WPKH_SCRIPT_TYPE } from "../utxos";
 import { EcPairsMappingEntry } from "../addresses";
@@ -71,16 +70,17 @@ export function buildTransactionUnsafe(
  * Builds transaction on base of given parameters.
  * Only P2PKH, P2WPKH and P2SH-P2WPKH utxos are supported.
  * TODO: [docs, critical]
- * @param amount
- * @param allowDustAmountToBeSent
- * @param address
- * @param change
- * @param changeAddress
- * @param utxos
- * @param ecPairsMappingToAddresses
- * @param network
- * @param sequence
- * @returns {*}
+ *
+ * @param amount {number}
+ * @param allowDustAmountToBeSent {boolean}
+ * @param address {string}
+ * @param change {number}
+ * @param changeAddress {string}
+ * @param utxos {Utxo[]}
+ * @param ecPairsMappingToAddresses {EcPairsMappingEntry[]}
+ * @param network {Network}
+ * @param sequence {number}
+ * @returns {Object}
  */
 function buildTransactionByCheckDustFlag(
     amount,
@@ -94,25 +94,25 @@ function buildTransactionByCheckDustFlag(
     sequence = MAX_RBF_SEQUENCE
 ) {
     try {
-        if (is.not.string(address) || !address.length) {
+        if (typeof address !== "string" || address === "") {
             throw new Error("Address should be not empty string.");
         }
 
         const dustCheckResult = isAmountDustForAddress(amount, address);
-        if (is.not.number(amount) || amount < 0 || (!allowDustAmountToBeSent && dustCheckResult.result)) {
+        if (typeof amount !== "number" || amount < 0 || (!allowDustAmountToBeSent && dustCheckResult.result)) {
             throw new Error(`Bad amount, should be number greater or equal to ${dustCheckResult.threshold}.`);
         }
 
-        if (is.not.number(change) || change < 0) {
+        if (typeof change !== "number" || change < 0) {
             throw new Error("Bad change amount, should be number greater or equal to 0.");
         }
 
         const changeDustCheckResult = isAmountDustForAddress(change, changeAddress);
-        if (!changeDustCheckResult.result && (is.not.string(changeAddress) || !changeAddress.length)) {
+        if (!changeDustCheckResult.result && (typeof changeAddress !== "string" || changeAddress === "")) {
             throw new Error("Change address should be not empty string.");
         }
 
-        if (is.not.array(ecPairsMappingToAddresses) || !ecPairsMappingToAddresses.length) {
+        if (!Array.isArray(ecPairsMappingToAddresses) || !ecPairsMappingToAddresses.length) {
             throw new Error("Empty ecPairs to addresses mapping.");
         } else {
             ecPairsMappingToAddresses.forEach(mappingEntry => {
@@ -122,7 +122,7 @@ function buildTransactionByCheckDustFlag(
             });
         }
 
-        if (is.not.array(utxos) || !utxos.length) {
+        if (!Array.isArray(utxos) || !utxos.length) {
             throw new Error("Empty utxos set.");
         } else {
             utxos.forEach(utxo => {
@@ -144,7 +144,7 @@ function buildTransactionByCheckDustFlag(
         }
 
         if (
-            is.not.number(sequence) ||
+            typeof sequence !== "number" ||
             sequence < 0 ||
             (sequence !== FORBID_RBF_SEQUENCE && sequence > MAX_RBF_SEQUENCE)
         ) {
@@ -184,7 +184,7 @@ function buildTransactionByCheckDustFlag(
             } else if (utxo.type === P2PKH_SCRIPT_TYPE) {
                 transactionBuilder.sign(index, utxo.ecPair);
             } else if (utxo.type === P2SH_SCRIPT_TYPE) {
-                // By design we only can get P2SH-P2WPKH utxo here, so enough following:
+                // By design, we only can get P2SH-P2WPKH utxo here, so enough following:
                 transactionBuilder.sign(index, utxo.ecPair, utxo.redeemScript, null, utxo.value_satoshis);
             }
         }
@@ -203,10 +203,10 @@ function buildTransactionByCheckDustFlag(
 /**
  * Adds ecPairs and prevOutScript (of needed) to utxos.
  *
- * @param utxos - utxos to be updated with ecPair
- * @param ecPairsMappingToAddresses - mapping of ecPairs to addresses
- * @param network - network of utxos
- * @return Array of updated utxos
+ * @param utxos {Utxo[]} utxos to be updated with ecPair
+ * @param ecPairsMappingToAddresses {EcPairsMappingEntry[]} mapping of ecPairs to addresses
+ * @param network {Network} network of utxos
+ * @return {Object[]} updated utxos
  */
 function addEcPairsAndRequiredScriptsToUtxos(utxos, ecPairsMappingToAddresses, network) {
     utxos.forEach(utxo => {

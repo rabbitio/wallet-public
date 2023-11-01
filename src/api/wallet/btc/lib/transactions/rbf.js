@@ -10,15 +10,15 @@ import { Coins } from "../../../coins";
 /**
  * Creates new transaction on base of old one but with new fee according to RBF protocol.
  *
- * @param oldTransaction - old transaction data
- * @param newFee - new fee for replacing transaction (not less than fee of old tx + fee covering new tx for some used rate)
- * @param seedHex - seed of HD wallet to calculate signatures for signing process
- * @param changeAddress - change address
- * @param network - network to work in
- * @param indexes - indexes of addresses of the wallet
- * @param allAddresses - all used/current addresses of wallet
- * @param candidateUtxos - list of currently available utxos (sorted by amount descending)
- * @param isFinalPrice - flag signalling whether to set sequence for transaction prohibiting further RBFing
+ * @param oldTransaction {Transaction} old transaction data
+ * @param newFee {number} new fee for replacing transaction (not less than fee of old tx + fee covering new tx for some used rate)
+ * @param seedHex {string} seed of HD wallet to calculate signatures for signing process
+ * @param changeAddress {string} change address
+ * @param network {Network} network to work in
+ * @param indexes {Object} indexes of addresses of the wallet
+ * @param allAddresses {{internal: string[], external: string[]}} all used/current addresses of wallet
+ * @param candidateUtxos {Utxo[]} list of currently available utxos (sorted by amount descending)
+ * @param isFinalPrice {boolean} flag signalling whether to set sequence for transaction prohibiting further RBFing
  * @returns {
  *              {
  *                  bitcoinJsTx: Object,
@@ -191,13 +191,13 @@ function selectAdditionalUtxosForRbf(candidateUtxos, amountToBeCovered) {
  * without change output and one with change output. It is because we cannot calculate fee before building a transaction -
  * we build it first, calculate fee and only then we are able to check final change amount.
  *
- * @param oldTransaction - transaction to recalculate fee for
- * @param allAddresses - all used/current addresses of the wallet
- * @param currentChangeAddress - current change address
- * @param feeRates - array of FeeRate to calculate fee for
- * @param candidateUtxos - sorted list of utxos that can be used for new transactions
- * @returns Array (length is equal to length of feeRates array) of objects if following format:
- *          { rate: FeeRate obj, fee: number of satoshi|null, isCoverableByBalance: boolean, isRational: boolean }
+ * @param oldTransaction {Transaction} transaction to recalculate fee for
+ * @param allAddresses {{internal: string[], external: string[]}} all used/current addresses of the wallet
+ * @param currentChangeAddress {string} current change address
+ * @param feeRates {FeeRate[]} array of FeeRate to calculate fee for
+ * @param candidateUtxos {Utxo[]} sorted list of utxos that can be used for new transactions
+ * @returns {{ rate: FeeRate, fee: number|null, isCoverableByBalance: boolean, isRational: boolean|null }[]}
+ *          Array length is equal to length of feeRates array
  */
 export function calculateFeeForExistingTransactionForFeeRates(
     oldTransaction,
@@ -259,37 +259,41 @@ export function calculateFeeForExistingTransactionForFeeRates(
             for (let i = 0; i < feeRates.length; ++i) {
                 const rate = feeRates[i];
                 const feeOfTxNoChange = calculateFeeByFeeRate(txNoChange, rate);
+                const newRbfFeeForTxWithoutChange = feeOfTxNoChange + oldFee;
                 /* Ideally we want to have no change output but only here we can check actual change due to calculated fee.
                  * We also take into account oldFee as RBF requires to add it to fee of new transaction. */
-                const changeOfTxNoChange = sourceSumForNewFee - feeOfTxNoChange - oldFee;
-                const feeOfTxWithChange = calculateFeeByFeeRate(txWithChange, rate);
-                const changeOfTxWithChange = sourceSumForNewFee - feeOfTxWithChange - oldFee;
+                const changeOfTxNoChange = sourceSumForNewFee - newRbfFeeForTxWithoutChange;
+                const feeOfTxHavingChange = calculateFeeByFeeRate(txWithChange, rate);
+                const newRbfFeeForTxHavingChange = feeOfTxHavingChange + oldFee;
+                const changeOfTxHavingChange = sourceSumForNewFee - newRbfFeeForTxHavingChange;
 
                 /** There are 4 possible meaningful cases:
                  *  1. changeOfTxNoChange < 0 -> means we should add more utxos
                  *  2. changeOfTxNoChange >=0 but is dust -> push feeOfTxNoChange to final map with coverable=true
-                 *  3. changeOfTxNoChange > dust and feeOfTxWithChange < 0 -> means we should add more utxos
-                 *  4. changeOfTxNoChange > dust and feeOfTxWithChange >= 0 -> push feeOfTxWithChange to final map with coverable=true
+                 *  3. changeOfTxNoChange > dust and feeOfTxHavingChange < 0 -> means we should add more utxos
+                 *  4. changeOfTxNoChange > dust and feeOfTxHavingChange >= 0 -> push feeOfTxHavingChange to final map with coverable=true
                  */
                 if (changeOfTxNoChange >= 0 && changeOfTxNoChange <= dustAmount) {
-                    finalMappingRatesToFee.push({ rate, fee: feeOfTxNoChange + oldFee, isCoverableByBalance: true });
-                } else if (changeOfTxNoChange > dustAmount && changeOfTxWithChange >= 0) {
-                    finalMappingRatesToFee.push({ rate, fee: feeOfTxWithChange + oldFee, isCoverableByBalance: true });
+                    finalMappingRatesToFee.push({ rate, fee: newRbfFeeForTxWithoutChange, isCoverableByBalance: true });
+                } else if (changeOfTxNoChange > dustAmount && changeOfTxHavingChange >= 0) {
+                    finalMappingRatesToFee.push({ rate, fee: newRbfFeeForTxHavingChange, isCoverableByBalance: true });
                 }
             }
             feeRates = feeRates.filter(rate => !finalMappingRatesToFee.find(item => item.rate === rate));
         } while (feeRates.length && candidateUtxos.length);
 
-        const itemWithGreatestPureTxFee = finalMappingRatesToFee.reduce(
-            (prev, item) => (prev == null || item.fee - oldFee > prev.fee - oldFee ? item : prev),
-            null
-        );
-        const greatestPureTxFee = itemWithGreatestPureTxFee != null ? itemWithGreatestPureTxFee.fee - oldFee : null;
+        /* There are possible rare cases when the option having higher fee rate (means faster inclusion in block)
+         * has smaller fee. This can occur due to adding/not adding change output or due to different set of used UTXOs.
+         * For suc options we set the isRational flag to false.
+         */
         finalMappingRatesToFee.forEach(item => {
-            item.isRational =
-                greatestPureTxFee != null ? item.fee < greatestPureTxFee || item === itemWithGreatestPureTxFee : null;
+            const thereIsNoOptionHavingSmallerFeeAndHigherRate = !finalMappingRatesToFee.find(
+                betterCandidate => betterCandidate.fee < item.fee && betterCandidate.rate.rate > item.rate.rate
+            );
+            item.isRational = thereIsNoOptionHavingSmallerFeeAndHigherRate;
         });
 
+        /* Here we add data for fee rates that we were unsuccessful to cover using the available UTXOs set */
         feeRates.forEach(rate =>
             finalMappingRatesToFee.push({ rate, fee: null, isCoverableByBalance: false, isRational: null })
         );

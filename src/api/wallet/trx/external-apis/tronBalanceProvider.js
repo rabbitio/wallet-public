@@ -2,28 +2,32 @@ import { ExternalApiProvider } from "../../../common/services/utils/robustExtera
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { Coins } from "../../coins";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { tronUtils } from "../adapters/tronUtils";
-import { TRONGR_PR_K } from "../../../../properties";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
 import {
     createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
     mergeSingleBalanceValuesAndNotifyAboutValueChanged,
 } from "../../common/utils/cacheActualizationUtils";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
 class TrongridTronBalanceProvider extends ExternalApiProvider {
     constructor() {
-        super("https://", "post", 15000, ApiGroups.TRONGRID, { "TRON-PRO-API-KEY": TRONGR_PR_K });
+        super("", "post", 15000, ApiGroups.TRONGRID);
     }
 
     composeQueryString(params, subRequestIndex = 0) {
-        const network = getCurrentNetwork(Coins.COINS.TRX);
-        return `${network === Coins.COINS.TRX.mainnet ? "api" : "nile"}.trongrid.io/wallet/getaccount`;
+        const originalApiPath = "/wallet/getaccount";
+        return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
     }
 
     composeBody(params, subRequestIndex = 0) {
-        const hexAddress = tronUtils.base58checkAddressToHex(params[0]);
-        return `{ "address": "${hexAddress}" }`;
+        try {
+            const hexAddress = tronUtils.base58checkAddressToHex(params[0]);
+            return `{ "address": "${hexAddress}" }`;
+        } catch (e) {
+            improveAndRethrow(e, "trongridTronBalanceProvider.composeBody");
+        }
     }
 
     getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
@@ -46,10 +50,8 @@ class TrongridTronBalanceProvider extends ExternalApiProvider {
 export class TronBalanceProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronBalanceProvider",
-        [new TrongridTronBalanceProvider()],
-        120000,
-        130,
-        1000,
+        [new TrongridTronBalanceProvider()], // TODO: [feature, high] add more providers. task_id=c246262b0e7f43dfa2a9b0e30c947ad7
+        STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,
         (cached, newValue) =>
             mergeSingleBalanceValuesAndNotifyAboutValueChanged(cached, newValue, Coins.COINS.TRX.ticker)

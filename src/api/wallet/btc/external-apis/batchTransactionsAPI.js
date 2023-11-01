@@ -37,7 +37,7 @@ class BlockchainComBatchBtcTransactionsProvider extends ExternalApiProvider {
                         input.prev_out.value,
                         input.prev_out?.tx_index, // txid is not provided by blockchain.com
                         input.prev_out.n,
-                        getOutputTypeByAddress(input.prev_out.addr), // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
+                        getOutputTypeByAddress(input.prev_out.addr),
                         input.sequence
                     )
             );
@@ -49,7 +49,7 @@ class BlockchainComBatchBtcTransactionsProvider extends ExternalApiProvider {
                             ? new Output(
                                   [output.addr],
                                   output.value,
-                                  getOutputTypeByAddress(output.addr), // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
+                                  getOutputTypeByAddress(output.addr),
                                   output?.spending_outpoints ? output?.spending_outpoints[0]?.tx_index : null, // txid is not provided by blockchain.com, so we use tx_index as it is not critical
                                   output.n
                               )

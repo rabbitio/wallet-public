@@ -244,7 +244,14 @@ export class SendCoinsService {
 
             this._actualizeCaches(wallet, coin, txData, pushedTxIdOrError);
 
-            EventBus.dispatch(TRANSACTION_PUSHED_EVENT, null, pushedTxIdOrError, txData.amount, txData.fee);
+            EventBus.dispatch(
+                TRANSACTION_PUSHED_EVENT,
+                null,
+                pushedTxIdOrError,
+                coin.atomsToCoinAmount("" + txData.amount),
+                txData.fee,
+                coin.ticker
+            );
 
             if (typeof note === "string" && note !== "") {
                 await TransactionsDataService.saveTransactionData(pushedTxIdOrError, { note });

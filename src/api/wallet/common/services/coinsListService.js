@@ -1,9 +1,6 @@
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { Coins } from "../../coins";
 import { BalancesService } from "./balancesService";
-import { coinToUSDRatesProvider } from "../external-apis/coinToUSDRatesProvider";
-import USDFiatRatesProvider from "../../../fiat/external-apis/usdFiatRatesExternalAPIs";
-import CoinsToFiatRatesService from "./coinsToFiatRatesService";
 import { Wallets } from "../wallets";
 import { NumbersUtils } from "../utils/numbersUtils";
 import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
@@ -14,6 +11,8 @@ import {
     NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
     TRANSACTION_PUSHED_EVENT,
 } from "../../../common/adapters/eventbus";
+import { safeStringify } from "../../../common/utils/browserUtils";
+import { SMALL_TTL_FOR_CACHE_L2_MS } from "../../../common/utils/ttlConstants";
 
 /**
  * Provides API to get the coins list with related data
@@ -22,9 +21,7 @@ import {
 export class CoinsListService {
     static _cacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
         "coinsListService",
-        80000,
-        90,
-        1000,
+        SMALL_TTL_FOR_CACHE_L2_MS,
         false
     );
     static _cacheKeyUniquePart = "e421726e-b2b4-4238-8632-313152077169";
@@ -56,7 +53,7 @@ export class CoinsListService {
      * Final list is sorted by fiat balance equivalent descending.
      * NOTE: returned balance values are not exact (just floating point number even for coins having many digits after the comma)
      *
-     * @param [coins] {Array<Coin>} list of coins to get the data for. All supported coins by default
+     * @param [coins=null] {Array<Coin>} list of coins to get the data for. All enabled coins by default
      * @return {Promise<{
      *             ticker: string,
      *             tickerPrintable: string,
@@ -72,8 +69,9 @@ export class CoinsListService {
      *             }[]>}
      *         Some values can be null if no data is retrieved
      */
-    static async getEnabledCoinsSortedByFiatBalance(coins) {
+    static async getEnabledCoinsSortedByFiatBalance(coins = null) {
         let cacheId;
+        let result;
         try {
             const allEnabledCoins = Coins.getEnabledCoinsList();
             const requestedEnabledCoins =
@@ -84,47 +82,31 @@ export class CoinsListService {
                 return [];
             }
             cacheId = this._cacheKey(requestedEnabledCoins);
-            // TODO: [tests, critical] Add tests for caching logic
-            let result = await this._cacheAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
-                cacheId
-            );
+            result = await this._cacheAndRequestsResolver.getCachedOrWaitForCachedOrAcquireLock(cacheId);
             if (!result.canStartDataRetrieval) {
                 return result?.cachedData;
             }
 
             const wallets = requestedEnabledCoins.map(coin => Wallets.getWalletByCoin(coin));
-            let currentFiatData = CoinsToFiatRatesService.getCurrentFiatCurrencyData();
-            let [balances, usdToFiatRates, coinsToUSDRates] = await Promise.all([
-                BalancesService.getBalances(wallets),
-                USDFiatRatesProvider.getUSDFiatRates(),
-                coinToUSDRatesProvider.getCoinsToUSDRates(),
-            ]);
+            const balancesWithFiat = await BalancesService.getBalancesWithFiat(wallets);
 
             if (
-                requestedEnabledCoins.find((coin, index) => balances[index] == null) ||
-                balances.length !== requestedEnabledCoins.length
+                requestedEnabledCoins.find((coin, index) => balancesWithFiat[index]?.balanceCoins == null) ||
+                balancesWithFiat.length !== requestedEnabledCoins.length
             ) {
                 throw new Error(
-                    `Balance for some coin is null or undefined ${JSON.stringify(
+                    `Balance for some coin is null or undefined ${safeStringify(
                         wallets.map(w => w.coin.ticker)
-                    )} ${JSON.stringify(balances)}`
+                    )} ${safeStringify(balancesWithFiat)}`
                 );
             }
 
-            let usdToCurrentFiatRate = usdToFiatRates.find(item => item.currency === currentFiatData.currency);
-            if (!usdToCurrentFiatRate) {
-                currentFiatData = CoinsToFiatRatesService.getDefaultFiatCurrencyData();
-                usdToCurrentFiatRate = { rate: 1 };
-            }
-
-            const unsortedList = balances.map((balance, index) => {
-                const coinToUSDRate = coinsToUSDRates.find(rateData => rateData.coin === requestedEnabledCoins[index]);
-                const coinToCurrentFiatRate = coinToUSDRate ? coinToUSDRate.usdRate * usdToCurrentFiatRate.rate : null;
-
-                const isBalanceZero = balance === 0 || /^[0.,]+$/.test(balance);
+            const unsortedList = balancesWithFiat.map((balanceItem, index) => {
+                const isBalanceZero = balanceItem.balanceCoins === 0 || /^[0.,]+$/.test(balanceItem.balanceCoins);
                 let balanceNotTrimmed =
-                    typeof balance === "number" ? balance.toFixed(requestedEnabledCoins[index].digits) : balance;
-                // TODO: [tests, critical] actualize unit tests according to trimming logic applied below
+                    typeof balanceItem.balanceCoins === "number"
+                        ? balanceItem.balanceCoins.toFixed(requestedEnabledCoins[index].digits)
+                        : balanceItem.balanceCoins;
                 balanceNotTrimmed = isBalanceZero
                     ? Number(0).toFixed(requestedEnabledCoins[index].digits)
                     : NumbersUtils.removeRedundantRightZerosFromNumberString(balanceNotTrimmed);
@@ -138,31 +120,28 @@ export class CoinsListService {
                     requestedEnabledCoins[index].digits,
                     10
                 );
-                const balanceFiat =
-                    coinToCurrentFiatRate != null
-                        ? (+balance * coinToCurrentFiatRate).toFixed(currentFiatData.decimalCount)
-                        : null;
+                const balanceFiat = balanceItem.balanceFiat;
                 const balanceFiatTrimmed =
                     balanceFiat != null
-                        ? NumbersUtils.trimCurrencyAmount(balanceFiat, currentFiatData.decimalCount, 10)
+                        ? NumbersUtils.trimCurrencyAmount(balanceFiat, balanceItem.fiatCurrencyDecimals, 10)
                         : null;
                 return {
                     ticker: requestedEnabledCoins[index].ticker,
                     tickerPrintable: requestedEnabledCoins[index].tickerPrintable,
                     latinName: requestedEnabledCoins[index].latinName,
-                    fiatCurrencyCode: currentFiatData.currency,
-                    coinToFiatRate: coinToCurrentFiatRate
-                        ? coinToCurrentFiatRate.toFixed(currentFiatData.decimalCount)
+                    fiatCurrencyCode: balanceItem.fiatCurrencyCode,
+                    coinToFiatRate: balanceItem.coinToFiatRate
+                        ? balanceItem.coinToFiatRate.toFixed(balanceItem.fiatCurrencyDecimals)
                         : null,
-                    coinFiatRateChange24hPercent: coinToUSDRate
+                    coinFiatRateChange24hPercent: balanceItem.change24hPercent
                         ? isBalanceZero
                             ? 0
-                            : +coinToUSDRate.change24hPercent
+                            : +balanceItem.change24hPercent
                         : null,
                     balance: balanceNotTrimmed,
                     balanceTrimmed: balanceTrimmed,
                     balanceTrimmedShortened: balanceTrimmedShortened,
-                    balanceFiat: balanceFiat,
+                    balanceFiat: balanceFiat == null ? null : "" + balanceFiat,
                     balanceFiatTrimmed: balanceFiatTrimmed,
                 };
             });
@@ -170,14 +149,14 @@ export class CoinsListService {
             const sorted = unsortedList.sort((coin1, coin2) => +coin2.balanceFiat - +coin1.balanceFiat);
 
             if (sorted.length === allEnabledCoins.length) {
-                this._cacheAndRequestsResolver.saveCachedData(cacheId, sorted);
+                this._cacheAndRequestsResolver.saveCachedData(cacheId, result?.lockId, sorted);
             }
 
             return sorted;
         } catch (e) {
             improveAndRethrow(e, "getOrderedCoinsDataWithFiat");
         } finally {
-            this._cacheAndRequestsResolver.markActiveCalculationAsFinished(cacheId);
+            this._cacheAndRequestsResolver.releaseLock(cacheId, result?.lockId);
         }
     }
 }

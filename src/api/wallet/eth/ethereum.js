@@ -4,6 +4,7 @@ import { NumbersUtils } from "../common/utils/numbersUtils";
 import { bip44Scheme } from "../btc/lib/addresses-schemes";
 import { Coin } from "../common/models/coin";
 import { Network } from "../common/models/networks";
+import { AmountUtils } from "../common/utils/amountUtils";
 
 class Ethereum extends Coin {
     constructor() {
@@ -34,7 +35,8 @@ class Ethereum extends Coin {
     }
 
     coinAmountToAtoms(coinsAmount) {
-        return ethers.utils.parseEther("" + coinsAmount).toString();
+        coinsAmount = AmountUtils.trimDigitsAfterPeriod(coinsAmount, this.digits, false);
+        return ethers.utils.parseEther(coinsAmount).toString();
     }
 
     composeUrlToTransactionExplorer(txId) {
@@ -48,4 +50,7 @@ class Ethereum extends Coin {
     }
 }
 
+/**
+ * WARNING: we use singleton coins objects all over the app. Don't create custom instances.
+ */
 export const ethereum = new Ethereum();

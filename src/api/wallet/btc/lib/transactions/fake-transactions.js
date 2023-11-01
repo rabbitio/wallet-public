@@ -14,7 +14,9 @@ import {
  * and get all final parameters like change amount, final fee for specific rate.
  *
  * Algorithm of UTXOs selection is encapsulated here. Note that it is pretty straightforward and
- * can fail to select appropriate UTXOs in some cases. TODO: [docs, moderate] describe cases
+ * can fail to select appropriate UTXOs in some cases.
+ *
+ * TODO: [docs, moderate] describe cases and improve algorithm task_id=5bba4dda33984b4aaeaa40bcf5313596
  *
  * @param amount {number} amount to be sent (satoshi)
  * @param address {string} address to send coins to
@@ -22,7 +24,7 @@ import {
  * @param feeRate {FeeRate} rate to calculate fee for
  * @param utxos {Utxo[]} all available candidate utxos of the wallet
  * @param network {Network} network to create transaction in
- * @return {TxData|Object} tx data or error object (see getFeePlusSendingAmountOverlapsBalanceErrorData)
+ * @return {TxData|{ result: false, errorDescription; string, howToFix: string}} tx data or error object
  */
 export function createFakeTransaction(amount, address, changeAddress, feeRate, utxos, network) {
     try {
@@ -34,6 +36,11 @@ export function createFakeTransaction(amount, address, changeAddress, feeRate, u
             ecPairsMapping,
             network
         );
+
+        if (isAmountDustForAddress(amount, address).result) {
+            // TODO: [feature, moderate] return TxData here too. task_id=c6771140cfce44049a8ce600032bb3af
+            return getFeePlusSendingAmountOverlapsBalanceErrorData();
+        }
 
         const selectedUtxos = [];
         let currentSum = 0;
@@ -81,11 +88,11 @@ export function createFakeTransaction(amount, address, changeAddress, feeRate, u
  *
  * Major idea is to add all spendable outputs to transaction except ones adding more fee than value.
  *
- * @param address - address to send all coins to
- * @param feeRate - rate to be used for fee calculation
- * @param utxos - all available candidate utxos of the wallet
- * @param network - network to perform operation within
- * @return TxData or error Object
+ * @param address {string} address to send all coins to
+ * @param feeRate {FeeRate} rate to be used for fee calculation
+ * @param utxos {Utxo[]} all available candidate utxos of the wallet
+ * @param network {Network} network to perform operation within
+ * @return {TxData|{ result: false, errorDescription: string, howToFix: string }}
  */
 export function createFakeSendAllTransaction(address, feeRate, utxos, network) {
     try {
@@ -99,6 +106,11 @@ export function createFakeSendAllTransaction(address, feeRate, utxos, network) {
         );
 
         const amountOfGoodUtxos = goodUtxos.reduce((sum, utxo) => sum + utxo.value_satoshis, 0);
+        if (isAmountDustForAddress(amountOfGoodUtxos, address).result) {
+            // TODO: [feature, moderate] return TxData here too. task_id=c6771140cfce44049a8ce600032bb3af
+            return getFeePlusSendingAmountOverlapsBalanceErrorData();
+        }
+
         const txOfGoodUtxos = buildTransaction(amountOfGoodUtxos, address, 0, null, goodUtxos, ecPairsMapping, network);
         const feeOfGoodUtxos = calculateFeeByFeeRate(txOfGoodUtxos, feeRate);
 

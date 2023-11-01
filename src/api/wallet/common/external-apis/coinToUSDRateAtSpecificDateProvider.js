@@ -3,6 +3,7 @@ import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
 import { ApiGroupCoinIdAdapters } from "../adapters/apiGroupCoinIdAdapters";
+import { PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
 
 // TODO: [feature, low] add provider (only some tokens): https://api.blockchain.com/v3/exchange/tickers
 // TODO: [feature, low] add provider (only some tokens): https://api.crypto.com/v2/public/get-ticker RPS=100 https://exchange-docs.crypto.com/spot/index.html#rate-limits
@@ -109,8 +110,9 @@ class MessariCoinToUsdRateProvider extends ExternalApiProvider {
                 [coin]
             )[0];
             const date = new Date(params[1]).toISOString().slice(0, 10);
+            const nextDate = new Date(params[1] + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-            return `/${coinIdClearForProvider}/metrics/price/time-series?start=${date}&end=${date}&interval=1d`;
+            return `/${coinIdClearForProvider}/metrics/price/time-series?start=${date}&end=${nextDate}&interval=1d`;
         } catch (e) {
             improveAndRethrow(e, "MessariCoinToUsdRateProvider.composeQueryString");
         }
@@ -118,7 +120,6 @@ class MessariCoinToUsdRateProvider extends ExternalApiProvider {
     getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
         try {
             let coinData = response.data?.data;
-
             if (!coinData) throw new Error("Wrong coin data for 'messari' rates at date provider:");
             if (!coinData?.schema?.values_schema)
                 throw new Error("Wrong schema defenition for 'messari' rates at date provider");
@@ -149,9 +150,10 @@ class CoinToUSDRateAtSpecificDateProvider {
         this._callerService = new CachedRobustExternalApiCallerService(
             "coinToUsdRateAtSpecificDate",
             providers,
-            600000000, // Because the data is historical rate and should not be actualized
-            10, // Because this data is not critical - just nice to have so we can reduce load of providers
-            1000
+            PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS, // Because the data is historical rate and should not be actualized
+            true,
+            null,
+            10 // Because this data is not critical - just nice to have, so we can reduce load of providers
         );
         this._attemptsCountForDataRetrieval = 5;
     }

@@ -214,6 +214,22 @@ export function addClientIpHash(req, data) {
     return data;
 }
 
+export const onlyIfDoesntStartWith = (path, middleware) => {
+    return function(req, res, next) {
+        if (req.path.startsWith(path)) {
+            // TODO: [dev] remove after dev testing
+            // eslint-disable-next-line no-console
+            console.log("MATCH: ", req.path, path);
+            return next();
+        } else {
+            // TODO: [dev] remove after dev testing
+            // eslint-disable-next-line no-console
+            console.log("DISSS: ", req.path, path);
+            return middleware(req, res, next);
+        }
+    };
+};
+
 export const apiVersionPrefix = "/api/v1";
 
 export function processSuccess(res, statusCode, payload = null) {

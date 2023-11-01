@@ -2,13 +2,15 @@ import {
     EventBus,
     SIGNED_IN_EVENT,
     SIGNED_UP_EVENT,
+    SWAP_CREATED_EVENT,
+    SWAP_TX_PUSHED_EVENT,
     TRANSACTION_PUSHED_EVENT,
     WALLET_IMPORTED_EVENT,
 } from "../../adapters/eventbus";
 import { getWalletId } from "../internal/storage";
-import { logError } from "../../utils/errorUtils";
-import TransactionsHistoryService from "../../../wallet/common/services/transactionsHistoryService";
+import { improveAndRethrow, logError } from "../../utils/errorUtils";
 import { Logger } from "../../../support/services/internal/logs/logger";
+import CoinsToFiatRatesService from "../../../wallet/common/services/coinsToFiatRatesService";
 import { Coins } from "../../../wallet/coins";
 
 const MEASUREMENT_ID = "G-VDHZL5BZCR";
@@ -33,10 +35,22 @@ export const setupAnalyticsMediators = () => {
         MixPanelUtils.identify(getWalletId());
     });
 
-    EventBus.addEventListener(TRANSACTION_PUSHED_EVENT, (event, tx_id, tx_amount, tx_fee) => {
-        const params = ["new_transaction", { tx_id, tx_amount, tx_fee, tx_type: "pushed_transaction" }];
-        GoogleAnalyticsUtils.sendEvent(...params);
-        MixPanelUtils.sendEvent(...params);
+    EventBus.addEventListener(TRANSACTION_PUSHED_EVENT, (event, tx_id, tx_amount, tx_fee, ticker) => {
+        (async () => {
+            try {
+                const coinUsdRate = await CoinsToFiatRatesService.getCoinToUSDRate(Coins.getCoinByTicker(ticker));
+                const usdAmount = +tx_amount * +coinUsdRate.rate;
+                const params = [
+                    "new_transaction",
+                    { tx_id, tx_amount, usd_amount: usdAmount, tx_fee, coin: ticker, tx_type: "pushed_transaction" },
+                ];
+
+                GoogleAnalyticsUtils.sendEvent(...params);
+                MixPanelUtils.sendEvent(...params);
+            } catch (e) {
+                improveAndRethrow(e, "TRANSACTION_PUSHED_EVENT handler in trackers");
+            }
+        })();
     });
 
     EventBus.addEventListener(WALLET_IMPORTED_EVENT, async event => {
@@ -45,30 +59,40 @@ export const setupAnalyticsMediators = () => {
         MixPanelUtils.sendEvent(...params);
     });
 
-    EventBus.addEventListener(WALLET_IMPORTED_EVENT, async event => {
-        setTimeout(async () => {
+    EventBus.addEventListener(SWAP_CREATED_EVENT, (event, fromTicker, toTicker, coinAmount) => {
+        (async () => {
             try {
-                const result = await TransactionsHistoryService.getTransactionsList(
-                    Coins.getEnabledCoinsTickers(),
-                    Number.MAX_SAFE_INTEGER
-                );
-                result.transactions.forEach(tx => {
-                    const params = [
-                        "new_transaction",
-                        {
-                            tx_id: tx.txid,
-                            tx_amount: tx.amountSignificantString,
-                            tx_fee: tx.fee,
-                            tx_type: "imported_transaction",
-                        },
-                    ];
-                    GoogleAnalyticsUtils.sendEvent(...params);
-                    MixPanelUtils.sendEvent(...params);
-                });
+                const coinUsdRate = await CoinsToFiatRatesService.getCoinToUSDRate(Coins.getCoinByTicker(fromTicker));
+                const usdAmount = +coinAmount * +coinUsdRate.rate;
+                const params = [
+                    "new_swap",
+                    { coin_amount: coinAmount, usd_amount: usdAmount, fromCoin: fromTicker, toCoin: toTicker },
+                ];
+
+                GoogleAnalyticsUtils.sendEvent(...params);
+                MixPanelUtils.sendEvent(...params);
             } catch (e) {
-                logError(e, "WALLET_IMPORTED_EVENT listener", "Failed to send events with imported transactions");
+                improveAndRethrow(e, "SWAP_CREATED_EVENT handler in trackers");
             }
-        }, 50000);
+        })();
+    });
+
+    EventBus.addEventListener(SWAP_TX_PUSHED_EVENT, (event, fromTicker, coinAmount) => {
+        (async () => {
+            try {
+                const coinUsdRate = await CoinsToFiatRatesService.getCoinToUSDRate(Coins.getCoinByTicker(fromTicker));
+                const usdAmount = +coinAmount * +coinUsdRate.rate;
+                const params = [
+                    "new_swap_transaction",
+                    { coin_amount: coinAmount, usd_amount: usdAmount, fromCoin: fromTicker },
+                ];
+
+                GoogleAnalyticsUtils.sendEvent(...params);
+                MixPanelUtils.sendEvent(...params);
+            } catch (e) {
+                improveAndRethrow(e, "SWAP_TX_PUSHED_EVENT handler in trackers");
+            }
+        })();
     });
 
     Logger.log("Setting up analytics mediators done", loggerSource);

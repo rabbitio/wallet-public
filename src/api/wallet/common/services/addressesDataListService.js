@@ -1,26 +1,19 @@
-import is from "is_js";
-
 import { getSumOfOutputsSendingToAddressByTransactionsList } from "../../btc/lib/transactions/transactions-utils";
 import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
 import AddressesService from "../../btc/services/addressesService";
-import InvoicesService from "../../../invoices/services/invoicesService";
 import CoinsToFiatRatesService from "./coinsToFiatRatesService";
 import { Coins } from "../../coins";
 
 export default class AddressesDataListService {
     static DEFAULT_SORT = "creationDate_desc";
 
-    // TODO: [refactoring, moderate] add constants and enums for sort, filters to avoid using not robust hardcoded values
+    // TODO: [refactoring, moderate] remove this service. task_id=2dfd7adefe9d48acbe0ecb6f83fd68f7
     /**
      * Retrieves a list of addresses data, adds per address amounts, apply filters, search, sort, paginates and returns
      * final list
      *
      * Use null if one of parameters is not needed.
      *
-     // * @param coinTickersList {string[]} - the list of ticker for coins to get addresses for. Note that this is kinda hard
-     // *                                   filter for this method to restrict the coins set it works with. But you can also
-     // *                                   use the coins filter in the filterBy. This param contains all supported coin
-     // *                                   tickers by default
      * @param numberOfAddressesToReturn {number} number of addresses to be returned. If there are less overall
      *                                   addresses count then less than passed number of addresses
      *                                   will be returned. This parameter is mandatory and should be not negative
@@ -39,7 +32,7 @@ export default class AddressesDataListService {
      *                 "amount_asc", "amount_desc", "creationDate_asc", "creationDate_desc", "label_asc", "label_desc"
      *
      * @throws validation error if parameters are not valid
-     * @returns {Promise<object>} Promise resolving to object of following format: TODO: [refactoring, moderate] use view-model
+     * @returns {Promise<object>} Promise resolving to object of following format:
      *          {
      *              addresses: [ {
      *                      uuid: string,
@@ -48,8 +41,6 @@ export default class AddressesDataListService {
      *                      creationTime: number of milliseconds,
      *                      amountBtc: number,
      *                      fiatAmount: number,
-     *                      invoiceUuid: optional string,
-     *                      invoiceName: optional string,
      *                  }, ... ],
      *              isWholeList: boolean,
      *              minAmount: number, // min amount throughout all addresses
@@ -57,31 +48,19 @@ export default class AddressesDataListService {
      *              wholeListLength: number, // number of all addresses in the wallet
      *              coin: Coin // The coin we calculated addresses list for
      *          }
-     *
      */
-    // TODO: [ether, critical] Add filtering by coin - add ticker saving to DB
-    static async getAddressesDataList(
-        // coinTickersList = Coins.getSupportedCoinsTickers(), // TODO: uncomment after actualizing the addresses list API
-        numberOfAddressesToReturn,
-        filterBy,
-        searchCriteria,
-        sortBy
-    ) {
+    static async getAddressesDataList(numberOfAddressesToReturn, filterBy, searchCriteria, sortBy) {
         try {
             validatedNumberOfAddresses(numberOfAddressesToReturn);
-            // validateCoin(coin);
             validateFilterBy(filterBy);
             validateSearchCriteria(searchCriteria);
             validateSort(sortBy);
             const allAddresses = await AddressesService.getAllAddressesData();
-            // TODO: [ether, critical] Add amounts calculation for other coins
-            // TODO: [ether, critical] When method is called for several coins than use fiat amounts for filtering and sorting
             const withAmounts = await fillAmounts(allAddresses);
             const withFiatAmounts = await addFiatAmounts(withAmounts);
             const selectedOnes = getOnlyFiltered(withFiatAmounts, filterBy);
             const searchedOnes = getOnlySearched(selectedOnes, searchCriteria);
-            const withInvoiceUuids = await addUuidsOfInvoices(searchedOnes);
-            const sorted = sort(withInvoiceUuids, sortBy);
+            const sorted = sort(searchedOnes, sortBy);
             const paginated = sorted.slice(0, numberOfAddressesToReturn);
             return {
                 addressesData: mapToProperReturnFormat(paginated),
@@ -89,7 +68,6 @@ export default class AddressesDataListService {
                 minAmount: getMinAmount(withFiatAmounts),
                 maxAmount: getMaxAmount(withFiatAmounts),
                 wholeListLength: allAddresses.length,
-                // coin: coin,
             };
         } catch (e) {
             improveAndRethrow(e, "getAddressesDataList");
@@ -97,24 +75,14 @@ export default class AddressesDataListService {
     }
 }
 
-// function validateCoin(coin) {
-//     if (coin instanceof Coin) {
-//         return true;
-//     }
-//
-//     throw new Error("Wrong coin format. coin param should be of Coin type. See the docs.");
-// }
-
 function validateFilterBy(filterBy) {
-    let isValid = true;
-
-    if (is.not.existy(filterBy)) {
+    if (filterBy == null) {
         return;
     }
-
+    let isValid = true;
     if (
-        is.not.array(filterBy) ||
-        filterBy.filter(filter => is.not.array(filter)).length ||
+        !Array.isArray(filterBy) ||
+        filterBy.filter(filter => !Array.isArray(filter)).length ||
         filterBy.filter(
             filter => filter[0] !== "amountRange" && filter[0] !== "datesRange" && filter[0] !== "onlyNotEmpty"
         ).length
@@ -134,21 +102,21 @@ function validateFilterBy(filterBy) {
             (onlyNotEmptyFilters.length && onlyNotEmptyFilters[0].length !== 2) ||
             (amountRangeFilters.length &&
                 amountRangeFilters[0].length &&
-                (is.not.number(amountRangeFilters[0][1]) ||
+                (typeof amountRangeFilters[0][1] !== "number" ||
                     (amountRangeFilters[0][1] < 0 && amountRangeFilters[0][1] !== -1))) ||
             (amountRangeFilters.length &&
                 amountRangeFilters[0].length &&
-                (is.not.number(amountRangeFilters[0][2]) ||
+                (typeof amountRangeFilters[0][2] !== "number" ||
                     (amountRangeFilters[0][2] < 0 && amountRangeFilters[0][2] !== -1))) ||
             (datesRangeFilters.length &&
                 datesRangeFilters[0].length &&
-                (is.not.number(datesRangeFilters[0][1]) ||
+                (typeof datesRangeFilters[0][1] !== "number" ||
                     (datesRangeFilters[0][1] < 0 && datesRangeFilters[0][1] !== -1))) ||
             (datesRangeFilters.length &&
                 datesRangeFilters[0].length &&
-                (is.not.number(datesRangeFilters[0][2]) ||
+                (typeof datesRangeFilters[0][2] !== "number" ||
                     (datesRangeFilters[0][2] < 0 && datesRangeFilters[0][2] !== -1))) ||
-            (onlyNotEmptyFilters.length && is.not.boolean(onlyNotEmptyFilters[0][1]))
+            (onlyNotEmptyFilters.length && typeof onlyNotEmptyFilters[0][1] !== "boolean")
         ) {
             isValid = false;
         }
@@ -160,7 +128,7 @@ function validateFilterBy(filterBy) {
 }
 
 function validateSort(sortBy) {
-    if (is.not.existy(sortBy)) {
+    if (sortBy == null) {
         return;
     }
 
@@ -177,11 +145,11 @@ function validateSort(sortBy) {
 }
 
 function validateSearchCriteria(searchCriteria) {
-    if (is.not.existy(searchCriteria)) {
+    if (searchCriteria == null) {
         return;
     }
 
-    if (is.not.string(searchCriteria) || is.empty(searchCriteria)) {
+    if (typeof searchCriteria !== "string" || searchCriteria === "") {
         throw new Error("Format of searchCriteria is wrong, see docs. ");
     }
 }
@@ -274,17 +242,6 @@ function getOnlySearched(addressesList, searchCriteria) {
     });
 }
 
-async function addUuidsOfInvoices(addressesList) {
-    const pureAddresses = addressesList.map(addressData => addressData.address);
-    const mapping = await InvoicesService.getInvoicesDataByAddressesList(pureAddresses);
-
-    return addressesList.map(addressData => {
-        addressData.invoiceUuid = mapping.find(item => item.address === addressData.address).invoiceUuid;
-        addressData.invoiceName = mapping.find(item => item.address === addressData.address).invoiceName;
-        return addressData;
-    });
-}
-
 function sort(addressesList, sortBy) {
     if (!sortBy || typeof sortBy !== "string") {
         sortBy = AddressesDataListService.DEFAULT_SORT;
@@ -334,9 +291,6 @@ function mapToProperReturnFormat(addressesList) {
             creationTime: +addressData.creationTime,
             amountBtc: addressData.amountBtc ?? null,
             fiatAmount: addressData.fiatAmount,
-            invoiceUuid: addressData.invoiceUuid,
-            invoiceName: addressData.invoiceName,
-            // ticker: Coins.COINS.BTC.ticker, // TODO: [ether, critical] Change to taking from addresses data after the implementation
         };
     });
 }

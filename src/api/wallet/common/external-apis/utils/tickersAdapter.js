@@ -1,3 +1,8 @@
+/**
+ * @param ticker
+ * @param protocol
+ * @return {string}
+ */
 export const standardTickerToRabbitTicker = function(ticker, protocol) {
     return `${ticker}${protocol ?? ""}`.toUpperCase();
 };

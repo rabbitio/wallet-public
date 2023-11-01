@@ -1,10 +1,8 @@
-import { Decimal } from "decimal.js-light";
-
 /**
  * Estimates brute force attack time and composes message to show to user.
  *
- * @param password - password string to estimate brute force attack duration for
- * @returns Message with brute force attack duration estimation
+ * @param password {string} password string to estimate brute force attack duration for
+ * @returns {string} Message with brute force attack duration estimation
  */
 export function generateMessageAboutBruteForceAttackForPassword(password) {
     const probability = 1;
@@ -17,20 +15,20 @@ export function generateMessageAboutBruteForceAttackForPassword(password) {
 }
 
 function getPasswordBruteForceEstimation(password, probability = 0.5) {
-    const lowOps = { ops: new Decimal("10000000"), string: "10 million" }; // ordinary computer
-    const midOps = { ops: new Decimal("1000000000000"), string: "1 trillion" }; // powerful computer
-    const highOps = { ops: new Decimal("1000000000000000"), string: "1 thousand of trillions" }; // thousand of powerful computers
+    const lowOps = { ops: 10000000n, string: "10 million" }; // ordinary computer
+    const midOps = { ops: 1000000000000n, string: "1 trillion" }; // powerful computer
+    const highOps = { ops: 1000000000000000n, string: "1 thousand of trillions" }; // a thousand of powerful computers
 
     const picoSecond = 0.000000000001;
     const nanoSecond = 0.000000001;
     const mcSecond = 0.000001;
     const mSecond = 0.001;
-    const secondsInHour = new Decimal(60 * 60);
-    const secondsInDay = secondsInHour.mul(24);
-    const secondsInYear = secondsInDay.mul(365);
-    const secondsInCentury = secondsInYear.mul(100);
-    const secondsInMillionOfCenturies = secondsInCentury.mul(1000000);
-    const secondsInTrillionOfCenturies = secondsInMillionOfCenturies.mul(1000000);
+    const secondsInHour = 60n * 60n;
+    const secondsInDay = secondsInHour * 24n;
+    const secondsInYear = secondsInDay * 365n;
+    const secondsInCentury = secondsInYear * 100n;
+    const secondsInMillionOfCenturies = secondsInCentury * 1000000n;
+    const secondsInTrillionOfCenturies = secondsInMillionOfCenturies * 1000000n;
 
     if (probability > 1 || probability <= 0) {
         throw new Error(`Probability must be between 0 (excluding) and 1 (inclusive) but got ${probability}. `);
@@ -62,35 +60,40 @@ function getPasswordBruteForceEstimation(password, probability = 0.5) {
         alphabetSize += 33; // for the rest symbols
     }
 
-    const searchSpace = new Decimal(alphabetSize).pow(new Decimal(passwordLength)).mul(new Decimal(probability));
-
-    const lowOpsTime = searchSpace.dividedToIntegerBy(lowOps.ops);
-    const midOpsTime = searchSpace.dividedToIntegerBy(midOps.ops);
-    const highOpsTime = searchSpace.dividedToIntegerBy(highOps.ops);
+    // TODO: [refactoring, moderate] remove ugly workarounds with window.BigInt and manual exponentiation after upgrading to the last NODE version. task_id=ceef7a6597234677bac35802ad3a574c
+    // let searchSpace = window.BigInt(alphabetSize) ** window.BigInt(passwordLength);
+    let searchSpace = 1n;
+    for (let i = 0; i < passwordLength; ++i) {
+        searchSpace *= window.BigInt(alphabetSize);
+    }
+    searchSpace = (searchSpace * window.BigInt(Math.ceil(probability * 100))) / 100n;
+    const lowOpsTime = searchSpace / lowOps.ops;
+    const midOpsTime = searchSpace / midOps.ops;
+    const highOpsTime = searchSpace / highOps.ops;
 
     const getMessage = (opsTime, opsData) => {
-        if (opsTime.gt(secondsInTrillionOfCenturies)) {
+        if (opsTime > secondsInTrillionOfCenturies) {
             return `more than 1 trillion centuries`;
-        } else if (opsTime.gt(secondsInMillionOfCenturies)) {
-            const millionOfCenturies = opsTime.div(secondsInMillionOfCenturies);
-            return `${millionOfCenturies.toFixed(2)} millions of centuries`;
-        } else if (opsTime.gt(secondsInCentury)) {
-            const centuries = opsTime.div(secondsInCentury);
-            return `${centuries.toFixed(2)} centuries`;
-        } else if (opsTime.gt(secondsInYear)) {
-            const years = opsTime.div(secondsInYear);
-            return `${years.toFixed(2)} years`;
-        } else if (opsTime.gt(secondsInDay)) {
-            const days = opsTime.div(secondsInDay);
-            return `${days.toFixed(2)} days`;
-        } else if (opsTime.gt(secondsInHour)) {
-            const hours = opsTime.div(secondsInHour);
-            return `${hours.toFixed(2)} hours`;
-        } else if (opsTime.gt(new Decimal(1))) {
+        } else if (opsTime > secondsInMillionOfCenturies) {
+            const millionOfCenturies = opsTime / secondsInMillionOfCenturies;
+            return `${millionOfCenturies.toString()} millions of centuries`;
+        } else if (opsTime > secondsInCentury) {
+            const centuries = opsTime / secondsInCentury;
+            return `${centuries.toString()} centuries`;
+        } else if (opsTime > secondsInYear) {
+            const years = opsTime / secondsInYear;
+            return `${years.toString()} years`;
+        } else if (opsTime > secondsInDay) {
+            const days = opsTime / secondsInDay;
+            return `${days.toString()} days`;
+        } else if (opsTime > secondsInHour) {
+            const hours = opsTime / secondsInHour;
+            return `${hours.toString()} hours`;
+        } else if (opsTime > 1n) {
             return `${opsTime} seconds`;
         } else {
-            const opsCount = searchSpace.toNumber();
-            const time = (opsCount / opsData.ops.toNumber()).toFixed(12);
+            const opsCount = Number(searchSpace.toString());
+            const time = (opsCount / Number(opsData.ops.toString())).toFixed(12);
             if (time > mSecond) {
                 const ms = time / mSecond;
                 return `${Math.round(ms)} milliseconds`;

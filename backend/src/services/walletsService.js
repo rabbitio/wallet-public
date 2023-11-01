@@ -21,7 +21,6 @@ import {
 } from "../properties";
 import { dbConnectionHolder } from "../utils/dbConnectionHolder";
 import { TransactionsDataService } from "./transactionsDataService";
-import EncryptedInvoicesService from "./encryptedInvoicesService";
 import AddressesDataService, { addressesDataDbCollectionName } from "./addressesDataService";
 
 const log = getLogger("walletsService");
@@ -577,7 +576,6 @@ export default class WalletsService {
 
                 await EncryptedIpsService.deleteAllEncryptedIpsForWallet(walletId);
                 await TransactionsDataService.removeAllTransactionsDataForWallet(walletId);
-                await EncryptedInvoicesService.deleteAllEncryptedInvoices(walletId);
                 await AddressesDataService.removeAllAddressesData(walletId);
 
                 log.debug("Wallet and all related data have been successfully deleted. Committing transaction.");

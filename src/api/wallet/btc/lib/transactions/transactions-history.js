@@ -7,7 +7,7 @@ import { Coins } from "../../../coins";
  * Composes btc transactions history items
  *
  * @param allAddresses {{ internal: string[], external: string[] }} all addresses of the wallet
- * @param allTransactions {Object[]} transactions data list
+ * @param allTransactions {Transaction[]} transactions data list
  * @return {TransactionsHistoryItem[]} history items list
  */
 export function composeTransactionsHistoryItems(allAddresses, allTransactions) {

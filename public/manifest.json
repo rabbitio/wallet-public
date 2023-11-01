@@ -1,0 +1,50 @@
+{
+    "short_name": "Rabbit",
+    "name": "Rabbit Wallet",
+    "description": "Strongly Secure Friendly Switz Bitcoin Wallet",
+    "icons": [
+        {
+            "src": "favicon.ico",
+            "sizes": "228x228 196x196 195x195 192x192 180x180 152x152 150x150 144x144 128x128 120x120 114x114 96x96 76x76 72x72 60x60 57x57 48x48 32x32 16x16"
+        },
+        {
+            "src": "apple-touch-icon.png",
+            "sizes": "228x228 196x196 195x195 192x192 180x180 152x152 150x150 144x144 128x128 120x120 114x114 96x96 76x76 72x72 60x60 57x57 48x48 32x32 16x16",
+            "type": "image/png"
+        }
+    ],
+    "start_url": "/",
+    "display": "standalone",
+    "theme_color": "#ffffff",
+    "background_color": "#ffffff",
+    "shortcuts": [
+        {
+            "name": "Send Coins",
+            "short_name": "Send",
+            "description": "Send Coins quickly",
+            "url": "/send",
+            "icons": [{ "src": "apple-touch-icon.png", "sizes": "310x310" }]
+        },
+        {
+            "name": "Get Address",
+            "short_name": "Get Address",
+            "description": "Get Address to receive coins to",
+            "url": "/receive",
+            "icons": [{ "src": "apple-touch-icon.png", "sizes": "310x310" }]
+        },
+        {
+            "name": "Transactions List",
+            "short_name": "Transactions",
+            "description": "View Transactions List",
+            "url": "/transactions",
+            "icons": [{ "src": "apple-touch-icon.png", "sizes": "310x310" }]
+        },
+        {
+            "name": "Dashboard",
+            "short_name": "Dashboard",
+            "description": "View Dashboard",
+            "url": "/dashboard",
+            "icons": [{ "src": "apple-touch-icon.png", "sizes": "310x310" }]
+        }
+    ]
+}

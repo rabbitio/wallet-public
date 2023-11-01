@@ -1,3 +1,6 @@
+import { getCurrentNetwork } from "../services/internal/storage";
+import { Coins } from "../../wallet/coins";
+
 /**
  * Models a group of APIs provided by the same owner and used for different services in our app.
  * It means we need to mention RPS several times for each usage and also have some holder of last call timestamp per
@@ -5,10 +8,11 @@
  * RPS value and make decisions on base of the same timestamp of last call to the API group owner.
  */
 export class ApiGroup {
-    constructor(id, rps) {
+    constructor(id, rps, backendProxyIdGenerator = null) {
         this.id = id;
         this.rps = rps;
         this.lastCalledTimestamp = null;
+        this.backendProxyIdGenerator = backendProxyIdGenerator;
     }
 
     isRpsExceeded() {
@@ -26,12 +30,16 @@ export const ApiGroups = {
      * per month. So we can add it if not enough current RPS.
      */
     ETHERSCAN: new ApiGroup("etherscan", 0.17), // Actually 0.2 but fails sometime, so we use smaller
-    ALCHEMY: new ApiGroup("alchemy", 0.3),
+    ALCHEMY: new ApiGroup("alchemy", 0.3, network => `alchemy-${(network || getCurrentNetwork(Coins.COINS.ETH)).key}`),
     BLOCKSTREAM: new ApiGroup("blockstream", 0.2),
     BLOCKCHAIN_INFO: new ApiGroup("blockchain.info", 1),
     BLOCKNATIVE: new ApiGroup("blocknative", 0.5),
     ETHGASSTATION: new ApiGroup("ethgasstation", 0.5),
-    TRONGRID: new ApiGroup("trongrid", 0.3),
+    TRONGRID: new ApiGroup(
+        "trongrid",
+        0.3,
+        network => `trongrid-${(network || getCurrentNetwork(Coins.COINS.TRX)).key}`
+    ),
     TRONSCAN: new ApiGroup("tronscan", 0.3),
     GETBLOCK: new ApiGroup("getblock", 0.3),
     COINCAP: new ApiGroup("coincap", 0.5), // 200 per minute without API key
@@ -49,5 +57,6 @@ export const ApiGroups = {
     BITGO: new ApiGroup("bitgo", 1), // Just assumption for RPS
     BITCOINER: new ApiGroup("bitcoiner", 1), // Just assumption for RPS
     BITCORE: new ApiGroup("bitcore", 1), // Just assumption for RPS
-    BLOCKCHAIR: new ApiGroup("blockchair", 0.04), // 1 req per minute, reduce if you need to use this provider frequently or start using API key (10usd 10000 reqs)
+    // BLOCKCHAIR: new ApiGroup("blockchair", 0.04), // this provider require API key for commercial use (10usd 10000 reqs), we will add it later
+    MEMPOOL: new ApiGroup("mempool", 0.2), // Just assumption for RPS
 };

@@ -5,8 +5,12 @@ import { bip44Scheme } from "../../btc/lib/addresses-schemes";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { tron } from "../../trx/tron";
 import { NumbersUtils } from "../../common/utils/numbersUtils";
+import { AmountUtils } from "../../common/utils/amountUtils";
 
 export class Trc20Token extends Coin {
+    /**
+     * WARNING: we use singleton coins objects all over the app. Don't create custom instances.
+     */
     constructor(latinName, tickerPrintable, digitsCountAfterComma, contractAddress, atomName = "", maxValue = null) {
         super(
             latinName,
@@ -39,7 +43,8 @@ export class Trc20Token extends Coin {
     }
 
     coinAmountToAtoms(coinsAmount) {
-        return ethers.utils.parseUnits("" + coinsAmount, this.digits).toString();
+        coinsAmount = AmountUtils.trimDigitsAfterPeriod(coinsAmount, this.digits, false);
+        return ethers.utils.parseUnits(coinsAmount, this.digits).toString();
     }
 
     composeUrlToTransactionExplorer(txId) {

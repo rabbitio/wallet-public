@@ -6,6 +6,7 @@ import { ExternalApiProvider } from "../../../common/services/utils/robustExtera
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
 import { ApiGroupCoinIdAdapters, areCoinsSupportedByCex } from "../adapters/apiGroupCoinIdAdapters";
 import { cache } from "../../../common/utils/cache";
+import { LONG_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
 
 // TODO: [feature, low] add provider (only some tokens): https://api.blockchain.com/v3/exchange/tickers
 // TODO: [feature, low] add provider (only some tokens): https://api.crypto.com/v2/public/get-ticker RPS=100 https://exchange-docs.crypto.com/spot/index.html#rate-limits
@@ -179,7 +180,7 @@ class CoingeckoCoinsToUsdRatesProvider extends ExternalApiProvider {
 
 class MessariCoinsToUsdRatesProvider extends ExternalApiProvider {
     constructor() {
-        // NOTE: this provider returns only restricted set of assets so should be used with lowest priority
+        // NOTE: this provider returns only restricted set of assets so should be used with the lowest priority
         // https://messari.io/api/docs#tag/Assets
         super(
             "https://data.messari.io/api/v2/assets?fields=slug,symbol,metrics/market_data/price_usd,metrics/market_data/percent_change_usd_last_24_hours",
@@ -193,6 +194,7 @@ class MessariCoinsToUsdRatesProvider extends ExternalApiProvider {
         try {
             // Adapter will fail if there are not supported coins in the list
             ApiGroupCoinIdAdapters.getCoinIdsListByCoinsListForApiGroup(ApiGroups.MESSARI, params[0]);
+            return "";
         } catch (e) {
             improveAndRethrow(e, "MessariCoinsToUsdRatesProvider.composeQueryString");
         }
@@ -242,28 +244,23 @@ export const consToUSDRatesProviders = [
 class CoinToUSDRatesProvider {
     constructor(providers) {
         this.bio = "coinToUSDRatesProvider";
-        this._ttlMs = 600_000;
-        this._callerService = new CachedRobustExternalApiCallerService(
-            this.bio,
-            providers,
-            this._ttlMs,
-            100,
-            1000,
-            false
-        );
+        this._ttlMs = LONG_TTL_FOR_FREQ_CHANGING_DATA_MS;
+        this._callerService = new CachedRobustExternalApiCallerService(this.bio, providers, this._ttlMs, false);
         this._attemptsCountForDataRetrieval = 1;
     }
 
     /**
-     * Retrieves current coins-usd rates for given coins list and 24h change in %.
+     * Retrieves current coins-usd rates for all supported coins and 24h change in %.
+     * For some providers uses retrieves only for enabled list as these providers support small number of tokens.
      *
+     * @param [allowRequestingOnlyForEnabled=true] {boolean} by default we can request rates only for enabled coins. If you need to request for all supported coins pass true for this param
      * @return {Promise<Array<{
      *     coin: Coin,
      *     usdRate: number,
      *     change24hPercent: number,
      * }>>}
      */
-    async getCoinsToUSDRates() {
+    async getCoinsToUSDRates(allowRequestingOnlyForEnabled = true) {
         let persistentCacheForAllSupported = getAllSupportedCoinsRatesFromPersistentCache();
         try {
             if (
@@ -276,7 +273,7 @@ class CoinToUSDRatesProvider {
             const enabledCoins = Coins.getEnabledCoinsList();
             const supportedCoins = Coins.getSupportedCoinsList();
             return await this._callerService.callExternalAPICached(
-                [enabledCoins, supportedCoins],
+                [allowRequestingOnlyForEnabled ? enabledCoins : supportedCoins, supportedCoins],
                 25000,
                 null,
                 this._attemptsCountForDataRetrieval,

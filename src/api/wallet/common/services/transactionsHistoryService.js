@@ -1,5 +1,3 @@
-import is from "is_js";
-
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { TransactionsDataService } from "./transactionsDataService";
 // import FiatPaymentsService from "../../../purchases/services/FiatPaymentsService";
@@ -17,14 +15,13 @@ import {
     TRANSACTION_PUSHED_EVENT,
 } from "../../../common/adapters/eventbus";
 import { NumbersUtils } from "../utils/numbersUtils";
+import { SMALL_TTL_FOR_CACHE_L2_MS } from "../../../common/utils/ttlConstants";
 
 export default class TransactionsHistoryService {
     // TODO: [tests, moderate] add units for caching for existing tests
     static _cacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
         "transactionsHistoryService",
-        60000,
-        700,
-        1000,
+        SMALL_TTL_FOR_CACHE_L2_MS,
         false
     );
     static _cachePrefix = "1ad60a23-40f7-47c5-a574-8e87c3dc71ca";
@@ -88,7 +85,6 @@ export default class TransactionsHistoryService {
      *                  type: ("incoming"|"outgoing"),
      *                  status: ("unconfirmed"|"increasing_fee"|"confirming"|"confirmed"),
      *                  confirmations: number,
-     *                  isConfirmed: boolean,
      *                  creationTime: number,
      *                  amount: (number|string),
      *                  amountSignificantString: string,
@@ -114,6 +110,8 @@ export default class TransactionsHistoryService {
      */
     static async getTransactionsList(coinTickersList, numberOfTransactionsToReturn, filterBy, searchCriteria, sortBy) {
         const loggerSource = "getTransactionsList";
+        let cacheKey;
+        let waitingResult;
         try {
             validateTickersList(coinTickersList);
             validateNumberOfTransactions(numberOfTransactionsToReturn);
@@ -123,9 +121,8 @@ export default class TransactionsHistoryService {
 
             const filteredCoins = getRequestedCoinsList(coinTickersList, filterBy);
 
-            const waitingResult = await this._cacheAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
-                this._cacheKey(coinTickersList, numberOfTransactionsToReturn, filterBy, searchCriteria, sortBy)
-            );
+            cacheKey = this._cacheKey(coinTickersList, numberOfTransactionsToReturn, filterBy, searchCriteria, sortBy);
+            waitingResult = await this._cacheAndRequestsResolver.getCachedOrWaitForCachedOrAcquireLock(cacheKey);
             if (!waitingResult.canStartDataRetrieval) {
                 return waitingResult?.cachedData;
             }
@@ -160,18 +157,13 @@ export default class TransactionsHistoryService {
                         : allTransactions.length + 1,
             };
 
-            this._cacheAndRequestsResolver.saveCachedData(
-                this._cacheKey(coinTickersList, numberOfTransactionsToReturn, filterBy, searchCriteria, sortBy),
-                result
-            );
+            this._cacheAndRequestsResolver.saveCachedData(cacheKey, waitingResult?.lockId, result);
 
             return result;
         } catch (e) {
             improveAndRethrow(e, loggerSource);
         } finally {
-            this._cacheAndRequestsResolver.markActiveCalculationAsFinished(
-                this._cacheKey(coinTickersList, numberOfTransactionsToReturn, filterBy, searchCriteria, sortBy)
-            );
+            cacheKey != null && this._cacheAndRequestsResolver.releaseLock(cacheKey, waitingResult?.lockId);
         }
     }
 }
@@ -186,15 +178,14 @@ function validateTickersList(coinTickersList) {
 }
 
 function validateFilterBy(filterBy) {
-    let isValid = true;
-
-    if (is.not.existy(filterBy)) {
+    if (filterBy == null) {
         return;
     }
+    let isValid = true;
 
     if (
-        is.not.array(filterBy) ||
-        filterBy.filter(filter => is.not.array(filter)).length ||
+        !Array.isArray(filterBy) ||
+        filterBy.filter(filter => !Array.isArray(filter)).length ||
         filterBy.filter(
             filter =>
                 filter[0] !== "amountRange" &&
@@ -226,19 +217,19 @@ function validateFilterBy(filterBy) {
                 (currencyFilters[0].length < 2 || currencyFilters[0].length > Coins.getEnabledCoinsTickers().length)) ||
             (amountRangeFilters.length &&
                 amountRangeFilters[0].length &&
-                (is.not.number(amountRangeFilters[0][1]) ||
+                (typeof amountRangeFilters[0][1] !== "number" ||
                     (amountRangeFilters[0][1] < 0 && amountRangeFilters[0][1] !== -1))) ||
             (amountRangeFilters.length &&
                 amountRangeFilters[0].length &&
-                (is.not.number(amountRangeFilters[0][2]) ||
+                (typeof amountRangeFilters[0][2] !== "number" ||
                     (amountRangeFilters[0][2] < 0 && amountRangeFilters[0][2] !== -1))) ||
             (datesRangeFilters.length &&
                 datesRangeFilters[0].length &&
-                (is.not.number(datesRangeFilters[0][1]) ||
+                (typeof datesRangeFilters[0][1] !== "number" ||
                     (datesRangeFilters[0][1] < 0 && datesRangeFilters[0][1] !== -1))) ||
             (datesRangeFilters.length &&
                 datesRangeFilters[0].length &&
-                (is.not.number(datesRangeFilters[0][2]) ||
+                (typeof datesRangeFilters[0][2] !== "number" ||
                     (datesRangeFilters[0][2] < 0 && datesRangeFilters[0][2] !== -1))) ||
             (typeFilters.length && typeFilters[0][1] !== "incoming" && typeFilters[0][1] !== "outgoing") ||
             (statusFilters.length &&
@@ -267,7 +258,7 @@ function validateFilterBy(filterBy) {
 }
 
 function validateSort(sortBy) {
-    if (is.not.existy(sortBy)) {
+    if (sortBy == null) {
         return;
     }
 
@@ -283,11 +274,11 @@ function validateSort(sortBy) {
 }
 
 function validateSearchCriteria(searchCriteria) {
-    if (is.not.existy(searchCriteria)) {
+    if (searchCriteria == null) {
         return;
     }
 
-    if (is.not.string(searchCriteria) || is.empty(searchCriteria)) {
+    if (typeof searchCriteria !== "string" || searchCriteria === "") {
         throw new Error("Format of searchCriteria is wrong, see docs. ");
     }
 }
@@ -479,7 +470,6 @@ function mapToProperReturnFormat(transactionsList) {
                 (transaction.confirmations < coin.minConfirmations && "confirming") ||
                 "confirmed",
             confirmations: transaction.confirmations,
-            isConfirmed: transaction.confirmations < coin.minConfirmations,
             creationTime: transaction.time,
             amount: transaction.amount,
             amountSignificantString: transaction.amount

@@ -13,6 +13,7 @@ import {
 } from "../../common/utils/cacheActualizationUtils";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
 class EtherscanEthTransactionsProvider extends ExternalApiProvider {
     constructor() {
@@ -25,6 +26,10 @@ class EtherscanEthTransactionsProvider extends ExternalApiProvider {
          * so we use two http methods and further processing.
          */
         super("", ["get", "get"], 15000, ApiGroups.ETHERSCAN, null, 10000);
+    }
+
+    doesRequireSubRequests() {
+        return true;
     }
 
     doesSupportPagination() {
@@ -147,9 +152,7 @@ export class EthTransactionsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "ethTransactionsProvider",
         [new EtherscanEthTransactionsProvider()],
-        100000,
-        110,
-        1000,
+        STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,
         mergeTwoTransactionsArraysAndNotifyAboutNewTransactions
     );

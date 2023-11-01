@@ -4,6 +4,7 @@ import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
 
+// TODO: [feature, moderate] Add mempool.space provider https://mempool.space/api/v1/blocks task_id=a8370ae7b99049b092f31f761a95b54d
 class BlockstreamBtcCurrentBlockProvider extends ExternalApiProvider {
     constructor() {
         super("https://blockstream.info/", "get", 15000, ApiGroups.BLOCKSTREAM);
@@ -61,12 +62,10 @@ export class ExternalBlocksApiCaller {
         "externalBlocksAPICaller",
         [
             new BlockstreamBtcCurrentBlockProvider(),
-            new BlockchainInfoBtcCurrentBlockProvider(),
             new BtcDotComCurrentBlockProvider(),
+            new BlockchainInfoBtcCurrentBlockProvider(),
         ],
-        90000,
-        100,
-        1000
+        90000 // Using custom TTL as we need some not so high and not so small TTL - blocks count is used for transactions actualization
     );
 
     static async retrieveCurrentBlockNumber(network, cancelToken = null) {

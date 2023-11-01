@@ -168,7 +168,7 @@ export class EncryptedIpsController {
                 log.debug("Request is valid, start deletion of encrypted IPs.");
                 await EncryptedIpsService.deleteEncryptedIps(data.walletId, data.ipHashes);
                 /**
-                 * NOTE: if there is no invoice with one of given hashes than we still return success as the result is
+                 * NOTE: if there is no IP with one of given hashes than we still return success as the result is
                  * still being achieved - there is no such document in DB
                  */
                 log.debug("Encrypted IPs have been deleted, sending 204.");

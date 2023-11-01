@@ -21,8 +21,10 @@ export class AddressesUsageUtils {
             );
 
             try {
-                // Here we push transactions retrieved from external provider to cache so we reduce number of requests inside the cache for actualization
-                await transactionsDataProvider.updateTransactionsCacheAndPushTxsToServer(transactions);
+                /* Here we push transactions retrieved from external provider to cache, so we reduce number
+                 * of requests inside the cache for actualization.
+                 */
+                await transactionsDataProvider.updateTransactionsCache(transactions);
             } catch (e) {
                 logError(e, "getAddressesUsage", "Failed to update transactions cache");
             }

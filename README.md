@@ -1,4 +1,4 @@
-Rabbit is a privacy-oriented non-custodial multicurrency wallet based in Switzerland. It is secure from the ground up, user-friendly and feature-rich.
+Rabbit is a privacy-oriented self-custodial multicurrency wallet based in Switzerland. It is secure from the ground up, user-friendly and feature-rich.
 
 See details at **https://rabbit.io**
 

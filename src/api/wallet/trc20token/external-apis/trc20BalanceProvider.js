@@ -3,24 +3,24 @@ import { CachedRobustExternalApiCallerService } from "../../../common/services/u
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { tronUtils } from "../../trx/adapters/tronUtils";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
-import { TRONGR_PR_K } from "../../../../properties";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
 import {
     createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
     mergeSingleBalanceValuesAndNotifyAboutValueChanged,
 } from "../../common/utils/cacheActualizationUtils";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
 class TrongridTrc20BalanceProvider extends ExternalApiProvider {
     constructor() {
-        super("https://", "post", 15000, ApiGroups.TRONGRID, { "TRON-PRO-API-KEY": TRONGR_PR_K });
+        super("", "post", 15000, ApiGroups.TRONGRID);
     }
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const network = getCurrentNetwork(Coins.COINS.TRX);
-            return `${network === Coins.COINS.TRX.mainnet ? "api" : "nile"}.trongrid.io/wallet/triggerconstantcontract`;
+            const originalApiPath = "/wallet/triggerconstantcontract";
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
         } catch (e) {
             improveAndRethrow(e, "trongridTrc20BalanceProvider.composeQueryString");
         }
@@ -55,10 +55,8 @@ class TrongridTrc20BalanceProvider extends ExternalApiProvider {
 export class Trc20BalanceProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "trc20BalanceProvider",
-        [new TrongridTrc20BalanceProvider()],
-        120000,
-        130,
-        1000,
+        [new TrongridTrc20BalanceProvider()], // TODO: [feature, high] add more providers. task_id=c246262b0e7f43dfa2a9b0e30c947ad7
+        STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,
         (cached, newValue, params) =>
             mergeSingleBalanceValuesAndNotifyAboutValueChanged(

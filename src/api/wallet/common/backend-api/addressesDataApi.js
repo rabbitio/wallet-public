@@ -1,8 +1,7 @@
-import is from "is_js";
-
 import { ApiCallWrongResponseError, doApiCall, urlWithPrefix } from "../../../common/backend-api/utils";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
+import { PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
 
 export default class AddressesDataApi {
     static serverEndpointEntity = "addressesData";
@@ -20,7 +19,7 @@ export default class AddressesDataApi {
 
     static async deleteAddressData(walletId, addressUUID) {
         try {
-            if (is.empty(addressUUID) || is.not.string(addressUUID)) {
+            if (typeof addressUUID !== "string" || addressUUID === "") {
                 throw new Error("Pass correct params - not empty string walletId and not empty string addressUUID. ");
             }
 
@@ -41,10 +40,10 @@ export default class AddressesDataApi {
     static async updateAddressData(walletId, addressUUID, addressData) {
         try {
             if (
-                is.not.string(addressUUID) ||
-                is.empty(addressUUID) ||
-                is.not.string(addressData) ||
-                is.empty(addressData)
+                typeof addressUUID !== "string" ||
+                addressUUID === "" ||
+                typeof addressData !== "string" ||
+                addressData === ""
             ) {
                 throw new Error(
                     "Pass correct params - not empty string walletId and not empty addressUUID and not empty addressData. "
@@ -69,9 +68,7 @@ export default class AddressesDataApi {
     static addressesIndexesCacheKey = "90a35f1b-14a9-4eb6-9cb2";
     static _cacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
         "addressesIndexesResolver",
-        600_000_000, // TODO: [refactoring, moderate] Since 0.8.3 we don't support new addresses creation so the indexes are always the same. Refactoring required. task_id=546c83e7f4b64f39b67055a7c4ecaa48
-        50,
-        1000,
+        PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS, // TODO: [refactoring, moderate] Since 0.8.3 we don't support new addresses creation so the indexes are always the same. Refactoring required. task_id=546c83e7f4b64f39b67055a7c4ecaa48
         false
     );
 
@@ -81,23 +78,24 @@ export default class AddressesDataApi {
      * @return Promise resolving to array of { path: string, index: number }
      */
     static async getAddressesIndexes(walletId) {
+        let cached;
         try {
-            const cached = await this._cacheAndRequestsResolver.getCachedResultOrWaitForItIfThereIsActiveCalculation(
+            cached = await this._cacheAndRequestsResolver.getCachedOrWaitForCachedOrAcquireLock(
                 this.addressesIndexesCacheKey
             );
-            if (!cached.canStartDataRetrieval) {
-                return cached.cachedData;
+            if (!cached?.canStartDataRetrieval) {
+                return cached?.cachedData;
             }
             const errorMessage = "Failed to get address indexes. ";
             const endpoint = `${urlWithPrefix}/addressesData/${walletId}/indexes`;
 
             const result = await doApiCall(endpoint, "get", null, 200, errorMessage);
-            this._cacheAndRequestsResolver.saveCachedData(this.addressesIndexesCacheKey, result);
+            this._cacheAndRequestsResolver.saveCachedData(this.addressesIndexesCacheKey, cached?.lockId, result);
             return result;
         } catch (e) {
             improveAndRethrow(e, "getAddressesIndexes");
         } finally {
-            this._cacheAndRequestsResolver.markActiveCalculationAsFinished(this.addressesIndexesCacheKey);
+            this._cacheAndRequestsResolver.releaseLock(this.addressesIndexesCacheKey, cached?.lockId);
         }
     }
 

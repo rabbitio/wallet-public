@@ -1,8 +1,6 @@
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { TRONGR_PR_K } from "../../../../properties";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { Coins } from "../../coins";
 import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem";
 import { tronUtils } from "../adapters/tronUtils";
@@ -10,10 +8,12 @@ import { computeConfirmationsCountByTimestamp } from "../lib/blocks";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
 import { BigNumber } from "ethers";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
 
 class TrongridTransactionDetailsProvider extends ExternalApiProvider {
     constructor() {
-        super("", ["post", "post"], 15000, ApiGroups.TRONGRID, { "TRON-PRO-API-KEY": TRONGR_PR_K });
+        super("", ["post", "post"], 15000, ApiGroups.TRONGRID);
     }
 
     doesRequireSubRequests() {
@@ -22,10 +22,9 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const network = getCurrentNetwork(Coins.COINS.TRX);
-            const networkPrefix = network === Coins.COINS.TRX.mainnet ? "api" : "nile";
             const endpointLastPart = subRequestIndex === 0 ? "gettransactionbyid" : "gettransactioninfobyid";
-            return `https://${networkPrefix}.trongrid.io/wallet/${endpointLastPart}`;
+            const originalApiPath = `/wallet/${endpointLastPart}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
         } catch (e) {
             improveAndRethrow(e, "trongridTransactionDetailsProvider.composeQueryString");
         }
@@ -182,10 +181,8 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
 export class TronBlockchainTransactionDetailsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronBlockchainTransactionDetailsProvider",
-        [new TrongridTransactionDetailsProvider()],
-        100000,
-        110,
-        1000,
+        [new TrongridTransactionDetailsProvider()], // TODO: [feature, high] add more providers. task_id=c246262b0e7f43dfa2a9b0e30c947ad7
+        STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false
     );
 

@@ -1,21 +1,26 @@
-import is from "is_js";
 import { BigNumber } from "ethers";
 
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { isAddressValid, isBip49Addresses, isP2shAddress, isSegWitAddress } from "./addresses";
+import {
+    isAddressValid,
+    isBip49Addresses,
+    isP2pkhAddress,
+    isP2shAddress,
+    isP2wpkhAddress,
+    isSegWitAddress,
+} from "./addresses";
 import { getNotDustUTXOsInTermsOfSpecificFeeRateConsideringSendingP2WPKH } from "./transactions/transactions-utils";
 import { Coins } from "../../coins";
 
 /**
- * Script types for internal use
- * TODO: [feature, high] add UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
+ * Script types the for internal use.
  */
 export const P2WPKH_SCRIPT_TYPE = "witness_v0_keyhash";
 export const P2PKH_SCRIPT_TYPE = "pubkeyhash";
 export const P2SH_SCRIPT_TYPE = "scripthash";
 
 /**
- * Thresholds used to control operating utxos.
+ * Thresholds used to control the operating utxos.
  * These thresholds are taken from bitcoin/scr/policy/policy.cpp:GetDustThreshold.
  * P2SH-P2WPKH to be precise should have other than 546 satoshi threshold but according to implementation (there is
  * a check in GetDustThreshold calling IsWitnessProgram) of bitcoin it is considered just as non-segwit so 546 is used.
@@ -64,14 +69,10 @@ export function getAllSpendableUtxosByWalletData(accountsData, allUtxos, indexes
 // TODO: [tests, low] Write unit tests for payment logic
 function getNotDustUtxos(utxos) {
     return utxos.filter(utxo => {
-        let threshold;
-        utxo.type === P2PKH_SCRIPT_TYPE && (threshold = NON_SEGWIT_DUST_THRESHOLD);
-        utxo.type === P2WPKH_SCRIPT_TYPE && (threshold = SEGWIT_DUST_THRESHOLD);
-        utxo.type === P2SH_SCRIPT_TYPE && (threshold = NON_SEGWIT_DUST_THRESHOLD);
-
-        // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
-        threshold == null &&
-            (threshold = isSegWitAddress(utxo.address) ? SEGWIT_DUST_THRESHOLD : NON_SEGWIT_DUST_THRESHOLD);
+        let threshold = NON_SEGWIT_DUST_THRESHOLD;
+        if (utxo.type === P2WPKH_SCRIPT_TYPE || isSegWitAddress(utxo.address)) {
+            threshold = SEGWIT_DUST_THRESHOLD;
+        }
 
         return utxo.value_satoshis > threshold;
     });
@@ -84,7 +85,7 @@ function getNotDustUtxos(utxos) {
  *
  * @param accountsData {AccountsData} accounts data
  * @param utxos {Utxo[]} array of utxos to be filtered
- * @param indexes {Object} indexes of addresses
+ * @param indexes {Object[]} indexes of addresses
  * @param network {Network} network of given utxos
  * @return {Utxo[]}
  */
@@ -247,27 +248,17 @@ export function getSortedListOfCandidateUtxosForRbf(accountsData, indexes, candi
  */
 // TODO: [tests, low] Write unit tests for payment logic
 export function isAmountDustForAddress(amount, address) {
-    if (is.not.number(amount) && !(amount instanceof BigNumber))
-        throw new Error("Amount should be a number or BigNumber.");
-    // TODO: [feature, high] add taproot support task_id=436e6743418647dd8bf656cd5e887742
-
-    // TODO: [feature, high] handle UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
-    if (isSegWitAddress(address)) {
+    try {
+        if (typeof amount !== "number" && !(amount instanceof BigNumber))
+            throw new Error("Amount should be a number or BigNumber.");
+        // TODO: [feature, high] add taproot support task_id=436e6743418647dd8bf656cd5e887742
+        const dustThreshold = getDustThreshold(address, false);
         return {
-            result:
-                amount instanceof BigNumber
-                    ? amount.lt(BigNumber.from(SEGWIT_DUST_THRESHOLD))
-                    : amount < SEGWIT_DUST_THRESHOLD,
-            threshold: SEGWIT_DUST_THRESHOLD,
+            result: amount instanceof BigNumber ? amount.lt(BigNumber.from(dustThreshold)) : amount < dustThreshold,
+            threshold: dustThreshold,
         };
-    } else {
-        return {
-            result:
-                amount instanceof BigNumber
-                    ? amount.lt(BigNumber.from(NON_SEGWIT_DUST_THRESHOLD))
-                    : amount < NON_SEGWIT_DUST_THRESHOLD,
-            threshold: NON_SEGWIT_DUST_THRESHOLD,
-        };
+    } catch (e) {
+        improveAndRethrow(e, "isAmountDustForAddress");
     }
 }
 
@@ -276,11 +267,12 @@ export function isAmountDustForAddress(amount, address) {
  * Throws error if given address is invalid.
  *
  * @param targetAddress {string} address to get threshold for
+ * @param [validateAddress=true] {boolean} whether to validate the given address
  * @returns {number} threshold amount satoshi
  */
 // TODO: [tests, critical] Write unit tests for payment logic
-export function getDustThreshold(targetAddress) {
-    if (!isAddressValid(targetAddress)) {
+export function getDustThreshold(targetAddress, validateAddress = true) {
+    if (validateAddress && !isAddressValid(targetAddress)) {
         throw new Error(`Address is invalid: ${targetAddress}.`);
     }
 
@@ -315,19 +307,20 @@ export function getTXIDSendingGivenOutput(output, outputTxId, transactions) {
 
 /**
  * Returns type of output according to given address.
- * WARNING: This function analyse only few types of outputs so make sure it is ok for you.
- *          We ignore P2WSH and other types here. P2PKH will by used by default.
+ * If the output is not supported returns null.
+ *
  * @param address {string} address to get type of Output for
- * @return {string} one of constants P2PKH_SCRIPT_TYPE|P2WPKH_SCRIPT_TYPE|P2SH_SCRIPT_TYPE
+ * @return {string|null} one of constants P2PKH_SCRIPT_TYPE|P2WPKH_SCRIPT_TYPE|P2SH_SCRIPT_TYPE or null
  */
 // TODO: [tests, low] Write unit tests for payment logic
 export function getOutputTypeByAddress(address) {
-    // TODO: [feature, high] use UNKNOWN output type. task_id=a12a2be006544920b1273b8c2bc5561f
-    let type = P2PKH_SCRIPT_TYPE;
-    if (isSegWitAddress(address)) {
+    let type = null;
+    if (isP2wpkhAddress(address)) {
         type = P2WPKH_SCRIPT_TYPE;
     } else if (isP2shAddress(address)) {
         type = P2SH_SCRIPT_TYPE;
+    } else if (isP2pkhAddress(address)) {
+        type = P2PKH_SCRIPT_TYPE;
     }
 
     return type;

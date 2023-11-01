@@ -3,6 +3,7 @@ import { Network } from "../common/models/networks";
 import { SupportedSchemes } from "./lib/addresses-schemes";
 import { NumbersUtils } from "../common/utils/numbersUtils";
 import { getCurrentNetwork } from "../../common/services/internal/storage";
+import { AmountUtils } from "../common/utils/amountUtils";
 
 class Bitcoin extends Coin {
     constructor() {
@@ -36,7 +37,8 @@ class Bitcoin extends Coin {
     }
 
     coinAmountToAtoms(coinsAmount) {
-        return NumbersUtils.removeRedundantRightZerosFromNumberString(Math.floor(+coinsAmount * 100000000));
+        coinsAmount = AmountUtils.trimDigitsAfterPeriod(coinsAmount, this.digits);
+        return NumbersUtils.removeRedundantRightZerosFromNumberString(Math.floor(coinsAmount * 100000000));
     }
 
     composeUrlToTransactionExplorer(txId) {
@@ -50,4 +52,7 @@ class Bitcoin extends Coin {
     }
 }
 
+/**
+ * WARNING: we use singleton coins objects all over the app. Don't create custom instances.
+ */
 export const bitcoin = new Bitcoin();

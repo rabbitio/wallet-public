@@ -57,6 +57,12 @@ import { tron } from "./trx/tron";
 import { PreferencesService } from "./common/services/preferencesService";
 import { UserDataAndSettings } from "./common/models/userDataAndSettings";
 
+/**
+ * This is the main service to manage coins.
+ * You should access coins singletons via this service.
+ * Coin objects are being compared by references to singletons all over the app so use only singletons
+ * and never instantiate Coin or its descendants manually.
+ */
 export class Coins {
     /**
      * Use this mapping object to address exact coin like Coins.COIN.BTC.

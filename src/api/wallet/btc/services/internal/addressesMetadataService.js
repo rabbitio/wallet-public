@@ -4,7 +4,12 @@ import AddressesServiceInternal from "./addressesServiceInternal";
 import { improveAndRethrow } from "../../../../common/utils/errorUtils";
 
 /**
- * Provides API to track metadata for addresses
+ * @deprecated because we don't use the old periodical full scanning approach - now we use single BTC address for new
+ *             wallets and perform scanning of BTC addresses only when importing wallet and then only when
+ *             initializing the app.
+ * @since 0.10.0
+ *
+ * Provides API to track metadata for Bitcoin addresses
  */
 class AddressesMetadataService {
     constructor() {
@@ -12,7 +17,7 @@ class AddressesMetadataService {
     }
 
     /**
-     * Returns addresses that are:most recent
+     * Returns addresses that are most recent
      * - frequent: have more than 3 transactions and last one during last 30 days
      * - 3 most recent for currently selected addresses type (both external and internal)
      * - 1 most recent for alternative addresses type (both external and internal)
@@ -102,4 +107,8 @@ class AddressesMetadataService {
     }
 }
 
+/**
+ * @deprecated
+ * @type {AddressesMetadataService}
+ */
 export const addressesMetadataService = new AddressesMetadataService();
