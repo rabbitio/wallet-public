@@ -229,7 +229,7 @@ export class AmountUtils {
         if (isFloat) {
             // TODO: [bug, critical] this is really bad solution as JS numbers has restricted preciseness and
             //       toLocaleString reduces it even more depending on the left part of number. task_id=70c1984b622847cd9e3e771822b1fc31
-            const correctlyTrimmedString = Number(amount).toLocaleString(undefined, {
+            const correctlyTrimmedString = Number(amount).toLocaleString("en-US", {
                 maximumFractionDigits: Math.min(decimalsCount, 20), // 20 is max supported decimals count
                 roundingMode: "floor",
                 useGrouping: false,
