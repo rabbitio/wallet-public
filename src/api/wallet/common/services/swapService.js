@@ -15,6 +15,7 @@ import { Coin } from "../models/coin";
 import { AmountUtils } from "../utils/amountUtils";
 import EmailsApi from "../../../support/backend-api/emailAPI";
 import { EventBus, SWAP_CREATED_EVENT, SWAP_TX_PUSHED_EVENT } from "../../../common/adapters/eventbus";
+import { NumbersUtils } from "../utils/numbersUtils";
 
 export class SwapDetails {
     /**
@@ -114,6 +115,7 @@ export class SwapService {
      *             coinsData: {
      *                 coin: Coin,
      *                 balance: (string|number),
+     *                 balanceTrimmed: string,
      *                 balanceFiat: string,
      *                 fiatCurrencyCode: string,
      *                 fiatCurrencyDecimals: number,
@@ -153,6 +155,7 @@ export class SwapService {
                 coinsData: balances.map(item => ({
                     coin: item.coin,
                     balance: item.balanceCoins,
+                    balanceTrimmed: NumbersUtils.trimCurrencyAmount(item.balanceCoins, item.coin.digits, 13),
                     balanceFiat: item.balanceFiat,
                     fiatCurrencyCode: item.fiatCurrencyCode,
                     fiatCurrencyDecimals: item.fiatCurrencyDecimals,
@@ -220,6 +223,7 @@ export class SwapService {
      *             swappableData: {
      *                 coin: Coin,
      *                 balance: (string|number),
+     *                 balanceTrimmed: string,
      *                 balanceFiat: string,
      *                 fiatCurrencyCode: string,
      *                 fiatCurrencyDecimals: number,

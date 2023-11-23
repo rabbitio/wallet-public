@@ -47,7 +47,7 @@ h4 {
 }
 
 h1 {
-    font-size: 4rem;
+    font-size: 3rem;
     font-weight: 600;
 }
 
@@ -237,6 +237,14 @@ h4 {
     height: 38px;
     background: url("../../landing/images/logo_dark.svg");
     background-size: 171px 38px;
+    display: inline-block;
+}
+
+.logo-dark-minimized {
+    width: 38px;
+    height: 38px;
+    background: url("../../landing/images/logo_dark_minimized.svg");
+    background-size: 38px 38px;
     display: inline-block;
 }
 
@@ -440,10 +448,18 @@ section.hero {
     margin: 0;
 }
 
+section.navbar-only {
+    margin: 0;
+}
+
 section.dimmed {
     background-color: #f0f4f4;
     padding: 6rem 0;
     margin-bottom: 0;
+}
+
+section.smaller-top-margin {
+    margin-top: 3rem;
 }
 
 section.background-image {
@@ -451,7 +467,7 @@ section.background-image {
     background-position: center;
     background-size: cover;
     background-position: bottom;
-    margin: 0;
+    margin: 0 0 -5px 0; /* This is a hack to fix the Safari's SVG edge issues */
     padding: 6rem 0 24rem 0;
 }
 
@@ -466,7 +482,7 @@ section.footer {
     background-color: #007a80;
     color: #ffffff;
     text-align: center;
-    margin: -5px 0 0 0; /* This is a hack to fix the Safari's SVG edge issues */
+    margin: 0;
 }
 
 /* Standard section blocks */
@@ -526,17 +542,18 @@ section.background-image .section-title {
 }
 
 /* ===== Hero section ===== */
-section.hero .content {
+section.hero {
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 100vh;
     gap: 2rem;
 }
 
 @media (max-width: 900px) {
-    section.hero .content {
-        min-height: none;
+    section.hero {
+        min-height: auto;
+        justify-content: flex-start;
     }
 }
 
@@ -555,9 +572,38 @@ section.hero .hero-buttons {
 }
 
 .navbar {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+}
+
+.navbar-container {
+    width: 100%;
+    max-width: 1172px;
+    margin: 0 auto;
     height: 88px;
     display: flex;
     align-items: center;
+    padding: 0 1.6rem;
+    box-sizing: border-box;
+}
+
+.navbar-container .logo-desktop {
+    display: block;
+}
+
+.navbar-container .logo-mobile {
+    display: none;
+}
+
+@media (max-width: 420px) {
+    .navbar-container .logo-desktop {
+        display: none;
+    }
+
+    .navbar-container .logo-mobile {
+        display: block;
+    }
 }
 
 .navbar-nav {
@@ -574,6 +620,157 @@ section.hero .hero-buttons {
 
 .navbar-nav-item:not(:last-child) {
     margin-right: 2rem;
+}
+
+.navbar-dropdown {
+    z-index: 3;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    padding-top: 88px;
+    left: 0;
+    background-color: #fff;
+    transform: translateY(-30px);
+    opacity: 0;
+    transition: 0.25s all cubic-bezier(0.22, 0.61, 0.36, 1);
+    pointer-events: none;
+    width: 100%;
+    box-shadow: 0 0 40px rgba(35, 45, 66, 0.2), 0 0 3px 0px rgba(35, 45, 66, 0.2);
+    padding-bottom: 40px;
+}
+
+.navbar-dropdown.visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+}
+
+.navbar-dropdown-container {
+    width: 100%;
+    max-width: 1172px;
+    padding: 0 1.6rem;
+    box-sizing: border-box;
+    margin: 0 auto;
+    transform: translateY(15px);
+    transition: 0.25s all cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.navbar-dropdown.visible .navbar-dropdown-container {
+    transform: translateY(0);
+}
+
+.navbar-dropdown-button {
+    margin: 20px auto 0 auto;
+}
+
+.wallets-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 10px;
+}
+
+.wallets-grid-item {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    cursor: pointer;
+    width: 100%;
+    text-decoration: none;
+}
+
+.wallets-grid-item-link {
+    background: #f1f5f7;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    width: 100%;
+    padding: 16px 20px;
+    border-radius: 8px;
+
+    transition: 0.2s all ease;
+    box-shadow: 0px 0px 0px 1px rgba(0, 0, 0, 0) inset, 0px 0px 3px 0px rgba(0, 0, 0, 0);
+
+    &.outline {
+        box-shadow: 0px 0px 0px 1px #16cdd6 inset, 0px 0px 3px 0px rgba(22, 205, 214, 0.3);
+    }
+}
+
+@media (hover: hover) {
+    .wallets-grid-item-link:hover {
+        box-shadow: 0px 0px 0px 1px #d3d5d9 inset, 0px 0px 3px 0px rgba(0, 0, 0, 0);
+        transition: 0.02s all ease;
+    }
+}
+
+.wallets-grid-item-link:active {
+    box-shadow: 0px 0px 0px 1px #16cdd6 inset, 0px 0px 3px 0px rgba(22, 205, 214, 0.3);
+    transition: 0.02s all ease;
+}
+
+.wallets-grid-item-link .icon {
+    height: 34px;
+}
+
+.wallets-grid-item-link .coin-icon {
+    height: 34px;
+}
+
+.wallets-grid-item-link .link-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    color: #232d42;
+    min-width: 0;
+    line-height: 20px;
+    margin-left: 16px;
+}
+
+.wallets-grid-item-link .link-content .name {
+    color: inherit;
+    font-weight: 700;
+    line-height: inherit;
+    user-select: none;
+    margin: 0;
+    text-align: left;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.wallets-grid-item-link .link-content .amount {
+    color: inherit;
+    font-weight: 500;
+    line-height: inherit;
+    opacity: 0.5;
+    user-select: none;
+    margin: 0;
+    text-align: left;
+    font-size: 14px;
+    line-height: 20px;
+}
+.wallets-grid-item-link .arrow {
+    height: 20px;
+    transform: rotate(-90deg);
+    margin-left: auto;
+}
+
+.navbar-dropdown-shadow {
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: 0.25s all cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.navbar-dropdown-shadow.visible {
+    pointer-events: all;
+    opacity: 1;
 }
 
 section.hero .learn-more {
@@ -765,6 +962,10 @@ section.hero .learn-more .button-item {
     transform: rotate(180deg);
 }
 
+.flickity-viewport {
+    overflow: visible;
+}
+
 /* ===== Grid section ===== */
 .content-grid {
     width: 100%;
@@ -917,11 +1118,55 @@ section.hero .learn-more .button-item {
     width: min(100%, 40vw, 500px);
 }
 
+.content-zigzag-image.margin-top {
+    margin-top: 1rem;
+}
+
 @media (max-width: 900px) {
     .content-zigzag-image {
         width: min(500px, 100%);
         padding: 0 1.6rem;
         box-sizing: border-box;
+    }
+}
+
+/* Styles for flexible illustration on coin pages */
+.content-zigzag-image-container {
+    width: min(100%, 40vw, 500px);
+    position: relative;
+    margin-top: 1rem;
+}
+
+.content-zigzag-image-container .backdrop-image {
+    width: 100%;
+}
+
+.content-zigzag-image-container .coin-wallet-icon {
+    position: absolute;
+    width: 20%;
+    bottom: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.content-zigzag-image-container .coin-wallet-title {
+    position: absolute;
+    width: 30%;
+    top: 62%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2vw;
+}
+
+@media (max-width: 900px) {
+    .content-zigzag-image-container {
+        width: min(500px, 100%);
+        padding: 0 1.6rem;
+        box-sizing: border-box;
+    }
+
+    .content-zigzag-image-container .coin-wallet-title {
+        font-size: min(24px, 4vw);
     }
 }
 
@@ -948,6 +1193,7 @@ section.hero .learn-more .button-item {
 .cards-wrapper {
     position: relative;
     margin-top: -48px;
+    overflow: hidden;
 }
 
 .cards-wrapper::before {
@@ -967,7 +1213,7 @@ section.hero .learn-more .button-item {
     padding: 24px;
     box-sizing: border-box;
     width: 255px;
-    height: 228px;
+    /* height: 228px; */
     color: #073a3f;
     border-radius: 20px;
     background: #ffffff;
@@ -1005,6 +1251,11 @@ section.hero .learn-more .button-item {
     font-weight: 400;
     font-size: 16px;
     line-height: 1.62em;
+}
+
+.card-text a {
+    color: #16cdd6;
+    text-decoration: none;
 }
 
 .card-done {

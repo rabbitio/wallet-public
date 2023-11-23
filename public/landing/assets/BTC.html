@@ -1,0 +1,524 @@
+<html lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <meta charset="utf-8" />
+        <title>Bitcoin Wallet (BTC) - Rabbit.io</title>
+        <meta
+            name="keywords"
+            content="Bitcoin wallet, BTC wallet, create BTC wallet online, create Bitcoin wallet online, swap Bitcoin, swap BTC, exchange Bitcoin, exchange BTC, buy Bitcoin, buy BTC, sell Bitcoin, sell BTC, secure crypto wallet, open-source crypto wallet, non-custodial crypto wallet, self-custodial crypto wallet"
+        />
+        <meta
+            name="description"
+            content="Create your Bitcoin Wallet with Rabbit to securely send, receive, and swap BTC for a variety of other cryptocurrencies and tokens."
+        />
+        <link rel="icon" type="image/png" href="/apple-touch-icon.png" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="any" />
+        <link rel="shortcut icon" href="/favicon.ico?v=4" />
+        <meta name="theme-color" content="#FFFFFF" />
+        <meta name="msapplication-TileColor" content="#FFFFFF" />
+        <meta name="msapplication-TileImage" content="/apple-touch-icon.png" />
+        <meta name="msapplication-square70x70logo" content="/apple-touch-icon.png" />
+        <meta name="msapplication-square150x150logo" content="/apple-touch-icon.png" />
+        <meta name="msapplication-wide310x150logo" content="/apple-touch-icon.png" />
+        <meta name="msapplication-square310x310logo" content="/apple-touch-icon.png" />
+        <meta name="application-name" content="Rabbit" />
+        <link rel="stylesheet" href="/landing/styles/flickity.min.css" />
+        <link rel="stylesheet" href="/landing/styles/styles.css" />
+        <link rel="manifest" href="/manifest.json" crossorigin="use-credentials" />
+    </head>
+
+    <body>
+        <div class="landing">
+            <!-- Hero section -->
+            <section class="hero">
+                <nav class="navbar">
+                    <div class="navbar-container">
+                        <div class="logo-desktop">
+                            <a href="/" class="logo-dark"></a>
+                        </div>
+                        <div class="logo-mobile">
+                            <a href="/" class="logo-dark-minimized"></a>
+                        </div>
+                        <div class="navbar-nav">
+                            <div class="navbar-nav-item">
+                                <a
+                                    class="button button-default-flat button-text-small button-flat"
+                                    onclick="switchDropDown()"
+                                >
+                                    <div class="button-item">Coins</div>
+                                </a>
+                            </div>
+                            <div class="navbar-nav-item">
+                                <a
+                                    type="button"
+                                    class="button button-outline button-small button-text-small"
+                                    href="/signin"
+                                >
+                                    <div class="button-item">Sign In</div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+                <div class="navbar-dropdown">
+                    <div class="navbar-dropdown-container">
+                        <div class="wallets-grid">
+                            <!-- GENERATED_COINS_START -->
+                            <a href="/coins/BTC" class="wallets-grid-item">
+                                <div class="wallets-grid-item-link">
+                                    <img src="/asset-icons/BTC.svg" class="coin-icon" alt="BTC-icon"/>
+                                    <div class="link-content">
+                                        <p class="name">Bitcoin Wallet - BTC</p>
+                                        <p class="amount">
+                                            Native
+                                        </p>
+                                    </div>
+                                    <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                                </div>
+                            </a>
+                            <a href="/coins/ETH" class="wallets-grid-item">
+                                <div class="wallets-grid-item-link">
+                                    <img src="/asset-icons/ETH.svg" class="coin-icon" alt="ETH-icon"/>
+                                    <div class="link-content">
+                                        <p class="name">Ethereum Wallet - ETH</p>
+                                        <p class="amount">
+                                            Native
+                                        </p>
+                                    </div>
+                                    <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                                </div>
+                            </a>
+                            <a href="/coins/USDT" class="wallets-grid-item">
+                                <div class="wallets-grid-item-link">
+                                    <img src="/asset-icons/USDT.svg" class="coin-icon" alt="USDT-icon"/>
+                                    <div class="link-content">
+                                        <p class="name">Tether Wallet - USDT</p>
+                                        <p class="amount">
+                                            ERC20, TRC20
+                                        </p>
+                                    </div>
+                                    <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                                </div>
+                            </a>
+                            <a href="/coins/TRX" class="wallets-grid-item">
+                                <div class="wallets-grid-item-link">
+                                    <img src="/asset-icons/TRX.svg" class="coin-icon" alt="TRX-icon"/>
+                                    <div class="link-content">
+                                        <p class="name">Tron Wallet - TRX</p>
+                                        <p class="amount">
+                                            Native
+                                        </p>
+                                    </div>
+                                    <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                                </div>
+                            </a>
+                            <a href="/coins/USDC" class="wallets-grid-item">
+                                <div class="wallets-grid-item-link">
+                                    <img src="/asset-icons/USDC.svg" class="coin-icon" alt="USDC-icon"/>
+                                    <div class="link-content">
+                                        <p class="name">USD Coin Wallet - USDC</p>
+                                        <p class="amount">
+                                            ERC20, TRC20
+                                        </p>
+                                    </div>
+                                    <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                                </div>
+                            </a>
+                            <a href="/coins/BUSD" class="wallets-grid-item">
+                                <div class="wallets-grid-item-link">
+                                    <img src="/asset-icons/BUSD.svg" class="coin-icon" alt="BUSD-icon"/>
+                                    <div class="link-content">
+                                        <p class="name">Binance USD Wallet - BUSD</p>
+                                        <p class="amount">
+                                            ERC20
+                                        </p>
+                                    </div>
+                                    <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                                </div>
+                            </a>
+                            <a href="/coins/SHIB" class="wallets-grid-item">
+                                <div class="wallets-grid-item-link">
+                                    <img src="/asset-icons/SHIB.svg" class="coin-icon" alt="SHIB-icon"/>
+                                    <div class="link-content">
+                                        <p class="name">SHIBA INU Wallet - SHIB</p>
+                                        <p class="amount">
+                                            ERC20
+                                        </p>
+                                    </div>
+                                    <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                                </div>
+                            </a>
+                            <a href="/coins/UNI" class="wallets-grid-item">
+                                <div class="wallets-grid-item-link">
+                                    <img src="/asset-icons/UNI.svg" class="coin-icon" alt="UNI-icon"/>
+                                    <div class="link-content">
+                                        <p class="name">Uniswap Wallet - UNI</p>
+                                        <p class="amount">
+                                            ERC20
+                                        </p>
+                                    </div>
+                                    <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                                </div>
+                            </a>
+                            <a href="/coins/1INCH" class="wallets-grid-item">
+                                <div class="wallets-grid-item-link">
+                                    <img src="/asset-icons/1INCH.svg" class="coin-icon" alt="1INCH-icon"/>
+                                    <div class="link-content">
+                                        <p class="name">1INCH Token Wallet - 1INCH</p>
+                                        <p class="amount">
+                                            ERC20
+                                        </p>
+                                    </div>
+                                    <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                                </div>
+                            </a>
+                            <!-- GENERATED_COINS_END -->
+                        </div>
+                        <div class="navbar-dropdown-button">
+                            <a
+                                type="button"
+                                class="button button-outline button-small button-text-small"
+                                href="/coins"
+                                onclick="handleLandingLeaving"
+                            >
+                                <div class="button-item">View all available coins</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="navbar-dropdown-shadow" onclick="switchDropDown()"></div>
+                <div class="content">
+                    <div class="content-zigzag reversed">
+                        <div class="content-zigzag-image-container">
+                            <img
+                                src="/landing/images/illustrations/coin-page-hero.svg"
+                                class="backdrop-image"
+                                alt="hero-illustration"
+                            />
+                            <img src="/asset-icons/BTC.svg" class="coin-wallet-icon" alt="asset-icon" />
+                            <h4 class="coin-wallet-title">
+                                BTC Wallet
+                            </h4>
+                        </div>
+                        <div class="content-zigzag-text">
+                            <h1 class="section-title">
+                                Create your Bitcoin Wallet (BTC)
+                            </h1>
+                            <div class="section-subtitle">
+                                Send, receive, and swap Bitcoin and a wide range of other coins securely with Rabbit
+                                Wallet. Set up your wallet in less than a minute.
+                            </div>
+                            <div class="hero-buttons">
+                                <a class="button button-primary" href="/signup">
+                                    <div class="button-item">
+                                        <span class="button-icon">
+                                            <span class="icon icon-add-wallet icon-mask"></span>
+                                        </span>
+                                    </div>
+                                    <div class="button-item">Create BTC wallet</div>
+                                </a>
+                                <a class="button button-transparent" href="/import">
+                                    <div class="button-item">
+                                        <span class="button-icon">
+                                            <img src="/landing/images/import-wallet-icon.svg" alt="" />
+                                        </span>
+                                    </div>
+                                    <div class="button-item">Import existing</div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="learn-more" onclick="learnMoreClick()">
+                    <div class="button button-default-flat button-text-small button-flat">
+                        <div class="button-item">Learn more</div>
+                    </div>
+                    <img src="/landing/images/down-arrow.svg" height="22" alt="" />
+                </div>
+            </section>
+
+            <section id="secondSection">
+                <div class="content">
+                    <h2 class="section-title">What is Bitcoin (BTC)?</h2>
+                    <div class="section-subtitle no-margin">
+                        Bitcoin (BTC), launched in 2009 by an unidentified person or group under the pseudonym Satoshi Nakamoto, represents the first implementation of a concept called cryptocurrency. It was created in the aftermath of the 2008 financial crisis, with the intention of establishing a decentralized digital currency independent of any central authority. Bitcoin operates on a peer-to-peer network, utilizing blockchain technology to facilitate financial transactions without the need for intermediaries. It enables transparent and irreversible transactions, introducing a new paradigm in the financial world.<br /><br />The primary purpose of Bitcoin has evolved from being a medium of exchange to a store of value, often compared to digital gold. This evolution is attributed to its limited supply and decentralized nature, which has attracted investors looking for a hedge against inflation and currency devaluation. As a result, Bitcoin has gained significant attention and adoption, both as an investment and as a revolutionary technology, shaping the landscape of digital finance.
+                    </div>
+                </div>
+            </section>
+
+            <section class="dimmed">
+                <div class="content">
+                    <h2 class="section-title">Why choose Rabbit Wallet for Bitcoin?</h2>
+                    <div class="section-subtitle increased-margin">
+                        Whether you're a total crypto newbie or a seasoned pro, Rabbit Wallet's got your back for
+                        handling your BTC with ease. Check out some cool features that make Rabbit stand out:
+                    </div>
+                    <div class="content-grid">
+                        <div class="content-grid-column">
+                            <div class="content-grid-column-item">
+                                <div class="content-grid-column-item-icon">
+                                    <img src="/landing/images/fa-icons/exchange.svg" alt="exchange" />
+                                </div>
+                                <h4 class="content-grid-column-item-title">Exchange Bitcoin (BTC)</h4>
+                                <div class="content-grid-column-item-content">
+                                    With the Rabbit's built-in coin swap feature, you can exchange your Bitcoin for
+                                    any other coin at the best rates without ever leaving the cozy confines of your
+                                    wallet.
+                                </div>
+                            </div>
+                            <div class="content-grid-column-item">
+                                <div class="content-grid-column-item-icon">
+                                    <img src="/landing/images/fa-icons/blockchain.svg" alt="blockchain" />
+                                </div>
+                                <h4 class="content-grid-column-item-title">
+                                    Self-Custodial
+                                </h4>
+                                <div class="content-grid-column-item-content">
+                                    With a self-custodial wallet, you control the keys to your Bitcoin, meaning that
+                                    nobody, not even Rabbit, can ever access your coins. This also leads to faster
+                                    transactions with no third-party fees except for miners and increased flexibility.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="content-grid-column">
+                            <div class="content-grid-column-item">
+                                <div class="content-grid-column-item-icon">
+                                    <img src="/landing/images/fa-icons/fee.svg" alt="card" />
+                                </div>
+                                <h4 class="content-grid-column-item-title">Optimal Fees</h4>
+                                <div class="content-grid-column-item-content">
+                                    The unique fee calculation algorithms provide you with various options when
+                                    available, allowing you to choose the most optimal one to ensure your transaction is
+                                    confirmed both swiftly and cost-effectively.
+                                </div>
+                            </div>
+                            <div class="content-grid-column-item">
+                                <div class="content-grid-column-item-icon">
+                                    <img src="/landing/images/fa-icons/user-friendly.svg" alt="hands" />
+                                </div>
+                                <h4 class="content-grid-column-item-title">User-Friendly</h4>
+                                <div class="content-grid-column-item-content">
+                                    We've worked hard to make Rabbit Wallet user-friendly for everyone. Packed with
+                                    features, it suits users at all levels, and our developers respond directly when
+                                    help is needed.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Easy migration -->
+            <section>
+                <div class="content">
+                    <div class="content-zigzag">
+                        <img
+                            src="/landing/images/illustrations/9-easy-migration.svg"
+                            loading="lazy"
+                            class="content-zigzag-image margin-top"
+                            alt="easy-migration-illustration"
+                        />
+                        <div class="content-zigzag-text">
+                            <h2 class="section-title">Easy migration</h2>
+                            <div class="section-subtitle increased-margin">
+                                Got some Bitcoin laying around? No worries! You can import your existing wallet in
+                                just a few clicks, and doing so won't revoke access to your current wallet.
+                            </div>
+                            <a class="button button-primary" href="/import">
+                                <div class="button-item">Import your BTC wallet</div>
+                                <div class="button-item">
+                                    <span class="button-icon">
+                                        <span class="icon icon-arrow-right icon-mask"></span>
+                                    </span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dimmed">
+                <div class="content">
+                    <h2 class="section-title">How to use Rabbit Wallet?</h2>
+                    <div class="section-subtitle increased-margin">
+                        Creating a new wallet takes just a few clicks, and requires no information from you.
+                        <br />
+                        Here is a short brief on how you can create your new wallet:
+                    </div>
+                </div>
+                <div class="cards-wrapper">
+                    <div
+                        class="cards"
+                        data-flickity='{ "freeScroll": true, "contain": true, "prevNextButtons": false, "pageDots": false }'
+                    >
+                        <div class="cards-card">
+                            <div class="card">
+                                <div class="card-icon">
+                                    <img src="/landing/images/fa-icons/link.svg" alt="link" />
+                                </div>
+                                <div class="card-title">Open create page</div>
+                                <div class="card-text">
+                                    <a href="/signup">Click here</a>, or click any other "Create Wallet" button on this
+                                    page.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cards-card">
+                            <div class="card">
+                                <div class="card-icon">
+                                    <img src="/landing/images/fa-icons/phrase.svg" alt="numbered list" />
+                                </div>
+                                <div class="card-title">Save your phrase</div>
+                                <div class="card-text">
+                                    You will be given a phrase, which will act as a primary key to your wallet. Save it
+                                    securely.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cards-card">
+                            <div class="card">
+                                <div class="card-icon">
+                                    <img src="/landing/images/fa-icons/password.svg" alt="password" />
+                                </div>
+                                <div class="card-title">Set your password</div>
+                                <div class="card-text">
+                                    Password is required to both open your wallet, and to perform any transactions.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cards-card">
+                            <div class="card card-done">
+                                <div class="card-icon">
+                                    <img src="/landing/images/fa-icons/success.svg" alt="success" />
+                                </div>
+                                <div class="card-title">You are in!</div>
+                                <div class="card-text">
+                                    Now you are all set to explore the crypto world! Welcome to freedom!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-subtitle muted">
+                    Friendly tip: Having your passphrase on a sticky note under a keyboard might not be the best way to
+                    store it.
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <section class="footer">
+                <div class="content">
+                    <div class="footer-title">Rabbit is open. Completely.</div>
+                    <a class="button button-default" href="https://github.com/rabbitio/wallet-public" target="_blank">
+                        <div class="button-item">
+                            <span class="button-icon"><span class="icon icon-github icon-mask"></span></span>
+                        </div>
+                        <div class="button-item">Our Repository on GitHub</div>
+                    </a>
+                    <div class="footer-row">
+                        <div class="footer-contacts">
+                            <div class="footer-contacts-item">
+                                <div class="footer-logo">
+                                    <a href="/" class="logo"></a>
+                                </div>
+                            </div>
+                            <div class="footer-contacts-item">
+                                <div class="footer-contact">Rue du Rhône 118, 1204 Genève, Switzerland</div>
+                                <div class="footer-contact">support@rabbit.io</div>
+                            </div>
+                        </div>
+                        <div class="footer-nav">
+                            <div class="footer-nav-item-group">
+                                <div class="footer-link">
+                                    <a
+                                        type="button"
+                                        class="button button-default-flat button-text-small button-flat"
+                                        target="_blank"
+                                        href="/docs/legal/terms-of-use.html"
+                                    >
+                                        <div class="button-item">Terms &amp; Conditions</div>
+                                    </a>
+                                </div>
+                                <div class="footer-link">
+                                    <a
+                                        type="button"
+                                        class="button button-default-flat button-text-small button-flat"
+                                        target="_blank"
+                                        href="/docs/legal/privacy-policy.html"
+                                    >
+                                        <div class="button-item">Privacy Policy</div>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="footer-nav-item-group">
+                                <div class="footer-link">
+                                    <a
+                                        type="button"
+                                        class="button button-default-flat button-text-small button-flat"
+                                        href="/coins"
+                                        onclick="handleLandingLeaving"
+                                    >
+                                        <div class="button-item">Coins</div>
+                                    </a>
+                                </div>
+                                <div class="footer-link">
+                                    <a
+                                        type="button"
+                                        class="button button-default-flat button-text-small button-flat"
+                                        href="/support"
+                                    >
+                                        <div class="button-item">Help</div>
+                                    </a>
+                                </div>
+                                <div class="footer-link">
+                                    <a
+                                        type="button"
+                                        class="button button-primary button-small button-text-small"
+                                        href="/signin"
+                                    >
+                                        <div class="button-item">Sign In</div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <script src="/landing/js/flickity.pkgd.min.js"></script>
+        <script>
+            var newFeaturesSlider = new Flickity(".cards", {
+                freeScroll: true,
+                contain: true,
+                prevNextButtons: false,
+                pageDots: false,
+                draggable: true,
+            });
+
+            function learnMoreClick() {
+                scroll({
+                    top: document.getElementById("secondSection").offsetTop - 20,
+                    behavior: "smooth",
+                });
+            }
+
+            let isDropDownOpened = false;
+
+            function switchDropDown() {
+                var dropdown = document.getElementsByClassName("navbar-dropdown")[0];
+                var dropdownShadow = document.getElementsByClassName("navbar-dropdown-shadow")[0];
+
+                if (isDropDownOpened) {
+                    dropdown.classList.remove("visible");
+                    dropdownShadow.classList.remove("visible");
+                } else {
+                    dropdown.classList.add("visible");
+                    dropdownShadow.classList.add("visible");
+                }
+                isDropDownOpened = !isDropDownOpened;
+            }
+        </script>
+        <script src="/landing/js/horizontal-scroll.js"></script>
+    </body>
+</html>

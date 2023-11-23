@@ -4,7 +4,7 @@
  * @return {string}
  */
 export const standardTickerToRabbitTicker = function(ticker, protocol) {
-    return `${ticker}${protocol ?? ""}`.toUpperCase();
+    return `${ticker}${protocol || ""}`.toUpperCase();
 };
 
 /**
@@ -13,6 +13,6 @@ export const standardTickerToRabbitTicker = function(ticker, protocol) {
  * @return {string}
  */
 export const rabbitTickerToStandardTicker = function(ticker, protocol) {
-    if (protocol) return ticker.split(protocol.protocol)[0];
+    if (protocol && protocol.protocol) return ticker.split(protocol.protocol)[0];
     return ticker;
 };

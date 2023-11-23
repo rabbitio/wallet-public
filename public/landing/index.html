@@ -14,7 +14,7 @@
         <link rel="icon" type="image/png" href="../apple-touch-icon.png" sizes="any" />
         <link rel="apple-touch-icon" href="../apple-touch-icon.png" sizes="any" />
         <link rel="shortcut icon" href="../favicon.ico?v=4" />
-        <meta name="theme-color" content="#232d42" />
+        <meta name="theme-color" content="#FFFFFF" />
         <meta name="msapplication-TileColor" content="#FFFFFF" />
         <meta name="msapplication-TileImage" content="apple-touch-icon.png" />
         <meta name="msapplication-square70x70logo" content="../apple-touch-icon.png" />
@@ -32,17 +32,21 @@
         <div class="landing">
             <!-- Hero section -->
             <section class="hero">
-                <div class="content">
-                    <nav class="navbar">
-                        <a href="/" class="logo-dark"></a>
+                <nav class="navbar">
+                    <div class="navbar-container">
+                        <div class="logo-desktop">
+                            <a href="/" class="logo-dark"></a>
+                        </div>
+                        <div class="logo-mobile">
+                            <a href="/" class="logo-dark-minimized"></a>
+                        </div>
                         <div class="navbar-nav">
-                            <div class="navbar-nav-item show-on-desktop">
+                            <div class="navbar-nav-item">
                                 <a
                                     class="button button-default-flat button-text-small button-flat"
-                                    href="/support"
-                                    onclick="handleLandingLeaving"
+                                    onclick="switchDropDown()"
                                 >
-                                    <div class="button-item">Help</div>
+                                    <div class="button-item">Coins</div>
                                 </a>
                             </div>
                             <div class="navbar-nav-item">
@@ -56,13 +60,142 @@
                                 </a>
                             </div>
                         </div>
-                    </nav>
+                    </div>
+                </nav>
+                <div class="navbar-dropdown">
+                    <div class="navbar-dropdown-container">
+                        <div class="wallets-grid">
+                            <!-- GENERATED_COINS_START -->
+                        <a href="/coins/BTC" class="wallets-grid-item">
+                            <div class="wallets-grid-item-link">
+                                <img src="/asset-icons/BTC.svg" class="coin-icon" alt="BTC-icon"/>
+                                <div class="link-content">
+                                    <p class="name">Bitcoin Wallet - BTC</p>
+                                    <p class="amount">
+                                        Native
+                                    </p>
+                                </div>
+                                <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                            </div>
+                        </a>
+                        <a href="/coins/ETH" class="wallets-grid-item">
+                            <div class="wallets-grid-item-link">
+                                <img src="/asset-icons/ETH.svg" class="coin-icon" alt="ETH-icon"/>
+                                <div class="link-content">
+                                    <p class="name">Ethereum Wallet - ETH</p>
+                                    <p class="amount">
+                                        Native
+                                    </p>
+                                </div>
+                                <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                            </div>
+                        </a>
+                        <a href="/coins/USDT" class="wallets-grid-item">
+                            <div class="wallets-grid-item-link">
+                                <img src="/asset-icons/USDT.svg" class="coin-icon" alt="USDT-icon"/>
+                                <div class="link-content">
+                                    <p class="name">Tether Wallet - USDT</p>
+                                    <p class="amount">
+                                        ERC20, TRC20
+                                    </p>
+                                </div>
+                                <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                            </div>
+                        </a>
+                        <a href="/coins/TRX" class="wallets-grid-item">
+                            <div class="wallets-grid-item-link">
+                                <img src="/asset-icons/TRX.svg" class="coin-icon" alt="TRX-icon"/>
+                                <div class="link-content">
+                                    <p class="name">Tron Wallet - TRX</p>
+                                    <p class="amount">
+                                        Native
+                                    </p>
+                                </div>
+                                <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                            </div>
+                        </a>
+                        <a href="/coins/USDC" class="wallets-grid-item">
+                            <div class="wallets-grid-item-link">
+                                <img src="/asset-icons/USDC.svg" class="coin-icon" alt="USDC-icon"/>
+                                <div class="link-content">
+                                    <p class="name">USD Coin Wallet - USDC</p>
+                                    <p class="amount">
+                                        ERC20, TRC20
+                                    </p>
+                                </div>
+                                <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                            </div>
+                        </a>
+                        <a href="/coins/BUSD" class="wallets-grid-item">
+                            <div class="wallets-grid-item-link">
+                                <img src="/asset-icons/BUSD.svg" class="coin-icon" alt="BUSD-icon"/>
+                                <div class="link-content">
+                                    <p class="name">Binance USD Wallet - BUSD</p>
+                                    <p class="amount">
+                                        ERC20
+                                    </p>
+                                </div>
+                                <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                            </div>
+                        </a>
+                        <a href="/coins/SHIB" class="wallets-grid-item">
+                            <div class="wallets-grid-item-link">
+                                <img src="/asset-icons/SHIB.svg" class="coin-icon" alt="SHIB-icon"/>
+                                <div class="link-content">
+                                    <p class="name">SHIBA INU Wallet - SHIB</p>
+                                    <p class="amount">
+                                        ERC20
+                                    </p>
+                                </div>
+                                <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                            </div>
+                        </a>
+                        <a href="/coins/UNI" class="wallets-grid-item">
+                            <div class="wallets-grid-item-link">
+                                <img src="/asset-icons/UNI.svg" class="coin-icon" alt="UNI-icon"/>
+                                <div class="link-content">
+                                    <p class="name">Uniswap Wallet - UNI</p>
+                                    <p class="amount">
+                                        ERC20
+                                    </p>
+                                </div>
+                                <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                            </div>
+                        </a>
+                        <a href="/coins/1INCH" class="wallets-grid-item">
+                            <div class="wallets-grid-item-link">
+                                <img src="/asset-icons/1INCH.svg" class="coin-icon" alt="1INCH-icon"/>
+                                <div class="link-content">
+                                    <p class="name">1INCH Token Wallet - 1INCH</p>
+                                    <p class="amount">
+                                        ERC20
+                                    </p>
+                                </div>
+                                <img src="/landing/images/arrow-dark.svg" class="arrow" alt="" />
+                            </div>
+                        </a>
+                        <!-- GENERATED_COINS_END -->
+                        </div>
+                        <div class="navbar-dropdown-button">
+                            <a
+                                type="button"
+                                class="button button-outline button-small button-text-small"
+                                href="/coins"
+                                onclick="handleLandingLeaving"
+                            >
+                                <div class="button-item">View all available coins</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="navbar-dropdown-shadow" onclick="switchDropDown()"></div>
+                <div class="content">
                     <div class="content-zigzag reversed">
-                        <img src="../landing/images/illustrations/1-hero.png" class="content-zigzag-image" />
+                        <img src="../landing/images/illustrations/1-hero.png" class="content-zigzag-image margin-top" />
                         <div class="content-zigzag-text">
-                            <h2 class="section-title">
+                            <h1 class="section-title">
                                 Safely send, receive, and swap your cryptocurrencies
-                            </h2>
+                            </h1>
                             <div class="section-subtitle">
                                 Open-source, self-custodial crypto wallet with swift coin swaps and top-notch security.
                                 Create your wallet and dive in.
@@ -87,12 +220,12 @@
                             </div>
                         </div>
                     </div>
-                    <div class="learn-more" onclick="learnMoreClick()">
-                        <div class="button button-default-flat button-text-small button-flat">
-                            <div class="button-item">Learn more</div>
-                        </div>
-                        <img src="../landing/images/down-arrow.svg" height="22" />
+                </div>
+                <div class="learn-more" onclick="learnMoreClick()">
+                    <div class="button button-default-flat button-text-small button-flat">
+                        <div class="button-item">Learn more</div>
                     </div>
+                    <img src="../landing/images/down-arrow.svg" height="22" />
                 </div>
             </section>
 
@@ -101,7 +234,7 @@
                 <div class="content">
                     <div class="content-zigzag reversed">
                         <img
-                            src="../landing/images/illustrations/2-self-custody.png"
+                            src="../landing/images/illustrations/2-self-custody.svg"
                             loading="lazy"
                             class="content-zigzag-image"
                         />
@@ -123,7 +256,7 @@
                 <div class="content">
                     <div class="content-zigzag">
                         <img
-                            src="../landing/images/illustrations/3-secure-and-private.png"
+                            src="../landing/images/illustrations/3-secure-and-private.svg"
                             loading="lazy"
                             class="content-zigzag-image"
                         />
@@ -276,7 +409,7 @@
                 <div class="content">
                     <div class="content-zigzag">
                         <img
-                            src="../landing/images/illustrations/7-coin-support.png"
+                            src="../landing/images/illustrations/7-coin-support.svg"
                             loading="lazy"
                             class="content-zigzag-image"
                         />
@@ -311,7 +444,7 @@
                 <div class="content">
                     <div class="content-zigzag reversed">
                         <img
-                            src="../landing/images/illustrations/8-support.png"
+                            src="../landing/images/illustrations/8-support.svg"
                             loading="lazy"
                             class="content-zigzag-image"
                         />
@@ -330,9 +463,9 @@
                 <div class="content">
                     <div class="content-zigzag">
                         <img
-                            src="../landing/images/illustrations/9-easy-migration.png"
+                            src="../landing/images/illustrations/9-easy-migration.svg"
                             loading="lazy"
-                            class="content-zigzag-image"
+                            class="content-zigzag-image margin-top"
                         />
                         <div class="content-zigzag-text">
                             <h2 class="section-title">Easy migration</h2>
@@ -357,8 +490,7 @@
             <section class="dimmed">
                 <div class="content">
                     <h2 class="section-title">
-                        Don’t wait until the next FTX gets away with all your coins. Protect them now with Rabbit
-                        Wallet
+                        Don’t wait until the next FTX gets away with all your coins. Protect them now with Rabbit Wallet
                     </h2>
                     <div class="section-subtitle increased-margin">
                         Crypto exchanges can be vulnerable to hacks, regulatory issues, or even bankruptcy. By keeping
@@ -510,25 +642,25 @@
                                     <img src="../landing/images/fa-icons/credit-card.svg" alt="card" />
                                 </div>
                                 <div class="card-title">Buy crypto with card</div>
-                                <div class="card-text">Feature expected in November 2023</div>
+                                <div class="card-text">Feature expected in December 2023</div>
                             </div>
                         </div>
                         <div class="cards-card">
                             <div class="card">
                                 <div class="card-icon">
-                                    <img src="../landing/images/fa-icons/gears.svg" alt="coins" />
+                                    <img src="../landing/images/fa-icons/chain.svg" alt="coins" />
                                 </div>
-                                <div class="card-title">Bitcoin taproot</div>
-                                <div class="card-text">Feature expected in November 2023</div>
-                            </div>
-                        </div>
-                        <div class="cards-card">
-                            <div class="card">
-                                <div class="card-icon">
-                                    <img src="../landing/images/fa-icons/coins.svg" alt="coins" />
-                                </div>
-                                <div class="card-title">Donation collection</div>
+                                <div class="card-title">Cross-chain sending</div>
                                 <div class="card-text">Feature expected in February 2024</div>
+                            </div>
+                        </div>
+                        <div class="cards-card">
+                            <div class="card">
+                                <div class="card-icon">
+                                    <img src="../landing/images/fa-icons/app.svg" alt="coins" />
+                                </div>
+                                <div class="card-title">Mobile apps</div>
+                                <div class="card-text">Feature expected in March 2024</div>
                             </div>
                         </div>
                     </div>
@@ -614,6 +746,16 @@
                                     <a
                                         type="button"
                                         class="button button-default-flat button-text-small button-flat"
+                                        href="/coins"
+                                        onclick="handleLandingLeaving"
+                                    >
+                                        <div class="button-item">Coins</div>
+                                    </a>
+                                </div>
+                                <div class="footer-link">
+                                    <a
+                                        type="button"
+                                        class="button button-default-flat button-text-small button-flat"
                                         href="/support"
                                         onclick="handleLandingLeaving"
                                     >
@@ -666,6 +808,22 @@
                     top: document.getElementById("secondSection").offsetTop - 20,
                     behavior: "smooth",
                 });
+            }
+
+            let isDropDownOpened = false;
+
+            function switchDropDown() {
+                var dropdown = document.getElementsByClassName("navbar-dropdown")[0];
+                var dropdownShadow = document.getElementsByClassName("navbar-dropdown-shadow")[0];
+
+                if (isDropDownOpened) {
+                    dropdown.classList.remove("visible");
+                    dropdownShadow.classList.remove("visible");
+                } else {
+                    dropdown.classList.add("visible");
+                    dropdownShadow.classList.add("visible");
+                }
+                isDropDownOpened = !isDropDownOpened;
             }
         </script>
         <script src="../landing/js/horizontal-scroll.js"></script>
