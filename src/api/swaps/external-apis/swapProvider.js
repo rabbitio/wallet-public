@@ -13,6 +13,17 @@ export class SwapProvider {
         RETRIABLE_FAIL: "retriableFail",
     };
 
+    // TODO: [dev] finish
+    static SWAP_STATUSES = {
+        WAITING_FOR_PAYMENT: "waiting_for_payment", // public +
+        PAYMENT_RECEIVED: "payment_received", // public +
+        EXCHANGING: "exchanging", // session full // public +
+        COMPLETED: "completed", // session full  // public +
+        REFUNDED: "refunded", // session full  // public +
+        EXPIRED: "expired", // public +
+        ERROR: "error", // public +
+    };
+
     /**
      * @return {number} milliseconds TTL
      */
@@ -84,6 +95,16 @@ export class SwapProvider {
      *                 })>}
      */
     async createSwap(fromCoin, toCoin, amount, toAddress, refundAddress, rawSwapData = null) {
+        throw new Error("Not implemented in base");
+    }
+
+    /**
+     * Retrieves details and status for swaps by given ids.
+     *
+     * @param swapIds {string[]}
+     * @return {Promise<{result: false, reason: string}|{result:true, swaps: ExistingSwap[]}>}
+     */
+    async getExistingSwapsDetailsAndStatus(swapIds) {
         throw new Error("Not implemented in base");
     }
 }

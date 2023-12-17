@@ -57,6 +57,14 @@ export class Trc20TokenWallet extends Wallet {
         }
     }
 
+    isAddressValid(address) {
+        try {
+            return { result: validateTronAddress(address) };
+        } catch (e) {
+            improveAndRethrow(e, `${this.coin.ticker}_isAddressValid`);
+        }
+    }
+
     isAddressValidForSending(address) {
         try {
             return { result: validateTronAddress(address) };

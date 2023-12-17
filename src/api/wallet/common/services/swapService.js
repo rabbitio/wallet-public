@@ -5,16 +5,18 @@ import { cache } from "../../../common/utils/cache";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { TxData } from "../models/tx-data";
 import CoinsToFiatRatesService from "./coinsToFiatRatesService";
-import { SwapProvider } from "../external-apis/swapProviders/swapProvider";
+import { SwapProvider } from "../../../swaps/external-apis/swapProvider";
 import { SendCoinsService } from "./sendCoinsService";
 import { safeStringify } from "../../../common/utils/browserUtils";
-import { SwapspaceSwapProvider } from "../external-apis/swapProviders/swapspaceSwapProvider";
+import { SwapspaceSwapProvider } from "../../../swaps/external-apis/swapspaceSwapProvider";
 import { BalancesService } from "./balancesService";
 import { Logger } from "../../../support/services/internal/logs/logger";
 import { Coin } from "../models/coin";
-import { AmountUtils } from "../utils/amountUtils";
-import EmailsApi from "../../../support/backend-api/emailAPI";
 import { EventBus, SWAP_CREATED_EVENT, SWAP_TX_PUSHED_EVENT } from "../../../common/adapters/eventbus";
+import { ETHEREUM_BLOCKCHAIN } from "../../eth/ethereumBlockchain";
+import { TRON_BLOCKCHAIN } from "../../trx/tronBlockchain";
+import { BITCOIN_BLOCKCHAIN } from "../../btc/bitcoinBlockchain";
+import { SwapUtils } from "../../../swaps/utils/swapUtils";
 import { NumbersUtils } from "../utils/numbersUtils";
 
 export class SwapDetails {
@@ -131,7 +133,7 @@ export class SwapService {
         try {
             const result = await this._swapProvider.getSupportedCurrencies();
             if (result.reason === SwapProvider.COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED) {
-                this._safeHandleRequestsLimitExceeding();
+                SwapUtils.safeHandleRequestsLimitExceeding();
                 return { result: false, reason: SwapService.SWAPS_COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED };
             }
             Logger.log(`Retrieved ${result?.coins?.length} supported currencies for exchange`, loggerSource);
@@ -184,7 +186,7 @@ export class SwapService {
             const providerResult = await this._swapProvider.getSupportedCurrencies();
             if (!providerResult.result) {
                 if (providerResult.reason === SwapProvider.COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED) {
-                    this._safeHandleRequestsLimitExceeding();
+                    SwapUtils.safeHandleRequestsLimitExceeding();
                     return { result: false, reason: SwapService.SWAPS_COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED };
                 }
                 throw new Error("Unsupported error code: " + providerResult.reason);
@@ -392,7 +394,7 @@ export class SwapService {
                 if (details?.reason === SwapProvider.NO_SWAPS_REASONS.NOT_SUPPORTED)
                     return composeFailResult(SwapService.SWAP_DETAILS_FAIL_REASONS.PAIR_NOT_SUPPORTED);
                 else if (details?.reason === SwapProvider.COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED) {
-                    this._safeHandleRequestsLimitExceeding();
+                    SwapUtils.safeHandleRequestsLimitExceeding();
                     return composeFailResult(SwapService.SWAPS_COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED);
                 }
             }
@@ -469,13 +471,13 @@ export class SwapService {
              */
             let address;
             switch (coin.blockchain) {
-                case Coin.BLOCKCHAINS.BITCOIN:
+                case BITCOIN_BLOCKCHAIN:
                     address = "bc1qn09cnuteke9nc74sdg627xx8a8cpettuh8sqzr";
                     break;
-                case Coin.BLOCKCHAINS.ETHEREUM:
+                case ETHEREUM_BLOCKCHAIN:
                     address = "0x5551bd33f5bbde0cbc59fb1078f65b7b3c52c77a";
                     break;
-                case Coin.BLOCKCHAINS.TRON:
+                case TRON_BLOCKCHAIN:
                     address = "TByaFxkXmYh16Nw1RUBpJaUkmiR7radQjW";
                     break;
                 default:
@@ -561,7 +563,7 @@ export class SwapService {
      * @param fromCoin {Coin} enabled coin (to swap amount from)
      * @param toCoin {Coin}
      * @return {Promise<{
-     *             result: boolean,
+     *             result: true,
      *             min: number,
      *             fiatMin: (number|null),
      *             max: number,
@@ -575,48 +577,17 @@ export class SwapService {
     async getInitialSwapData(fromCoin, toCoin) {
         const loggerSource = "getInitialSwapData";
         try {
-            /* We use some amount here that should fit at least some of the limits of the swap providers.
-             * So we are going to get some rate to be used as the default for the on-flight calculations before we get
-             * the exact rate (that should be retrieved by getSwapDetails method) for a specific amount.
-             */
-            const defaultAmountUsd = 300;
-            const coinUsdRate = await CoinsToFiatRatesService.getCoinToUSDRate(fromCoin);
-            const coinAmountForDefaultUsdAmount = AmountUtils.trimCryptoAmountByCoin(
-                defaultAmountUsd / +coinUsdRate?.rate,
-                fromCoin
-            );
-            Logger.log(`Init: ${coinAmountForDefaultUsdAmount} ${fromCoin.ticker}->${toCoin.ticker}`, loggerSource);
-            const details = await this._swapProvider.getSwapInfo(fromCoin, toCoin, +coinAmountForDefaultUsdAmount);
-            if (!details) {
-                throw new Error("The details are empty: " + safeStringify(details));
-            }
-            if (!details.result) {
-                Logger.log(`Failed with reason: ${details.reason}. ${fromCoin.ticker}->${toCoin.ticker}`, loggerSource);
-                if (details?.reason === SwapProvider.NO_SWAPS_REASONS.NOT_SUPPORTED)
+            const result = await SwapUtils.getInitialSwapData(this._swapProvider, fromCoin, toCoin);
+            if (!result.result) {
+                if (result?.reason === SwapProvider.NO_SWAPS_REASONS.NOT_SUPPORTED)
                     return { result: false, reason: SwapService.SWAP_DETAILS_FAIL_REASONS.PAIR_NOT_SUPPORTED };
-                else if (details?.reason === SwapProvider.COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED) {
-                    this._safeHandleRequestsLimitExceeding();
+                else if (result?.reason === SwapProvider.COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED) {
+                    SwapUtils.safeHandleRequestsLimitExceeding();
                     return { result: false, reason: SwapService.SWAPS_COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED };
-                } else {
-                    throw new Error("Unhandled error case: " + details?.reason);
                 }
             }
-            const fiatData = await CoinsToFiatRatesService.convertCoinsAmountsToCurrentlySelectedFiat([
-                { coin: fromCoin, amounts: [details?.smallestMin, details?.greatestMax] },
-            ]);
-            const [fiatMin, fiatMax] = fiatData[0].amountsFiat;
-            const result = {
-                result: true,
-                min: details?.smallestMin,
-                fiatMin: fiatMin,
-                max: details?.greatestMax,
-                fiatMax: fiatMax,
-                rate: details?.rate ?? null,
-            };
-            Logger.log(`Returning: ${safeStringify(result)}`, loggerSource);
             return result;
         } catch (e) {
-            Logger.log(`Failed to init swap: ${safeStringify(e)}`, loggerSource);
             improveAndRethrow(e, loggerSource);
         }
     }
@@ -783,11 +754,8 @@ export class SwapService {
             );
             if (!result?.result) {
                 if (result?.reason === SwapProvider.COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED) {
-                    this._safeHandleRequestsLimitExceeding();
-                    return {
-                        result: false,
-                        reason: SwapService.SWAPS_COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED,
-                    };
+                    SwapUtils.safeHandleRequestsLimitExceeding();
+                    return { result: false, reason: SwapService.SWAPS_COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED };
                 }
                 if (result?.reason === SwapProvider.CREATION_FAIL_REASONS.RETRIABLE_FAIL) {
                     // TODO: [feature, high] implement retrying if one partner fail and we have another partners task_id=a07e367e488f4a4899613ac9056fa359
@@ -922,19 +890,6 @@ export class SwapService {
         } catch (e) {
             improveAndRethrow(e, "sendSwapTransaction");
         }
-    }
-
-    _safeHandleRequestsLimitExceeding() {
-        (async () => {
-            try {
-                await EmailsApi.sendEmail(
-                    "AUTOMATIC EMAIL - SWAPSPACE REQUESTS LIMIT EXCEEDED",
-                    "Requests limit exceeded. Urgently ask swapspace support for limit increasing"
-                );
-            } catch (e) {
-                Logger.log(`Failed to handle limit exceeding ${safeStringify(e)}`, "_safeHandleRequestsLimitExceeding");
-            }
-        })();
     }
 }
 

@@ -6,6 +6,8 @@ import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { ethereum } from "../../eth/ethereum";
 import { NumbersUtils } from "../../common/utils/numbersUtils";
 import { AmountUtils } from "../../common/utils/amountUtils";
+import { ERC20 } from "../erc20Protocol";
+import { ETHEREUM_BLOCKCHAIN } from "../../eth/ethereumBlockchain";
 
 export class Erc20Token extends Coin {
     /**
@@ -14,7 +16,7 @@ export class Erc20Token extends Coin {
     constructor(latinName, tickerPrintable, digitsCountAfterComma, contractAddress, atomName = "", maxValue = null) {
         super(
             latinName,
-            `${tickerPrintable}${Coin.PROTOCOLS.ERC20.protocol}`,
+            `${tickerPrintable}${ERC20.protocol}`,
             tickerPrintable,
             digitsCountAfterComma,
             maxValue,
@@ -25,8 +27,8 @@ export class Erc20Token extends Coin {
             "gas",
             ["30min", "5min", "3.5min", "2min"],
             60000,
-            Coin.BLOCKCHAINS.ETHEREUM,
-            Coin.PROTOCOLS.ERC20,
+            ETHEREUM_BLOCKCHAIN,
+            ERC20,
             contractAddress
         );
         this.feeCoin = ethereum;
@@ -47,9 +49,10 @@ export class Erc20Token extends Coin {
     }
 
     composeUrlToTransactionExplorer(txId) {
-        return `https://${
-            getCurrentNetwork(this)?.key === this.mainnet.key ? "" : `${this.testnet.key}.`
-        }etherscan.io/tx/${txId}`;
+        if (getCurrentNetwork(this)?.key === this.mainnet.key) {
+            return `https://blockchair.com/ethereum/transaction/${txId}?from=rabbitio`;
+        }
+        return `https://${this.testnet.key}etherscan.io/tx/${txId}`;
     }
 
     coinAtomsFeeRateToCommonlyUsedAmountFormatWithDenominationString(coinAtomsString) {

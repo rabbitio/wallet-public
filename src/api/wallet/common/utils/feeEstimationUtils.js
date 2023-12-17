@@ -1,4 +1,5 @@
-import { Coin } from "../models/coin";
+import { TRC20 } from "../../trc20token/trc20Protocol";
+import { ERC20 } from "../../erc20token/erc20Protocol";
 
 export class FeeEstimationUtils {
     /**
@@ -17,10 +18,10 @@ export class FeeEstimationUtils {
      * @return {string} address
      */
     static getWalletAddressToUseAsFromAddressForTokenSendingEstimation(protocol) {
-        if (protocol === Coin.PROTOCOLS.TRC20) {
+        if (protocol === TRC20) {
             return "TD4j8oaQFcUFwDjn2dthCJXUY19yvfhmHz"; // Has mainnet and testnet (nile) TRX
         }
-        if (protocol === Coin.PROTOCOLS.ERC20) {
+        if (protocol === ERC20) {
             return "0x71538cae72716738f59dbedcce3dda3a183de8aa"; // Has mainnet and testnet (goerli) ETH and USDT ERC20
         }
         throw new Error("Protocol is not supported: " + protocol);

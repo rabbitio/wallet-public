@@ -61,6 +61,14 @@ export class Erc20TokenWallet extends Wallet {
         }
     }
 
+    isAddressValid(address) {
+        try {
+            return { result: ethers.utils.isAddress(address) };
+        } catch (e) {
+            improveAndRethrow(e, `${this.coin.ticker}_isAddressValid`);
+        }
+    }
+
     isAddressValidForSending(address) {
         try {
             return { result: ethers.utils.isAddress(address) };

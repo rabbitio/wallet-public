@@ -8,13 +8,13 @@ import { TrxAddressesService } from "./trxAddressesService";
 import { Coins } from "../../coins";
 import { TronNetworkConstantsService } from "./tronNetworkConstantsService";
 import { TronBlockchainBalancesService } from "./tronBlockchainBalancesService";
-import { Coin } from "../../common/models/coin";
 import { validateTronAddress } from "../lib/addresses";
 import { KeysBip44 } from "../../common/lib/keysBip44";
 import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { safeStringify } from "../../../common/utils/browserUtils";
 import { FeeEstimationUtils } from "../../common/utils/feeEstimationUtils";
 import { TronAccountExistenceProvider } from "../external-apis/tronAccountExistanceProvider";
+import { TRC20 } from "../../trc20token/trc20Protocol";
 
 // TODO: [tests, critical] Units required
 export class TronSendTransactionService {
@@ -65,7 +65,7 @@ export class TronSendTransactionService {
             let requiredBandwidth = 0;
             let requiredEnergy = 0;
             let priceForTargetAccountCreationSuns = 0;
-            if (coin.protocol === Coin.PROTOCOLS.TRC20) {
+            if (coin.protocol === TRC20) {
                 /* If the passed address is fake we use random not activated valid address as empirically we discovered
                  * that not activated tron addresses require significantly more energy to send to them.
                  *
@@ -96,7 +96,7 @@ export class TronSendTransactionService {
                  * NOTE 2: you will not be able to send to this address - fee estimation will fail
                  */
                 const existingAccount = FeeEstimationUtils.getWalletAddressToUseAsFromAddressForTokenSendingEstimation(
-                    Coin.PROTOCOLS.TRC20
+                    TRC20
                 );
                 /* This value should not exceed tron balance of the hardcoded address we use for estimation. So we
                  * use the smallest possible. Greater value can add just few bytes to the hex transaction. We handle
@@ -269,7 +269,7 @@ export class TronSendTransactionService {
                     txData.amount,
                     privateKey
                 );
-            } else if (coin?.protocol === Coin.PROTOCOLS.TRC20) {
+            } else if (coin?.protocol === TRC20) {
                 id = await tronUtils.createSignAndBroadcastTrc20TransferTransaction(
                     coin.tokenAddress,
                     fromAddress,

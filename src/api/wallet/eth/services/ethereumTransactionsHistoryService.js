@@ -3,8 +3,8 @@ import { EthTransactionsProvider } from "../external-apis/ethTransactionsProvide
 import { EthAddressesService } from "./ethAddressesService";
 import { EthereumBlockchainTransactionsProvider } from "../external-apis/ethereumBlockchainTransactionsProvider";
 import { Coins } from "../../coins";
-import { Coin } from "../../common/models/coin";
 import { Erc20TransactionsProvider } from "../../erc20token/external-apis/erc20TransactionsProvider";
+import { ERC20 } from "../../erc20token/erc20Protocol";
 
 export class EthereumTransactionsHistoryService {
     /**
@@ -34,7 +34,7 @@ export class EthereumTransactionsHistoryService {
                 try {
                     const onlyEth = ethereumBlockchainTransactions.filter(tx => tx.ticker === Coins.COINS.ETH.ticker);
                     EthTransactionsProvider.actualizeCacheWithTransactionsReturnedByAnotherProvider(address, onlyEth);
-                    const onlyErc20 = ethereumBlockchainTransactions.filter(t => t.protocol === Coin.PROTOCOLS.ERC20);
+                    const onlyErc20 = ethereumBlockchainTransactions.filter(t => t.protocol === ERC20);
                     Erc20TransactionsProvider.actualizeCacheWithTransactionsReturnedByAnotherProvider(
                         address,
                         onlyErc20

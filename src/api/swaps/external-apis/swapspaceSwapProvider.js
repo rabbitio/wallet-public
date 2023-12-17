@@ -1,15 +1,21 @@
 import axios from "axios";
 import { SwapProvider } from "./swapProvider";
-import { rabbitTickerToStandardTicker, standardTickerToRabbitTicker } from "../utils/tickersAdapter";
-import { Coin } from "../../models/coin";
-import { Coins } from "../../../coins";
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import IpAddressProvider from "../../../../auth/external-apis/ipAddressProviders";
-import { Logger } from "../../../../support/services/internal/logs/logger";
-import { safeStringify } from "../../../../common/utils/browserUtils";
-import CoinsToFiatRatesService from "../../services/coinsToFiatRatesService";
-import { AmountUtils } from "../../utils/amountUtils";
-import { API_KEYS_PROXY_URL } from "../../../../common/backend-api/utils";
+import {
+    rabbitTickerToStandardTicker,
+    standardTickerToRabbitTicker,
+} from "../../wallet/common/external-apis/utils/tickersAdapter";
+import { Coin } from "../../wallet/common/models/coin";
+import { Coins } from "../../wallet/coins";
+import { improveAndRethrow } from "../../common/utils/errorUtils";
+import IpAddressProvider from "../../auth/external-apis/ipAddressProviders";
+import { Logger } from "../../support/services/internal/logs/logger";
+import { safeStringify } from "../../common/utils/browserUtils";
+import CoinsToFiatRatesService from "../../wallet/common/services/coinsToFiatRatesService";
+import { AmountUtils } from "../../wallet/common/utils/amountUtils";
+import { API_KEYS_PROXY_URL } from "../../common/backend-api/utils";
+import { TRC20 } from "../../wallet/trc20token/trc20Protocol";
+import { ERC20 } from "../../wallet/erc20token/erc20Protocol";
+import { ExistingSwap } from "../models/existingSwap";
 
 export const BANNED_PARTNERS = ["stealthex"];
 
@@ -57,9 +63,9 @@ export class SwapspaceSwapProvider extends SwapProvider {
                         } else if (network === "btc" && item.code === "btc") {
                             ticker = Coins.COINS.BTC.ticker;
                         } else if (network === "erc20") {
-                            ticker = standardTickerToRabbitTicker(item.code, Coin.PROTOCOLS.ERC20.protocol);
+                            ticker = standardTickerToRabbitTicker(item.code, ERC20.protocol);
                         } else if (network === "trc20") {
-                            ticker = standardTickerToRabbitTicker(item.code, Coin.PROTOCOLS.TRC20.protocol);
+                            ticker = standardTickerToRabbitTicker(item.code, TRC20.protocol);
                         }
 
                         if (
@@ -88,9 +94,9 @@ export class SwapspaceSwapProvider extends SwapProvider {
             ? "eth"
             : coin.ticker === Coins.COINS.TRX.ticker
             ? "trx"
-            : coin.protocol === Coin.PROTOCOLS.TRC20
+            : coin.protocol === TRC20
             ? "trc20"
-            : coin.protocol === Coin.PROTOCOLS.ERC20
+            : coin.protocol === ERC20
             ? "erc20"
             : null;
     }
@@ -313,6 +319,86 @@ export class SwapspaceSwapProvider extends SwapProvider {
                 return composeFailResult(SwapProvider.CREATION_FAIL_REASONS.RETRIABLE_FAIL);
             }
             Logger.log(`Internal swapspace/rabbit error for ${partner}: ${safeStringify(e)}`, loggerSource);
+            improveAndRethrow(e, loggerSource);
+        }
+    }
+
+    _fromSwapspaceCodeAndNetwork(code, network) {
+        if (code === "btc") return Coins.COINS.BTC;
+        if (code === "eth") return Coins.COINS.ETH;
+        if (code === "trx") return Coins.COINS.TRX;
+        const protocol = network === "erc20" ? ERC20 : network === "trc20" ? TRC20 : null;
+        if (!protocol) throw new Error("Unknown swapspace network: " + network);
+        const coin = Coins.getCoinByTicker(standardTickerToRabbitTicker(code, protocol.protocol));
+        if (!coin) throw new Error("Unknown coin from swapspace: " + code + ", " + network);
+        return coin;
+    }
+
+    _mapSwapspaceStatusToRabbitStatus(status) {
+        switch (status) {
+            case "waiting":
+                return SwapProvider.SWAP_STATUSES.WAITING_FOR_PAYMENT;
+            case "confirming":
+                return SwapProvider.SWAP_STATUSES.WAITING_FOR_PAYMENT;
+            case "exchanging":
+                return SwapProvider.SWAP_STATUSES.EXCHANGING;
+            case "sending":
+                return SwapProvider.SWAP_STATUSES.PAYMENT_RECEIVED;
+            case "finished":
+                return SwapProvider.SWAP_STATUSES.COMPLETED;
+            case "verifying":
+                return SwapProvider.SWAP_STATUSES.EXCHANGING;
+            case "refunded":
+                return SwapProvider.SWAP_STATUSES.REFUNDED;
+            case "expired":
+                return SwapProvider.SWAP_STATUSES.EXPIRED;
+            default:
+                throw new Error(`Unknown swapspace status: ${status}`);
+        }
+    }
+
+    async getExistingSwapsDetailsAndStatus(swapIds) {
+        const loggerSource = "getExistingSwapsDetailsAndStatus";
+        try {
+            if (swapIds.find(id => typeof id !== "string")) {
+                throw new Error("Swap id is not string: " + safeStringify(swapIds));
+            }
+            const responses = await Promise.all(
+                swapIds.map(swapId => axios.get(`${this._URL}/api/v2/exchange/${swapId}`))
+            );
+            const swaps = responses
+                .map(r => r.data)
+                .map(
+                    (swap, index) =>
+                        new ExistingSwap(
+                            swapIds[index],
+                            this._mapSwapspaceStatusToRabbitStatus(swap.status),
+                            new Date(swap.timestamps.createdAt).getTime(),
+                            new Date(swap.timestamps.expiresAt).getTime(),
+                            swap.confirmations,
+                            swap.rate,
+                            swap.refundAddress,
+                            this._fromSwapspaceCodeAndNetwork(swap.from.code, swap.from.network),
+                            swap.from.amount,
+                            swap.from.transactionHash,
+                            this._fromSwapspaceCodeAndNetwork(swap.to.code, swap.to.network),
+                            swap.to.amount,
+                            swap.to.transactionHash,
+                            swap.to.address,
+                            swap.partner
+                        )
+                );
+            Logger.log(`Swap details result ${safeStringify(swaps)}`, loggerSource);
+            return { result: true, swaps: swaps };
+        } catch (e) {
+            Logger.log(`Failed to get swap details. Error is: ${safeStringify(e)}`, loggerSource);
+            const composeFailResult = reason => ({ result: false, reason: reason });
+            const status = e?.response?.status;
+            const data = e?.response?.data;
+            if (status === 429) {
+                Logger.log(`Returning fail - RPS limit exceeded ${data}`, loggerSource);
+                return composeFailResult(SwapProvider.COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED);
+            }
             improveAndRethrow(e, loggerSource);
         }
     }

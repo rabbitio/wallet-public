@@ -1,8 +1,7 @@
+import { BigNumber } from "ethers";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
 import { Coins } from "../../coins";
 import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { Coin } from "../../common/models/coin";
-import { BigNumber } from "ethers";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
 import { EthTransactionsUtils } from "../lib/ethTransactionsUtils";
 import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem";
@@ -11,6 +10,7 @@ import { mergeTwoTransactionsArraysAndNotifyAboutNewTransactions } from "../../c
 import { ApiGroups } from "../../../common/external-apis/apiGroups";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
+import { ERC20 } from "../../erc20token/erc20Protocol";
 
 class AlchemyEthereumBlockchainTransactionsProvider extends ExternalApiProvider {
     constructor() {
@@ -82,7 +82,7 @@ class AlchemyEthereumBlockchainTransactionsProvider extends ExternalApiProvider 
                             : Coins.getSupportedCoinsList().find(
                                   c =>
                                       (c.ticker === transfer.asset || c.tickerPrintable === transfer.asset) &&
-                                      c.protocol === Coin.PROTOCOLS.ERC20
+                                      c.protocol === ERC20
                               );
                     if (!coin) {
                         // Means coin is not supported

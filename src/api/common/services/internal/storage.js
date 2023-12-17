@@ -216,3 +216,11 @@ export function getPersistentCacheItem(uniqueKey) {
 export function setPersistentCacheItem(uniqueKey, value) {
     storageProvider.setItem(uniqueKey, value);
 }
+
+export function getSwapIds() {
+    return storageProvider.getItem("publicSwapIds");
+}
+
+export function setSwapIds(value) {
+    storageProvider.setItem("publicSwapIds", value);
+}

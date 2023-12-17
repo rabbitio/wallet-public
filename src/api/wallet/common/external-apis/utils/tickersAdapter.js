@@ -1,6 +1,6 @@
 /**
- * @param ticker
- * @param protocol
+ * @param ticker {string}
+ * @param protocol {string}
  * @return {string}
  */
 export const standardTickerToRabbitTicker = function(ticker, protocol) {

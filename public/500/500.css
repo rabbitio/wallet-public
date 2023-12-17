@@ -10,6 +10,33 @@
 
 .landing-top {
     background-image: url("./500-background.svg");
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.error-page-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.section-title,
+.section-subtitle {
+    color: #fff;
+}
+
+.section-title {
+    margin-top: 4rem;
+}
+
+@media screen and (max-width: 575.98px) {
+    .section-title {
+        margin-top: 2rem;
+    }
 }
 
 @media screen and (max-width: 575.98px) {

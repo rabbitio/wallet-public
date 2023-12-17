@@ -4,7 +4,7 @@ import { TrxAddressesService } from "./trxAddressesService";
 import { TronTransactionsProvider } from "../external-apis/tronTransactionsProvider";
 import { Coins } from "../../coins";
 import { Trc20TransactionsProvider } from "../../trc20token/external-apis/trc20TransactionsProvider";
-import { Coin } from "../../common/models/coin";
+import { TRC20 } from "../../trc20token/trc20Protocol";
 
 export class TronTransactionDetailsService {
     // TODO: [tests, moderate] sophisticated logic, prays for unit tests
@@ -14,7 +14,7 @@ export class TronTransactionDetailsService {
             let txDataItems = [];
             if (coin === Coins.COINS.TRX) {
                 txDataItems = (await TronTransactionsProvider.getTronTransactions(address)) ?? [];
-            } else if (coin.protocol === Coin.PROTOCOLS.TRC20) {
+            } else if (coin.protocol === TRC20) {
                 txDataItems = (await Trc20TransactionsProvider.getTrc20Transactions(address)) ?? [];
             } else {
                 return null;

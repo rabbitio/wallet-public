@@ -4,6 +4,7 @@ import { bip44Scheme } from "../btc/lib/addresses-schemes";
 import { NumbersUtils } from "../common/utils/numbersUtils";
 import { getCurrentNetwork } from "../../common/services/internal/storage";
 import { AmountUtils } from "../common/utils/amountUtils";
+import { TRON_BLOCKCHAIN } from "./tronBlockchain";
 
 class Tron extends Coin {
     constructor() {
@@ -20,7 +21,7 @@ class Tron extends Coin {
             "energy",
             null, // Doesn't provide an option to prioritise the transactions
             60000,
-            Coin.BLOCKCHAINS.TRON,
+            TRON_BLOCKCHAIN,
             null,
             null,
             false

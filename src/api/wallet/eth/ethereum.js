@@ -5,6 +5,7 @@ import { bip44Scheme } from "../btc/lib/addresses-schemes";
 import { Coin } from "../common/models/coin";
 import { Network } from "../common/models/networks";
 import { AmountUtils } from "../common/utils/amountUtils";
+import { ETHEREUM_BLOCKCHAIN } from "./ethereumBlockchain";
 
 class Ethereum extends Coin {
     constructor() {
@@ -21,7 +22,7 @@ class Ethereum extends Coin {
             "gas",
             ["30min", "5min", "3.5min", "2min"],
             60000,
-            Coin.BLOCKCHAINS.ETHEREUM
+            ETHEREUM_BLOCKCHAIN
         );
     }
 
@@ -40,9 +41,10 @@ class Ethereum extends Coin {
     }
 
     composeUrlToTransactionExplorer(txId) {
-        return `https://${
-            getCurrentNetwork(this)?.key === this.mainnet.key ? "" : `${this.testnet.key}.`
-        }etherscan.io/tx/${txId}`;
+        if (getCurrentNetwork(this)?.key === this.mainnet.key) {
+            return `https://blockchair.com/ethereum/transaction/${txId}?from=rabbitio`;
+        }
+        return `https://${this.testnet.key}etherscan.io/tx/${txId}`;
     }
 
     coinAtomsFeeRateToCommonlyUsedAmountFormatWithDenominationString(coinAtomsString) {

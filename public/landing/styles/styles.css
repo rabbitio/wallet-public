@@ -464,7 +464,6 @@ section.smaller-top-margin {
 
 section.background-image {
     color: #fff;
-    background-position: center;
     background-size: cover;
     background-position: bottom;
     margin: 0 0 -5px 0; /* This is a hack to fix the Safari's SVG edge issues */
@@ -628,15 +627,14 @@ section.hero .hero-buttons {
     position: absolute;
     top: 0;
     padding-top: 88px;
+    padding-bottom: 40px;
     left: 0;
     background-color: #fff;
     transform: translateY(-30px);
     opacity: 0;
     transition: 0.25s all cubic-bezier(0.22, 0.61, 0.36, 1);
     pointer-events: none;
-    width: 100%;
     box-shadow: 0 0 40px rgba(35, 45, 66, 0.2), 0 0 3px 0px rgba(35, 45, 66, 0.2);
-    padding-bottom: 40px;
 }
 
 .navbar-dropdown.visible {
@@ -687,13 +685,8 @@ section.hero .hero-buttons {
     width: 100%;
     padding: 16px 20px;
     border-radius: 8px;
-
     transition: 0.2s all ease;
     box-shadow: 0px 0px 0px 1px rgba(0, 0, 0, 0) inset, 0px 0px 3px 0px rgba(0, 0, 0, 0);
-
-    &.outline {
-        box-shadow: 0px 0px 0px 1px #16cdd6 inset, 0px 0px 3px 0px rgba(22, 205, 214, 0.3);
-    }
 }
 
 @media (hover: hover) {
@@ -735,7 +728,6 @@ section.hero .hero-buttons {
     margin: 0;
     text-align: left;
     font-size: 14px;
-    line-height: 20px;
 }
 
 .wallets-grid-item-link .link-content .amount {
@@ -747,7 +739,6 @@ section.hero .hero-buttons {
     margin: 0;
     text-align: left;
     font-size: 14px;
-    line-height: 20px;
 }
 .wallets-grid-item-link .arrow {
     height: 20px;
@@ -1213,7 +1204,6 @@ section.hero .learn-more .button-item {
     padding: 24px;
     box-sizing: border-box;
     width: 255px;
-    /* height: 228px; */
     color: #073a3f;
     border-radius: 20px;
     background: #ffffff;

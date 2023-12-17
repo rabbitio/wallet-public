@@ -1,15 +1,3 @@
-(() => {
-    const doNotRedirectIfThereIsWalletId = localStorage.getItem("doNotRedirectIfThereIsWalletId");
-
-    if (!doNotRedirectIfThereIsWalletId) {
-        if (document.cookie.indexOf("walletId") > -1 || localStorage.getItem("walletId")) {
-            window.location.replace("/signin");
-        }
-    } else {
-        localStorage.removeItem("doNotRedirectIfThereIsWalletId");
-    }
-})();
-
 function handleLandingLeaving() {
     sendNoBounceEvent();
 }

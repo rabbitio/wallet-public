@@ -1,72 +1,85 @@
 <html lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <meta charset="utf-8" />
+        <meta
+            name="description"
+            content="This isn’t working properly. Our team is now working to fix this problem. In the meantime, try refreshing the page, waiting 30 minutes to try again, or email us at support@rabbit.io and let us know what happened."
+        />
+        <title>Sorry... - Rabbit.io</title>
+        <link rel="icon" type="image/png" href="../apple-touch-icon.png" sizes="any" />
+        <link rel="apple-touch-icon" href="../apple-touch-icon.png" sizes="any" />
+        <link rel="shortcut icon" href="../favicon.ico?v=4" />
+        <meta name="theme-color" content="#232d42" />
+        <meta name="msapplication-TileColor" content="#FFFFFF" />
+        <meta name="msapplication-TileImage" content="apple-touch-icon.png" />
+        <meta name="msapplication-square70x70logo" content="../apple-touch-icon.png" />
+        <meta name="msapplication-square150x150logo" content="../apple-touch-icon.png" />
+        <meta name="msapplication-wide310x150logo" content="../apple-touch-icon.png" />
+        <meta name="msapplication-square310x310logo" content="../apple-touch-icon.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <meta name="application-name" content="Rabbit" />
+        <link rel="stylesheet" href="../landing/styles/styles.css" />
+        <link rel="stylesheet" href="/500/500.css" />
+        <link rel="stylesheet" href="../landing/styles/splide-core.min.css" />
+        <link rel="manifest" href="../manifest.json" crossorigin="use-credentials" />
+    </head>
 
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <meta charset="utf-8" />
-    <meta name="description" content="This isn’t working properly. Our team is now working to fix this problem. In the meantime, try refreshing the page, waiting 30 minutes to try again, or email us at support@rabbit.io and let us know what happened."/>
-    <title>Sorry... - Rabbit.io</title>
-    <link rel="icon" type="image/png" href="../apple-touch-icon.png" sizes="any" />
-    <link rel="apple-touch-icon" href="../apple-touch-icon.png" sizes="any">
-    <link rel="shortcut icon" href="../favicon.ico?v=4" />
-    <meta name="theme-color" content="#232d42">
-    <meta name="msapplication-TileColor" content="#FFFFFF" />
-    <meta name="msapplication-TileImage" content="apple-touch-icon.png" />
-    <meta name="msapplication-square70x70logo" content="../apple-touch-icon.png" />
-    <meta name="msapplication-square150x150logo" content="../apple-touch-icon.png" />
-    <meta name="msapplication-wide310x150logo" content="../apple-touch-icon.png" />
-    <meta name="msapplication-square310x310logo" content="../apple-touch-icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <meta name="application-name" content="Rabbit">
-    <link rel="stylesheet" href="../landing/styles/styles.css">
-    <link rel="stylesheet" href="./500.css">
-    <link rel="stylesheet" href="../landing/styles/splide-core.min.css">
-    <link rel="manifest" href="../manifest.json" crossorigin="use-credentials" />
-</head>
-
-<body>
-<div class="landing">
-    <section class="landing-top">
-        <div class="content">
-            <nav class="navbar">
-                <a href="/" class="logo"></a>
-                <div class="navbar-nav">
-                    <div class="navbar-nav-item">
-                        <a class="button button-default-flat button-text-small button-flat" href="/import">
-                            <div class="button-item">Import</div>
-                        </a>
+    <body>
+        <div class="landing">
+            <section class="landing-top">
+                <div class="content">
+                    <nav class="navbar">
+                        <div class="navbar-container">
+                            <div class="logo-desktop">
+                                <a href="/" class="logo"></a>
+                            </div>
+                            <div class="logo-mobile">
+                                <a href="/" class="logo-dark-minimized"></a>
+                            </div>
+                            <div class="navbar-nav">
+                                <div class="navbar-nav-item">
+                                    <a class="button button-default-flat button-text-small button-flat" href="/import">
+                                        <div class="button-item">Import</div>
+                                    </a>
+                                </div>
+                                <div class="navbar-nav-item">
+                                    <a
+                                        type="button"
+                                        class="button button-outline button-small button-text-small"
+                                        href="/signin"
+                                        onclick="handleLandingLeaving"
+                                    >
+                                        <div class="button-item">Sign In</div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                    <h1 class="section-title">There seems to be a problem</h1>
+                    <div class="section-subtitle">
+                        Sorry, Rabbit's servers have failed to process your request. We already know about this issue
+                        and are doing our best to fix it. In the meantime, try refreshing the page, waiting 30 minutes
+                        to try again, or email us at support@rabbit.io. We apologize for the inconvenience.
                     </div>
-                    <div class="navbar-nav-item">
-                        <a type="button" class="button button-outline button-small button-text-small" href="/signin">
-                            <div class="button-item">Sign In</div>
-                        </a>
+                    <div class="error-page-buttons">
+                        <a class="button button-primary" href="#" onclick="window.location.reload(false)"
+                            ><div class="button-item">
+                                <span class="button-icon"><span class="icon icon-add-wallet icon-mask"></span></span>
+                            </div>
+                            <div class="button-item">Reload the page</div></a
+                        >
+                        <a class="button button-default" href="/support"
+                            ><div class="button-item">
+                                <span class="button-icon"><span class="icon icon-add-wallet icon-mask"></span></span>
+                            </div>
+                            <div class="button-item">Contact support</div></a
+                        >
                     </div>
                 </div>
-            </nav>
-            <h3 class="landing-title landing-top-title">
-                <span>There seems to be a problem</span>
-            </h3>
-            <div class="landing-top-subtitle">Sorry, Rabbit's servers have failed to process your request. We already know about this issue and are doing our best to fix it. In the meantime, try refreshing the page, waiting 30 minutes to try again, or email us at support@rabbit.io. We apologize for the inconvenience.</div>
-            <div class="landing-top-buttons">
-                <div class="landing-top-button" onclick="window.location.reload(false)">
-                    <a class="button button-default button-block button-left" href="#"><div
-                            class="button-item"><span
-                            class="button-icon"><span
-                            class="icon icon-add-wallet icon-mask"></span></span></div><div
-                            class="button-item">Reload the page</div></a>
-                </div>
-                <div class="landing-top-button">
-                    <a class="button button-transparent button-block button-left" href="/support"><div
-                            class="button-item"><span
-                            class="button-icon"><span
-                            class="icon icon-add-wallet icon-mask"></span></span></div><div
-                            class="button-item">Contact support</div></a>
-                </div>
-            </div>
+            </section>
         </div>
-    </section>
-</div>
 
-<script src="../landing/js/horizontal-scroll.js"></script>
-</body>
-
+        <script src="../landing/js/horizontal-scroll.js"></script>
+    </body>
 </html>

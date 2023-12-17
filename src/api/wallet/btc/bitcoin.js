@@ -4,6 +4,7 @@ import { SupportedSchemes } from "./lib/addresses-schemes";
 import { NumbersUtils } from "../common/utils/numbersUtils";
 import { getCurrentNetwork } from "../../common/services/internal/storage";
 import { AmountUtils } from "../common/utils/amountUtils";
+import { BITCOIN_BLOCKCHAIN } from "./bitcoinBlockchain";
 
 class Bitcoin extends Coin {
     constructor() {
@@ -20,7 +21,7 @@ class Bitcoin extends Coin {
             "byte",
             ["3.5 h", "1.5 h", "50 min", "10 min"],
             300000,
-            Coin.BLOCKCHAINS.BITCOIN,
+            BITCOIN_BLOCKCHAIN,
             null,
             null,
             true,
@@ -42,9 +43,9 @@ class Bitcoin extends Coin {
     }
 
     composeUrlToTransactionExplorer(txId) {
-        return `https://blockstream.info/${
+        return `https://blockchair.com/bitcoin/${
             getCurrentNetwork(this)?.key === this.mainnet.key ? "" : `${this.testnet.key}/`
-        }tx/${txId}`;
+        }transaction/${txId}?from=rabbitio`;
     }
 
     coinAtomsFeeRateToCommonlyUsedAmountFormatWithDenominationString(coinAtomsString) {

@@ -1,0 +1,46 @@
+.landing {
+    background: linear-gradient(351.31deg, #2c0436 34.47%, #d04f4f 236.77%);
+}
+
+@media screen and (max-width: 767.98px) {
+    .landing {
+        background: linear-gradient(305.8deg, #2c0436 15.99%, #d04f4f 214.11%);
+    }
+}
+
+.landing-top {
+    background-image: url("/404/404-background.svg");
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.error-page-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.section-title,
+.section-subtitle {
+    color: #fff;
+}
+
+.section-title {
+    margin-top: 4rem;
+}
+
+@media screen and (max-width: 575.98px) {
+    .section-title {
+        margin-top: 2rem;
+    }
+}
+
+@media screen and (max-width: 575.98px) {
+    .landing-top {
+        background-image: url("/404/404-mobile-background.svg");
+    }
+}

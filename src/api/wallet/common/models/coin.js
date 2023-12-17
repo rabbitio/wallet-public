@@ -1,6 +1,3 @@
-import { Blockchain } from "./blockchain";
-import { Protocol } from "./protocol";
-
 /**
  * The model for cryptocurrency coins.
  *
@@ -71,17 +68,6 @@ export class Coin {
         this.doesUseLowerCaseAddresses = doesUseLowerCaseAddresses;
         this.doesUseOutputs = doesUseOutputs;
     }
-
-    static PROTOCOLS = {
-        ERC20: new Protocol("ERC20"),
-        TRC20: new Protocol("TRC20"),
-    };
-
-    static BLOCKCHAINS = {
-        BITCOIN: new Blockchain("Bitcoin blockchain", []),
-        ETHEREUM: new Blockchain("Ethereum blockchain", [this.PROTOCOLS.ERC20]),
-        TRON: new Blockchain("Tron blockchain", [this.PROTOCOLS.TRC20]),
-    };
 
     /**
      * Sets fee coin

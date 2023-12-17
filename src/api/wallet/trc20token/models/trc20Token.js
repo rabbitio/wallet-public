@@ -6,6 +6,8 @@ import { getCurrentNetwork } from "../../../common/services/internal/storage";
 import { tron } from "../../trx/tron";
 import { NumbersUtils } from "../../common/utils/numbersUtils";
 import { AmountUtils } from "../../common/utils/amountUtils";
+import { TRC20 } from "../trc20Protocol";
+import { TRON_BLOCKCHAIN } from "../../trx/tronBlockchain";
 
 export class Trc20Token extends Coin {
     /**
@@ -14,7 +16,7 @@ export class Trc20Token extends Coin {
     constructor(latinName, tickerPrintable, digitsCountAfterComma, contractAddress, atomName = "", maxValue = null) {
         super(
             latinName,
-            `${tickerPrintable}${Coin.PROTOCOLS.TRC20.protocol}`,
+            `${tickerPrintable}${TRC20.protocol}`,
             tickerPrintable,
             digitsCountAfterComma,
             maxValue,
@@ -25,8 +27,8 @@ export class Trc20Token extends Coin {
             null,
             null,
             60000,
-            Coin.BLOCKCHAINS.TRON,
-            Coin.PROTOCOLS.TRC20,
+            TRON_BLOCKCHAIN,
+            TRC20,
             contractAddress,
             false
         );

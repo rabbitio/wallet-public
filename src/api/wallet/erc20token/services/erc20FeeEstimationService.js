@@ -3,9 +3,9 @@ import { logError } from "../../../common/utils/errorUtils";
 import { Logger } from "../../../support/services/internal/logs/logger";
 import { Erc20transactionUtils } from "../lib/erc20transactionUtils";
 import { FeeEstimationUtils } from "../../common/utils/feeEstimationUtils";
-import { Coin } from "../../common/models/coin";
 import { safeStringify } from "../../../common/utils/browserUtils";
 import { Erc20TransactionFeeEstimationProvider } from "../external-apis/erc20transactionFeeEstimationProvider";
+import { ERC20 } from "../erc20Protocol";
 
 export class Erc20FeeEstimationService {
     /**
@@ -56,9 +56,7 @@ export class Erc20FeeEstimationService {
             } catch (e) {
                 Logger.log(`Failed to estimate gas (we will retry): ${safeStringify(e)}`, loggerSource);
                 const res2 = await Erc20TransactionFeeEstimationProvider.getErc20TransferFeeEstimation(
-                    FeeEstimationUtils.getWalletAddressToUseAsFromAddressForTokenSendingEstimation(
-                        Coin.PROTOCOLS.ERC20
-                    ),
+                    FeeEstimationUtils.getWalletAddressToUseAsFromAddressForTokenSendingEstimation(ERC20),
                     token.tokenAddress,
                     dataHex,
                     defaultMaxGasAmountForErc20Transfer

@@ -9,6 +9,7 @@ import AddressesServiceInternal from "./services/internal/addressesServiceIntern
 import { bitcoin } from "./bitcoin";
 import { transactionsDataProvider } from "./services/internal/transactionsDataProvider";
 import { Transaction } from "./models/transaction/transaction";
+import { isAddressValid } from "./lib/addresses";
 
 class BitcoinWallet extends Wallet {
     constructor() {
@@ -53,6 +54,14 @@ class BitcoinWallet extends Wallet {
             return await AddressesService.getCurrentExternalAddress();
         } catch (e) {
             improveAndRethrow(e, `${this.coin.ticker}_getCurrentAddress`);
+        }
+    }
+
+    isAddressValid(address) {
+        try {
+            return { result: isAddressValid(address) };
+        } catch (e) {
+            improveAndRethrow(e, `${this.coin.ticker}_isAddressValid`);
         }
     }
 

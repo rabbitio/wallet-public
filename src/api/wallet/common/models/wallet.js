@@ -62,7 +62,19 @@ export class Wallet {
     }
 
     /**
-     * Validates given address for sending
+     * Validates address for the coin of this wallet.
+     *
+     * @param address {string}
+     * @return {{result:boolean}} true if address is valid for the wallet's coin
+     */
+    isAddressValid(address) {
+        throw new Error("Not implemented in base Wallet class");
+    }
+
+    /**
+     * Validates given address for sending.
+     * This method should be used prior to the ordinary validation when
+     * you check the address is technically supported to send coins to it.
      *
      * @param address {string} address to be validated
      * @return {{ result: true }|{ result: false, errorDescription: string|undefined, howToFix: string|undefined }}

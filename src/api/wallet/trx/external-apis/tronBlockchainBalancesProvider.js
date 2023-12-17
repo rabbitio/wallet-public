@@ -9,8 +9,8 @@ import {
     createRawBalanceAtomsCacheProcessorForMultiBalancesProvider,
     mergeTwoBalancesArraysAndNotifyAboutBalanceValueChange,
 } from "../../common/utils/cacheActualizationUtils";
-import { Coin } from "../../common/models/coin";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
+import { TRC20 } from "../../trc20token/trc20Protocol";
 
 class TronscanBlockchainBalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -29,13 +29,13 @@ class TronscanBlockchainBalanceProvider extends ExternalApiProvider {
             const data = response?.data;
             const trxBalance = "" + data?.balance;
             const tokenAddresses = Coins.getSupportedCoinsList()
-                .filter(c => c.protocol === Coin.PROTOCOLS.TRC20)
+                .filter(c => c.protocol === TRC20)
                 .map(t => t.tokenAddress);
             const trc20Balances = (data?.trc20token_balances ?? [])
                 .filter(t => tokenAddresses.find(a => a.toLowerCase() === t.tokenId.toLowerCase()))
                 .map(item => ({
                     balance: "" + item?.balance,
-                    ticker: standardTickerToRabbitTicker(item?.tokenAbbr, Coin.PROTOCOLS.TRC20.protocol),
+                    ticker: standardTickerToRabbitTicker(item?.tokenAbbr, TRC20.protocol),
                 }));
             const resources = {
                 availableBandwidth: (data?.bandwidth?.freeNetRemaining ?? 0) + (data?.bandwidth?.netRemaining ?? 0),

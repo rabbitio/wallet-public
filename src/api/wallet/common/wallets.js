@@ -4,8 +4,9 @@ import { tronWallet } from "../trx/tronWallet";
 import { ethereumWallet } from "../eth/ethereumWallet";
 import { bitcoinWallet } from "../btc/bitcoinWallet";
 import { Erc20TokenWallet } from "../erc20token/models/erc20TokenWallet";
-import { Coin } from "./models/coin";
 import { Trc20TokenWallet } from "../trc20token/models/trc20TokenWallet";
+import { TRC20 } from "../trc20token/trc20Protocol";
+import { ERC20 } from "../erc20token/erc20Protocol";
 
 /**
  * This is the main service to manage wallets.
@@ -18,8 +19,8 @@ export class Wallets {
         bitcoinWallet,
         ethereumWallet,
         tronWallet,
-        ...Coins.getCoinsListByProtocol(Coin.PROTOCOLS.ERC20).map(erc20Token => new Erc20TokenWallet(erc20Token)),
-        ...Coins.getCoinsListByProtocol(Coin.PROTOCOLS.TRC20).map(trc20Token => new Trc20TokenWallet(trc20Token)),
+        ...Coins.getCoinsListByProtocol(ERC20).map(erc20Token => new Erc20TokenWallet(erc20Token)),
+        ...Coins.getCoinsListByProtocol(TRC20).map(trc20Token => new Trc20TokenWallet(trc20Token)),
     ];
 
     /**

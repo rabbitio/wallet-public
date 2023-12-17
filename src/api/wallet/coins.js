@@ -56,6 +56,7 @@ import {
 import { tron } from "./trx/tron";
 import { PreferencesService } from "./common/services/preferencesService";
 import { UserDataAndSettings } from "./common/models/userDataAndSettings";
+import { rabbitTickerToStandardTicker } from "./common/external-apis/utils/tickersAdapter";
 
 /**
  * This is the main service to manage coins.
@@ -187,22 +188,24 @@ export class Coins {
     }
 
     /**
-     * @param coin {Coin}
+     * @param coinsToEnable {Coin[]}
      * @return {Promise<boolean>} true if the coin was disabled and we enabled it during this call and false otherwise
      */
-    static async enableCoinIfDisabled(coin) {
+    static async enableCoinsIfDisabled(coinsToEnable) {
         try {
             const enabledTickersCommaSeparated =
                 PreferencesService.getUserSettingValue(UserDataAndSettings.SETTINGS.ENABLED_COINS_LIST) ??
                 this.getDefaultEnabledCoinsList().reduce((prev, current) => {
                     return prev.length ? prev + "," + current.ticker : current.ticker;
                 }, "");
-            const isEnabled = enabledTickersCommaSeparated.split(",").find(t => t === coin.ticker);
-            if (!isEnabled) {
+            const enabledTickers = enabledTickersCommaSeparated.split(",");
+            const notEnabledList = coinsToEnable.filter(c => !enabledTickers.find(t => t === c.ticker));
+            if (notEnabledList.length) {
+                const tickersToAddCommaSeparated = notEnabledList.map(c => c.ticker).join(",");
                 const tickersCommaSeparated =
                     enabledTickersCommaSeparated !== ""
-                        ? `${enabledTickersCommaSeparated},${coin.ticker}`
-                        : coin.ticker;
+                        ? `${enabledTickersCommaSeparated},${tickersToAddCommaSeparated}`
+                        : tickersToAddCommaSeparated;
                 await PreferencesService.cacheAndSaveSetting(
                     UserDataAndSettings.SETTINGS.ENABLED_COINS_LIST,
                     tickersCommaSeparated
@@ -211,7 +214,7 @@ export class Coins {
             }
             return false;
         } catch (e) {
-            improveAndRethrow(e, "enableCoinIfDisabled");
+            improveAndRethrow(e, "enableCoinsIfDisabled");
         }
     }
 
@@ -297,6 +300,23 @@ export class Coins {
             throw new Error("No coin for given ticker " + ticker);
         } catch (e) {
             improveAndRethrow(e, "getCoinByTicker");
+        }
+    }
+
+    /**
+     * Returns coins by given ticker if it is supported.
+     *
+     * @param ticker {string} ticker string
+     * @return {Coin[]} coins corresponding to given ticker or null
+     */
+    static getCoinsIfTickerIsSupported(ticker) {
+        try {
+            const coins = Object.values(this.COINS).filter(
+                coin => rabbitTickerToStandardTicker(coin.ticker, coin.protocol) === (ticker ?? "").toUpperCase()
+            );
+            return coins;
+        } catch (e) {
+            improveAndRethrow(e, "getCoinsIfTickerIsSupported");
         }
     }
 

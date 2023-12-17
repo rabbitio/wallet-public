@@ -8,6 +8,7 @@ import { TronTransactionsProvider } from "./external-apis/tronTransactionsProvid
 import { TronTransactionDetailsService } from "./services/tronTransactionDetailsService";
 import { TronSendTransactionService } from "./services/tronSendTransactionService";
 import { getCurrentNetwork } from "../../common/services/internal/storage";
+import { validateTronAddress } from "./lib/addresses";
 
 class TronWallet extends Wallet {
     constructor() {
@@ -51,6 +52,14 @@ class TronWallet extends Wallet {
             return TrxAddressesService.getCurrentTrxAddress();
         } catch (e) {
             improveAndRethrow(e, `${this.coin.ticker}_getCurrentAddress`);
+        }
+    }
+
+    isAddressValid(address) {
+        try {
+            return { result: validateTronAddress(address) };
+        } catch (e) {
+            improveAndRethrow(e, `${this.coin.ticker}_isAddressValid`);
         }
     }
 
