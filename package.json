@@ -110,6 +110,7 @@
         "react-animate-height": "3.0.4",
         "react-circular-progressbar": "2.1.0",
         "react-day-picker": "7.4.10",
+        "react-helmet": "6.1.0",
         "react-i18next": "11.8.15",
         "react-redux": "5.0.7",
         "react-router-dom": "5.2.0",
