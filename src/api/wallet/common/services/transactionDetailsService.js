@@ -14,32 +14,34 @@ export class TransactionDetailsService {
      * @param txId {string} id of transaction to get the details for
      * @param ticker {string} the ticker for coin
      * @param [transactionType=null] {"in"|"out"|null} optional type of transaction
-     * @return {Promise<({
+     * @return {Promise<{
      *             txId: string,
-     *             creationTime: number, @description of milliseconds
-     *             type: string, @description "incoming"|"outgoing"
-     *             isSendingAndReceiving: boolean, @description true if the transaction sends coins to the wallet itself
-     *             status: string,
-     *             unconfirmedTime: (number|undefined), @description undefined is for confirmed transactions
+     *             creationTime: number,
+     *             type: "incoming"|"outgoing",
+     *             isSendingAndReceiving: boolean,
+     *             status: "increasing_fee"|"confirming"|"confirmed"|"unconfirmed",
+     *             unconfirmedTime: number|undefined,
      *             confirmations: number,
      *             explorerLink: string,
-     *             address: string, @description target for outgoing transaction; receiving for incoming transaction
-     *             ticker: string, @description coin ticker of the transaction
-     *             tickerPrintable: string, @description coin ticker of the transaction in printable format
+     *             address: string,
+     *             ticker: string,
+     *             tickerPrintable: string,
      *             latinName: string,
      *             coinAmount: string,
-     *             fiatAmount: (string|null),
+     *             fiatAmount: string|null,
      *             coinFee: string,
      *             feeCoinTicker: string,
      *             feeCoinTickerPrintable: string,
      *             fiatFee: string,
      *             fiatCurrencyCode: string,
      *             fiatCurrencySymbol: string,
-     *             fiatConversionRate: string, @description rate at transaction creation time
-     *             note: string|undefined, @description optional - undefined means there is no note
-     *             isRbfAble: boolean, @description Whether RBF can be applied for transaction
+     *             fiatConversionRate: string,
+     *             note: string|undefined,
+     *             isRbfAble: boolean,
      *             purchaseData: ({ paymentId: string, amountWithCurrencyString: string } | null)
-     *         }|null)>}
+     *         }|null>}
+     *         Address is target for outgoing transaction; receiving for incoming transaction.
+     *         Rate is at transaction creation time.
      */
     // TODO: [tests, moderate] Units
     static async getTransactionDetails(txId, ticker, transactionType = null) {

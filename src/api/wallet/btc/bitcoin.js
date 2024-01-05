@@ -24,7 +24,7 @@ class Bitcoin extends Coin {
             BITCOIN_BLOCKCHAIN,
             null,
             null,
-            true,
+            false,
             true
         );
     }
