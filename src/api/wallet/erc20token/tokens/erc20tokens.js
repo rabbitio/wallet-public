@@ -29,7 +29,7 @@ export const maticErc20 = new Erc20Token(
     18,
     "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"
 );
-export const galaErc20 = new Erc20Token("Gala ERC20", "GALA", 8, "0x15d4c048f83bd7e37d49ea4c83a07267ec4203da");
+export const galaErc20 = new Erc20Token("Gala ERC20", "GALA", 8, "0xd1d2eb1b1e90b638588728b4130137d262c87cae");
 export const linkErc20 = new Erc20Token(
     "ChainLink Token ERC20",
     "LINK",
