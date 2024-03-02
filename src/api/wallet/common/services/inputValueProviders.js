@@ -1,13 +1,15 @@
+import { BigNumber } from "bignumber.js";
+
 export default class InputValuesProviders {
     /**
      * Designed to be called onKeyUp event of html input field for float value
      * Removes all prohibited stuff from the given float string and remains only allowed.
      * Removes digits before and after the dot.
      *
-     * @param inputString - string to be corrected
-     * @param maxValue - max value for the correcting float value
-     * @param digitsAfterDot - count of digits after the dot that this method should provide, min 1
-     * @return String - corrected float value string
+     * @param inputString {string} string to be corrected
+     * @param maxValue {string} max value for the correcting float value
+     * @param digitsAfterDot {number} count of digits after the dot that this method should provide, min 1
+     * @return {string} corrected float value string
      */
     static provideFormatOfFloatValueByInputString(inputString, digitsAfterDot = 2, maxValue = null) {
         let value = inputString;
@@ -31,7 +33,7 @@ export default class InputValuesProviders {
         }
 
         if (maxValue != null) {
-            const maxDigitsCountBeforeTheDot = ("" + maxValue).length;
+            const maxDigitsCountBeforeTheDot = BigNumber(maxValue).toFixed(0).length;
             if (parts[0]?.length > maxDigitsCountBeforeTheDot) {
                 // removes redundant prefix digits
                 parts[0] = parts[0].substring(parts[0].length - maxDigitsCountBeforeTheDot, parts[0].length);

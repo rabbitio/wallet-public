@@ -1,13 +1,15 @@
 import { ethers } from "ethers";
-import { Wallet } from "../common/models/wallet";
-import { ethereum } from "./ethereum";
-import { improveAndRethrow } from "../../common/utils/errorUtils";
-import { EthBalanceService } from "./services/ethBalanceService";
-import { EthereumTransactionsHistoryService } from "./services/ethereumTransactionsHistoryService";
-import { EthTransactionDetailsService } from "./services/ethTransactionDetailsService";
-import { EthAddressesService } from "./services/ethAddressesService";
-import { EthSendTransactionService } from "./services/ethSendTransactionService";
-import { EthTransactionsProvider } from "./external-apis/ethTransactionsProvider";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Wallet } from "../common/models/wallet.js";
+import { ethereum } from "./ethereum.js";
+import { EthBalanceService } from "./services/ethBalanceService.js";
+import { EthereumTransactionsHistoryService } from "./services/ethereumTransactionsHistoryService.js";
+import { EthTransactionDetailsService } from "./services/ethTransactionDetailsService.js";
+import { EthAddressesService } from "./services/ethAddressesService.js";
+import { EthSendTransactionService } from "./services/ethSendTransactionService.js";
+import { EthTransactionsProvider } from "./external-apis/ethTransactionsProvider.js";
 
 class EthereumWallet extends Wallet {
     constructor() {

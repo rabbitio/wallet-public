@@ -1,5 +1,6 @@
 import ipaddr from "ipaddr.js";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
 export class IpsServiceInternal {
     /**

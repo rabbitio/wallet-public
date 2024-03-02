@@ -1,32 +1,32 @@
 import axios from "axios";
-import { SwapProvider } from "./swapProvider";
-import {
-    rabbitTickerToStandardTicker,
-    standardTickerToRabbitTicker,
-} from "../../wallet/common/external-apis/utils/tickersAdapter";
-import { Coin } from "../../wallet/common/models/coin";
-import { Coins } from "../../wallet/coins";
-import { improveAndRethrow } from "../../common/utils/errorUtils";
-import IpAddressProvider from "../../auth/external-apis/ipAddressProviders";
-import { Logger } from "../../support/services/internal/logs/logger";
-import { safeStringify } from "../../common/utils/browserUtils";
-import CoinsToFiatRatesService from "../../wallet/common/services/coinsToFiatRatesService";
-import { AmountUtils } from "../../wallet/common/utils/amountUtils";
-import { API_KEYS_PROXY_URL } from "../../common/backend-api/utils";
-import { TRC20 } from "../../wallet/trc20token/trc20Protocol";
-import { ERC20 } from "../../wallet/erc20token/erc20Protocol";
-import { ExistingSwap } from "../models/existingSwap";
+import { BigNumber } from "bignumber.js";
 
-export const BANNED_PARTNERS = ["stealthex"];
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { SwapProvider } from "./swapProvider.js";
+import { TickersAdapter } from "../../wallet/common/external-apis/utils/tickersAdapter.js";
+import { Coin } from "../../wallet/common/models/coin.js";
+import { Coins } from "../../wallet/coins.js";
+import IpAddressProvider from "../../auth/external-apis/ipAddressProviders.js";
+import { Logger } from "../../support/services/internal/logs/logger.js";
+import { safeStringify } from "../../common/utils/browserUtils.js";
+import CoinsToFiatRatesService from "../../wallet/common/services/coinsToFiatRatesService.js";
+import { API_KEYS_PROXY_URL } from "../../common/backend-api/utils.js";
+import { TRC20 } from "../../wallet/trc20token/trc20Protocol.js";
+import { ERC20 } from "../../wallet/erc20token/erc20Protocol.js";
+import { ExistingSwap } from "../models/existingSwap.js";
+
+export const BANNED_PARTNERS = ["stealthex", "changee", "coincraddle"];
 
 export class SwapspaceSwapProvider extends SwapProvider {
     constructor() {
         super();
         this._supportedCoins = [];
         this._URL = `${API_KEYS_PROXY_URL}/swapspace`;
+        this._maxRateDigits = 20;
     }
 
-    getSwapDetailsTtlMs() {
+    getSwapCreationInfoTtlMs() {
         /* Actually 2 minutes and only relevant for some partners, but we use it
          * (and even a bit smaller value) for better consistency */
         return 110000;
@@ -54,67 +54,69 @@ export class SwapspaceSwapProvider extends SwapProvider {
                 Logger.log(`Retrieved ${rawResponse?.data?.length} currencies`, loggerSource);
                 this._supportedCoins = (rawResponse?.data ?? [])
                     .map(item => {
-                        const network = item.network;
-                        let ticker = null;
-                        if (network === "eth" && item.code === "eth") {
-                            ticker = Coins.COINS.ETH.ticker;
-                        } else if (network === "trx" && item.code === "trx") {
-                            ticker = Coins.COINS.TRX.ticker;
-                        } else if (network === "btc" && item.code === "btc") {
-                            ticker = Coins.COINS.BTC.ticker;
-                        } else if (network === "erc20") {
-                            ticker = standardTickerToRabbitTicker(item.code, ERC20.protocol);
-                        } else if (network === "trc20") {
-                            ticker = standardTickerToRabbitTicker(item.code, TRC20.protocol);
-                        }
-
-                        if (
-                            ticker != null &&
-                            Coins.getSupportedCoinsTickers().find(supported => supported === ticker)
-                        ) {
+                        const coin = this._fromSwapspaceCodeAndNetwork(item.code, item.network);
+                        if (coin) {
                             return {
-                                coin: Coins.getCoinByTicker(ticker),
+                                coin: coin,
                                 extraId: item.hasExtraId ? item.extraIdName : "",
+                                isPopular: !!item?.popular,
                             };
                         }
 
                         return [];
                     })
                     .flat();
+                this._putPopularCoinsFirst();
             }
         } catch (e) {
             improveAndRethrow(e, loggerSource);
         }
     }
 
+    /**
+     * This method sort internal list putting popular (as swapspace thinks) coins to the top.
+     * This is just for users of this API if they don't care about the sorting - we just improve a list a bit this way.
+     * @private
+     */
+    _putPopularCoinsFirst() {
+        this._supportedCoins.sort((i1, i2) => {
+            if (i1.isPopular && !i2.isPopular) return -1;
+            if (i2.isPopular && !i1.isPopular) return 1;
+            return i1.coin.ticker > i2.coin.ticker ? 1 : i1.coin.ticker < i2.coin.ticker ? -1 : 0;
+        });
+    }
+
     _toSwapspaceNetwork(coin) {
         return coin.ticker === Coins.COINS.BTC.ticker
             ? "btc"
             : coin.ticker === Coins.COINS.ETH.ticker
-            ? "eth"
-            : coin.ticker === Coins.COINS.TRX.ticker
-            ? "trx"
-            : coin.protocol === TRC20
-            ? "trc20"
-            : coin.protocol === ERC20
-            ? "erc20"
-            : null;
+              ? "eth"
+              : coin.ticker === Coins.COINS.TRX.ticker
+                ? "trx"
+                : coin.protocol === TRC20
+                  ? "trc20"
+                  : coin.protocol === ERC20
+                    ? "erc20"
+                    : null;
     }
 
     async getSwapInfo(fromCoin, toCoin, amountCoins) {
         const loggerSource = "getSwapInfo";
         try {
             if (
-                !fromCoin instanceof Coin ||
-                !toCoin instanceof Coin ||
-                typeof amountCoins !== "number" ||
-                amountCoins < 0
+                !(fromCoin instanceof Coin) ||
+                !(toCoin instanceof Coin) ||
+                typeof amountCoins !== "string" ||
+                BigNumber(amountCoins).lt("0")
             ) {
                 throw new Error(`Wrong input params: ${amountCoins} ${fromCoin.ticker} -> ${toCoin.ticker}`);
             }
-            const fromTicker = rabbitTickerToStandardTicker(fromCoin.ticker, fromCoin.protocol).toLowerCase();
+            const fromTicker = TickersAdapter.rabbitTickerToStandardTicker(
+                fromCoin.ticker,
+                fromCoin.protocol
+            ).toLowerCase();
             const fromNetwork = this._toSwapspaceNetwork(fromCoin);
-            const toTicker = rabbitTickerToStandardTicker(toCoin.ticker, toCoin.protocol).toLowerCase();
+            const toTicker = TickersAdapter.rabbitTickerToStandardTicker(toCoin.ticker, toCoin.protocol).toLowerCase();
             const toNetwork = this._toSwapspaceNetwork(toCoin);
             /* Here we use not documented parameter 'estimated=false'. This parameter controls whether we want to use
              * cached rate values stored in swapspace cache. Their support says they store at most for 30 sec.
@@ -149,64 +151,77 @@ export class SwapspaceSwapProvider extends SwapProvider {
             Logger.log(`Available (having amountTo): ${safeStringify(availableExchanges)}`, loggerSource);
             // min=0 or max=0 means there is no limit for the partner
             let smallestMin = null;
-            if (exchangesSupportingThePair.find(ex => ex.min === 0) == null)
-                smallestMin = exchangesSupportingThePair.reduce(
-                    (prev, cur) => (typeof cur.min === "number" && (prev === null || cur.min < prev) ? cur.min : prev),
-                    null
-                );
-            let greatestMax = null;
-            if (exchangesSupportingThePair.find(ex => ex.max === 0) == null)
-                greatestMax = exchangesSupportingThePair.reduce(
-                    (prev, cur) => (typeof cur.max === "number" && (prev === null || cur.max > prev) ? cur.max : prev),
-                    null
-                );
-            const usdAmountForSaferMinMaxLimits = 1; // We correct limits as the exact limit can fluctuate and cause failed swap creation
-            const coinUsdRate = await CoinsToFiatRatesService.getCoinToUSDRate(fromCoin);
-            const coinAmountForMinMaxSafety =
-                typeof coinUsdRate?.rate === "number" && coinUsdRate.rate > 0
-                    ? AmountUtils.trimCryptoAmountByCoin(usdAmountForSaferMinMaxLimits / +coinUsdRate?.rate, fromCoin)
-                    : 0;
-            if (smallestMin != null) smallestMin += coinAmountForMinMaxSafety;
-            if (greatestMax != null) {
-                if (greatestMax > coinAmountForMinMaxSafety) greatestMax -= coinAmountForMinMaxSafety;
-                else greatestMax = 0;
+            if (exchangesSupportingThePair.find(ex => BigNumber(ex.min).isZero()) == null) {
+                smallestMin = exchangesSupportingThePair.reduce((prev, cur) => {
+                    if (typeof cur.min === "number" && (prev === null || BigNumber(cur.min).lt(prev)))
+                        return BigNumber(cur.min);
+                    return prev;
+                }, null);
             }
+            let greatestMax = null;
+            if (exchangesSupportingThePair.find(ex => BigNumber(ex.max).isZero()) == null) {
+                greatestMax = exchangesSupportingThePair.reduce((prev, cur) => {
+                    if (typeof cur.max === "number" && (prev === null || BigNumber(cur.max).gt(prev)))
+                        return BigNumber(cur.max);
+                    return prev;
+                }, null);
+            }
+            const extraUsdToFitMinMax = BigNumber("1"); // We correct the limits as the exact limit can fluctuate and cause failed swap creation
+            const coinUsdRate = await CoinsToFiatRatesService.getCoinToUSDRate(fromCoin);
+            let extraCoinsToFitMinMax = "0";
+            if (typeof coinUsdRate?.rate === "number" && coinUsdRate.rate > 0) {
+                extraCoinsToFitMinMax = AmountUtils.trim(extraUsdToFitMinMax.div(coinUsdRate?.rate), fromCoin.digits);
+            }
+            if (smallestMin instanceof BigNumber) {
+                smallestMin = AmountUtils.trim(smallestMin.plus(extraCoinsToFitMinMax), fromCoin.digits);
+            }
+            if (greatestMax instanceof BigNumber) {
+                if (greatestMax > extraCoinsToFitMinMax) {
+                    greatestMax = AmountUtils.trim(greatestMax.minus(extraCoinsToFitMinMax), fromCoin.digits);
+                } else {
+                    greatestMax = "0";
+                }
+            }
+
             if (availableExchanges.length) {
                 const sorted = availableExchanges.sort((op1, op2) => op2.toAmount - op1.toAmount);
-                const bestRateOption = sorted[0];
-                Logger.log(`Returning first option after sorting: ${safeStringify(bestRateOption)}`, loggerSource);
-                const max =
-                    typeof bestRateOption.max !== "number" || bestRateOption.max === 0
-                        ? null
-                        : bestRateOption.max - coinAmountForMinMaxSafety;
-                const min =
-                    typeof bestRateOption.min !== "number" || bestRateOption.min === 0
-                        ? null
-                        : bestRateOption.min + coinAmountForMinMaxSafety;
+                const bestOpt = sorted[0];
+                Logger.log(`Returning first option after sorting: ${safeStringify(bestOpt)}`, loggerSource);
+                let max = null;
+                let min = null;
+                if (extraCoinsToFitMinMax != null) {
+                    if (typeof bestOpt.max === "number" && bestOpt.max !== 0) {
+                        max = BigNumber(bestOpt.max).minus(extraCoinsToFitMinMax);
+                        max = AmountUtils.trim(max.lt(0) ? "0" : max, fromCoin.digits);
+                    }
+                    if (typeof bestOpt.min === "number" && bestOpt.min !== 0) {
+                        min = AmountUtils.trim(BigNumber(bestOpt.min).plus(extraCoinsToFitMinMax), fromCoin.digits);
+                    }
+                }
+
+                const rate =
+                    bestOpt.toAmount && bestOpt.fromAmount ? BigNumber(bestOpt.toAmount).div(bestOpt.fromAmount) : null;
                 return {
                     result: true,
                     min: min,
-                    max: max == null ? null : max < 0 ? 0 : max,
+                    max: max,
                     smallestMin: smallestMin,
                     greatestMax: greatestMax,
-                    rate:
-                        bestRateOption.toAmount && bestRateOption.fromAmount
-                            ? bestRateOption.toAmount / bestRateOption.fromAmount
-                            : null,
-                    durationMinutesRange: bestRateOption.duration ?? null,
-                    rawSwapData: bestRateOption,
+                    rate: rate != null ? AmountUtils.trim(rate, this._maxRateDigits) : null,
+                    durationMinutesRange: bestOpt.duration ?? null,
+                    rawSwapData: bestOpt,
                 };
             }
             const result = {
                 result: false,
                 reason:
-                    smallestMin && amountCoins < smallestMin
+                    smallestMin && BigNumber(amountCoins).lt(smallestMin)
                         ? SwapProvider.NO_SWAPS_REASONS.TOO_LOW
-                        : greatestMax && amountCoins > greatestMax
-                        ? SwapProvider.NO_SWAPS_REASONS.TOO_HIGH
-                        : SwapProvider.NO_SWAPS_REASONS.NOT_SUPPORTED,
-                smallestMin: smallestMin ?? null,
-                greatestMax: greatestMax ?? null,
+                        : greatestMax && BigNumber(amountCoins).gt(greatestMax)
+                          ? SwapProvider.NO_SWAPS_REASONS.TOO_HIGH
+                          : SwapProvider.NO_SWAPS_REASONS.NOT_SUPPORTED,
+                smallestMin: smallestMin,
+                greatestMax: greatestMax,
             };
             Logger.log(`Returning result ${safeStringify(result)}`, loggerSource);
             return result;
@@ -226,7 +241,7 @@ export class SwapspaceSwapProvider extends SwapProvider {
             if (
                 !(fromCoin instanceof Coin) ||
                 !(toCoin instanceof Coin) ||
-                typeof amount !== "number" ||
+                typeof amount !== "string" ||
                 typeof toAddress !== "string" ||
                 typeof refundAddress !== "string"
             ) {
@@ -260,10 +275,12 @@ export class SwapspaceSwapProvider extends SwapProvider {
                 userIp: clientIp,
                 refund: refundAddress,
             };
+
             Logger.log(`Sending create request: ${safeStringify(requestData)}`, loggerSource);
             const response = await axios.post(`${this._URL}/api/v2/exchange`, requestData);
             const result = response.data;
             Logger.log(`Creation result ${safeStringify(result)}`, loggerSource);
+
             if (result?.id) {
                 if (
                     typeof result?.from?.amount !== "number" ||
@@ -275,20 +292,22 @@ export class SwapspaceSwapProvider extends SwapProvider {
                 /* We use the returned rate preferably but if the retrieved
                  * rate 0/null/undefined we calculate it manually */
                 let rate = result.rate;
-                if (typeof rate !== "number" || rate === 0) {
-                    rate = result?.to?.amount / result?.from?.amount;
+                if (typeof rate !== "number" || BigNumber(rate).isZero()) {
+                    rate = BigNumber(result?.to?.amount).div(result?.from?.amount);
+                } else {
+                    rate = BigNumber(rate);
                 }
 
                 return {
                     result: true,
                     swapId: result?.id,
                     fromCoin: fromCoin,
-                    fromAmount: result?.from?.amount,
+                    fromAmount: AmountUtils.trim(result?.from?.amount, fromCoin.digits),
                     fromAddress: result?.from?.address,
                     toCoin: toCoin,
-                    toAmount: result?.to?.amount,
+                    toAmount: AmountUtils.trim(result?.to?.amount, toCoin.digits),
                     toAddress: result?.to?.address,
-                    rate: rate,
+                    rate: AmountUtils.trim(rate, this._maxRateDigits),
                 };
             }
             const errorMessage = `Swap creation succeeded but the response is wrong: ${safeStringify(response)}`;
@@ -324,14 +343,13 @@ export class SwapspaceSwapProvider extends SwapProvider {
     }
 
     _fromSwapspaceCodeAndNetwork(code, network) {
-        if (code === "btc") return Coins.COINS.BTC;
-        if (code === "eth") return Coins.COINS.ETH;
-        if (code === "trx") return Coins.COINS.TRX;
+        if (code === "btc" && network === "btc") return Coins.COINS.BTC;
+        if (code === "eth" && network === "eth") return Coins.COINS.ETH;
+        if (code === "trx" && network === "trx") return Coins.COINS.TRX;
         const protocol = network === "erc20" ? ERC20 : network === "trc20" ? TRC20 : null;
-        if (!protocol) throw new Error("Unknown swapspace network: " + network);
-        const coin = Coins.getCoinByTicker(standardTickerToRabbitTicker(code, protocol.protocol));
-        if (!coin) throw new Error("Unknown coin from swapspace: " + code + ", " + network);
-        return coin;
+        if (!protocol) return null;
+        const rabbitTicker = TickersAdapter.standardTickerToRabbitTicker(code, protocol.protocol);
+        return Coins.getCoinByTickerIfPresent(rabbitTicker);
     }
 
     _mapSwapspaceStatusToRabbitStatus(status) {
@@ -339,7 +357,7 @@ export class SwapspaceSwapProvider extends SwapProvider {
             case "waiting":
                 return SwapProvider.SWAP_STATUSES.WAITING_FOR_PAYMENT;
             case "confirming":
-                return SwapProvider.SWAP_STATUSES.WAITING_FOR_PAYMENT;
+                return SwapProvider.SWAP_STATUSES.CONFIRMING;
             case "exchanging":
                 return SwapProvider.SWAP_STATUSES.EXCHANGING;
             case "sending":
@@ -352,6 +370,8 @@ export class SwapspaceSwapProvider extends SwapProvider {
                 return SwapProvider.SWAP_STATUSES.REFUNDED;
             case "expired":
                 return SwapProvider.SWAP_STATUSES.EXPIRED;
+            case "failed":
+                return SwapProvider.SWAP_STATUSES.FAILED;
             default:
                 throw new Error(`Unknown swapspace status: ${status}`);
         }
@@ -363,31 +383,51 @@ export class SwapspaceSwapProvider extends SwapProvider {
             if (swapIds.find(id => typeof id !== "string")) {
                 throw new Error("Swap id is not string: " + safeStringify(swapIds));
             }
-            const responses = await Promise.all(
-                swapIds.map(swapId => axios.get(`${this._URL}/api/v2/exchange/${swapId}`))
-            );
-            const swaps = responses
+            const getNotFailingOn404 = async swapId => {
+                try {
+                    return await axios.get(`${this._URL}/api/v2/exchange/${swapId}`);
+                } catch (error) {
+                    if (error?.response?.status === 404) return [];
+                    throw error;
+                }
+            };
+            const responses = await Promise.all(swapIds.map(swapId => getNotFailingOn404(swapId)));
+            const wo404 = responses.flat();
+            const swaps = wo404
                 .map(r => r.data)
-                .map(
-                    (swap, index) =>
-                        new ExistingSwap(
-                            swapIds[index],
-                            this._mapSwapspaceStatusToRabbitStatus(swap.status),
-                            new Date(swap.timestamps.createdAt).getTime(),
-                            new Date(swap.timestamps.expiresAt).getTime(),
-                            swap.confirmations,
-                            swap.rate,
-                            swap.refundAddress,
-                            this._fromSwapspaceCodeAndNetwork(swap.from.code, swap.from.network),
-                            swap.from.amount,
-                            swap.from.transactionHash,
-                            this._fromSwapspaceCodeAndNetwork(swap.to.code, swap.to.network),
-                            swap.to.amount,
-                            swap.to.transactionHash,
-                            swap.to.address,
-                            swap.partner
-                        )
-                );
+                .map((swap, index) => {
+                    const fromCoin = this._fromSwapspaceCodeAndNetwork(swap.from.code, swap.from.network);
+                    const toCoin = this._fromSwapspaceCodeAndNetwork(swap.to.code, swap.to.network);
+                    if (!fromCoin || !toCoin) {
+                        return []; // We skip swaps with not supported coins for now
+                    }
+
+                    const status = this._mapSwapspaceStatusToRabbitStatus(swap.status);
+                    const toDigits = status === SwapProvider.SWAP_STATUSES.REFUNDED ? fromCoin.digits : toCoin.digits;
+                    const addressToSendCoinsToSwapspace = swap.from.address;
+                    const toUtcTimestamp = timeStr => Date.parse(timeStr.match(/.+[Zz]$/) ? timeStr : `${timeStr}Z`);
+                    return new ExistingSwap(
+                        swapIds[index],
+                        status,
+                        toUtcTimestamp(swap.timestamps.createdAt),
+                        toUtcTimestamp(swap.timestamps.expiresAt),
+                        swap.confirmations,
+                        AmountUtils.trim(swap.rate, this._maxRateDigits),
+                        swap.refundAddress,
+                        addressToSendCoinsToSwapspace,
+                        fromCoin,
+                        AmountUtils.trim(swap.from.amount, fromCoin.digits),
+                        swap.from.transactionHash,
+                        swap.blockExplorerTransactionUrl.from,
+                        toCoin,
+                        AmountUtils.trim(swap.to.amount, toDigits),
+                        swap.to.transactionHash,
+                        swap.blockExplorerTransactionUrl.to,
+                        swap.to.address,
+                        swap.partner
+                    );
+                })
+                .flat();
             Logger.log(`Swap details result ${safeStringify(swaps)}`, loggerSource);
             return { result: true, swaps: swaps };
         } catch (e) {

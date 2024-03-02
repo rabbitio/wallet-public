@@ -1,19 +1,21 @@
-import { BigNumber } from "ethers";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { Coins } from "../../coins";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { EthTransactionsUtils } from "../lib/ethTransactionsUtils";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { EthTransactionsUtils } from "../lib/ethTransactionsUtils.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem.js";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import {
     actualizeCacheWithNewTransactionSentFromAddress,
     mergeTwoArraysByItemIdFieldName,
     mergeTwoTransactionsArraysAndNotifyAboutNewTransactions,
-} from "../../common/utils/cacheActualizationUtils";
-import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
+} from "../../common/utils/cacheActualizationUtils.js";
+import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
 
 class EtherscanEthTransactionsProvider extends ExternalApiProvider {
     constructor() {
@@ -38,7 +40,8 @@ class EtherscanEthTransactionsProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const networkPrefix = getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet ? "" : "-goerli";
+            const networkPrefix =
+                Storage.getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet ? "" : "-goerli";
             const address = params[0];
             const page = params[1] ?? 1;
             const offset = this.maxPageLength * (page - 1);
@@ -67,9 +70,7 @@ class EtherscanEthTransactionsProvider extends ExternalApiProvider {
                         const type = tx.to === myAddress ? "in" : "out";
                         const fee =
                             tx.gasUsed && tx.gasPrice
-                                ? BigNumber.from(tx.gasUsed)
-                                      .mul(tx.gasPrice)
-                                      .toString()
+                                ? AmountUtils.trim(BigNumber(tx.gasUsed).times(tx.gasPrice), 0)
                                 : null;
                         const isSendingAndReceiving = tx.to === tx.from;
                         const timestamp = tx.timeStamp ? +tx.timeStamp * 1000 : provideFirstSeenTime(tx.hash);

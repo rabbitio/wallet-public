@@ -1,9 +1,11 @@
-import { getLogger } from "log4js";
-import { dbConnectionHolder } from "../utils/dbConnectionHolder";
-import { isFindAndUpdateOneResultValid } from "./mongoUtil";
-import { improveAndRethrow } from "../utils/utils";
+import log4js from "log4js";
 
-const log = getLogger("transactionsToPaymentsService");
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { dbConnectionHolder } from "../utils/dbConnectionHolder.js";
+import { isFindAndUpdateOneResultValid } from "./mongoUtil.js";
+
+const log = log4js.getLogger("transactionsToPaymentsService");
 
 export default class TransactionsToPaymentsService {
     static documentName = "transactionsToPaymentsMapping";

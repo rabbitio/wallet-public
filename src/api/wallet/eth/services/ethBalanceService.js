@@ -1,7 +1,9 @@
 import { ethers } from "ethers";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { EthAddressesService } from "./ethAddressesService";
-import { EthBalanceProvider } from "../external-apis/ethBalanceProvider";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { EthAddressesService } from "./ethAddressesService.js";
+import { EthBalanceProvider } from "../external-apis/ethBalanceProvider.js";
 
 // TODO: [tests, critical] implement some units/integration tests
 export class EthBalanceService {

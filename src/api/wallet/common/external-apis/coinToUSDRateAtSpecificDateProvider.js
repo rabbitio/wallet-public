@@ -1,9 +1,10 @@
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { ApiGroupCoinIdAdapters } from "../adapters/apiGroupCoinIdAdapters";
-import { PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { ApiGroupCoinIdAdapters } from "../adapters/apiGroupCoinIdAdapters.js";
+import { PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 // TODO: [feature, low] add provider (only some tokens): https://api.blockchain.com/v3/exchange/tickers
 // TODO: [feature, low] add provider (only some tokens): https://api.crypto.com/v2/public/get-ticker RPS=100 https://exchange-docs.crypto.com/spot/index.html#rate-limits
@@ -24,8 +25,9 @@ class CoincapCoinToUsdRateProvider extends ExternalApiProvider {
                 [coin]
             )[0];
             const twoDaysMS = 2 * 24 * 60 * 60 * 1000;
-            return `${coinIdClearForProvider}/history?start=${timestamp - twoDaysMS}&end=${timestamp +
-                twoDaysMS}&interval=d1`;
+            return `${coinIdClearForProvider}/history?start=${timestamp - twoDaysMS}&end=${
+                timestamp + twoDaysMS
+            }&interval=d1`;
         } catch (e) {
             improveAndRethrow(e, "CoincapCoinToUsdRateProvider.composeQueryString");
         }

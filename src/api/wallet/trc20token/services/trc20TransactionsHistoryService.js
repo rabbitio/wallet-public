@@ -1,6 +1,7 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { TrxAddressesService } from "../../trx/services/trxAddressesService";
-import { Trc20TransactionsProvider } from "../external-apis/trc20TransactionsProvider";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { TrxAddressesService } from "../../trx/services/trxAddressesService.js";
+import { Trc20TransactionsProvider } from "../external-apis/trc20TransactionsProvider.js";
 
 export class Trc20TransactionsHistoryService {
     static async getTrc20TokenTransactionsHistory(coin) {

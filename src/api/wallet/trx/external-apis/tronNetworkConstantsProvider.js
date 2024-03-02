@@ -1,11 +1,12 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { Coins } from "../../coins";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { LONG_TTL_FOR_REALLY_RARELY_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { LONG_TTL_FOR_REALLY_RARELY_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 class TronscanNetworkConstantsProvider extends ExternalApiProvider {
     constructor() {
@@ -13,7 +14,7 @@ class TronscanNetworkConstantsProvider extends ExternalApiProvider {
     }
 
     composeQueryString(params, subRequestIndex = 0) {
-        if (getCurrentNetwork(Coins.COINS.TRX) !== Coins.COINS.TRX.mainnet) {
+        if (Storage.getCurrentNetwork(Coins.COINS.TRX) !== Coins.COINS.TRX.mainnet) {
             throw new Error("Tronscan provider doesn't support test networks (in network parameters retrieval)");
         }
         return "";

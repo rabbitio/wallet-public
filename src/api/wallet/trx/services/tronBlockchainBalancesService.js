@@ -1,9 +1,10 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { TronBlockchainBalancesProvider } from "../external-apis/tronBlockchainBalancesProvider";
-import { TrxAddressesService } from "./trxAddressesService";
-import { Trc20BalanceProvider } from "../../trc20token/external-apis/trc20BalanceProvider";
-import { TronBalanceProvider } from "../external-apis/tronBalanceProvider";
-import { Coins } from "../../coins";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { TronBlockchainBalancesProvider } from "../external-apis/tronBlockchainBalancesProvider.js";
+import { TrxAddressesService } from "./trxAddressesService.js";
+import { Trc20BalanceProvider } from "../../trc20token/external-apis/trc20BalanceProvider.js";
+import { TronBalanceProvider } from "../external-apis/tronBalanceProvider.js";
+import { Coins } from "../../coins.js";
 
 export class TronBlockchainBalancesService {
     /**

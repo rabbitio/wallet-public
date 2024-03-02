@@ -1,8 +1,9 @@
-import { decrypt, encrypt, getSaltedHash } from "../../../common/adapters/crypto-utils";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { getDataPassword } from "../../../common/services/internal/storage";
-import { TransactionDataApi } from "../backend-api/transactionDataApi";
-import { Logger } from "../../../support/services/internal/logs/logger";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { decrypt, encrypt, getSaltedHash } from "../../../../common/adapters/crypto-utils.js";
+import { TransactionDataApi } from "../../backend-api/transactionDataApi.js";
+import { Logger } from "../../../../support/services/internal/logs/logger.js";
+import { Storage } from "../../../../common/services/internal/storage.js";
 
 export class TransactionsDataService {
     /**
@@ -12,16 +13,16 @@ export class TransactionsDataService {
      *
      * Also encrypts transaction data with dataPassword. It protects us from stole of data from server.
      *
-     * @param transactionId - id of transaction to save data for
-     * @param data - transactions data, format: { note: "note_string" }
-     * @returns Promise resolving to nothing
+     * @param transactionId {string} id of transaction to save data for
+     * @param data {{ note: string }}
+     * @returns {Promise<void>}
      */
     static async saveTransactionData(transactionId, data) {
         const loggerSource = "saveTransactionData";
         try {
             Logger.log(`Start saving tx data for ${transactionId}`, loggerSource);
 
-            const dataPassword = getDataPassword();
+            const dataPassword = Storage.getDataPassword();
             const transactionIdHash = getSaltedHash(transactionId, dataPassword);
             const encryptedNote = encrypt(data.note, dataPassword);
             const transactionsData = { encryptedNote };
@@ -37,20 +38,19 @@ export class TransactionsDataService {
     /**
      * Gets encrypted transactions data from server, decrypts it and returns (for current wallet recognized by cookies).
      *
-     * @param transactionIds - ids of transactions to get from
-     * @returns Promise resolving to [ { transactionId: "id_string", note: "note_string" }, ... ]
+     * @param transactionIds {string[]} ids of transactions to get from
+     * @returns {Promise<{ transactionId: string, note: string }[]>}
      */
     static async getTransactionsData(transactionIds) {
         try {
-            const dataPassword = getDataPassword();
+            const dataPassword = Storage.getDataPassword();
             const transactionIdHashesMapping = transactionIds.map(transactionId => {
                 return { transactionId, transactionIdHash: getSaltedHash(transactionId, dataPassword) };
             });
             const transactionIdHashes = transactionIdHashesMapping.map(entry => entry.transactionIdHash);
 
-            const encryptedTransactionsData = await TransactionDataApi.getTransactionsDataFromServerForCurrentWallet(
-                transactionIdHashes
-            );
+            const encryptedTransactionsData =
+                await TransactionDataApi.getTransactionsDataFromServerForCurrentWallet(transactionIdHashes);
 
             return encryptedTransactionsData.map(dataEntry => {
                 const { transactionId } = transactionIdHashesMapping.filter(
@@ -66,17 +66,16 @@ export class TransactionsDataService {
     /**
      * Updates transaction data on server for current wallet.
      *
-     * @param transactionId - id of transaction to update data for
-     * @param data - data to be pushed, format: { note: "note_string" }
-     * @returns Promise resolving to null if given ids are not found, update result otherwise:
-     *   { transactionId: "id_string", note: "note_string" }
+     * @param transactionId {string} id of transaction to update data for
+     * @param data {{ note: string }} data to be pushed
+     * @returns {Promise<{ transactionId: "id_string", note: "note_string" }|null>}
      */
     static async updateTransactionData(transactionId, data) {
         const loggerSource = "updateTransactionData";
         try {
             Logger.log(`Start updating for ${transactionId}`, loggerSource);
 
-            const dataPassword = getDataPassword();
+            const dataPassword = Storage.getDataPassword();
             const transactionIdHash = getSaltedHash(transactionId, dataPassword);
             const encryptedNote = encrypt(data.note, dataPassword);
             const transactionData = { encryptedNote };
@@ -94,7 +93,7 @@ export class TransactionsDataService {
             Logger.log(`Tx data was updated ${transactionId}`, loggerSource);
             return { transactionId, note: decrypt(updateResult.encryptedNote, dataPassword) };
         } catch (e) {
-            improveAndRethrow(e, TransactionsDataService.updateTransactionData);
+            improveAndRethrow(e, "updateTransactionData");
         }
     }
 }

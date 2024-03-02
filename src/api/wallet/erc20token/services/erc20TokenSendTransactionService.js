@@ -1,9 +1,8 @@
-import { BigNumber } from "ethers";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { Erc20FeeEstimationService } from "./erc20FeeEstimationService";
-import { EthSendTransactionService } from "../../eth/services/ethSendTransactionService";
-import { EthAddressesService } from "../../eth/services/ethAddressesService";
+import { Erc20FeeEstimationService } from "./erc20FeeEstimationService.js";
+import { EthSendTransactionService } from "../../eth/services/ethSendTransactionService.js";
+import { EthAddressesService } from "../../eth/services/ethAddressesService.js";
 
 export class Erc20TokenSendTransactionService {
     /**
@@ -15,7 +14,7 @@ export class Erc20TokenSendTransactionService {
      * @param coinAmount {string} amount to be validated in coin denomination
      * @param isSendAll {boolean} whether transaction should send all available coins or not
      * @param network {Network} coin to create the fake ttx for
-     * @param balanceCoins {number|string} balance of sending coin
+     * @param balanceCoins {string} balance of sending coin
      * @return {Promise<
      *         {
      *             result: true,
@@ -44,7 +43,6 @@ export class Erc20TokenSendTransactionService {
     ) {
         try {
             const senderAddress = EthAddressesService.getCurrentEthAddress();
-            // TODO: [feature, critical] use balance atoms to avoid potential overflow. task_id=825b0eace30c4a78bd30c90569d10d84
             coinAmount = isSendAll ? balanceCoins : coinAmount;
             const gasIntString = await Erc20FeeEstimationService.estimateGasForTransfer(
                 coin,
@@ -53,8 +51,6 @@ export class Erc20TokenSendTransactionService {
                 coin.coinAmountToAtoms(coinAmount),
                 network
             );
-            const gasUnitsRequired = BigNumber.from(Math.round(gasIntString) + "");
-
             return await EthSendTransactionService.createEthereumBlockchainCoinTransactionsWithFakeSignatures(
                 coin,
                 address,
@@ -62,7 +58,7 @@ export class Erc20TokenSendTransactionService {
                 isSendAll,
                 network,
                 balanceCoins,
-                gasUnitsRequired
+                gasIntString
             );
         } catch (e) {
             improveAndRethrow(e, "createEthTransactionsWithFakeSignatures");

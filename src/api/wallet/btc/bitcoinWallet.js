@@ -1,15 +1,16 @@
-import { Wallet } from "../common/models/wallet";
-import BalanceService from "./services/balanceService";
-import { improveAndRethrow } from "../../common/utils/errorUtils";
-import { BtcTransactionsHistoryService } from "./services/btcTransactionsHistoryService";
-import { BtcTransactionDetailsService } from "./services/btcTransactionDetailsService";
-import AddressesService from "./services/addressesService";
-import PaymentService from "./services/paymentService";
-import AddressesServiceInternal from "./services/internal/addressesServiceInternal";
-import { bitcoin } from "./bitcoin";
-import { transactionsDataProvider } from "./services/internal/transactionsDataProvider";
-import { Transaction } from "./models/transaction/transaction";
-import { isAddressValid } from "./lib/addresses";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Wallet } from "../common/models/wallet.js";
+import BalanceService from "./services/balanceService.js";
+import { BtcTransactionsHistoryService } from "./services/btcTransactionsHistoryService.js";
+import { BtcTransactionDetailsService } from "./services/btcTransactionDetailsService.js";
+import AddressesService from "./services/addressesService.js";
+import PaymentService from "./services/paymentService.js";
+import AddressesServiceInternal from "./services/internal/addressesServiceInternal.js";
+import { bitcoin } from "./bitcoin.js";
+import { transactionsDataProvider } from "./services/internal/transactionsDataProvider.js";
+import { Transaction } from "./models/transaction/transaction.js";
+import { BitcoinAddresses } from "./lib/addresses.js";
 
 class BitcoinWallet extends Wallet {
     constructor() {
@@ -59,7 +60,7 @@ class BitcoinWallet extends Wallet {
 
     isAddressValid(address) {
         try {
-            return { result: isAddressValid(address) };
+            return { result: BitcoinAddresses.isAddressValid(address) };
         } catch (e) {
             improveAndRethrow(e, `${this.coin.ticker}_isAddressValid`);
         }

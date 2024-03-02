@@ -1,15 +1,16 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import { dbConnectionHolder } from "../utils/dbConnectionHolder";
-import { improveAndRethrow } from "../utils/utils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { dbConnectionHolder } from "../utils/dbConnectionHolder.js";
 import {
     isDeleteManyResultValid,
     isFindAndUpdateOneNotMatched,
     isFindAndUpdateOneResultValid,
     isInsertOneResultValid,
-} from "./mongoUtil";
+} from "./mongoUtil.js";
 
-const log = getLogger("AddressesDataService");
+const log = log4js.getLogger("AddressesDataService");
 
 export const addressesDataDbCollectionName = "addressesData";
 
@@ -333,8 +334,9 @@ async function findOneSavedAddressesDataDocAndUpdate(
         (findAndUpdateResultForPresentPath && !isFindAndUpdateOneResultValid(findAndUpdateResultForPresentPath, false))
     ) {
         throw new Error(
-            `Failed to update address index ${addressesDataMappingItems &&
-                `or save addresses data: ${JSON.stringify(addressesDataMappingItems)}`}.` +
+            `Failed to update address index ${
+                addressesDataMappingItems && `or save addresses data: ${JSON.stringify(addressesDataMappingItems)}`
+            }.` +
                 `newIndex is ${newIndexValue}. Result for not empty path: ` +
                 `${JSON.stringify(findAndUpdateResultForPresentPath)}, for empty path: ` +
                 `${JSON.stringify(findAndModifyResultForEmptyPath)}`

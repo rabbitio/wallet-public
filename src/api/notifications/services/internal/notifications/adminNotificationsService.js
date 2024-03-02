@@ -1,7 +1,8 @@
-import DedicatedNotificationsService from "./dedicatedNotificationsService";
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import NotificationsAPI from "../../../backend-api/notificatiionsApi";
-import Notification, { NOTIFICATIONS_TYPES } from "../../../models/notification";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import DedicatedNotificationsService from "./dedicatedNotificationsService.js";
+import NotificationsAPI from "../../../backend-api/notificatiionsApi.js";
+import Notification, { NOTIFICATIONS_TYPES } from "../../../models/notification.js";
 
 export default class AdminNotificationsService extends DedicatedNotificationsService {
     /**

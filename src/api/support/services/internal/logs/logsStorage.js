@@ -1,10 +1,5 @@
-import {
-    getLogs,
-    getDoNotRemoveClientLogsWhenSignedOut,
-    removeLogs,
-    saveLogs,
-} from "../../../../common/services/internal/storage";
-import { logError } from "../../../../common/utils/errorUtils";
+import { Storage } from "../../../../common/services/internal/storage.js";
+import { logError } from "../../../../common/utils/errorUtils.js";
 
 export class LogsStorage {
     static _inMemoryStorage = [];
@@ -18,13 +13,13 @@ export class LogsStorage {
     }
 
     static getAllLogs() {
-        return `${getLogs()}\n${this._inMemoryStorage.join("\n")}`;
+        return `${Storage.getLogs()}\n${this._inMemoryStorage.join("\n")}`;
     }
 
     static saveToTheDisk() {
         try {
-            const existingLogs = getLogs();
-            saveLogs(`${existingLogs}\n${this._inMemoryStorage.join("\n")}`);
+            const existingLogs = Storage.getLogs();
+            Storage.saveLogs(`${existingLogs}\n${this._inMemoryStorage.join("\n")}`);
             this._inMemoryStorage = [];
         } catch (e) {
             logError(e, "saveToTheDisk", "Failed to save logs to disk");
@@ -32,9 +27,9 @@ export class LogsStorage {
     }
 
     static removeAllClientLogs() {
-        const doNotRemoveClientLogsWhenSignedOut = getDoNotRemoveClientLogsWhenSignedOut();
+        const doNotRemoveClientLogsWhenSignedOut = Storage.getDoNotRemoveClientLogsWhenSignedOut();
         if (doNotRemoveClientLogsWhenSignedOut !== "true") {
-            removeLogs();
+            Storage.removeLogs();
             this._inMemoryStorage = [];
         }
     }

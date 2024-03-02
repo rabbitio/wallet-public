@@ -1,8 +1,9 @@
-import { improveAndRethrow } from "../../common/utils/errorUtils";
-import { EncryptedWalletPaymentIdsApi } from "../backend-api/encryptedWalletPaymentIdsApi";
-import { getDataPassword, getWalletId } from "../../common/services/internal/storage";
-import { decrypt, encrypt } from "../../common/adapters/crypto-utils";
-import { Logger } from "../../support/services/internal/logs/logger";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { EncryptedWalletPaymentIdsApi } from "../backend-api/encryptedWalletPaymentIdsApi.js";
+import { Storage } from "../../common/services/internal/storage.js";
+import { decrypt, encrypt } from "../../common/adapters/crypto-utils.js";
+import { Logger } from "../../support/services/internal/logs/logger.js";
 
 export class EncryptedWalletPaymentIdsService {
     /**
@@ -16,8 +17,8 @@ export class EncryptedWalletPaymentIdsService {
         try {
             Logger.log(`Start saving new payment id: ${paymentId}`, loggerSource);
 
-            const encryptedId = encrypt(paymentId, getDataPassword());
-            await EncryptedWalletPaymentIdsApi.saveEncryptedWalletPaymentId(getWalletId(), encryptedId);
+            const encryptedId = encrypt(paymentId, Storage.getDataPassword());
+            await EncryptedWalletPaymentIdsApi.saveEncryptedWalletPaymentId(Storage.getWalletId(), encryptedId);
 
             Logger.log(`New payment id was saved: ${paymentId}`, loggerSource);
         } catch (e) {
@@ -32,8 +33,10 @@ export class EncryptedWalletPaymentIdsService {
      */
     static async getPaymentIdsForCurrentWallet() {
         try {
-            const encryptedIdsArray = await EncryptedWalletPaymentIdsApi.getAllEncryptedWalletPaymentIds(getWalletId());
-            const decryptedIds = encryptedIdsArray.map(encryptedId => decrypt(encryptedId, getDataPassword()));
+            const encryptedIdsArray = await EncryptedWalletPaymentIdsApi.getAllEncryptedWalletPaymentIds(
+                Storage.getWalletId()
+            );
+            const decryptedIds = encryptedIdsArray.map(encryptedId => decrypt(encryptedId, Storage.getDataPassword()));
 
             return decryptedIds;
         } catch (e) {

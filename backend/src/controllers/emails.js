@@ -1,10 +1,11 @@
-import { getLogger } from "log4js";
-import { processSuccess, processInternalError, validateRequestDataAndResponseOnErrors } from "./controllerUtils";
-import schemas from "../models/joi_schemas";
-import { SEND_EMAIL_EP_NUMBER } from "./endpointNumbers";
-import EmailsService from "../services/emailsService";
+import log4js from "log4js";
 
-const log = getLogger("emails");
+import { ControllerUtils } from "./controllerUtils.js";
+import schemas from "../models/joi_schemas.js";
+import { SEND_EMAIL_EP_NUMBER } from "./endpointNumbers.js";
+import EmailsService from "../services/emailsService.js";
+
+const log = log4js.getLogger("emails");
 
 export default class EmailsController {
     /**
@@ -32,7 +33,7 @@ export default class EmailsController {
         log.debug("Start sending email.");
         const endpointNumber = SEND_EMAIL_EP_NUMBER;
         try {
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 req.body,
                 schemas.sendEmail,
@@ -46,10 +47,10 @@ export default class EmailsController {
                 await EmailsService.sendEmail(req.body.subject, req.body.body);
 
                 log.debug("Email has been sent, sending 201.");
-                processSuccess(res, 201);
+                ControllerUtils.processSuccess(res, 201);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to send email due to internal error. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to send email due to internal error. ", e);
         }
     }
 }

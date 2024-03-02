@@ -1,16 +1,11 @@
-import { getLogger } from "log4js";
-import {
-    addClientIpHash,
-    addWalletIdAndSessionId,
-    processSuccess,
-    processInternalError,
-    validateRequestDataAndResponseOnErrors,
-} from "./controllerUtils";
-import schemas from "../models/joi_schemas";
-import { GET_FIAT_RATE_FOR_SPECIFIC_DATE_EP_NUMBER, GET_FIAT_RATES_EP_NUMBER } from "./endpointNumbers";
-import FiatRatesService from "../services/fiatRatesService";
+import log4js from "log4js";
 
-const log = getLogger("fiatRatesController");
+import { ControllerUtils } from "./controllerUtils.js";
+import schemas from "../models/joi_schemas.js";
+import { GET_FIAT_RATE_FOR_SPECIFIC_DATE_EP_NUMBER, GET_FIAT_RATES_EP_NUMBER } from "./endpointNumbers.js";
+import FiatRatesService from "../services/fiatRatesService.js";
+
+const log = log4js.getLogger("fiatRatesController");
 
 export default class FiatRatesController {
     /**
@@ -43,8 +38,8 @@ export default class FiatRatesController {
         log.debug("Start getting fiat rates.");
         const endpointNumber = GET_FIAT_RATES_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, {}));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, {}));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.getFiatRates,
@@ -57,10 +52,10 @@ export default class FiatRatesController {
                 const ratesData = await FiatRatesService.getAllRatesData();
 
                 log.debug("Rates were retrieved, sending 200 and rates array.");
-                processSuccess(res, 200, ratesData);
+                ControllerUtils.processSuccess(res, 200, ratesData);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to get rates due to internal error. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to get rates due to internal error. ", e);
         }
     }
 
@@ -97,8 +92,8 @@ export default class FiatRatesController {
         const endpointNumber = GET_FIAT_RATE_FOR_SPECIFIC_DATE_EP_NUMBER;
         try {
             const timestamp = req.params && req.params.timestamp;
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, { timestamp }));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, { timestamp }));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.getFiatRateForSpecificDate,
@@ -112,14 +107,14 @@ export default class FiatRatesController {
 
                 if (rateData) {
                     log.debug(`Rate was retrieved, sending 200 and rate object: ${rateData}`);
-                    processSuccess(res, 200, rateData);
+                    ControllerUtils.processSuccess(res, 200, rateData);
                 } else {
                     res.status(404).json();
                     log.debug("Rate was not found, sending 404");
                 }
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to get rate due to internal error. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to get rate due to internal error. ", e);
         }
     }
 }

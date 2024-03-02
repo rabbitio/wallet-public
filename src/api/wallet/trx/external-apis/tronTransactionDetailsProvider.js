@@ -1,15 +1,15 @@
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { Coins } from "../../coins";
-import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem";
-import { tronUtils } from "../adapters/tronUtils";
-import { computeConfirmationsCountByTimestamp } from "../lib/blocks";
-import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { BigNumber } from "ethers";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { Coins } from "../../coins.js";
+import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem.js";
+import { tronUtils } from "../adapters/tronUtils.js";
+import { computeConfirmationsCountByTimestamp } from "../lib/blocks.js";
+import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
 
 class TrongridTransactionDetailsProvider extends ExternalApiProvider {
     constructor() {
@@ -43,7 +43,7 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
                 const t = response?.data ?? {};
                 const id = t?.txID;
                 const timestamp = t?.raw_data?.timestamp ?? provideFirstSeenTime(id);
-                const feeLimit = "" + (t?.raw_data?.fee_limit ?? "");
+                const feeLimit = AmountUtils.intStr(t?.raw_data?.fee_limit ?? null);
                 const confirmations = t?.raw_data?.timestamp ? computeConfirmationsCountByTimestamp(timestamp) : 0;
                 if ((t?.raw_data?.contract ?? [])[0]?.type === "TransferContract") {
                     const toAddress = tronUtils.hexAddressToBase58check(
@@ -51,7 +51,7 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
                     );
                     const isSelfSending = toAddress === myAddress;
                     const type = toAddress === myAddress ? "in" : "out";
-                    const amount = "" + (t?.raw_data?.contract ?? [])[0]?.parameter?.value?.amount;
+                    const amount = AmountUtils.intStr((t?.raw_data?.contract ?? [])[0]?.parameter?.value?.amount);
                     return new TransactionsHistoryItem(
                         id,
                         Coins.COINS.TRX.ticker,
@@ -72,7 +72,7 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
                 const t2 = response?.data;
                 const id = t2.id;
                 const txFromFirstApiCall = iterationsData[0];
-                const improvedFee = t2.fee != null ? "" + t2.fee : txFromFirstApiCall?.fees;
+                const improvedFee = t2.fee != null ? AmountUtils.intStr(t2.fee) : txFromFirstApiCall?.fees;
                 txFromFirstApiCall && (txFromFirstApiCall.fees = improvedFee);
                 const confirmations = t2.blockTimeStamp ? computeConfirmationsCountByTimestamp(t2.blockTimeStamp) : 0;
                 const timestamp = t2.blockTimeStamp ?? provideFirstSeenTime(id);
@@ -100,7 +100,7 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
                                 );
                                 const addressTo = tronUtils.hexAddressToBase58check("41" + logItem.topics[2].slice(24));
                                 const type = addressFrom === myAddress ? "out" : addressTo === myAddress ? "in" : null;
-                                const amount = BigNumber.from(`0x${logItem.data}`).toString();
+                                const amount = AmountUtils.intStr(`0x${logItem.data}`);
                                 if (type) {
                                     return new TransactionsHistoryItem(
                                         id,
@@ -134,7 +134,7 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
                         .map(internalTx => {
                             const addressFrom = tronUtils.hexAddressToBase58check(internalTx.caller_address);
                             const addressTo = tronUtils.hexAddressToBase58check(internalTx.transferTo_address);
-                            const amount = "" + internalTx.callValueInfo[0].callValue;
+                            const amount = AmountUtils.intStr(internalTx.callValueInfo[0].callValue);
                             if (
                                 addressFrom &&
                                 addressTo &&

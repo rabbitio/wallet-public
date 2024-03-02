@@ -1,7 +1,9 @@
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import CoinsToFiatRatesService from "../../common/services/coinsToFiatRatesService";
-import FiatRatesApi from "../backend-api/fiatRatesApi";
-import { Coins } from "../../coins";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { logError } from "../../../common/utils/errorUtils.js";
+import CoinsToFiatRatesService from "../../common/services/coinsToFiatRatesService.js";
+import FiatRatesApi from "../backend-api/fiatRatesApi.js";
+import { Coins } from "../../coins.js";
 
 export default class BtcFiatChartService {
     static SCALES = {

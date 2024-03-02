@@ -1,10 +1,12 @@
-import { Coin } from "../common/models/coin";
-import { Network } from "../common/models/networks";
-import { SupportedSchemes } from "./lib/addresses-schemes";
-import { NumbersUtils } from "../common/utils/numbersUtils";
-import { getCurrentNetwork } from "../../common/services/internal/storage";
-import { AmountUtils } from "../common/utils/amountUtils";
-import { BITCOIN_BLOCKCHAIN } from "./bitcoinBlockchain";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils } from "@rabbitio/ui-kit";
+
+import { Coin } from "../common/models/coin.js";
+import { Network } from "../common/models/networks.js";
+import { SupportedSchemes } from "./lib/addresses-schemes.js";
+import { Storage } from "../../common/services/internal/storage.js";
+import { BITCOIN_BLOCKCHAIN } from "./bitcoinBlockchain.js";
 
 class Bitcoin extends Coin {
     constructor() {
@@ -30,21 +32,19 @@ class Bitcoin extends Coin {
     }
 
     atomsToCoinAmount(atoms) {
-        return NumbersUtils.removeRedundantRightZerosFromNumberString((+atoms / 100000000).toFixed(this.digits));
-    }
-
-    atomsToCoinAmountSignificantString(atoms, maxNumberLength = null) {
-        return NumbersUtils.trimCurrencyAmount(+atoms / 100000000, this.digits, maxNumberLength);
+        return AmountUtils.removeRedundantRightZerosFromNumberString(
+            BigNumber(atoms).div(100_000_000).toFixed(this.digits, BigNumber.ROUND_FLOOR)
+        );
     }
 
     coinAmountToAtoms(coinsAmount) {
-        coinsAmount = AmountUtils.trimDigitsAfterPeriod(coinsAmount, this.digits);
-        return NumbersUtils.removeRedundantRightZerosFromNumberString(Math.floor(coinsAmount * 100000000));
+        const satoshi = BigNumber(coinsAmount).times(100_000_000).toFixed(0, BigNumber.ROUND_FLOOR);
+        return AmountUtils.removeRedundantRightZerosFromNumberString(satoshi);
     }
 
     composeUrlToTransactionExplorer(txId) {
         return `https://blockchair.com/bitcoin/${
-            getCurrentNetwork(this)?.key === this.mainnet.key ? "" : `${this.testnet.key}/`
+            Storage.getCurrentNetwork(this)?.key === this.mainnet.key ? "" : `${this.testnet.key}/`
         }transaction/${txId}?from=rabbitio`;
     }
 

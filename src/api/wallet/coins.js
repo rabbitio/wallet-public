@@ -1,7 +1,8 @@
-import { getCurrentNetwork } from "../common/services/internal/storage";
-import { improveAndRethrow } from "../common/utils/errorUtils";
-import { bitcoin } from "./btc/bitcoin";
-import { ethereum } from "./eth/ethereum";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Storage } from "../common/services/internal/storage.js";
+import { bitcoin } from "./btc/bitcoin.js";
+import { ethereum } from "./eth/ethereum.js";
 import {
     agixErc20,
     blurErc20,
@@ -42,7 +43,7 @@ import {
     vraErc20,
     stgErc20,
     lrcErc20,
-} from "./erc20token/tokens/erc20tokens";
+} from "./erc20token/tokens/erc20tokens.js";
 import {
     bttTrc20,
     jstTrc20,
@@ -52,17 +53,19 @@ import {
     usddTrc20,
     usdtTrc20,
     wtrxTrc20,
-} from "./trc20token/tokens/trc20tokens";
-import { tron } from "./trx/tron";
-import { PreferencesService } from "./common/services/preferencesService";
-import { UserDataAndSettings } from "./common/models/userDataAndSettings";
-import { rabbitTickerToStandardTicker } from "./common/external-apis/utils/tickersAdapter";
+} from "./trc20token/tokens/trc20tokens.js";
+import { tron } from "./trx/tron.js";
+import { PreferencesService } from "./common/services/preferencesService.js";
+import { UserDataAndSettings } from "./common/models/userDataAndSettings.js";
+import { TickersAdapter } from "./common/external-apis/utils/tickersAdapter.js";
 
 /**
  * This is the main service to manage coins.
  * You should access coins singletons via this service.
  * Coin objects are being compared by references to singletons all over the app so use only singletons
  * and never instantiate Coin or its descendants manually.
+ *
+ * TODO: [refactoring, high] rename to CoinsService
  */
 export class Coins {
     /**
@@ -244,7 +247,7 @@ export class Coins {
      * @return {Network[]}
      */
     static getSupportedNetworks() {
-        return Object.keys(this.COINS).map(key => getCurrentNetwork(this.COINS[key]));
+        return Object.keys(this.COINS).map(key => Storage.getCurrentNetwork(this.COINS[key]));
     }
 
     /**
@@ -254,7 +257,7 @@ export class Coins {
      */
     static getUniqueSupportedNetworks() {
         try {
-            const allNetworks = Object.keys(this.COINS).map(key => getCurrentNetwork(this.COINS[key]));
+            const allNetworks = Object.keys(this.COINS).map(key => Storage.getCurrentNetwork(this.COINS[key]));
             const uniqueNetworksByCoinId = [];
             for (let i = 0; i < allNetworks.length; ++i) {
                 if (
@@ -304,19 +307,35 @@ export class Coins {
     }
 
     /**
-     * Returns coins by given ticker if it is supported.
+     * Returns coin by rabbit ticker format or null.
      *
      * @param ticker {string} ticker string
-     * @return {Coin[]} coins corresponding to given ticker or null
+     * @return {Coin|null} coin corresponding to given ticker or null
      */
-    static getCoinsIfTickerIsSupported(ticker) {
+    static getCoinByTickerIfPresent(ticker) {
+        try {
+            return Object.values(this.COINS).find(coin => coin.ticker === (ticker ?? "").toUpperCase()) ?? null;
+        } catch (e) {
+            improveAndRethrow(e, "getCoinByTickerIfPresent");
+        }
+    }
+
+    /**
+     * Returns coins by given standardTicker if it is supported.
+     *
+     * @param standardTicker {string} standardTicker string
+     * @return {Coin[]} coins corresponding to given standardTicker or null
+     */
+    static getCoinsIfStandardTickerIsSupported(standardTicker) {
         try {
             const coins = Object.values(this.COINS).filter(
-                coin => rabbitTickerToStandardTicker(coin.ticker, coin.protocol) === (ticker ?? "").toUpperCase()
+                coin =>
+                    TickersAdapter.rabbitTickerToStandardTicker(coin.ticker, coin.protocol) ===
+                    (standardTicker ?? "").toUpperCase()
             );
             return coins;
         } catch (e) {
-            improveAndRethrow(e, "getCoinsIfTickerIsSupported");
+            improveAndRethrow(e, "getCoinsIfStandardTickerIsSupported");
         }
     }
 
@@ -333,6 +352,14 @@ export class Coins {
             return coin ?? null;
         } catch (e) {
             improveAndRethrow(e, "getCoinByContractAddress");
+        }
+    }
+
+    static tickerAndProtocol(coin) {
+        try {
+            return `${coin.tickerPrintable}${coin.protocol ? " " + coin.protocol.protocol : ""}`;
+        } catch (e) {
+            improveAndRethrow(e, "tickerAndProtocol");
         }
     }
 }

@@ -1,5 +1,6 @@
 import QRCode from "qrcode";
-import { improveAndRethrow } from "../utils/errorUtils";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
 /**
  * Generates QR as svg xml string.

@@ -1,4 +1,6 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
 import {
     DB_NAME,
@@ -8,15 +10,14 @@ import {
     MONGODB_RECONNECT_INTERVAL,
     MONGODB_RECONNECTION_INTERVAL_FACTOR,
     MONGODB_URL,
-} from "../properties";
-import { isPingResultOk } from "../services/mongoUtil";
-import { improveAndRethrow } from "./utils";
-import { promiseRetryWrapped } from "./promiseRetryWrapper";
-import { connectWrapper } from "./connectWrapper";
+} from "../properties.js";
+import { isPingResultOk } from "../services/mongoUtil.js";
+import { PromiseRetryWrapper } from "./promiseRetryWrapper.js";
+import { ConnectWrapper } from "./connectWrapper.js";
 
 class DbConnectionHolder {
     constructor() {
-        this._log = getLogger("DbConnectionHolder");
+        this._log = log4js.getLogger("DbConnectionHolder");
         this._isReconnecting = false;
         this._db = null;
         this._client = null;
@@ -48,7 +49,10 @@ class DbConnectionHolder {
                 maxTimeout: MONGODB_MAX_RECONNECTION_INTERVAL,
             };
 
-            const client = await promiseRetryWrapped(this._connectingCallback.bind(this), promiseRetryOptions);
+            const client = await PromiseRetryWrapper.promiseRetryWrapped(
+                this._connectingCallback.bind(this),
+                promiseRetryOptions
+            );
 
             this._client = client;
             this._db = client.db(DB_NAME);
@@ -74,7 +78,7 @@ class DbConnectionHolder {
             // bufferMaxEntries: 0 // To abort requests immediately in case of lost connection to avoid waiting during the whole reconnection process
         };
 
-        return connectWrapper(MONGODB_URL, mongodbConnectionOptions).catch(err => {
+        return ConnectWrapper.connectWrapper(MONGODB_URL, mongodbConnectionOptions).catch(err => {
             this._log.error("Failed to connect to MongoDB. ", err);
             retry(err);
         });

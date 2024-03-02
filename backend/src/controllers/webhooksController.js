@@ -1,10 +1,11 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 import { verify } from "crypto";
 import stableStringify from "fast-json-stable-stringify";
-import { RAMP_PUBLIC_KEY } from "../properties";
-import RampPaymentsService from "../services/rampPaymentsService";
 
-const log = getLogger("webhooksController");
+import { RAMP_PUBLIC_KEY } from "../properties.js";
+import RampPaymentsService from "../services/rampPaymentsService.js";
+
+const log = log4js.getLogger("webhooksController");
 
 // TODO [feature, high] Should be removed/improved in task_id=-16127916f375490aa6b526675a6c72e4
 export class WebhooksController {

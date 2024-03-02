@@ -1,16 +1,16 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { BigNumber } from "ethers";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { Coins } from "../../coins";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import {
     createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
     mergeSingleBalanceValuesAndNotifyAboutValueChanged,
-} from "../../common/utils/cacheActualizationUtils";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
+} from "../../common/utils/cacheActualizationUtils.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
 
 class AlchemyEthBalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -44,7 +44,7 @@ class AlchemyEthBalanceProvider extends ExternalApiProvider {
             const balanceHex = "" + response?.data?.result;
             if (!/^0x[\da-fA-F]+$/.test(balanceHex))
                 throw new Error("Wrong balance response from alchemy for eth: " + balanceHex);
-            return BigNumber.from(balanceHex).toString();
+            return AmountUtils.trim(balanceHex, 0);
         } catch (e) {
             improveAndRethrow(e, "AlchemyEthBalanceProvider.getDataByResponse");
         }
@@ -58,7 +58,8 @@ class EtherscanEthBalanceProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const networkPrefix = getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet ? "" : "-goerli";
+            const networkPrefix =
+                Storage.getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet ? "" : "-goerli";
             const address = params[0];
             // NOTE: add api key if you decide to use paid API '&apikey=YourApiKeyToken'
             return `https://api${networkPrefix}.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest`;

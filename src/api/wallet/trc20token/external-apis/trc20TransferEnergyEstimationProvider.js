@@ -1,11 +1,13 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { tronUtils } from "../../trx/adapters/tronUtils";
-import { BigNumber } from "ethers";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { LONG_TTL_FOR_REALLY_RARELY_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
+import { BigNumber } from "bignumber.js";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { tronUtils } from "../../trx/adapters/tronUtils.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { LONG_TTL_FOR_REALLY_RARELY_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 class Trc20TransferEstimationTrongridProvider extends ExternalApiProvider {
     constructor() {
@@ -28,7 +30,7 @@ class Trc20TransferEstimationTrongridProvider extends ExternalApiProvider {
             const amount = params[3];
             const encodedParameters = tronUtils.encodeParams([
                 { type: "address", value: addressToHex },
-                { type: "uint256", value: BigNumber.from("" + amount).toHexString() },
+                { type: "uint256", value: "0x" + BigNumber(amount).toString(16) },
             ]);
             return JSON.stringify({
                 owner_address: addressFrom,
@@ -58,6 +60,13 @@ export class Trc20TransferEnergyEstimationProvider {
         LONG_TTL_FOR_REALLY_RARELY_CHANGING_DATA_MS // Energy estimation should mot change for the same transaction, so we use long TTL
     );
 
+    /**
+     * @param coin {Coin}
+     * @param addressFrom {string}
+     * @param addressTo {string}
+     * @param amountAtoms {string}
+     * @return {Promise<number>}
+     */
     static async estimateTrc20TransferEnergy(coin, addressFrom, addressTo, amountAtoms) {
         try {
             return await this._provider.callExternalAPICached(

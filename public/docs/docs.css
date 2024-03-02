@@ -15,7 +15,8 @@
 }
 
 .white-box {
-    margin-top: 40px;
+    margin-top: 20px;
+    margin-bottom: 40px;
     background: white;
     border-radius: 16px;
     padding: 40px;
@@ -45,7 +46,7 @@
     line-height: 1.3em;
     font-size: 14px;
     line-height: 24px;
-    color: #073A3F;
+    color: #073a3f;
 }
 
 .docs-title {
@@ -55,9 +56,9 @@
 }
 
 a {
-    color: #073A3F;
+    color: #073a3f;
 }
 
 h3 {
-    color: #073A3F;
+    color: #073a3f;
 }

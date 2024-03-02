@@ -1,4 +1,6 @@
-import { improveAndRethrow, logError } from "../../../utils/errorUtils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { logError } from "../../../utils/errorUtils.js";
 
 class ExternalServicesStatsCollector {
     constructor() {

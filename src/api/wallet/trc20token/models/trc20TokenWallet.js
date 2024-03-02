@@ -1,13 +1,14 @@
-import { Wallet } from "../../common/models/wallet";
-import { TronBlockchainBalancesService } from "../../trx/services/tronBlockchainBalancesService";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { TrxAddressesService } from "../../trx/services/trxAddressesService";
-import { validateTronAddress } from "../../trx/lib/addresses";
-import { Trc20TransactionsHistoryService } from "../services/trc20TransactionsHistoryService";
-import { Trc20TransactionsProvider } from "../external-apis/trc20TransactionsProvider";
-import { TronTransactionDetailsService } from "../../trx/services/tronTransactionDetailsService";
-import { TronSendTransactionService } from "../../trx/services/tronSendTransactionService";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Wallet } from "../../common/models/wallet.js";
+import { TronBlockchainBalancesService } from "../../trx/services/tronBlockchainBalancesService.js";
+import { TrxAddressesService } from "../../trx/services/trxAddressesService.js";
+import { validateTronAddress } from "../../trx/lib/addresses.js";
+import { Trc20TransactionsHistoryService } from "../services/trc20TransactionsHistoryService.js";
+import { Trc20TransactionsProvider } from "../external-apis/trc20TransactionsProvider.js";
+import { TronTransactionDetailsService } from "../../trx/services/tronTransactionDetailsService.js";
+import { TronSendTransactionService } from "../../trx/services/tronSendTransactionService.js";
+import { Storage } from "../../../common/services/internal/storage.js";
 
 export class Trc20TokenWallet extends Wallet {
     /**
@@ -87,7 +88,7 @@ export class Trc20TokenWallet extends Wallet {
                 address,
                 coinAmount,
                 isSendAll,
-                getCurrentNetwork(this.coin),
+                Storage.getCurrentNetwork(this.coin),
                 balanceCoins,
                 isAddressFake
             );

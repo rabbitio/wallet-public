@@ -1,10 +1,12 @@
-import { BigNumber } from "ethers";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 class AlchemyEthereumBlockchainFeeDataProvider extends ExternalApiProvider {
     constructor() {
@@ -48,9 +50,9 @@ class AlchemyEthereumBlockchainFeeDataProvider extends ExternalApiProvider {
         try {
             const data = response?.data?.result;
             if (subRequestIndex === 0) {
-                return BigNumber.from(data);
+                return AmountUtils.intStr(BigNumber(data));
             } else if (subRequestIndex === 1) {
-                return BigNumber.from(data?.baseFeePerGas);
+                return AmountUtils.intStr(BigNumber(data?.baseFeePerGas));
             }
         } catch (e) {
             improveAndRethrow(e, "AlchemyEthereumBlockchainFeeDataProvider.getDataByResponse");
@@ -68,14 +70,14 @@ export class EthereumBlockchainFeeDataProvider {
     );
 
     /**
-     * @return {Promise<{ maxFeePerGas: BigNumber, maxPriorityFeePerGas: BigNumber }>}
+     * @return {Promise<{ maxFeePerGas: string, maxPriorityFeePerGas: string }>}
      */
     static async getEthereumFeeData() {
         try {
             const result = await this._provider.callExternalAPICached([], 15000, null, 1, hashFunctionForParams);
             const maxPriorityFeePerGas = result[0];
             const baseFeePerGas = result[1];
-            const maxFeePerGas = baseFeePerGas.add(maxPriorityFeePerGas);
+            const maxFeePerGas = AmountUtils.intStr(BigNumber(baseFeePerGas).plus(maxPriorityFeePerGas));
             return { maxFeePerGas: maxFeePerGas, maxPriorityFeePerGas: maxPriorityFeePerGas };
         } catch (e) {
             improveAndRethrow(e, "getEthereumFeeData");

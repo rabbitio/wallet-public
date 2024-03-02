@@ -1,10 +1,11 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import { deleteExistingDocuments } from "./mongoUtil";
-import { improveAndRethrow } from "../utils/utils";
-import { dbConnectionHolder } from "../utils/dbConnectionHolder";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-const log = getLogger("encryptedIpsService");
+import { deleteExistingDocuments } from "./mongoUtil.js";
+import { dbConnectionHolder } from "../utils/dbConnectionHolder.js";
+
+const log = log4js.getLogger("encryptedIpsService");
 const encryptedIpsCollectionName = "encryptedIps";
 
 export default class EncryptedIpsService {
@@ -66,8 +67,9 @@ export default class EncryptedIpsService {
                 throw new Error("No encrypted IPs have been deleted. ");
             } else if (notRemovedEncryptedIps && notRemovedEncryptedIps.length) {
                 throw new Error(
-                    `Not all encrypted IPs have been deleted. Deleted count: ${ipHashesToDelete.length -
-                        notRemovedEncryptedIps.length}. `
+                    `Not all encrypted IPs have been deleted. Deleted count: ${
+                        ipHashesToDelete.length - notRemovedEncryptedIps.length
+                    }. `
                 );
             }
 

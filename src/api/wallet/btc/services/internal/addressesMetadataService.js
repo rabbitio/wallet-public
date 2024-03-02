@@ -1,7 +1,7 @@
-import AddressesService from "../addressesService";
-import AddressesServiceInternal from "./addressesServiceInternal";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
+import AddressesService from "../addressesService.js";
+import AddressesServiceInternal from "./addressesServiceInternal.js";
 
 /**
  * @deprecated because we don't use the old periodical full scanning approach - now we use single BTC address for new
@@ -92,8 +92,8 @@ class AddressesMetadataService {
                     ? 0
                     : -1
                 : m2.lastUpdateTimestamp == null
-                ? 1
-                : m1.lastUpdateTimestamp - m2.lastUpdateTimestamp
+                  ? 1
+                  : m1.lastUpdateTimestamp - m2.lastUpdateTimestamp
         );
 
         return this._addressesMetadata.map(metadata => metadata.address);

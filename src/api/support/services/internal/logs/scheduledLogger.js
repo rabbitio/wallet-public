@@ -1,7 +1,7 @@
-import { logError } from "../../../../common/utils/errorUtils";
-import { Logger } from "./logger";
-import { externalServicesStatsCollector } from "../../../../common/services/utils/robustExteranlApiCallerService/externalServicesStatsCollector";
-import { WalletSliceService } from "../../../../wallet/common/services/utils/walletSliceService";
+import { logError } from "../../../../common/utils/errorUtils.js";
+import { Logger } from "./logger.js";
+import { externalServicesStatsCollector } from "../../../../common/services/utils/robustExteranlApiCallerService/externalServicesStatsCollector.js";
+import { WalletSliceService } from "../../../../wallet/common/services/utils/walletSliceService.js";
 
 export class ScheduledLogger {
     static logExternalServicesStatsPeriodically() {

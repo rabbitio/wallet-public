@@ -1,13 +1,15 @@
 import { ethers } from "ethers";
-import { Wallet } from "../../common/models/wallet";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { Erc20TokenBalanceService } from "../services/erc20TokenBalanceService";
-import { Erc20TokenTransactionDetailsService } from "../services/erc20TokenTransactionDetailsService";
-import { EthAddressesService } from "../../eth/services/ethAddressesService";
-import { Erc20TokenSendTransactionService } from "../services/erc20TokenSendTransactionService";
-import { EthSendTransactionService } from "../../eth/services/ethSendTransactionService";
-import { Erc20TransactionsProvider } from "../external-apis/erc20TransactionsProvider";
-import { EthereumTransactionsHistoryService } from "../../eth/services/ethereumTransactionsHistoryService";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Wallet } from "../../common/models/wallet.js";
+import { Erc20TokenBalanceService } from "../services/erc20TokenBalanceService.js";
+import { Erc20TokenTransactionDetailsService } from "../services/erc20TokenTransactionDetailsService.js";
+import { EthAddressesService } from "../../eth/services/ethAddressesService.js";
+import { Erc20TokenSendTransactionService } from "../services/erc20TokenSendTransactionService.js";
+import { EthSendTransactionService } from "../../eth/services/ethSendTransactionService.js";
+import { Erc20TransactionsProvider } from "../external-apis/erc20TransactionsProvider.js";
+import { EthereumTransactionsHistoryService } from "../../eth/services/ethereumTransactionsHistoryService.js";
 
 export class Erc20TokenWallet extends Wallet {
     /**

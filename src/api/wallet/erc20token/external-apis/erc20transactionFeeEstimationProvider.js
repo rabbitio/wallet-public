@@ -1,11 +1,13 @@
-import { BigNumber } from "ethers";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 class AlchemyErc20TransactionFeeEstimationProvider extends ExternalApiProvider {
     constructor() {
@@ -26,7 +28,7 @@ class AlchemyErc20TransactionFeeEstimationProvider extends ExternalApiProvider {
             const to = params[1];
             const data = params[2];
             const defaultMaxGasAmountForErc20Transfer = params[3];
-            const gasForEstimationCallHex = "0x" + Number(defaultMaxGasAmountForErc20Transfer).toString(16);
+            const gasForEstimationCallHex = "0x" + BigNumber(defaultMaxGasAmountForErc20Transfer).toString(16);
             const body = JSON.stringify({
                 id: 1,
                 jsonrpc: "2.0",
@@ -50,7 +52,7 @@ class AlchemyErc20TransactionFeeEstimationProvider extends ExternalApiProvider {
 
     getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
         try {
-            return BigNumber.from(response?.data?.result);
+            return AmountUtils.intStr(response?.data?.result); // Passing hex string
         } catch (e) {
             improveAndRethrow(e, "AlchemyErc20TransactionFeeEstimationProvider.getDataByResponse");
         }
@@ -70,8 +72,8 @@ export class Erc20TransactionFeeEstimationProvider {
      * @param from {string} from address
      * @param to {string} to address
      * @param data {string} hex data
-     * @param defaultMaxGasAmountForErc20Transfer {number}
-     * @return {Promise<BigNumber>}
+     * @param defaultMaxGasAmountForErc20Transfer {string}
+     * @return {Promise<string>}
      */
     static async getErc20TransferFeeEstimation(from, to, data, defaultMaxGasAmountForErc20Transfer) {
         try {

@@ -1,5 +1,6 @@
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import { Wallets } from "../../wallets";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Wallets } from "../../wallets.js";
 
 export class TransactionCoinService {
     /**

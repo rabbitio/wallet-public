@@ -1,12 +1,13 @@
 import { v4 } from "uuid";
 
-import { GAP_LIMIT, getAddressByIndex, INTERNAL_CHANGE_INDEX } from "../../lib/addresses";
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import { getDataPassword } from "../../../../common/services/internal/storage";
-import Address from "../../../common/models/address";
-import AddressesDataApi from "../../../common/backend-api/addressesDataApi";
-import AddressesDataAdapter from "../../../common/backend-api/adapters/addressesDataAdapter";
-import { AddressesUsageUtils } from "../internal/addressesUsageUtils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { GAP_LIMIT, BitcoinAddresses, INTERNAL_CHANGE_INDEX } from "../../lib/addresses.js";
+import { Storage } from "../../../../common/services/internal/storage.js";
+import Address from "../../../common/models/address.js";
+import AddressesDataApi from "../../../common/backend-api/addressesDataApi.js";
+import AddressesDataAdapter from "../../../common/backend-api/adapters/addressesDataAdapter.js";
+import { AddressesUsageUtils } from "../internal/addressesUsageUtils.js";
 
 export default class CurrentAddressUtils {
     static async _getCurrentAddress(
@@ -50,7 +51,7 @@ export default class CurrentAddressUtils {
             const currentAddressIndex = AddressesDataAdapter.getIndexByPath(addressNodesIndexes, path);
 
             if (currentAddressIndex === -1 && !doAddressNodesScanning) {
-                const address0 = getAddressByIndex(scheme, changeNode, 0, network);
+                const address0 = BitcoinAddresses.getAddressByIndex(scheme, changeNode, 0, network);
                 await incrementIndexAndSaveAddressesIfNeeded(
                     walletId,
                     path,
@@ -64,7 +65,7 @@ export default class CurrentAddressUtils {
             let isCurrentAddressNodeUsed = null;
             let currentAddress = null;
             if (currentAddressIndex !== -1) {
-                currentAddress = getAddressByIndex(scheme, changeNode, currentAddressIndex, network);
+                currentAddress = BitcoinAddresses.getAddressByIndex(scheme, changeNode, currentAddressIndex, network);
                 /**
                  * Since 0.8.3 we disabled bitcoin addresses generation feature. So for simplicity here we just set
                  * false treating all addresses as unused in terms of this algorithm. But we still leave option to
@@ -107,7 +108,7 @@ export default class CurrentAddressUtils {
 }
 
 async function incrementIndexAndSaveAddressesIfNeeded(walletId, path, changeIndex, addresses, addressesIndexes) {
-    const dataPassword = getDataPassword();
+    const dataPassword = Storage.getDataPassword();
     if (changeIndex === INTERNAL_CHANGE_INDEX) {
         const baseIndex = AddressesDataAdapter.getIndexByPath(addressesIndexes, path);
         await AddressesDataApi.incrementAddressesIndexOnServer(walletId, path, addresses.length, baseIndex);
@@ -195,7 +196,12 @@ class AddressesUsageService {
             const tmpAddressesArray = [];
             for (let i = 0; i < GAP_LIMIT; ++i) {
                 tmpAddressesArray.push(
-                    getAddressByIndex(this.scheme, this.changeNode, currentAddressIndex + i, this.network)
+                    BitcoinAddresses.getAddressByIndex(
+                        this.scheme,
+                        this.changeNode,
+                        currentAddressIndex + i,
+                        this.network
+                    )
                 );
             }
             const tmpUsage = await AddressesUsageUtils.getAddressesUsage(tmpAddressesArray, this.network);

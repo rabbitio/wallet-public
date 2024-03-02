@@ -1,15 +1,16 @@
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { Coins } from "../../coins";
-import { tronUtils } from "../adapters/tronUtils";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { Coins } from "../../coins.js";
+import { tronUtils } from "../adapters/tronUtils.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import {
     createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
     mergeSingleBalanceValuesAndNotifyAboutValueChanged,
-} from "../../common/utils/cacheActualizationUtils";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
+} from "../../common/utils/cacheActualizationUtils.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
 
 class TrongridTronBalanceProvider extends ExternalApiProvider {
     constructor() {

@@ -1,19 +1,20 @@
-import { BigNumber } from "ethers";
+import { BigNumber } from "bignumber.js";
 
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import {
     actualizeCacheWithNewTransactionSentFromAddress,
     mergeTwoArraysByItemIdFieldName,
     mergeTwoTransactionsArraysAndNotifyAboutNewTransactions,
-} from "../../common/utils/cacheActualizationUtils";
-import { Coins } from "../../coins";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
+} from "../../common/utils/cacheActualizationUtils.js";
+import { Coins } from "../../coins.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
 
 /**
  * Currently we use free version of this provider. But we have API key with 100k requests free per month.
@@ -30,7 +31,7 @@ class EtherScanErc20TransactionsProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            if (getCurrentNetwork(Coins.COINS.ETH) !== Coins.COINS.ETH.mainnet) {
+            if (Storage.getCurrentNetwork(Coins.COINS.ETH) !== Coins.COINS.ETH.mainnet) {
                 throw new Error("Etherscan doesn't support testnet for ethereum blockchain");
             }
             const pageNumber = params[1] ?? 1;
@@ -63,15 +64,11 @@ class EtherScanErc20TransactionsProvider extends ExternalApiProvider {
                             coin.ticker,
                             coin.tickerPrintable,
                             type,
-                            tx.value,
+                            AmountUtils.trim(tx.value, 0),
                             tx.confirmations ? +tx.confirmations : 0,
                             tx.timeStamp ? +tx.timeStamp * 1000 : provideFirstSeenTime(tx.hash),
                             tx.to,
-                            tx.gasUsed != null
-                                ? BigNumber.from(tx.gasUsed)
-                                      .mul(tx.gasPrice)
-                                      .toString()
-                                : null,
+                            tx.gasUsed != null ? AmountUtils.trim(BigNumber(tx.gasUsed).times(tx.gasPrice), 0) : null,
                             tx,
                             false,
                             isSendingAndReceiving

@@ -1,9 +1,10 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import { DB_NAME } from "../properties";
-import { improveAndRethrow } from "../utils/utils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-const log = getLogger("mongoUtils");
+import { DB_NAME } from "../properties.js";
+
+const log = log4js.getLogger("mongoUtils");
 
 export async function deleteExistingDocuments(criteria, mongoDbCollection) {
     log.debug(

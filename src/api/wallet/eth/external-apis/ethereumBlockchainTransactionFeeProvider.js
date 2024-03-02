@@ -1,10 +1,12 @@
-import { BigNumber } from "ethers";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 class AlchemyTransactionReceiptProvider extends ExternalApiProvider {
     constructor() {
@@ -38,9 +40,7 @@ class AlchemyTransactionReceiptProvider extends ExternalApiProvider {
             const gas = response?.data?.result?.gasUsed;
             const gasPrice = response?.data?.result?.effectiveGasPrice;
             if (gas == null || gasPrice == null) return null;
-            return BigNumber.from(gas)
-                .mul(gasPrice)
-                .toString();
+            return AmountUtils.trim(BigNumber(gas).times(gasPrice), 0);
         } catch (e) {
             improveAndRethrow(e, "alchemyTransactionReceiptProvider.getDataByResponse");
         }

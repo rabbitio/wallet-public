@@ -1,16 +1,17 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { Coins } from "../../coins";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { standardTickerToRabbitTicker } from "../../common/external-apis/utils/tickersAdapter";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { TickersAdapter } from "../../common/external-apis/utils/tickersAdapter.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import {
     createRawBalanceAtomsCacheProcessorForMultiBalancesProvider,
     mergeTwoBalancesArraysAndNotifyAboutBalanceValueChange,
-} from "../../common/utils/cacheActualizationUtils";
-import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
-import { TRC20 } from "../../trc20token/trc20Protocol";
+} from "../../common/utils/cacheActualizationUtils.js";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
+import { TRC20 } from "../../trc20token/trc20Protocol.js";
 
 class TronscanBlockchainBalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -18,7 +19,7 @@ class TronscanBlockchainBalanceProvider extends ExternalApiProvider {
     }
 
     composeQueryString(params, subRequestIndex = 0) {
-        if (getCurrentNetwork(Coins.COINS.TRX) !== Coins.COINS.TRX.mainnet) {
+        if (Storage.getCurrentNetwork(Coins.COINS.TRX) !== Coins.COINS.TRX.mainnet) {
             throw new Error("Tronscan provider doesn't support testnet for balances retrieval.");
         }
         return `?address=${params[0]}`;
@@ -35,7 +36,7 @@ class TronscanBlockchainBalanceProvider extends ExternalApiProvider {
                 .filter(t => tokenAddresses.find(a => a.toLowerCase() === t.tokenId.toLowerCase()))
                 .map(item => ({
                     balance: "" + item?.balance,
-                    ticker: standardTickerToRabbitTicker(item?.tokenAbbr, TRC20.protocol),
+                    ticker: TickersAdapter.standardTickerToRabbitTicker(item?.tokenAbbr, TRC20.protocol),
                 }));
             const resources = {
                 availableBandwidth: (data?.bandwidth?.freeNetRemaining ?? 0) + (data?.bandwidth?.netRemaining ?? 0),

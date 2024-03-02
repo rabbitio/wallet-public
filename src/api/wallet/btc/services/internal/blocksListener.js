@@ -1,8 +1,8 @@
-import { EventBus, NEW_BLOCK_EVENT } from "../../../../common/adapters/eventbus";
-import { logError } from "../../../../common/utils/errorUtils";
-import { Logger } from "../../../../support/services/internal/logs/logger";
-import { getCurrentNetwork } from "../../../../common/services/internal/storage";
-import { Coins } from "../../../coins";
+import { EventBus, NEW_BLOCK_EVENT } from "../../../../common/adapters/eventbus.js";
+import { logError } from "../../../../common/utils/errorUtils.js";
+import { Logger } from "../../../../support/services/internal/logs/logger.js";
+import { Storage } from "../../../../common/services/internal/storage.js";
+import { Coins } from "../../../coins.js";
 
 // TODO: [feature, moderate] Add more providers
 class BlocksListener {
@@ -28,7 +28,7 @@ class BlocksListener {
         this._socket.onmessage = message => {
             try {
                 const data = JSON.parse(message.data);
-                if (getCurrentNetwork() === Coins.COINS.BTC.mainnet) {
+                if (Storage.getCurrentNetwork() === Coins.COINS.BTC.mainnet) {
                     EventBus.dispatch(NEW_BLOCK_EVENT, null, data);
                 }
 

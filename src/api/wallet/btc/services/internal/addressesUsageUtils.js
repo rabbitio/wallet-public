@@ -1,6 +1,8 @@
-import { transactionsDataProvider } from "./transactionsDataProvider";
-import { improveAndRethrow, logError } from "../../../../common/utils/errorUtils";
-import { TransactionsDataRetrieverService } from "./transactionsDataRetrieverService";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { transactionsDataProvider } from "./transactionsDataProvider.js";
+import { logError } from "../../../../common/utils/errorUtils.js";
+import { TransactionsDataRetrieverService } from "./transactionsDataRetrieverService.js";
 
 export class AddressesUsageUtils {
     /**

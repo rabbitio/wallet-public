@@ -1,9 +1,9 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import RobustExternalAPICallerService from "../../utils/robustExternalAPICallerService";
-import { formatUTCDate } from "../../utils/utils";
+import RobustExternalAPICallerService from "../../utils/robustExternalAPICallerService.js";
+import { formatUTCDate } from "../../utils/utils.js";
 
-const log = getLogger("externalBTCFiatRatesService");
+const log = log4js.getLogger("externalBTCFiatRatesService");
 
 const providers = [
     {

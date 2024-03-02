@@ -2,24 +2,14 @@ import bip39 from "bip39";
 import secureRandom from "secure-random";
 import Cookie from "js-cookie";
 
-import { Logger } from "../../support/services/internal/logs/logger";
-import { decrypt, encrypt, getHash } from "../../common/adapters/crypto-utils";
-import {
-    clearAccountsData,
-    clearDataPassword,
-    clearStorage,
-    getEncryptedWalletCredentials,
-    getIsPassphraseUsed,
-    getWalletId,
-    saveAccountsData,
-    saveDataPassword,
-    saveEncryptedWalletCredentials,
-    saveIsPassphraseUsed,
-    saveWalletId,
-} from "../../common/services/internal/storage";
-import { improveAndRethrow, logError } from "../../common/utils/errorUtils";
-import { SupportedSchemes } from "../../wallet/btc/lib/addresses-schemes";
-import { AccountsData } from "../../wallet/btc/lib/accounts";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Logger } from "../../support/services/internal/logs/logger.js";
+import { decrypt, encrypt, getHash } from "../../common/adapters/crypto-utils.js";
+import { Storage } from "../../common/services/internal/storage.js";
+import { logError } from "../../common/utils/errorUtils.js";
+import { SupportedSchemes } from "../../wallet/btc/lib/addresses-schemes.js";
+import { AccountsData } from "../../wallet/btc/lib/accounts.js";
 import {
     authenticateAndCreateSession,
     changePasswordHash,
@@ -28,10 +18,10 @@ import {
     isPasswordHashCorrespondToWallet,
     logoutWallet,
     saveWalletOnServerAndCreateSession,
-} from "../backend-api/walletsApi";
-import { ApiCallWrongResponseError, SESSION_COOKIE_NAME } from "../../common/backend-api/utils";
-import AddressesService from "../../wallet/btc/services/addressesService";
-import ClientIpHashService from "./internal/clientIpHashService";
+} from "../backend-api/walletsApi.js";
+import { ApiCallWrongResponseError, SESSION_COOKIE_NAME } from "../../common/backend-api/utils.js";
+import AddressesService from "../../wallet/btc/services/addressesService.js";
+import ClientIpHashService from "./internal/clientIpHashService.js";
 import {
     AUTHENTICATION_DISCOVERED_EVENT,
     EventBus,
@@ -40,11 +30,11 @@ import {
     SIGNED_UP_EVENT,
     WALLET_DELETED_EVENT,
     WALLET_IMPORTED_EVENT,
-} from "../../common/adapters/eventbus";
-import { WalletDataApi } from "../../wallet/common/backend-api/walletDataApi";
-import { PreferencesService } from "../../wallet/common/services/preferencesService";
-import { Coins } from "../../wallet/coins";
-import { ImportWalletService } from "../../wallet/common/services/importWalletService";
+} from "../../common/adapters/eventbus.js";
+import { WalletDataApi } from "../../wallet/common/backend-api/walletDataApi.js";
+import { PreferencesService } from "../../wallet/common/services/preferencesService.js";
+import { Coins } from "../../wallet/coins.js";
+import { ImportWalletService } from "../../wallet/common/services/importWalletService.js";
 
 export const ALLOWED_MNEMONIC_LENGTHS = [12, 15, 18, 21, 24];
 
@@ -68,7 +58,7 @@ const WORDS_LISTS = [
 export function isWalletDataPresent() {
     const loggerSource = "isWalletDataPresent";
     try {
-        const encryptedWalletCredentials = getEncryptedWalletCredentials();
+        const encryptedWalletCredentials = Storage.getEncryptedWalletCredentials();
 
         const isPresent = !!(
             encryptedWalletCredentials != null &&
@@ -185,7 +175,7 @@ export async function isPassphraseCorrect(mnemonic, passphrase) {
  * Adds one more result representing case when there is no saved credentials.
  */
 export async function loginIntoWalletBySavedMnemonicAndCreateSession(password) {
-    const encryptedWalletCredentials = getEncryptedWalletCredentials();
+    const encryptedWalletCredentials = Storage.getEncryptedWalletCredentials();
 
     if (encryptedWalletCredentials != null) {
         let mnemonic = "";
@@ -200,7 +190,7 @@ export async function loginIntoWalletBySavedMnemonicAndCreateSession(password) {
             mnemonic = "";
         }
 
-        return loginIntoWalletAndCreateSession(mnemonic, passphrase, password, getWalletId());
+        return loginIntoWalletAndCreateSession(mnemonic, passphrase, password, Storage.getWalletId());
     }
 
     return {
@@ -257,10 +247,10 @@ async function loginIntoWalletAndCreateSession(mnemonic, passphrase, password, w
             SupportedSchemes,
             Coins.getUniqueSupportedNetworks()
         );
-        saveAccountsData(accountsData);
-        saveEncryptedWalletCredentials(encrypt(mnemonic, password), encrypt(passphrase, password));
-        saveWalletId(mnemonicToWalletId(mnemonic));
-        saveDataPassword(mnemonicToDataPassword(mnemonic));
+        Storage.saveAccountsData(accountsData);
+        Storage.saveEncryptedWalletCredentials(encrypt(mnemonic, password), encrypt(passphrase, password));
+        Storage.saveWalletId(mnemonicToWalletId(mnemonic));
+        Storage.saveDataPassword(mnemonicToDataPassword(mnemonic));
         PreferencesService.cacheWalletData(authResult.walletData);
         isJustLoggedOutFlag = false;
         resetIntervalLookingForAuthentication();
@@ -292,10 +282,7 @@ export function mnemonicToWalletId(mnemonic) {
  */
 export function mnemonicToDataPassword(mnemonic) {
     // Making some string based on mnemonic to get different hash than just from mnemonic
-    const mnemonicBasedString = mnemonic
-        .split(" ")
-        .slice(2, 10)
-        .join(" ");
+    const mnemonicBasedString = mnemonic.split(" ").slice(2, 10).join(" ");
     return getHash(mnemonicBasedString);
 }
 
@@ -394,11 +381,11 @@ async function saveNewWalletAndProvideLocalData(mnemonic, passphrase = "", passw
 
         Logger.log("Wallet saved", loggerSource);
 
-        saveAccountsData(accountsData);
-        saveEncryptedWalletCredentials(encrypt(mnemonic, password), encrypt(passphrase, password));
-        saveWalletId(mnemonicToWalletId(mnemonic));
-        saveDataPassword(dataPassword);
-        saveIsPassphraseUsed(mnemonicToWalletId(mnemonic), !!passphrase);
+        Storage.saveAccountsData(accountsData);
+        Storage.saveEncryptedWalletCredentials(encrypt(mnemonic, password), encrypt(passphrase, password));
+        Storage.saveWalletId(mnemonicToWalletId(mnemonic));
+        Storage.saveDataPassword(dataPassword);
+        Storage.saveIsPassphraseUsed(mnemonicToWalletId(mnemonic), !!passphrase);
         isJustLoggedOutFlag = false; // TODO: [refactoring, low] Move to mediators
         resetIntervalLookingForAuthentication();
         await ClientIpHashService.provideIpHashStored(); // TODO: [refactoring, low] Move to mediators
@@ -429,14 +416,14 @@ export async function doLogout() {
     try {
         Logger.log("Start logging out", loggerSource);
 
-        await logoutWallet(getWalletId());
+        await logoutWallet(Storage.getWalletId());
 
         Logger.log("Successfully logged out", loggerSource);
 
         // We are not clearing encrypted wallet data here as it is required for login process
-        clearAccountsData();
-        clearDataPassword();
-        setIntervalLookingForAuthentication();
+        Storage.clearAccountsData();
+        Storage.clearDataPassword();
+        setTimeoutLookingForAuthentication();
         Cookie.remove(SESSION_COOKIE_NAME);
         EventBus.dispatch(LOGGED_OUT_EVENT);
         isJustLoggedOutFlag = true;
@@ -455,11 +442,11 @@ export async function deleteWalletByCurrentSession(password) {
     try {
         Logger.log(`Start deleting wallet, password is empty: ${!!password}`, loggerSource);
 
-        const result = await deleteWallet(getWalletId(), getHash(password));
+        const result = await deleteWallet(Storage.getWalletId(), getHash(password));
         if (result.result) {
             Logger.log("Wallet was removed", loggerSource);
 
-            clearStorage();
+            Storage.clearStorage();
             Cookie.remove(SESSION_COOKIE_NAME);
             isJustLoggedOutFlag = true;
             EventBus.dispatch(WALLET_DELETED_EVENT);
@@ -501,8 +488,8 @@ export function isThereClientSession() {
  */
 export async function isCurrentSessionValid(booleanValueToReturnInsteadOfError = null) {
     try {
-        const result = await WalletDataApi.getAccountData(getWalletId());
-        !result && setIntervalLookingForAuthentication();
+        const result = await WalletDataApi.getAccountData(Storage.getWalletId());
+        !result && setTimeoutLookingForAuthentication();
 
         if (result) {
             PreferencesService.cacheWalletData(result);
@@ -526,7 +513,7 @@ export async function isPasswordValid(password) {
     try {
         Logger.log(`Checking password. The parameter is empty: ${!!password}`, "isPasswordValid");
 
-        return await isPasswordHashCorrespondToWallet(getWalletId(), getHash(password));
+        return await isPasswordHashCorrespondToWallet(Storage.getWalletId(), getHash(password));
     } catch (e) {
         improveAndRethrow(e, "isPasswordValid");
     }
@@ -544,13 +531,13 @@ export async function changePassword(oldPassword, newPassword) {
     try {
         Logger.log(`Changing password. The old/new are empty: ${!!oldPassword}|${!!newPassword}`, loggerSource);
 
-        const result = await changePasswordHash(getWalletId(), getHash(oldPassword), getHash(newPassword));
+        const result = await changePasswordHash(Storage.getWalletId(), getHash(oldPassword), getHash(newPassword));
         if (result.result) {
-            const { encryptedMnemonic, encryptedPassphrase } = getEncryptedWalletCredentials();
+            const { encryptedMnemonic, encryptedPassphrase } = Storage.getEncryptedWalletCredentials();
             const reencryptedMnemonic = encrypt(decrypt(encryptedMnemonic, oldPassword), newPassword);
             const reencryptedPassphrase = encrypt(decrypt(encryptedPassphrase, oldPassword), newPassword);
             PreferencesService.cacheLastPasswordChangeTimestamp(Date.now()); // TODO: [feature, moderate] make this timestamp a wallet setting for easier management
-            saveEncryptedWalletCredentials(reencryptedMnemonic, reencryptedPassphrase);
+            Storage.saveEncryptedWalletCredentials(reencryptedMnemonic, reencryptedPassphrase);
         }
         Logger.log(`Password changed. Returning: ${JSON.stringify(result)}`, loggerSource);
 
@@ -571,25 +558,24 @@ export function isJustLoggedOut() {
     return isJustLoggedOutFlag;
 }
 
-let checkAuthenticationIntervalId = null;
-function setIntervalLookingForAuthentication() {
-    // TODO: [refactoring, moderate] looks like we can use setTimeout here
-    checkAuthenticationIntervalId && clearInterval(checkAuthenticationIntervalId);
-    checkAuthenticationIntervalId = setInterval(async () => {
+let checkAuthTimeoutId = null;
+function setTimeoutLookingForAuthentication() {
+    checkAuthTimeoutId && clearTimeout(checkAuthTimeoutId);
+    checkAuthTimeoutId = setTimeout(async () => {
         try {
             if (await isCurrentSessionValid()) {
                 EventBus.dispatch(AUTHENTICATION_DISCOVERED_EVENT);
-                checkAuthenticationIntervalId = null;
+                checkAuthTimeoutId = null;
             }
         } catch (e) {
             logError(e, "checkAuthenticationInterval");
         }
-    }, 30000);
+    }, 60 * 1000);
 }
 
 function resetIntervalLookingForAuthentication() {
-    checkAuthenticationIntervalId && clearInterval(checkAuthenticationIntervalId);
-    checkAuthenticationIntervalId = null;
+    checkAuthTimeoutId && clearTimeout(checkAuthTimeoutId);
+    checkAuthTimeoutId = null;
 }
 
 /**
@@ -600,7 +586,7 @@ function resetIntervalLookingForAuthentication() {
  */
 export function checkLocallyIfPassphraseUsed(mnemonic) {
     try {
-        return getIsPassphraseUsed(mnemonicToWalletId(mnemonic));
+        return Storage.getIsPassphraseUsed(mnemonicToWalletId(mnemonic));
     } catch (e) {
         improveAndRethrow(e, "checkLocallyIfPassphraseUsed");
     }
@@ -613,20 +599,23 @@ export function checkLocallyIfPassphraseUsed(mnemonic) {
  */
 export function saveLocallyFlagThatPassphraseIsUsed(mnemonic) {
     try {
-        saveIsPassphraseUsed(mnemonicToWalletId(mnemonic), true);
+        Storage.saveIsPassphraseUsed(mnemonicToWalletId(mnemonic), true);
     } catch (e) {
         improveAndRethrow(e, "saveLocallyFlagThatPassphraseIsUsed");
     }
 }
 
-export function getDecryptedWalletCredentials(password) {
-    try {
-        const encryptedWalletCredentials = getEncryptedWalletCredentials();
-        return {
-            mnemonic: decrypt(encryptedWalletCredentials.encryptedMnemonic, password),
-            passphrase: decrypt(encryptedWalletCredentials.encryptedPassphrase, password),
-        };
-    } catch (e) {
-        improveAndRethrow(e, "getDecryptedWalletCredentials");
+// TODO: [refactoring, low] move all methods to this class when writing tests
+export class AuthService {
+    static getDecryptedWalletCredentials(password) {
+        try {
+            const encryptedWalletCredentials = Storage.getEncryptedWalletCredentials();
+            return {
+                mnemonic: decrypt(encryptedWalletCredentials.encryptedMnemonic, password),
+                passphrase: decrypt(encryptedWalletCredentials.encryptedPassphrase, password),
+            };
+        } catch (e) {
+            improveAndRethrow(e, "getDecryptedWalletCredentials");
+        }
     }
 }

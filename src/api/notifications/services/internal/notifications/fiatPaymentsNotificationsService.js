@@ -1,7 +1,8 @@
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import { EncryptedWalletPaymentIdsService } from "../../../../purchases/services/encryptedWalletPaymentIdsService";
-import Notification, { NOTIFICATIONS_TYPES } from "../../../models/notification";
-import FiatPaymentsService from "../../../../purchases/services/FiatPaymentsService";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { EncryptedWalletPaymentIdsService } from "../../../../purchases/services/encryptedWalletPaymentIdsService.js";
+import Notification, { NOTIFICATIONS_TYPES } from "../../../models/notification.js";
+import FiatPaymentsService from "../../../../purchases/services/FiatPaymentsService.js";
 
 // TODO: [feature, moderate] use it if binance connect support this feature task_id=16127916f375490aa6b526675a6c72e4
 export default class FiatPaymentsNotificationsService {

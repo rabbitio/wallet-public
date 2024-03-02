@@ -1,6 +1,9 @@
-import { BigNumber, ethers } from "ethers";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import erc20abi from "./erc20abi.json";
+import { ethers } from "ethers";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ERC20_ABI } from "./erc20abi.js";
 
 export class Erc20transactionUtils {
     static TRANSFER_HEX = "0xa9059cbb";
@@ -23,7 +26,7 @@ export class Erc20transactionUtils {
             let amount;
             if (data.startsWith(this.TRANSFER_HEX)) {
                 receiverAddress = `0x${data.slice(34, 74)}`.toLowerCase();
-                amount = BigNumber.from("0x" + data.slice(74));
+                amount = AmountUtils.trim(BigNumber("0x" + data.slice(74)), 0);
                 // TODO: [feature, moderate] Support transferFrom method. task_id=9239674b09744d9581c3e51e42854af7
                 // } else if (data.startWith(this.TRANSFER_FROM_HEX)) {
                 //     sender = data.slice(34, 74);
@@ -80,8 +83,8 @@ export class Erc20transactionUtils {
      */
     static composeEthereumTransactionDataForGivenParams(receiver, amountAtoms) {
         try {
-            const erc20Interface = new ethers.utils.Interface(erc20abi);
-            return erc20Interface.encodeFunctionData("transfer", [receiver, BigNumber.from(amountAtoms)]);
+            const erc20Interface = new ethers.utils.Interface(ERC20_ABI);
+            return erc20Interface.encodeFunctionData("transfer", [receiver, AmountUtils.intStr(amountAtoms)]);
         } catch (e) {
             improveAndRethrow(e, "composeEthereumTransactionDataForGivenParams");
         }

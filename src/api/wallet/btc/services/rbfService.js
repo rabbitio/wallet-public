@@ -1,30 +1,31 @@
 import bip39 from "bip39";
+import { BigNumber } from "bignumber.js";
 
-import { getAccountsData, getCurrentNetwork, getWalletId } from "../../../common/services/internal/storage";
-import { getCurrentFeeRate } from "./feeRatesService";
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import { DEFAULT_RATES, MIN_FEE_RATES } from "../lib/fees";
-import AddressesService from "./addressesService";
-import { getSortedListOfCandidateUtxosForRbf } from "../lib/utxos";
-import { getAllUTXOs } from "./utils/utxosUtils";
-import AddressesDataApi from "../../common/backend-api/addressesDataApi";
-import AddressesServiceInternal from "./internal/addressesServiceInternal";
-import UtxosService from "./internal/utxosService";
-import { TransactionsDataService } from "../../common/services/transactionsDataService";
-import {
-    calculateFeeForExistingTransactionForFeeRates,
-    createTransactionWithChangedFee,
-} from "../lib/transactions/rbf";
-import { broadcastTransaction } from "./internal/transactionsBroadcastingService";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import { getDecryptedWalletCredentials } from "../../../auth/services/authService";
-import CoinsToFiatRatesService from "../../common/services/coinsToFiatRatesService";
-import { Coins } from "../../coins";
-import { retrieveTransactionData } from "../external-apis/transactionDataAPI";
-import { TxData } from "../../common/models/tx-data";
-import { Wallets } from "../../common/wallets";
-import { EventBus, INCREASE_FEE_IS_FINISHED_EVENT } from "../../../common/adapters/eventbus";
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
 
+import { Storage } from "../../../common/services/internal/storage.js";
+import { BtcFeeRatesService } from "./feeRatesService.js";
+import { logError } from "../../../common/utils/errorUtils.js";
+import { DEFAULT_RATES, MIN_FEE_RATES } from "../lib/fees.js";
+import AddressesService from "./addressesService.js";
+import { Utxos } from "../lib/utxos.js";
+import { BtcUtxosUtils } from "./utils/utxosUtils.js";
+import AddressesDataApi from "../../common/backend-api/addressesDataApi.js";
+import AddressesServiceInternal from "./internal/addressesServiceInternal.js";
+import UtxosService from "./internal/utxosService.js";
+import { TransactionsDataService } from "../../common/services/internal/transactionsDataService.js";
+import { BtcRbfUtils } from "../lib/transactions/rbf.js";
+import { BtcTransactionBroadcastingService } from "./internal/transactionsBroadcastingService.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { AuthService } from "../../../auth/services/authService.js";
+import CoinsToFiatRatesService from "../../common/services/coinsToFiatRatesService.js";
+import { Coins } from "../../coins.js";
+import { BtcTransactionDetailsProvider } from "../external-apis/transactionDataAPI.js";
+import { TxData } from "../../common/models/tx-data.js";
+import { Wallets } from "../../common/wallets.js";
+import { EventBus, INCREASE_FEE_IS_FINISHED_EVENT } from "../../../common/adapters/eventbus.js";
+
+// TODO: [feature, low] use strings instead of numbers under the hood here
 export default class RbfService {
     static BLOCKS_COUNTS_FOR_RBF_OPTIONS = [1, 2, 5, 10];
 
@@ -48,11 +49,13 @@ export default class RbfService {
         const loggerSource = "getFeeOptionsForRbf";
         try {
             Logger.log(`Start getting fee options for txid: ${oldTxId}`, loggerSource);
-            const network = getCurrentNetwork();
-            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
+            const network = Storage.getCurrentNetwork();
+            const indexes = await AddressesDataApi.getAddressesIndexes(Storage.getWalletId());
             const resolvedPromises = await Promise.all([
-                ...this.BLOCKS_COUNTS_FOR_RBF_OPTIONS.map(blocksCount => getCurrentFeeRate(network, blocksCount)),
-                retrieveTransactionData(oldTxId, network),
+                ...this.BLOCKS_COUNTS_FOR_RBF_OPTIONS.map(blocksCount =>
+                    BtcFeeRatesService.getCurrentFeeRate(network, blocksCount)
+                ),
+                BtcTransactionDetailsProvider.retrieveTransactionData(oldTxId, network),
                 AddressesServiceInternal.getAllUsedAddresses(indexes),
                 AddressesService.getCurrentChangeAddress(),
             ]);
@@ -64,7 +67,7 @@ export default class RbfService {
                  * transaction (that we just sent) inside the mempool they use.
                  * So here we are retrying to retrieve the details as we cannot go further without them.
                  */
-                oldTransaction = await retrieveTransactionData(oldTxId, network);
+                oldTransaction = await BtcTransactionDetailsProvider.retrieveTransactionData(oldTxId, network);
             }
 
             Logger.log(
@@ -72,15 +75,20 @@ export default class RbfService {
                 loggerSource
             );
 
-            const allUtxos = await getAllUTXOs(allAddresses.internal, allAddresses.external, network);
+            const allUtxos = await BtcUtxosUtils.getAllUTXOs(allAddresses.internal, allAddresses.external, network);
 
             Logger.log(`UTXOs: ${JSON.stringify(allUtxos.count)}`, loggerSource);
 
-            const candidateUtxos = getSortedListOfCandidateUtxosForRbf(getAccountsData(), indexes, allUtxos, network);
+            const candidateUtxos = Utxos.getSortedListOfCandidateUtxosForRbf(
+                Storage.getAccountsData(),
+                indexes,
+                allUtxos,
+                network
+            );
 
             Logger.log(`Candidate UTXOs: ${JSON.stringify(candidateUtxos)}`, loggerSource);
 
-            const ratesToFeeMapping = calculateFeeForExistingTransactionForFeeRates(
+            const ratesToFeeMapping = BtcRbfUtils.calculateFeeForExistingTransactionForFeeRates(
                 oldTransaction,
                 allAddresses,
                 changeAddress,
@@ -111,10 +119,10 @@ export default class RbfService {
         try {
             Logger.log(`Validating fee: ${oldTxId}. Fee: ${inputtedFeeBtc}`, loggerSource);
 
-            const currentNetwork = getCurrentNetwork();
-            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
+            const currentNetwork = Storage.getCurrentNetwork();
+            const indexes = await AddressesDataApi.getAddressesIndexes(Storage.getWalletId());
             const [oldTx, allAddresses, changeAddress] = await Promise.all([
-                retrieveTransactionData(oldTxId, currentNetwork),
+                BtcTransactionDetailsProvider.retrieveTransactionData(oldTxId, currentNetwork),
                 AddressesServiceInternal.getAllUsedAddresses(indexes),
                 AddressesService.getCurrentChangeAddress(),
             ]);
@@ -124,11 +132,20 @@ export default class RbfService {
                 loggerSource
             );
 
-            const accountsData = getAccountsData();
+            const accountsData = Storage.getAccountsData();
             const minFeeRate = MIN_FEE_RATES.find(rate => rate.network === currentNetwork.key);
-            const allUtxos = await getAllUTXOs(allAddresses.internal, allAddresses.external, currentNetwork);
-            const candidateUtxos = getSortedListOfCandidateUtxosForRbf(accountsData, indexes, allUtxos, currentNetwork);
-            const newCalculatedFeesItems = calculateFeeForExistingTransactionForFeeRates(
+            const allUtxos = await BtcUtxosUtils.getAllUTXOs(
+                allAddresses.internal,
+                allAddresses.external,
+                currentNetwork
+            );
+            const candidateUtxos = Utxos.getSortedListOfCandidateUtxosForRbf(
+                accountsData,
+                indexes,
+                allUtxos,
+                currentNetwork
+            );
+            const newCalculatedFeesItems = BtcRbfUtils.calculateFeeForExistingTransactionForFeeRates(
                 oldTx,
                 allAddresses,
                 changeAddress,
@@ -174,13 +191,13 @@ export default class RbfService {
                 loggerSource
             );
 
-            const network = getCurrentNetwork();
-            const { mnemonic, passphrase } = getDecryptedWalletCredentials(password);
+            const network = Storage.getCurrentNetwork();
+            const { mnemonic, passphrase } = AuthService.getDecryptedWalletCredentials(password);
             const seedHex = bip39.mnemonicToSeedHex(mnemonic, passphrase);
-            const accountsData = getAccountsData();
-            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
+            const accountsData = Storage.getAccountsData();
+            const indexes = await AddressesDataApi.getAddressesIndexes(Storage.getWalletId());
             const [oldTx, changeAddress, allAddresses] = await Promise.all([
-                retrieveTransactionData(oldTxId, network),
+                BtcTransactionDetailsProvider.retrieveTransactionData(oldTxId, network),
                 AddressesService.getCurrentChangeAddress(),
                 AddressesServiceInternal.getAllUsedAddresses(indexes),
             ]);
@@ -190,14 +207,14 @@ export default class RbfService {
                 loggerSource
             );
 
-            const allUtxos = await getAllUTXOs(allAddresses.internal, allAddresses.external, network);
+            const allUtxos = await BtcUtxosUtils.getAllUTXOs(allAddresses.internal, allAddresses.external, network);
             Logger.log(`UTXOs were retrieved: ${JSON.stringify(allUtxos)}`, loggerSource);
 
-            const candidateUtxos = getSortedListOfCandidateUtxosForRbf(accountsData, indexes, allUtxos, network);
+            const candidateUtxos = Utxos.getSortedListOfCandidateUtxosForRbf(accountsData, indexes, allUtxos, network);
             Logger.log(`Candidate UTXOS: ${JSON.stringify(candidateUtxos)}`, loggerSource);
 
             const newFeeSatoshi = +Coins.COINS.BTC.coinAmountToAtoms("" + newFee);
-            const creationResult = createTransactionWithChangedFee(
+            const creationResult = BtcRbfUtils.createTransactionWithChangedFee(
                 oldTx,
                 newFeeSatoshi,
                 seedHex,
@@ -216,7 +233,10 @@ export default class RbfService {
 
             Logger.log("Transaction was created, pushing it", loggerSource);
 
-            const newTransactionId = await broadcastTransaction(creationResult.bitcoinJsTx, network);
+            const newTransactionId = await BtcTransactionBroadcastingService.broadcastTransaction(
+                creationResult.bitcoinJsTx,
+                network
+            );
 
             Logger.log(`Transaction was pushed: ${newTransactionId}`, loggerSource);
 
@@ -263,10 +283,10 @@ function actualizeTransactionsCacheWithoutFailing(params, oldFee, newFee, networ
     try {
         const anyStubRate = DEFAULT_RATES[0];
         const txData = new TxData(
-            params.amount,
+            AmountUtils.intStr(params.amount),
             params.targetAddress,
-            params.newChange,
-            newFee,
+            AmountUtils.intStr(params.newChange),
+            AmountUtils.intStr(newFee),
             params.currentChangeAddress,
             params.utxos,
             network,
@@ -275,7 +295,8 @@ function actualizeTransactionsCacheWithoutFailing(params, oldFee, newFee, networ
 
         const btcWallet = Wallets.getWalletByCoin(Coins.COINS.BTC);
         btcWallet.actualizeLocalCachesWithNewTransactionData(Coins.COINS.BTC, txData, newTransactionId);
-        btcWallet.actualizeBalanceCacheWithAmountAtoms("" + (newFee - oldFee), -1);
+        const balanceDiffString = AmountUtils.intStr(BigNumber(newFee).minus(oldFee));
+        btcWallet.actualizeBalanceCacheWithAmountAtoms(balanceDiffString, -1);
     } catch (e) {
         logError(e, loggerSource, `Failed to actualize cache for rbf new tx ${newTransactionId}`);
     }

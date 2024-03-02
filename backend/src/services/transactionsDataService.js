@@ -1,10 +1,11 @@
-import {getLogger} from "log4js";
-import {improveAndRethrow} from "../utils/utils";
-import {dbConnectionHolder} from "../utils/dbConnectionHolder";
-import {deleteExistingDocuments, isUpdateOneResultValid} from "./mongoUtil";
+import log4js from "log4js";
 
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-const log = getLogger("transactionsDataService");
+import { dbConnectionHolder } from "../utils/dbConnectionHolder.js";
+import { deleteExistingDocuments, isUpdateOneResultValid } from "./mongoUtil.js";
+
+const log = log4js.getLogger("transactionsDataService");
 
 export class TransactionsDataService {
     static async saveTransactionData(walletId, transactionIdHash, encryptedNote) {
@@ -36,7 +37,9 @@ export class TransactionsDataService {
 
         try {
             const transactionsDataCollection = await dbConnectionHolder.getCollection("transactionsData");
-            const transactionsData = await transactionsDataCollection.find({ walletId, transactionIdHash: { $in: hashes } }).toArray();
+            const transactionsData = await transactionsDataCollection
+                .find({ walletId, transactionIdHash: { $in: hashes } })
+                .toArray();
 
             if (!transactionsData) {
                 log.debug("Transaction data has not been found.");
@@ -80,9 +83,13 @@ export class TransactionsDataService {
 
             const notRemovedCount = (await transactionsDataCollection.find({ walletId }).toArray()).length;
             if (notRemovedCount) {
-                throw new Error(`Not all transaction data documents have been removed by wallet id, remains ${notRemovedCount}. `);
+                throw new Error(
+                    `Not all transaction data documents have been removed by wallet id, remains ${notRemovedCount}. `
+                );
             }
-            log.debug("All transactions data documents have been successfully removed for given walletId. Call finished.");
+            log.debug(
+                "All transactions data documents have been successfully removed for given walletId. Call finished."
+            );
         } catch (e) {
             improveAndRethrow(e, "removeAllTransactionsDataForWallet");
         }

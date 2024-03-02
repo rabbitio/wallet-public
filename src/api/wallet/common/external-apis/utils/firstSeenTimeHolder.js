@@ -1,4 +1,4 @@
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
 /**
  * This array and function are needed as some providers give no first seen time for transaction. So we store it

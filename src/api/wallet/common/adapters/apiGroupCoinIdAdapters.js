@@ -1,6 +1,7 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { Coins } from "../../coins";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { Coins } from "../../coins.js";
 
 // TODO: [refactoring, low] improve architecture of ApiGroups and their adapters
 export class ApiGroupCoinIdAdapters {

@@ -1,8 +1,9 @@
-import { Coins } from "../../coins";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Coins } from "../../coins.js";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 
 // TODO: [feature, moderate] Add mempool.space provider https://mempool.space/api/v1/blocks task_id=a8370ae7b99049b092f31f761a95b54d
 class BlockstreamBtcCurrentBlockProvider extends ExternalApiProvider {

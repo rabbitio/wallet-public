@@ -1,22 +1,18 @@
 import bip39 from "bip39";
 
-import AddressesDataApi from "../../../common/backend-api/addressesDataApi";
-import {
-    getAccountsData,
-    getCurrentNetwork,
-    getEncryptedWalletCredentials,
-    getWalletId,
-} from "../../../../common/services/internal/storage";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import AddressesDataApi from "../../../common/backend-api/addressesDataApi.js";
+import { Storage } from "../../../../common/services/internal/storage.js";
 import {
     EXTERNAL_CHANGE_INDEX,
     getAllUsedAddressesByIndexes,
-    getEcPairsToAddressesMapping,
+    EcPairsUtils,
     INTERNAL_CHANGE_INDEX,
-} from "../../lib/addresses";
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import CurrentAddressUtils from "../utils/currentAddressUtils";
-import { decrypt } from "../../../../common/adapters/crypto-utils";
-import { Logger } from "../../../../support/services/internal/logs/logger";
+} from "../../lib/addresses.js";
+import CurrentAddressUtils from "../utils/currentAddressUtils.js";
+import { decrypt } from "../../../../common/adapters/crypto-utils.js";
+import { Logger } from "../../../../support/services/internal/logs/logger.js";
 
 // TODO: [ether, critical] add support for all coins here
 export default class AddressesServiceInternal {
@@ -30,10 +26,10 @@ export default class AddressesServiceInternal {
     static async getAllUsedAddresses(indexes = null) {
         try {
             if (indexes == null) {
-                indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
+                indexes = await AddressesDataApi.getAddressesIndexes(Storage.getWalletId());
             }
 
-            return getAllUsedAddressesByIndexes(getAccountsData(), getCurrentNetwork(), indexes);
+            return getAllUsedAddressesByIndexes(Storage.getAccountsData(), Storage.getCurrentNetwork(), indexes);
         } catch (e) {
             improveAndRethrow(e, "getAllUsedAddresses");
         }
@@ -50,8 +46,8 @@ export default class AddressesServiceInternal {
      */
     static async performScanningOfAddresses(networks, schemes) {
         try {
-            const accountsData = getAccountsData();
-            const walletId = getWalletId();
+            const accountsData = Storage.getAccountsData();
+            const walletId = Storage.getWalletId();
             const changeIndexes = [INTERNAL_CHANGE_INDEX, EXTERNAL_CHANGE_INDEX];
             const promises = changeIndexes.reduce((promisesOfAllIndexes, changeIndex) => {
                 const promisesForIndexAndNetworks = networks.reduce((promisesOfNetworks, network) => {
@@ -98,15 +94,20 @@ export default class AddressesServiceInternal {
         const loggerSource = "exportAddressesWithPrivateKeysByPassword";
         try {
             Logger.log("Started exporting addresses and private keys", loggerSource);
-            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
-            const network = getCurrentNetwork();
-            const allAddresses = getAllUsedAddressesByIndexes(getAccountsData(), network, indexes);
-            const encryptedWalletCredentials = getEncryptedWalletCredentials();
+            const indexes = await AddressesDataApi.getAddressesIndexes(Storage.getWalletId());
+            const network = Storage.getCurrentNetwork();
+            const allAddresses = getAllUsedAddressesByIndexes(Storage.getAccountsData(), network, indexes);
+            const encryptedWalletCredentials = Storage.getEncryptedWalletCredentials();
             const mnemonic = decrypt(encryptedWalletCredentials.encryptedMnemonic, password);
             const passphrase = decrypt(encryptedWalletCredentials.encryptedPassphrase, password);
             const seedHex = bip39.mnemonicToSeedHex(mnemonic, passphrase);
             const addressesArray = allAddresses.internal.concat(allAddresses.external);
-            const addressesToEcPairs = getEcPairsToAddressesMapping(addressesArray, seedHex, network, indexes);
+            const addressesToEcPairs = EcPairsUtils.getEcPairsToAddressesMapping(
+                addressesArray,
+                seedHex,
+                network,
+                indexes
+            );
 
             Logger.log(`Exported ${addressesToEcPairs.length} addresses and private keys. Returning`, loggerSource);
 

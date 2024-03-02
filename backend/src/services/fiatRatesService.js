@@ -1,13 +1,15 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import { getLocalDateByUTCTimestamp, getUTCDateStartByLocalDate, improveAndRethrow } from "../utils/utils";
-import { dbConnectionHolder } from "../utils/dbConnectionHolder";
-import { BTC_USD_RATES_DATA } from "./data/btcFiatRates";
-import { isInsertManyResultValid } from "./mongoUtil";
-import ExternalBTCFiatRatesService from "./external/externalBTCFiatRatesService";
-import { NUMBER_OF_DATES_TO_CHECK_RATES_FOR } from "../properties";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-const log = getLogger("fiatRatesService");
+import { getLocalDateByUTCTimestamp, getUTCDateStartByLocalDate } from "../utils/utils.js";
+import { dbConnectionHolder } from "../utils/dbConnectionHolder.js";
+import { BTC_USD_RATES_DATA } from "./data/btcFiatRates.js";
+import { isInsertManyResultValid } from "./mongoUtil.js";
+import ExternalBTCFiatRatesService from "./external/externalBTCFiatRatesService.js";
+import { NUMBER_OF_DATES_TO_CHECK_RATES_FOR } from "../properties.js";
+
+const log = log4js.getLogger("fiatRatesService");
 
 export default class FiatRatesService {
     static dbCollectionName = "btcUSDRates";

@@ -1,21 +1,23 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { TransactionsDataService } from "./transactionsDataService";
-// import FiatPaymentsService from "../../../purchases/services/FiatPaymentsService";
-import { TransactionDetailsService } from "./transactionDetailsService";
-import CoinsToFiatRatesService from "./coinsToFiatRatesService";
-import { Coins } from "../../coins";
-import { Wallets } from "../wallets";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
+import { BigNumber } from "bignumber.js";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { TransactionsDataService } from "./internal/transactionsDataService.js";
+// import FiatPaymentsService from "../../../purchases/services/FiatPaymentsService.js";
+import { TransactionDetailsService } from "./transactionDetailsService.js";
+import CoinsToFiatRatesService from "./coinsToFiatRatesService.js";
+import { Coins } from "../../coins.js";
+import { Wallets } from "../wallets.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
 import {
     BALANCE_CHANGED_EXTERNALLY_EVENT,
     FIAT_CURRENCY_CHANGED_EVENT,
     INCREASE_FEE_IS_FINISHED_EVENT,
     NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
     TRANSACTION_PUSHED_EVENT,
-} from "../../../common/adapters/eventbus";
-import { NumbersUtils } from "../utils/numbersUtils";
-import { SMALL_TTL_FOR_CACHE_L2_MS } from "../../../common/utils/ttlConstants";
+} from "../../../common/adapters/eventbus.js";
+import { SMALL_TTL_FOR_CACHE_L2_MS } from "../../../common/utils/ttlConstants.js";
 
 export default class TransactionsHistoryService {
     // TODO: [tests, moderate] add units for caching for existing tests
@@ -86,18 +88,14 @@ export default class TransactionsHistoryService {
      *                  status: ("unconfirmed"|"increasing_fee"|"confirming"|"confirmed"),
      *                  confirmations: number,
      *                  creationTime: number,
-     *                  amount: (number|string),
-     *                  amountSignificantString: string,
-     *                  amountSignificantStringShortened: string,
+     *                  amountCoins: string,
      *                  fiatAmount: (number|string),
-     *                  fee: (number|string|null),
-     *                  feeSignificantString: (string|null),
+     *                  feeCoins: (string|null),
      *                  fiatFee: number,
      *                  note: string|null,
      *                  isRbfAble: boolean,
      *                  purchaseData: ({ paymentId: string, amountWithCurrencyString: string }|null),
-     *                  ticker: string,
-     *                  tickerPrintable: string
+     *                  coin: Coin
      *              }[],
      *              isWholeList: boolean,
      *              minAmount: number,
@@ -301,7 +299,7 @@ async function addNotesIgnoringErrors(allTransactions) {
             matchedTx && (matchedTx.description = txData.note);
         });
     } catch (e) {
-        Logger.log("Failed to add notes to transactions: " + e.message, "addNotes");
+        Logger.log("Failed to add notes to transactions: " + e.message, "addNotesIgnoringErrors");
     }
 }
 
@@ -330,9 +328,9 @@ function getOnlyFiltered(transactionsList, filterBy) {
                             filterCriteria[1] !== undefined &&
                             filterCriteria[2] !== undefined &&
                             typeof filterCriteria[1] === "number" &&
-                            (filterCriteria[1] === -1 || transaction.fiatAmount >= filterCriteria[1]) &&
+                            (filterCriteria[1] === -1 || BigNumber(transaction.fiatAmount).gte(filterCriteria[1])) &&
                             typeof filterCriteria[2] === "number" &&
-                            (filterCriteria[2] === -1 || transaction.fiatAmount <= filterCriteria[2])
+                            (filterCriteria[2] === -1 || BigNumber(transaction.fiatAmount).lte(filterCriteria[2]))
                         );
                     case "datesRange":
                         return (
@@ -438,9 +436,13 @@ function validateNumberOfTransactions(numberOfTransactionsToReturn) {
 async function addFiatAmounts(coins, transactionsList) {
     try {
         for (let i = 0; i < coins.length; ++i) {
-            const coinTransactions = transactionsList.filter(tx => coins[i] === Coins.getCoinByTicker(tx.ticker));
-            const amounts = coinTransactions.map(tx => (tx.amount ? +coins[i].atomsToCoinAmount(tx.amount) : null));
-            const fees = coinTransactions.map(tx => (tx.fees ? +coins[i].feeCoin.atomsToCoinAmount(tx.fees) : null));
+            const coinTransactions = transactionsList.filter(tx => coins[i].ticker === tx.ticker);
+            const amounts = coinTransactions.map(tx =>
+                tx.amount != null ? coins[i].atomsToCoinAmount(tx.amount) : null
+            );
+            const fees = coinTransactions.map(tx =>
+                tx.fees != null ? coins[i].feeCoin.atomsToCoinAmount(tx.fees) : null
+            );
 
             const fiatAmounts = await CoinsToFiatRatesService.convertCoinAmountsToFiat(coins[i], amounts.concat(fees));
 
@@ -459,7 +461,7 @@ async function addFiatAmounts(coins, transactionsList) {
 function mapToProperReturnFormat(transactionsList) {
     return transactionsList.map(transaction => {
         const coin = Coins.getCoinByTicker(transaction.ticker);
-        const fiatDigitsCount = (("" + transaction.fiatAmount).split(".")[1] ?? "").length;
+        const amountCoinsString = transaction.amount != null ? coin.atomsToCoinAmount(transaction.amount) : null;
         return {
             txid: transaction.txid,
             // TODO: [refactoring, moderate] use type constant
@@ -471,25 +473,15 @@ function mapToProperReturnFormat(transactionsList) {
                 "confirmed",
             confirmations: transaction.confirmations,
             creationTime: transaction.time,
-            amount: transaction.amount,
-            amountSignificantString: transaction.amount
-                ? coin.atomsToCoinAmountSignificantString(transaction.amount, 12) // TODO: [refactoring, moderate] these constants for length is better to locate in UI code
-                : null,
-            amountSignificantStringShortened: transaction.amount
-                ? coin.atomsToCoinAmountSignificantString(transaction.amount, 9)
-                : null,
-            fiatAmount: NumbersUtils.trimCurrencyAmount(transaction.fiatAmount, fiatDigitsCount, 12),
-            fee: transaction.fees,
-            feeSignificantString: transaction.fees
-                ? coin.feeCoin.atomsToCoinAmountSignificantString(transaction.fees)
-                : null, // TODO: [bug, critical] fee can be in another coin
+            amountCoins: amountCoinsString,
+            fiatAmount: transaction.fiatAmount,
+            feeCoins: transaction.fees != null ? coin.feeCoin.atomsToCoinAmount(transaction.fees) : null,
             fiatFee: transaction.fiatFee,
             note: transaction.description,
             // TODO: [refactoring, low] use per-coin isRBFAble?
             isRbfAble: transaction.type === "out" && !!transaction.isRbfAble,
             purchaseData: transaction.purchaseData ?? null,
-            ticker: coin.ticker,
-            tickerPrintable: coin.tickerPrintable,
+            coin: coin,
             address: transaction.address,
         };
     });
@@ -497,20 +489,20 @@ function mapToProperReturnFormat(transactionsList) {
 
 function getMinAmount(transactionsList) {
     return (
-        (transactionsList &&
-            transactionsList.length &&
-            transactionsList.reduce((min, current) => (+current.fiatAmount < +min.fiatAmount ? current : min))
-                .fiatAmount) ||
+        (transactionsList?.length &&
+            transactionsList.reduce((min, current) =>
+                BigNumber(current.fiatAmount).lt(min.fiatAmount) ? current : min
+            ).fiatAmount) ||
         0
     );
 }
 
 function getMaxAmount(transactionsList) {
     return (
-        (transactionsList &&
-            transactionsList.length &&
-            transactionsList.reduce((max, current) => (+current.fiatAmount > +max.fiatAmount ? current : max))
-                .fiatAmount) ||
+        (transactionsList?.length &&
+            transactionsList.reduce((max, current) =>
+                BigNumber(current.fiatAmount).gt(max.fiatAmount) ? current : max
+            ).fiatAmount) ||
         0
     );
 }

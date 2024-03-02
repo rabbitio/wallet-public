@@ -1,16 +1,16 @@
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { Coins } from "../../coins";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { BigNumber } from "ethers";
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { Coins } from "../../coins.js";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import {
     createRawBalanceAtomsCacheProcessorForMultiBalancesProvider,
     mergeTwoArraysByItemIdFieldName,
     mergeTwoBalancesArraysAndNotifyAboutBalanceValueChange,
-} from "../../common/utils/cacheActualizationUtils";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
+} from "../../common/utils/cacheActualizationUtils.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
 
 class AlchemyErc20AllBalancesProvider extends ExternalApiProvider {
     constructor() {
@@ -50,7 +50,7 @@ class AlchemyErc20AllBalancesProvider extends ExternalApiProvider {
                     if (coin) {
                         return {
                             ticker: coin.ticker,
-                            balance: BigNumber.from(balanceData.tokenBalance).toString(),
+                            balance: AmountUtils.trim(balanceData.tokenBalance, 0),
                         };
                     }
                     return [];

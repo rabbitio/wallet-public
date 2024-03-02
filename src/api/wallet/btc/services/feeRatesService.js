@@ -1,16 +1,13 @@
-import { getFeesFromExtService } from "../external-apis/feerates-external";
-import { FEE_LIFETIME } from "../../../../properties";
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import { DEFAULT_RATES } from "../lib/fees";
-import {
-    getFeeRatesExpirationTime,
-    getSerializedFeeRatesArray,
-    saveFeeRates,
-    saveFeeRatesExpirationTime,
-} from "../../../common/services/internal/storage";
-import { postponeExecution } from "../../../common/utils/browserUtils";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import { FeeRate } from "../models/feeRate";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { BtcFeeRatesProvider } from "../external-apis/feerates-external.js";
+import { FEE_LIFETIME } from "../../../../properties.js";
+import { logError } from "../../../common/utils/errorUtils.js";
+import { DEFAULT_RATES } from "../lib/fees.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { postponeExecution } from "../../../common/utils/browserUtils.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { FeeRate } from "../models/feeRate.js";
 
 /**
  * Retrieves the smallest rate by given blocks counts.
@@ -21,7 +18,9 @@ import { FeeRate } from "../models/feeRate";
  */
 export async function getCurrentSmallestFeeRate(network, blocksCounts = []) {
     try {
-        const rates = await Promise.all(blocksCounts.map(count => getCurrentFeeRate(network, count)));
+        const rates = await Promise.all(
+            blocksCounts.map(count => BtcFeeRatesService.getCurrentFeeRate(network, count))
+        );
 
         Logger.log(`All rates: ${rates.map(r => r.toMiniString()).join(";")}`, "getCurrentSmallestFeeRate");
 
@@ -36,72 +35,76 @@ export async function getCurrentSmallestFeeRate(network, blocksCounts = []) {
  */
 let isRetrievingRates = false;
 
-/**
- * Retrieves current fee rate for given params.
- *
- * Algorithm:
- * 1. Get from cache
- * 2. If data in cache are expired or not present or parsing failed call external service for new rates
- * 3. Return default if ext service returns nothing or call fails
- * 4. Save retrieved data to cache
- * 5. Return rate for given network and blocks count if present in retrieved data or default otherwise
- *
- * @param network - network to get rates for
- * @param blocksCount - count of blocks to confirm transaction in
- * @returns Promise resolving to FeeRate instance
- */
-export async function getCurrentFeeRate(network, blocksCount) {
-    const loggerSource = "getCurrentFeeRate";
-    let rate = DEFAULT_RATES.find(rate => rate.network === network.key && rate.blocksCount === blocksCount);
-    try {
-        let feesRates = getFeesFromCache();
+export class BtcFeeRatesService {
+    /**
+     * Retrieves current fee rate for given params.
+     *
+     * Algorithm:
+     * 1. Get from cache
+     * 2. If data in cache are expired or not present or parsing failed call external service for new rates
+     * 3. Return default if ext service returns nothing or call fails
+     * 4. Save retrieved data to cache
+     * 5. Return rate for given network and blocks count if present in retrieved data or default otherwise
+     *
+     * @param network - network to get rates for
+     * @param blocksCount - count of blocks to confirm transaction in
+     * @returns Promise resolving to FeeRate instance
+     */
+    static async getCurrentFeeRate(network, blocksCount) {
+        const loggerSource = "getCurrentFeeRate";
+        let rate = DEFAULT_RATES.find(rate => rate.network === network.key && rate.blocksCount === blocksCount);
+        try {
+            let feesRates = getFeesFromCache();
 
-        if (feesRates === null) {
-            if (isRetrievingRates) {
-                return await postponeExecution(async () => {
-                    const currentRates = getFeesFromCache();
-                    const result = currentRates ? filterRatesForBlocksCount(currentRates, blocksCount, network) : null;
+            if (feesRates === null) {
+                if (isRetrievingRates) {
+                    return await postponeExecution(async () => {
+                        const currentRates = getFeesFromCache();
+                        const result = currentRates
+                            ? filterRatesForBlocksCount(currentRates, blocksCount, network)
+                            : null;
 
-                    return result || (await getCurrentFeeRate(network, blocksCount));
-                }, 1000);
+                        return result || (await BtcFeeRatesService.getCurrentFeeRate(network, blocksCount));
+                    }, 1000);
+                }
+                isRetrievingRates = true;
+                try {
+                    feesRates = await BtcFeeRatesProvider.getFeesFromExtService(network);
+                    saveFeeRatesToCache(feesRates, FEE_LIFETIME);
+                    Logger.log(
+                        `Retrieved and saved to cache ${feesRates
+                            .map(item => `${item.blocksCount}:${item.rate}`)
+                            .join(",")}`,
+                        loggerSource
+                    );
+                } catch (e) {
+                    logError(e, loggerSource, "Failed to get external fee rates");
+                } finally {
+                    isRetrievingRates = false;
+                }
             }
-            isRetrievingRates = true;
-            try {
-                feesRates = await getFeesFromExtService(network);
-                saveFeeRatesToCache(feesRates, FEE_LIFETIME);
-                Logger.log(
-                    `Retrieved and saved to cache ${feesRates
-                        .map(item => `${item.blocksCount}:${item.rate}`)
-                        .join(",")}`,
+
+            const currentRate = feesRates?.length && filterRatesForBlocksCount(feesRates, blocksCount, network);
+            if (!currentRate) {
+                logError(
+                    new Error("No fee rates have been got. Default will be returned: " + JSON.stringify(rate)),
                     loggerSource
                 );
-            } catch (e) {
-                logError(e, loggerSource, "Failed to get external fee rates");
-            } finally {
-                isRetrievingRates = false;
+            } else {
+                return currentRate;
             }
+        } catch (e) {
+            logError(e, loggerSource);
         }
 
-        const currentRate = feesRates?.length && filterRatesForBlocksCount(feesRates, blocksCount, network);
-        if (!currentRate) {
-            logError(
-                new Error("No fee rates have been got. Default will be returned: " + JSON.stringify(rate)),
-                loggerSource
-            );
-        } else {
-            return currentRate;
-        }
-    } catch (e) {
-        logError(e, loggerSource);
+        return rate;
     }
-
-    return rate;
 }
 
 function getFeesFromCache() {
     try {
-        const serializedFeeRates = getSerializedFeeRatesArray();
-        const expirationTime = getFeeRatesExpirationTime();
+        const serializedFeeRates = Storage.getSerializedFeeRatesArray();
+        const expirationTime = Storage.getFeeRatesExpirationTime();
         if (
             !serializedFeeRates ||
             !expirationTime ||
@@ -119,8 +122,8 @@ function getFeesFromCache() {
 }
 
 function saveFeeRatesToCache(feeRatesArray, lifetimeMs) {
-    saveFeeRates(FeeRate.serializeArray(feeRatesArray));
-    saveFeeRatesExpirationTime(new Date(new Date().valueOf() + lifetimeMs).toISOString());
+    Storage.saveFeeRates(FeeRate.serializeArray(feeRatesArray));
+    Storage.saveFeeRatesExpirationTime(new Date(new Date().valueOf() + lifetimeMs).toISOString());
 }
 
 /**

@@ -1,20 +1,14 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import {
-    addClientIpHash,
-    addWalletIdAndSessionId,
-    processInternalError,
-    processSuccess,
-    validateRequestDataAndResponseOnErrors,
-} from "./controllerUtils";
-import schemas from "../models/joi_schemas";
-import { GET_NOTIFICATIONS_EP_NUMBER, SAVE_NOTIFICATION_EP_NUMBER } from "./endpointNumbers";
-import { NotificationsService } from "../services/notificationsService";
+import { ControllerUtils } from "./controllerUtils.js";
+import schemas from "../models/joi_schemas.js";
+import { GET_NOTIFICATIONS_EP_NUMBER, SAVE_NOTIFICATION_EP_NUMBER } from "./endpointNumbers.js";
+import { NotificationsService } from "../services/notificationsService.js";
 
-import { getHash } from "../utils/utils";
-import { NOTIFICATIONS_API_TOKEN_HASH } from "../properties";
+import { getHash } from "../utils/utils.js";
+import { NOTIFICATIONS_API_TOKEN_HASH } from "../properties.js";
 
-const log = getLogger("notifications");
+const log = log4js.getLogger("notifications");
 
 export default class NotificationsController {
     /**
@@ -44,8 +38,8 @@ export default class NotificationsController {
         log.debug("Start getting notifications.");
         const endpointNumber = GET_NOTIFICATIONS_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, {}));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, {}));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.getNotifications,
@@ -58,14 +52,14 @@ export default class NotificationsController {
 
                 if (notifications == null || notifications.length === 0) {
                     log.debug("Notifications have not been found, sending 404.");
-                    processSuccess(res, 404);
+                    ControllerUtils.processSuccess(res, 404);
                 } else {
                     log.debug("Notifications have been retrieved, sending 200.");
-                    processSuccess(res, 200, notifications);
+                    ControllerUtils.processSuccess(res, 200, notifications);
                 }
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Error occurred during the notifications retrieval.", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Error occurred during the notifications retrieval.", e);
         }
     }
 
@@ -94,7 +88,7 @@ export default class NotificationsController {
         const endpointNumber = SAVE_NOTIFICATION_EP_NUMBER;
         try {
             const data = req.query || {};
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.saveNotification,
@@ -116,14 +110,14 @@ export default class NotificationsController {
                     });
 
                     log.debug("Notification has been saved, sending 201.");
-                    processSuccess(res, 201, { result: "success" });
+                    ControllerUtils.processSuccess(res, 201, { result: "success" });
                 } else {
                     log.debug("Token is invalid, sending 403.");
                     req.body({ result: "invalid_token" }).send(403);
                 }
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Error occurred while saving notification.", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Error occurred while saving notification.", e);
         }
     }
 }

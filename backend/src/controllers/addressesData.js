@@ -1,14 +1,8 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import {
-    addClientIpHash,
-    addWalletIdAndSessionId,
-    processSuccess,
-    processInternalError,
-    validateRequestDataAndResponseOnErrors,
-} from "./controllerUtils";
-import schemas from "../models/joi_schemas";
-import AddressesDataService from "../services/addressesDataService";
+import { ControllerUtils } from "./controllerUtils.js";
+import schemas from "../models/joi_schemas.js";
+import AddressesDataService from "../services/addressesDataService.js";
 import {
     GET_ADDRESSES_DATA_EP_NUMBER,
     GET_ADDRESSES_INDEXES_EP_NUMBER,
@@ -16,9 +10,9 @@ import {
     UPDATE_ADDRESS_INDEX_EP_NUMBER,
     REMOVE_ADDRESS_DATA_EP_NUMBER,
     UPDATE_ADDRESS_DATA_EP_NUMBER,
-} from "./endpointNumbers";
+} from "./endpointNumbers.js";
 
-const log = getLogger("addressesDataController");
+const log = log4js.getLogger("addressesDataController");
 
 export default class AddressesDataController {
     /**
@@ -51,8 +45,8 @@ export default class AddressesDataController {
         log.debug("Start getting addresses data.");
         const endpointNumber = GET_ADDRESSES_DATA_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, {}));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, {}));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.getAddressesData,
@@ -65,10 +59,10 @@ export default class AddressesDataController {
                 const addressesData = await AddressesDataService.getAddressesData(data.walletId);
 
                 log.debug("Address data was retrieved, sending 200 and data array.");
-                processSuccess(res, 200, addressesData);
+                ControllerUtils.processSuccess(res, 200, addressesData);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to get addresses data due to internal error. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to get addresses data due to internal error. ", e);
         }
     }
 
@@ -102,8 +96,8 @@ export default class AddressesDataController {
         log.debug("Start getting addresses indexes.");
         const endpointNumber = GET_ADDRESSES_INDEXES_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, {}));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, {}));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.getAddressIndexes,
@@ -116,10 +110,10 @@ export default class AddressesDataController {
                 const addressIndexes = await AddressesDataService.getAddressesIndexes(data.walletId);
 
                 log.debug("Address indexes were retrieved, sending 200 and indexes object.");
-                processSuccess(res, 200, addressIndexes);
+                ControllerUtils.processSuccess(res, 200, addressIndexes);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to get address indexes due to internal error. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to get address indexes due to internal error. ", e);
         }
     }
 
@@ -157,8 +151,8 @@ export default class AddressesDataController {
         log.debug("Update address index request received.");
         const endpointNumber = UPDATE_ADDRESS_INDEX_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, req.body));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, req.body));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.updateAddressIndexSchema,
@@ -172,10 +166,10 @@ export default class AddressesDataController {
                 await AddressesDataService.updateAddressIndex(data.walletId, path, newIndexValue);
 
                 log.debug("Address index was updated, sending 204.");
-                processSuccess(res, 204);
+                ControllerUtils.processSuccess(res, 204);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to update address index due to internal error. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to update address index due to internal error. ", e);
         }
     }
 
@@ -220,8 +214,8 @@ export default class AddressesDataController {
         log.debug("Update address index and save addresses data request received.");
         const endpointNumber = UPDATE_ADDRESS_INDEX_AND_SAVE_ADDRESSES_DATA_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, req.body));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, req.body));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.updateAddressIndexAndSaveDataSchema,
@@ -240,10 +234,10 @@ export default class AddressesDataController {
                 );
 
                 log.debug("Addresses index was updated, addresses data were saved, sending 204.");
-                processSuccess(res, 204);
+                ControllerUtils.processSuccess(res, 204);
             }
         } catch (e) {
-            processInternalError(
+            ControllerUtils.processInternalError(
                 res,
                 endpointNumber,
                 "Failed to update address index and save addresses data due to internal error. ",
@@ -283,9 +277,9 @@ export default class AddressesDataController {
         const endpointNumber = REMOVE_ADDRESS_DATA_EP_NUMBER;
         try {
             const { uuid } = req.params;
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, { uuid }));
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, { uuid }));
 
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.removeAddressDataScheme,
@@ -298,10 +292,10 @@ export default class AddressesDataController {
                 await AddressesDataService.removeAddressData(data.walletId, data.uuid);
 
                 log.debug("Address data has been successfully removed, sending 204.");
-                processSuccess(res, 204);
+                ControllerUtils.processSuccess(res, 204);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to remove address data due to internal error. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to remove address data due to internal error. ", e);
         }
     }
 
@@ -340,9 +334,9 @@ export default class AddressesDataController {
         try {
             const { uuid } = req.params;
             const { addressData } = req.body;
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, { uuid, addressData }));
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, { uuid, addressData }));
 
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.updateAddressDataScheme,
@@ -355,10 +349,10 @@ export default class AddressesDataController {
                 await AddressesDataService.updateAddressData(data.walletId, data.uuid, data.addressData);
 
                 log.debug("Address data has been successfully updated, sending 200.");
-                processSuccess(res, 200);
+                ControllerUtils.processSuccess(res, 200);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to update address data due to internal error. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to update address data due to internal error. ", e);
         }
     }
 }

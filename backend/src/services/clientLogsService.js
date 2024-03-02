@@ -1,9 +1,11 @@
 import fsExtra from "fs-extra";
 import path from "path";
-import { getLogger } from "log4js";
-import { MAX_CLIENT_LOGS_LIFETIME_MS } from "../../../properties/server/envs/prod";
+import log4js from "log4js";
 
-const log = getLogger("clientLogsService");
+import { MAX_CLIENT_LOGS_LIFETIME_MS } from "../properties.js";
+
+const log = log4js.getLogger("clientLogsService");
+const __dirname = path.resolve();
 
 export class ClientLogsService {
     static _LOGS_PATH = path.join(__dirname, "../../log/client");

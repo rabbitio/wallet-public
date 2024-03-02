@@ -1,8 +1,9 @@
-import RobustExternalAPICallerService from "../../../common/services/utils/robustExteranlApiCallerService/robustExternalAPICallerService";
-import { Coins } from "../../coins";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import RobustExternalAPICallerService from "../../../common/services/utils/robustExteranlApiCallerService/robustExternalAPICallerService.js";
+import { Coins } from "../../coins.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 
 class BlockstreamPostTransactionApiProvider extends ExternalApiProvider {
     constructor() {

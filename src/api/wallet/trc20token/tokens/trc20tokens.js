@@ -1,4 +1,4 @@
-import { Trc20Token } from "../models/trc20Token";
+import { Trc20Token } from "../models/trc20Token.js";
 
 /**
  * Guide to add new token:

@@ -1,16 +1,16 @@
-import { BigNumber } from "ethers";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { Coins } from "../../coins";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
-import { EthTransactionsUtils } from "../lib/ethTransactionsUtils";
-import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { mergeTwoTransactionsArraysAndNotifyAboutNewTransactions } from "../../common/utils/cacheActualizationUtils";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
-import { ERC20 } from "../../erc20token/erc20Protocol";
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { Coins } from "../../coins.js";
+import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
+import { EthTransactionsUtils } from "../lib/ethTransactionsUtils.js";
+import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem.js";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { mergeTwoTransactionsArraysAndNotifyAboutNewTransactions } from "../../common/utils/cacheActualizationUtils.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
+import { ERC20 } from "../../erc20token/erc20Protocol.js";
 
 class AlchemyEthereumBlockchainTransactionsProvider extends ExternalApiProvider {
     constructor() {
@@ -97,7 +97,7 @@ class AlchemyEthereumBlockchainTransactionsProvider extends ExternalApiProvider 
                     }
                     const type = transfer.to === myAddress ? "in" : "out";
                     const isSendingAndReceiving = transfer.to === transfer.from;
-                    const amount = BigNumber.from(transfer.rawContract.value).toString();
+                    const amount = AmountUtils.trim(transfer.rawContract.value, 0);
                     let timestamp = Date.parse(transfer?.metadata?.blockTimestamp ?? "");
                     timestamp = timestamp ? timestamp : provideFirstSeenTime(transfer.hash);
                     const confirmations = EthTransactionsUtils.estimateEthereumConfirmationsByTimestamp(timestamp);

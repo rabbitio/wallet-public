@@ -1,6 +1,7 @@
 import express from "express";
-import { apiVersionPrefix } from "../controllers/controllerUtils";
-import { FiatPaymentsController } from "../controllers/fiatPayments";
+
+import { apiVersionPrefix } from "../controllers/controllerUtils.js";
+import { FiatPaymentsController } from "../controllers/fiatPayments.js";
 
 const router = express.Router({});
 

@@ -1,8 +1,10 @@
-import { getLogger } from "log4js";
-import { improveAndRethrow } from "../utils/utils";
-import TransactionsToPaymentsService from "./transactionsToPaymentsService";
+import log4js from "log4js";
 
-const log = getLogger("rampPaymentsService");
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import TransactionsToPaymentsService from "./transactionsToPaymentsService.js";
+
+const log = log4js.getLogger("rampPaymentsService");
 
 export default class RampPaymentsService {
     static PROVIDER_ID = "ramp";

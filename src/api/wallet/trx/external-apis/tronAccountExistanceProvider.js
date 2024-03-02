@@ -1,11 +1,12 @@
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { Coins } from "../../coins";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { MODERATE_TTL_FOR_RELATIVELY_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { MODERATE_TTL_FOR_RELATIVELY_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 class TronscanAccountExistenceProvider extends ExternalApiProvider {
     constructor() {
@@ -14,7 +15,7 @@ class TronscanAccountExistenceProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            if (getCurrentNetwork(Coins.COINS.TRX) !== Coins.COINS.TRX.mainnet) {
+            if (Storage.getCurrentNetwork(Coins.COINS.TRX) !== Coins.COINS.TRX.mainnet) {
                 throw new Error("Tronscan provider doesn't support testnet for account existence check.");
             }
             return `?address=${params[0]}`;

@@ -1,4 +1,4 @@
-import { decrypt, encrypt } from "../../../common/adapters/crypto-utils";
+import { decrypt, encrypt } from "../../../common/adapters/crypto-utils.js";
 
 // TODO: [tests, low]
 export default class Address {

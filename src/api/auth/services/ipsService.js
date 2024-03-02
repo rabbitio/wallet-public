@@ -1,15 +1,16 @@
-import { improveAndRethrow } from "../../common/utils/errorUtils";
-import { decrypt, encrypt, getSaltedHash } from "../../common/adapters/crypto-utils";
-import { getDataPassword, getWalletId } from "../../common/services/internal/storage";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { decrypt, encrypt, getSaltedHash } from "../../common/adapters/crypto-utils.js";
+import { Storage } from "../../common/services/internal/storage.js";
 import {
     deleteEncryptedIpAddresses,
     getAllEncryptedIpAddresses,
     isIpHashPresent,
     saveEncryptedIpAddress,
-} from "../backend-api/encryptedIpsApi";
-import { Logger } from "../../support/services/internal/logs/logger";
-import { IpsServiceInternal } from "./internal/ipsServiceInternal";
-import IpAddressProvider from "../external-apis/ipAddressProviders";
+} from "../backend-api/encryptedIpsApi.js";
+import { Logger } from "../../support/services/internal/logs/logger.js";
+import { IpsServiceInternal } from "./internal/ipsServiceInternal.js";
+import IpAddressProvider from "../external-apis/ipAddressProviders.js";
 
 export class IPsService {
     /**
@@ -24,10 +25,10 @@ export class IPsService {
             Logger.log(`Start saving IP address. It is empty: ${!!ip}`, loggerSource);
 
             const bytesRepresentation = IpsServiceInternal.ipToStringOfBytes(ip);
-            const dataPassword = getDataPassword();
+            const dataPassword = Storage.getDataPassword();
             const encryptedIp = encrypt(ip, dataPassword);
             const ipHash = getSaltedHash(bytesRepresentation, dataPassword);
-            await saveEncryptedIpAddress(getWalletId(), encryptedIp, ipHash);
+            await saveEncryptedIpAddress(Storage.getWalletId(), encryptedIp, ipHash);
 
             Logger.log(`IP address was saved`, loggerSource);
         } catch (e) {
@@ -47,8 +48,8 @@ export class IPsService {
             Logger.log(`Start deleting IP address. It is empty: ${!!ip}`, loggerSource);
 
             const bytesRepresentation = IpsServiceInternal.ipToStringOfBytes(ip);
-            const ipHash = getSaltedHash(bytesRepresentation, getDataPassword());
-            await deleteEncryptedIpAddresses(getWalletId(), [ipHash]);
+            const ipHash = getSaltedHash(bytesRepresentation, Storage.getDataPassword());
+            await deleteEncryptedIpAddresses(Storage.getWalletId(), [ipHash]);
 
             Logger.log("IP address was removed", loggerSource);
         } catch (e) {
@@ -65,7 +66,10 @@ export class IPsService {
     static async doesIpAddressExist(ip) {
         try {
             const bytesRepresentation = IpsServiceInternal.ipToStringOfBytes(ip);
-            return await isIpHashPresent(getWalletId(), getSaltedHash(bytesRepresentation, getDataPassword()));
+            return await isIpHashPresent(
+                Storage.getWalletId(),
+                getSaltedHash(bytesRepresentation, Storage.getDataPassword())
+            );
         } catch (e) {
             improveAndRethrow(e, "doesIpAddressExist");
         }
@@ -80,8 +84,8 @@ export class IPsService {
         const loggerSource = "getAllIpAddresses";
         try {
             Logger.log("Start getting all IP addresses", loggerSource);
-            const allEncryptedIps = await getAllEncryptedIpAddresses(getWalletId());
-            const result = allEncryptedIps.map(encryptedIp => decrypt(encryptedIp, getDataPassword()));
+            const allEncryptedIps = await getAllEncryptedIpAddresses(Storage.getWalletId());
+            const result = allEncryptedIps.map(encryptedIp => decrypt(encryptedIp, Storage.getDataPassword()));
 
             Logger.log(`Returning ${result.length} IP addresses`, loggerSource);
             return result;

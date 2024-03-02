@@ -1,7 +1,8 @@
-import { ApiCallWrongResponseError, doApiCall, urlWithPrefix } from "../../../common/backend-api/utils";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
-import { PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ApiCallWrongResponseError, doApiCall, urlWithPrefix } from "../../../common/backend-api/utils.js";
+import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
+import { PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 export default class AddressesDataApi {
     static serverEndpointEntity = "addressesData";

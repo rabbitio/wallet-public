@@ -1,21 +1,15 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import {
-    addClientIpHash,
-    addWalletIdAndSessionId,
-    processInternalError,
-    processSuccess,
-    validateRequestDataAndResponseOnErrors,
-} from "./controllerUtils";
+import { ControllerUtils } from "./controllerUtils.js";
 
-import schemas from "../models/joi_schemas";
+import schemas from "../models/joi_schemas.js";
 import {
     GET_LIST_OF_ENCRYPTED_WALLET_PAYMENT_IDS_EP_NUMBER,
     SAVE_ENCRYPTED_WALLET_PAYMENT_ID_EP_NUMBER,
-} from "./endpointNumbers";
-import { EncryptedWalletPaymentIdsService } from "../services/encryptedWalletPaymentIdsService";
+} from "./endpointNumbers.js";
+import { EncryptedWalletPaymentIdsService } from "../services/encryptedWalletPaymentIdsService.js";
 
-const log = getLogger("encryptedWalletPaymentIds");
+const log = log4js.getLogger("encryptedWalletPaymentIds");
 
 export class EncryptedWalletPaymentIdsController {
     /**
@@ -46,8 +40,8 @@ export class EncryptedWalletPaymentIdsController {
         const endpointNumber = SAVE_ENCRYPTED_WALLET_PAYMENT_ID_EP_NUMBER;
 
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, req.body));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, req.body));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.saveEncryptedWalletPaymentId,
@@ -62,10 +56,10 @@ export class EncryptedWalletPaymentIdsController {
                 );
 
                 log.debug("Encrypted payment id was saved, sending 201.");
-                processSuccess(res, 201);
+                ControllerUtils.processSuccess(res, 201);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Error occurred during the saving of encrypted payment id. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Error occurred during the saving of encrypted payment id. ", e);
         }
     }
 
@@ -99,8 +93,8 @@ export class EncryptedWalletPaymentIdsController {
         const endpointNumber = GET_LIST_OF_ENCRYPTED_WALLET_PAYMENT_IDS_EP_NUMBER;
 
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, {}));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, {}));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.getListOfEncryptedWalletPaymentIds,
@@ -118,11 +112,11 @@ export class EncryptedWalletPaymentIdsController {
                     res.status(404).json({ encryptedPaymentIds: [] });
                 } else {
                     log.debug("Encrypted payment ids were retrieved, sending 200 and the ids.");
-                    processSuccess(res, 200, { encryptedPaymentIds });
+                    ControllerUtils.processSuccess(res, 200, { encryptedPaymentIds });
                 }
             }
         } catch (e) {
-            processInternalError(
+            ControllerUtils.processInternalError(
                 res,
                 endpointNumber,
                 "Error occurred during the getting of encrypted payment ids: ",

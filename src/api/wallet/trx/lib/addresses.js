@@ -1,5 +1,5 @@
-import { logError } from "../../../common/utils/errorUtils";
-import { tronUtils } from "../adapters/tronUtils";
+import { logError } from "../../../common/utils/errorUtils.js";
+import { tronUtils } from "../adapters/tronUtils.js";
 
 /**
  * Validates tron address.

@@ -1,10 +1,11 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import { improveAndRethrow } from "../utils/utils";
-import { dbConnectionHolder } from "../utils/dbConnectionHolder";
-import { isInsertOneResultValid } from "./mongoUtil";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-const log = getLogger("notificationsService");
+import { dbConnectionHolder } from "../utils/dbConnectionHolder.js";
+import { isInsertOneResultValid } from "./mongoUtil.js";
+
+const log = log4js.getLogger("notificationsService");
 
 export class NotificationsService {
     static documentName = "notifications";

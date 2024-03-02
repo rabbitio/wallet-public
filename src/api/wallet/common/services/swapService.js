@@ -1,76 +1,26 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { Wallets } from "../wallets";
-import { Coins } from "../../coins";
-import { cache } from "../../../common/utils/cache";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { TxData } from "../models/tx-data";
-import CoinsToFiatRatesService from "./coinsToFiatRatesService";
-import { SwapProvider } from "../../../swaps/external-apis/swapProvider";
-import { SendCoinsService } from "./sendCoinsService";
-import { safeStringify } from "../../../common/utils/browserUtils";
-import { SwapspaceSwapProvider } from "../../../swaps/external-apis/swapspaceSwapProvider";
-import { BalancesService } from "./balancesService";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import { Coin } from "../models/coin";
-import { EventBus, SWAP_CREATED_EVENT, SWAP_TX_PUSHED_EVENT } from "../../../common/adapters/eventbus";
-import { ETHEREUM_BLOCKCHAIN } from "../../eth/ethereumBlockchain";
-import { TRON_BLOCKCHAIN } from "../../trx/tronBlockchain";
-import { BITCOIN_BLOCKCHAIN } from "../../btc/bitcoinBlockchain";
-import { SwapUtils } from "../../../swaps/utils/swapUtils";
-import { NumbersUtils } from "../utils/numbersUtils";
+import { BigNumber } from "bignumber.js";
 
-export class SwapDetails {
-    /**
-     * @param fromCoin {Coin}
-     * @param toCoin {Coin}
-     * @param fromAmount {number}
-     * @param toAmount {number}
-     * @param feeCoin {Coin}
-     * @param feeCoins {number}
-     * @param feeFiat {number}
-     * @param rate {number}
-     * @param rawSwapData {Object}
-     * @param min {number|null}
-     * @param fiatMin {number|null}
-     * @param max {number|null}
-     * @param fiatMax {number|null}
-     * @param txData {TxData}
-     * @param durationMinutesRange {string}
-     */
-    constructor(
-        fromCoin,
-        toCoin,
-        fromAmount,
-        toAmount,
-        feeCoin,
-        feeCoins,
-        feeFiat,
-        rate,
-        rawSwapData,
-        min,
-        fiatMin,
-        max,
-        fiatMax,
-        txData,
-        durationMinutesRange
-    ) {
-        this.fromCoin = fromCoin;
-        this.toCoin = toCoin;
-        this.fromAmount = fromAmount;
-        this.toAmount = toAmount;
-        this.feeCoin = feeCoin;
-        this.feeCoins = feeCoins;
-        this.feeFiat = feeFiat;
-        this.rate = rate;
-        this.rawSwapData = rawSwapData;
-        this.min = min;
-        this.fiatMin = fiatMin;
-        this.max = max;
-        this.fiatMax = fiatMax;
-        this.txData = txData;
-        this.durationMinutesRange = durationMinutesRange;
-    }
-}
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Wallets } from "../wallets.js";
+import { Coins } from "../../coins.js";
+import { cache } from "../../../common/utils/cache.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { TxData } from "../models/tx-data.js";
+import CoinsToFiatRatesService from "./coinsToFiatRatesService.js";
+import { SwapProvider } from "../../../swaps/external-apis/swapProvider.js";
+import { SendCoinsService } from "./sendCoinsService.js";
+import { safeStringify } from "../../../common/utils/browserUtils.js";
+import { SwapspaceSwapProvider } from "../../../swaps/external-apis/swapspaceSwapProvider.js";
+import { BalancesService } from "./balancesService.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { Coin } from "../models/coin.js";
+import { EventBus, SWAP_CREATED_EVENT, SWAP_TX_PUSHED_EVENT } from "../../../common/adapters/eventbus.js";
+import { ETHEREUM_BLOCKCHAIN } from "../../eth/ethereumBlockchain.js";
+import { TRON_BLOCKCHAIN } from "../../trx/tronBlockchain.js";
+import { BITCOIN_BLOCKCHAIN } from "../../btc/bitcoinBlockchain.js";
+import { SwapUtils } from "../../../swaps/utils/swapUtils.js";
+import { SwapCreationInfo } from "../models/swapCreationInfo.js";
 
 export class SwapService {
     static SWAPS_COMMON_ERRORS = {
@@ -100,8 +50,8 @@ export class SwapService {
         this._swapProvider = swapProvider;
     }
 
-    getSwapDetailsTtlMs() {
-        return this._swapProvider.getSwapDetailsTtlMs();
+    getSwapCreationInfoTtlMs() {
+        return this._swapProvider.getSwapCreationInfoTtlMs();
     }
 
     /**
@@ -116,8 +66,7 @@ export class SwapService {
      *             result: true,
      *             coinsData: {
      *                 coin: Coin,
-     *                 balance: (string|number),
-     *                 balanceTrimmed: string,
+     *                 balance: string,
      *                 balanceFiat: string,
      *                 fiatCurrencyCode: string,
      *                 fiatCurrencyDecimals: number,
@@ -143,8 +92,10 @@ export class SwapService {
             );
             const wallets = Wallets.getWalletsByCoins(enabledSupportedByProvider);
             let balances = await BalancesService.getBalancesWithFiat(wallets);
-            // TODO: [bug, high] need precise decimals here to compare robustly arbitrary precision. Add tests for it (uncomment existing) task_id=e0be6bc18cf843b7a078bae8977b19d5
-            balances.sort((i1, i2) => +i2.balanceFiat - +i1.balanceFiat);
+            balances.sort((i1, i2) => {
+                const diff = BigNumber(i2.balanceFiat).minus(i1.balanceFiat);
+                return diff.isNegative() ? -1 : diff.isZero() ? 0 : 1;
+            });
             Logger.log(
                 `Balances for enabled coins supported by swap provider ${safeStringify(
                     balances.map(b => ({ c: b?.coin?.ticker, b: b?.balanceFiat }))
@@ -157,7 +108,6 @@ export class SwapService {
                 coinsData: balances.map(item => ({
                     coin: item.coin,
                     balance: item.balanceCoins,
-                    balanceTrimmed: NumbersUtils.trimCurrencyAmount(item.balanceCoins, item.coin.digits, 13),
                     balanceFiat: item.balanceFiat,
                     fiatCurrencyCode: item.fiatCurrencyCode,
                     fiatCurrencyDecimals: item.fiatCurrencyDecimals,
@@ -224,7 +174,7 @@ export class SwapService {
      *             result: true,
      *             swappableData: {
      *                 coin: Coin,
-     *                 balance: (string|number),
+     *                 balance: string,
      *                 balanceTrimmed: string,
      *                 balanceFiat: string,
      *                 fiatCurrencyCode: string,
@@ -289,60 +239,60 @@ export class SwapService {
     }
 
     /**
-     * Retrieves swap details for giving parameters.
+     * Retrieves swap creation info for giving parameters that can be used to create swap.
      *
-     * Note: caches swap details from swap provider under the hood so this method can be used for frequent recalculations.
+     * Note: it caches swap creation info from swap provider under the hood so this method can be used for
+     * frequent recalculations.
      * But there are few reasons except cache expiration that trigger the recalculation like:
      * 1. when sending BTC we should recalculate network fee each time because of outputs;
-     * 2. we cannot use swap details from provider if giving fromAmount is not in [min, max];
+     * 2. we cannot use swap creation info from provider if giving fromAmount is not in [min, max];
      * 3. etc.
      * Despite on some possible slow recalculations this method is still sane because it aggregates the plenty of cases
      * that we should handle during the swap details calculation.
      *
      * @param fromCoin {Coin}
      * @param toCoin {Coin}
-     * @param fromAmountCoins {number}
+     * @param fromAmountCoins {string}
      * @param [swapAll=false] {boolean}
      * @return {Promise<{
      *             result: true,
-     *             swapDetails: SwapDetails,
+     *             swapCreationInfo: SwapCreationInfo,
      *         }|{
      *             result: false,
      *             reason: (SwapService.SWAP_DETAILS_FAIL_REASONS|SwapService.SWAPS_COMMON_ERRORS),
-     *             min: (number|null|undefined),
+     *             min: (string|null|undefined),
      *             fiatMin: (number|null|undefined),
-     *             max: (number|null|undefined),
+     *             max: (string|null|undefined),
      *             fiatMax: (number|null|undefined),
-     *             fromBalanceCoins: (number|null),
-     *             feeBalanceCoins: (number|undefined),
-     *             feeCoins: (number|null|undefined),
+     *             fromBalanceCoins: (string|null),
+     *             feeCoins: (string|null|undefined),
      *             feeFiat: (number|null|undefined),
-     *             rate: (number|null|undefined),
+     *             rate: (string|null|undefined),
      *         }>}
      *
      * TODO: [tests, critical] unit tests are required
      */
-    async getSwapDetails(fromCoin, toCoin, fromAmountCoins, swapAll = false) {
-        const loggerSource = "getSwapDetails";
+    async getSwapCreationInfo(fromCoin, toCoin, fromAmountCoins, swapAll = false) {
+        const loggerSource = "getSwapCreationInfo";
         try {
-            const fromBalanceCoins = (await BalancesService.getBalances([Wallets.getWalletByCoin(fromCoin)]))[0];
+            let fromBalanceCoins = (await BalancesService.getBalances([Wallets.getWalletByCoin(fromCoin)]))[0];
             this._throwErrorIfParamsNotValid(fromAmountCoins, fromBalanceCoins, swapAll);
             const feeResult = await this._calculateNetworkFee(fromCoin, fromAmountCoins, swapAll, fromBalanceCoins);
             const feeCoins = feeResult?.feeCoins ?? undefined;
-            const isFeePayable = typeof feeCoins === "number" && !feeResult?.isFeeCoinBalanceNotEnoughForAllOptions;
+            const isFeePayable = typeof feeCoins === "string" && !feeResult?.isFeeCoinBalanceNotEnoughForAllOptions;
             if (swapAll) {
                 if (isFeePayable) {
                     if (fromCoin.doesUseDifferentCoinFee()) {
-                        fromAmountCoins = fromBalanceCoins;
+                        fromAmountCoins = AmountUtils.trim(fromBalanceCoins, fromCoin.digits);
                     } else {
-                        fromAmountCoins = +fromCoin.atomsToCoinAmount(feeResult.fastestOptionTxData.amount);
+                        fromAmountCoins = fromCoin.atomsToCoinAmount(feeResult.fastestOptionTxData.amount);
                     }
                 } else {
                     /* We use just some default value to make sure we get min/max limits for swap all case when the fee
                      * is not payable by balance, and we are just preparing to return a fail so getting more details for
                      * its construction. We will return fail result at the validation stage.
                      */
-                    fromAmountCoins = 1;
+                    fromAmountCoins = "1";
                 }
             }
             const cacheKey = `swap_details_${fromCoin.ticker}-${toCoin.ticker}-${fromAmountCoins}`;
@@ -351,17 +301,17 @@ export class SwapService {
                 details == null ||
                 swapAll ||
                 !details.result ||
-                (details.min != null && +fromAmountCoins < details.min) ||
-                (details.max != null && +fromAmountCoins > details.max)
+                (details.min != null && BigNumber(fromAmountCoins).lt(details.min)) ||
+                (details.max != null && BigNumber(fromAmountCoins).gt(details.max))
             ) {
-                /* Requesting thw data if no item found in the cache/expired or the data contains the fail result or if
+                /* Requesting the data if no item found in the cache/expired or the data contains the fail result or if
                  * the fromAmount doesn't fit min or max limits for the cached data (as we need to select another rate
                  * internally for the amount to fit another min/max as the cached rate is just for coins pair and doesn't
                  * depend on min/max).
                  * Also we recalculate despite on the present data when swap all is requested.
                  */
-                details = await this._swapProvider.getSwapInfo(fromCoin, toCoin, +fromAmountCoins);
-                cache.putSessionDependentData(cacheKey, details, this.getSwapDetailsTtlMs());
+                details = await this._swapProvider.getSwapInfo(fromCoin, toCoin, fromAmountCoins);
+                cache.putSessionDependentData(cacheKey, details, this.getSwapCreationInfoTtlMs());
                 Logger.log(`Fetched the swap details: ${safeStringify(details)}`, loggerSource);
             }
 
@@ -376,7 +326,7 @@ export class SwapService {
             ]);
             const [fiatMin, fiatMax] = fiatData[0].amountsFiat;
             const feeFiat = fiatData[1].amountsFiat[0];
-            const composeFailResult = (reason, feeBalanceCoins) => ({
+            const composeFailResult = reason => ({
                 result: false,
                 reason: reason,
                 min: min ?? null,
@@ -384,7 +334,6 @@ export class SwapService {
                 max: max ?? null,
                 fiatMax: fiatMax,
                 fromBalanceCoins: fromBalanceCoins,
-                feeBalanceCoins: feeBalanceCoins,
                 feeCoins: feeCoins,
                 feeFiat: feeFiat ?? undefined,
                 rate: details.rate ?? undefined, // Suitable for validation errors like exceeding balance
@@ -415,12 +364,12 @@ export class SwapService {
                 fromBalanceCoins
             );
             if (!validation.result) {
-                return composeFailResult(validation.reason, validation.feeBalanceCoins);
+                return composeFailResult(validation.reason);
             }
-            const toAmountCoins = +fromAmountCoins * details.rate;
+            const toAmountCoins = AmountUtils.trim(BigNumber(fromAmountCoins).times(details.rate), toCoin.digits);
             const result = {
                 result: true,
-                swapDetails: new SwapDetails(
+                swapCreationInfo: new SwapCreationInfo(
                     fromCoin,
                     toCoin,
                     fromAmountCoins,
@@ -441,11 +390,11 @@ export class SwapService {
             Logger.log(
                 `Result: ${safeStringify({
                     result: result.result,
-                    swapDetails: {
-                        ...result.swapDetails,
-                        fromCoin: result?.swapDetails?.fromCoin?.ticker,
-                        toCoin: result?.swapDetails?.toCoin?.ticker,
-                        feeCoin: result?.swapDetails?.feeCoin?.ticker,
+                    swapCreationInfo: {
+                        ...result.swapCreationInfo,
+                        fromCoin: result?.swapCreationInfo?.fromCoin?.ticker,
+                        toCoin: result?.swapCreationInfo?.toCoin?.ticker,
+                        feeCoin: result?.swapCreationInfo?.feeCoin?.ticker,
                     },
                 })}`,
                 loggerSource
@@ -491,13 +440,13 @@ export class SwapService {
 
     /**
      * @param fromCoin {Coin}
-     * @param fromAmountCoins {string|number}
+     * @param fromAmountCoins {string}
      * @param swapAll {boolean}
-     * @param fromBalanceCoins {string|number}
+     * @param fromBalanceCoins {string}
      * @return {Promise<{
      *             result: boolean,
      *             fastestOptionTxData: TxData,
-     *             feeCoins: number,
+     *             feeCoins: string,
      *             isFeeCoinBalanceNotEnoughForAllOptions: boolean
      *         }|{
      *             result: false,
@@ -511,10 +460,10 @@ export class SwapService {
             const fromWallet = Wallets.getWalletByCoin(fromCoin);
             const feeOptionsResult = await fromWallet.createTransactionsWithFakeSignatures(
                 this._getFakeAddressForTransactionFeeEstimation(fromCoin),
-                "" + fromAmountCoins, // TODO: [bug, critical] unsafe. taskId=96a8026f8a5747899dbb9ff1dd2fe8df
+                fromAmountCoins,
                 swapAll,
-                getCurrentNetwork(fromCoin),
-                fromBalanceCoins, // TODO: [bug, critical] number is unsafe here. task_id=96a8026f8a5747899dbb9ff1dd2fe8df
+                Storage.getCurrentNetwork(fromCoin),
+                fromBalanceCoins,
                 true
             );
             Logger.log(`Retrieved fee options for swap: ${safeStringify(feeOptionsResult)}`, loggerSource);
@@ -538,7 +487,7 @@ export class SwapService {
                 throw new Error("Wrong change address inside swap details creation.");
             }
             const feeCoins =
-                fastestOption instanceof TxData ? +fromCoin.feeCoin.atomsToCoinAmount("" + fastestOption.fee) : null;
+                fastestOption instanceof TxData ? fromCoin.feeCoin.atomsToCoinAmount(fastestOption.fee) : null;
             Logger.log(`Returning fee: ${feeCoins}, txData: ${safeStringify(fastestOption)}`, loggerSource);
             return {
                 result: true,
@@ -564,11 +513,11 @@ export class SwapService {
      * @param toCoin {Coin}
      * @return {Promise<{
      *             result: true,
-     *             min: number,
+     *             min: string,
      *             fiatMin: (number|null),
-     *             max: number,
+     *             max: string,
      *             fiatMax: (number|null),
-     *             rate: (number|null),
+     *             rate: (string|null),
      *         }|{
      *             result: false,
      *             reason: string
@@ -592,14 +541,17 @@ export class SwapService {
         }
     }
 
+    /**
+     * @param fromAmount {string}
+     * @param fromBalanceCoins {string}
+     * @param swapAll {boolean}
+     * @private
+     */
     _throwErrorIfParamsNotValid(fromAmount, fromBalanceCoins, swapAll) {
-        fromAmount = +fromAmount;
-        fromBalanceCoins = +fromBalanceCoins;
         if (
-            (!swapAll && (Number.isNaN(fromAmount) || typeof fromAmount !== "number" || fromAmount < 0)) ||
-            Number.isNaN(fromBalanceCoins) ||
-            typeof fromBalanceCoins !== "number" ||
-            fromBalanceCoins < 0
+            (!swapAll && (typeof fromAmount !== "string" || !fromAmount.match(/\d+\.?\d*/))) ||
+            typeof fromBalanceCoins !== "string" ||
+            !fromBalanceCoins.match(/\d+\.?\d*/)
         ) {
             throw new Error(`Wrong from amount or balance: ${fromAmount}, ${fromBalanceCoins}`);
         }
@@ -608,19 +560,18 @@ export class SwapService {
     /**
      * @param fromCoin {Coin}
      * @param toCoin {Coin}
-     * @param fromAmount {number}
+     * @param fromAmount {string}
      * @param isFeePayable {boolean}
      * @param swapAll {boolean}
-     * @param feeCoins {number|null}
-     * @param min {number|null}
-     * @param max {number|null}
-     * @param fromBalanceCoins {number}
+     * @param feeCoins {string|null}
+     * @param min {string|null}
+     * @param max {string|null}
+     * @param fromBalanceCoins {string}
      * @return {Promise<{
      *             result: true
      *         }|{
      *             result: false,
-     *             reason: string,
-     *             feeBalanceCoins: (number|undefined)
+     *             reason: string
      *          }>} reason is one of SwapService.SWAP_DETAILS_FAIL_REASONS
      * @throws {Error} if fee is not null but not positive number
      *
@@ -633,13 +584,11 @@ export class SwapService {
                 `Validating ${fromCoin.ticker} ${fromAmount}, ${fromBalanceCoins} ${feeCoins} ${min} ${max}`,
                 loggerSource
             );
-            fromAmount = +fromAmount;
-            fromBalanceCoins = +fromBalanceCoins;
-            if (feeCoins != null && (Number.isNaN(+feeCoins) || typeof +feeCoins !== "number" || +feeCoins < 0)) {
-                throw new Error(`Wrong fee: ${feeCoins}`);
+            if (feeCoins != null && !feeCoins.match(/\d+\.?\d*/)) {
+                throw new Error(`Wrong fee: ${feeCoins}, ${typeof feeCoins}`);
             }
+            const fromAmountBigNumber = BigNumber(fromAmount);
             let failReason = null;
-            let feeBalance = null;
             if (fromCoin === toCoin) {
                 failReason = SwapService.SWAP_DETAILS_FAIL_REASONS.SAME_COINS;
             } else if (!isFeePayable && swapAll) {
@@ -651,11 +600,11 @@ export class SwapService {
                 } else {
                     failReason = SwapService.SWAP_DETAILS_FAIL_REASONS.NETWORK_FEE_PLUS_FROM_AMOUNT_EXCEED_BALANCE;
                 }
-            } else if (fromAmount > fromBalanceCoins) {
+            } else if (fromAmountBigNumber.gt(fromBalanceCoins)) {
                 failReason = SwapService.SWAP_DETAILS_FAIL_REASONS.FROM_AMOUNT_EXCEEDS_BALANCE;
-            } else if (typeof min === "number" && fromAmount < min) {
+            } else if (typeof min === "string" && fromAmountBigNumber.lt(min)) {
                 failReason = SwapService.SWAP_DETAILS_FAIL_REASONS.AMOUNT_LESS_THAN_MIN_SWAPPABLE;
-            } else if (typeof max === "number" && fromAmount > max) {
+            } else if (typeof max === "string" && fromAmountBigNumber.gt(max)) {
                 failReason = SwapService.SWAP_DETAILS_FAIL_REASONS.AMOUNT_HIGHER_THAN_MAX_SWAPPABLE;
             } else if (feeCoins == null || !isFeePayable) {
                 if (fromCoin.doesUseDifferentCoinFee()) {
@@ -666,11 +615,7 @@ export class SwapService {
             }
 
             if (failReason) {
-                let result = {
-                    result: false,
-                    reason: failReason,
-                    feeBalanceCoins: feeBalance ?? undefined,
-                };
+                let result = { result: false, reason: failReason };
                 Logger.log(`Returning fail result ${safeStringify(result)}`, loggerSource);
                 return result;
             }
@@ -683,23 +628,23 @@ export class SwapService {
     /**
      * @param fromCoin {Coin}
      * @param toCoin {Coin}
-     * @param fromAmount {number}
-     * @param swapDetails {SwapDetails}
+     * @param fromAmount {string}
+     * @param swapCreationInfo {SwapCreationInfo}
      * @return {Promise<{
      *              result: true,
      *              swapId: string,
      *              fromCoin: Coin,
      *              toCoin: Coin,
-     *              fromAmount: number,
-     *              toAmount: number,
+     *              fromAmount: string,
+     *              toAmount: string,
      *              fromAmountFiat: (number|null),
      *              toAmountFiat: (number|null),
      *              fiatCurrencyCode: string,
      *              fiatCurrencyDecimals: number,
-     *              rate: number,
+     *              rate: string,
      *              transactionNote: string,
      *              txData: TxData,
-     *              feeCoins: number,
+     *              feeCoins: string,
      *              feeFiat: number,
      *              durationMinutesRange: string,
      *
@@ -708,26 +653,23 @@ export class SwapService {
      *              reason: (SwapService.SWAP_CREATION_FAIL_REASONS|SwapService.COMMON_ERRORS)
      *          }>}
      */
-    async createSwap(fromCoin, toCoin, fromAmount, swapDetails) {
+    async createSwap(fromCoin, toCoin, fromAmount, swapCreationInfo) {
         const loggerSource = "createSwap";
         try {
-            if (typeof fromAmount === "string") {
-                fromAmount = Number(fromAmount);
-            }
             if (
                 !(fromCoin instanceof Coin) ||
                 !(toCoin instanceof Coin) ||
-                typeof fromAmount !== "number" ||
-                !(swapDetails instanceof SwapDetails)
+                typeof fromAmount !== "string" ||
+                !(swapCreationInfo instanceof SwapCreationInfo)
             ) {
-                throw new Error(`Wrong input: ${fromCoin} ${toCoin} ${fromAmount} ${swapDetails}`);
+                throw new Error(`Wrong input: ${fromCoin} ${toCoin} ${fromAmount} ${swapCreationInfo}`);
             }
             Logger.log(
                 `Start: ${fromAmount} ${fromCoin.ticker} -> ${toCoin.ticker}. Details: ${safeStringify({
-                    ...swapDetails,
-                    fromCoin: swapDetails?.fromCoin?.ticker,
-                    toCoin: swapDetails?.toCoin?.ticker,
-                    feeCoin: swapDetails?.feeCoin?.ticker,
+                    ...swapCreationInfo,
+                    fromCoin: swapCreationInfo?.fromCoin?.ticker,
+                    toCoin: swapCreationInfo?.toCoin?.ticker,
+                    feeCoin: swapCreationInfo?.feeCoin?.ticker,
                 })}`,
                 loggerSource
             );
@@ -742,7 +684,7 @@ export class SwapService {
                 fromAmount,
                 toAddress,
                 refundAddress,
-                swapDetails.rawSwapData
+                swapCreationInfo.rawSwapData
             );
             Logger.log(
                 `Created:${safeStringify({
@@ -766,7 +708,7 @@ export class SwapService {
                 }
             }
             if (result.result && result?.swapId) {
-                const feeCoins = +fromCoin.feeCoin.atomsToCoinAmount("" + swapDetails.txData.fee);
+                const feeCoins = fromCoin.feeCoin.atomsToCoinAmount(swapCreationInfo.txData.fee);
                 const fiatRequest = [
                     { coin: fromCoin, amounts: [result.fromAmount] },
                     { coin: toCoin, amounts: [result.toAmount] },
@@ -791,12 +733,12 @@ export class SwapService {
                 const note = `Swap ${fromCurrencyString} to ${toCurrencyString}. Expect to receive the ${toCurrencyString} transaction shortly after the ${fromCurrencyString} transaction is confirmed. If the swap fails for any reason, you will receive a refund. Swap ID: ${result.swapId}`;
                 /*
                  * WARNING: critical point - setting target address to send coins to swaps provider.
-                 * We fail if address is not valid.
+                 * We fail if address is not valid for safety.
                  */
                 if (typeof result.fromAddress !== "string" || result.fromAddress.length === 0) {
                     throw new Error("Wrong address returned during swap creation");
                 }
-                swapDetails.txData.address = result.fromAddress;
+                swapCreationInfo.txData.address = result.fromAddress;
 
                 EventBus.dispatch(SWAP_CREATED_EVENT, null, fromCoin.ticker, toCoin.ticker, result.fromAmount);
 
@@ -813,10 +755,10 @@ export class SwapService {
                     fiatCurrencyDecimals: currentFiatCurrencyData.decimalCount,
                     rate: result.rate,
                     transactionNote: note,
-                    txData: swapDetails.txData,
+                    txData: swapCreationInfo.txData,
                     feeCoins: feeCoins,
                     feeFiat: feeFiat,
-                    durationMinutesRange: swapDetails.durationMinutesRange,
+                    durationMinutesRange: swapCreationInfo.durationMinutesRange,
                 };
                 Logger.log(
                     `Returning: ${safeStringify({

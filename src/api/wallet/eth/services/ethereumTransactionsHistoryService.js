@@ -1,10 +1,12 @@
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import { EthTransactionsProvider } from "../external-apis/ethTransactionsProvider";
-import { EthAddressesService } from "./ethAddressesService";
-import { EthereumBlockchainTransactionsProvider } from "../external-apis/ethereumBlockchainTransactionsProvider";
-import { Coins } from "../../coins";
-import { Erc20TransactionsProvider } from "../../erc20token/external-apis/erc20TransactionsProvider";
-import { ERC20 } from "../../erc20token/erc20Protocol";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { logError } from "../../../common/utils/errorUtils.js";
+import { EthTransactionsProvider } from "../external-apis/ethTransactionsProvider.js";
+import { EthAddressesService } from "./ethAddressesService.js";
+import { EthereumBlockchainTransactionsProvider } from "../external-apis/ethereumBlockchainTransactionsProvider.js";
+import { Coins } from "../../coins.js";
+import { Erc20TransactionsProvider } from "../../erc20token/external-apis/erc20TransactionsProvider.js";
+import { ERC20 } from "../../erc20token/erc20Protocol.js";
 
 export class EthereumTransactionsHistoryService {
     /**
@@ -28,9 +30,8 @@ export class EthereumTransactionsHistoryService {
                 const erc20List = await Erc20TransactionsProvider.getErc20TransactionsByAddress(address);
                 return erc20List.filter(tx => tx.ticker === coin.ticker);
             } catch (e) {
-                const ethereumBlockchainTransactions = await EthereumBlockchainTransactionsProvider.getEthereumBlockchainTransactions(
-                    address
-                );
+                const ethereumBlockchainTransactions =
+                    await EthereumBlockchainTransactionsProvider.getEthereumBlockchainTransactions(address);
                 try {
                     const onlyEth = ethereumBlockchainTransactions.filter(tx => tx.ticker === Coins.COINS.ETH.ticker);
                     EthTransactionsProvider.actualizeCacheWithTransactionsReturnedByAnotherProvider(address, onlyEth);

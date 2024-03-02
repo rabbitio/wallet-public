@@ -1,16 +1,16 @@
-import { BigNumber } from "ethers";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { tronUtils } from "../../trx/adapters/tronUtils";
-import { Coins } from "../../coins";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { tronUtils } from "../../trx/adapters/tronUtils.js";
+import { Coins } from "../../coins.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import {
     createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
     mergeSingleBalanceValuesAndNotifyAboutValueChanged,
-} from "../../common/utils/cacheActualizationUtils";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
+} from "../../common/utils/cacheActualizationUtils.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
 
 class TrongridTrc20BalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -46,7 +46,7 @@ class TrongridTrc20BalanceProvider extends ExternalApiProvider {
         try {
             const balanceHex = (response?.data?.constant_result ?? [])[0];
             if (balanceHex == null) throw new Error("Wrong balance retrieved for trc20: " + JSON.stringify(params));
-            return BigNumber.from(`0x${balanceHex}`).toString();
+            return AmountUtils.trim(`0x${balanceHex}`, 0);
         } catch (e) {
             improveAndRethrow(e, "trongridTrc20BalanceProvider.getDataByResponse");
         }

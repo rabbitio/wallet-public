@@ -1,4 +1,4 @@
-import { Erc20Token } from "../models/erc20Token";
+import { Erc20Token } from "../models/erc20Token.js";
 
 /**
  * Guide to add new token:

@@ -1,4 +1,4 @@
-import { LOG_LEVEL } from "../../../../../properties";
+import { LOG_LEVEL } from "../../../../../properties.js";
 
 // TODO: [feature, high] Improve logger logic with new levels and other stuff
 export class ConsoleLogger {

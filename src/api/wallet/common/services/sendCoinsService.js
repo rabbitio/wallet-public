@@ -1,14 +1,18 @@
-import { BigNumber } from "ethers";
-import { Coins } from "../../coins";
-import { Wallets } from "../wallets";
-import { isAmountDustForAddress } from "../../btc/lib/utxos";
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import CoinsToFiatRatesService from "./coinsToFiatRatesService";
-import { getDecryptedWalletCredentials } from "../../../auth/services/authService";
-import { EventBus, TRANSACTION_PUSHED_EVENT } from "../../../common/adapters/eventbus";
-import { TransactionsDataService } from "./transactionsDataService";
+import { BigNumber } from "bignumber.js";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Coins } from "../../coins.js";
+import { Wallets } from "../wallets.js";
+import { Utxos } from "../../btc/lib/utxos.js";
+import { logError } from "../../../common/utils/errorUtils.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import CoinsToFiatRatesService from "./coinsToFiatRatesService.js";
+import { AuthService } from "../../../auth/services/authService.js";
+import { EventBus, TRANSACTION_PUSHED_EVENT } from "../../../common/adapters/eventbus.js";
+import { TransactionsDataService } from "./internal/transactionsDataService.js";
+import { safeStringify } from "../../../common/utils/browserUtils.js";
 
 export class SendCoinsService {
     /**
@@ -19,7 +23,7 @@ export class SendCoinsService {
      * @param amountCoins {string} amount to be validated in coins (not atoms)
      * @param isSendAll {boolean} whether user aims to send all coins from the wallet
      * @param address {string} address that user aims to send coins to
-     * @param [balanceCoinAmount] optional balance to avoid in-place calculation (in coins)
+     * @param [balanceCoinAmount] {string|null} optional balance to avoid in-place calculation (in coins)
      * @param [coin] {Coin} a coin to check the sending for
      * @return {Promise<{
      *             result: true
@@ -49,30 +53,30 @@ export class SendCoinsService {
                 };
             }
 
+            if (typeof amountCoins !== "string") {
+                throw new Error("Amount should be string for validation start: " + typeof amountCoins);
+            }
+
             const currentBalance =
                 balanceCoinAmount != null ? balanceCoinAmount : await Wallets.getWalletByCoin(coin).calculateBalance();
 
             const amountAtoms = coin.coinAmountToAtoms(amountCoins);
             // TODO: [feature, moderate, ether] implement for other coins. task_id=0834dc5591994ad4b632d2124f18c1de
             if (coin === Coins.COINS.BTC) {
-                const dustCheckResult = isAmountDustForAddress(
-                    amountAtoms instanceof BigNumber ? amountAtoms : +amountAtoms,
-                    address
-                );
-
+                const dustCheckResult = Utxos.isAmountDustForAddress(amountAtoms, address);
                 if (dustCheckResult.result) {
                     return {
                         result: false,
                         errorDescription: "The entered amount is less than the minimum possible for sending. ",
-                        howToFix: `Enter an amount greater than ${coin.atomsToCoinAmount(dustCheckResult.threshold)} ${
-                            coin.ticker
-                        }. `,
+                        howToFix: `Enter an amount greater than ${coin.atomsToCoinAmount(
+                            String(dustCheckResult.threshold)
+                        )} ${coin.ticker}. `,
                     };
                 }
             }
 
             const balanceAtoms = coin.coinAmountToAtoms(currentBalance);
-            if (BigNumber.from(amountAtoms).gt(BigNumber.from("" + balanceAtoms))) {
+            if (BigNumber(amountAtoms).gt(BigNumber(balanceAtoms))) {
                 return {
                     result: false,
                     errorDescription: "The entered amount is greater than the balance you can spend ",
@@ -90,7 +94,7 @@ export class SendCoinsService {
      * Validates address and amount and tries to create transactions for 4 speed options with fake signatures
      * Composes TxData ready for sending for further usage if all is ok.
      *
-     * @param address - address to be validated
+     * @param address {string} address to be validated
      * @param coinAmount {string} amount to be validated in coin denomination
      * @param paymentDescription {string} description of payment
      * @param isSendAll {boolean} whether transaction should send all available coins or not
@@ -131,9 +135,9 @@ export class SendCoinsService {
         const loggerSource = "validateParamsAndCreateTransactionsWithFakeSignatures";
         try {
             Logger.log(`Start. ${coinAmount}->${address}. All: ${isSendAll}. Balance: ${balanceCoins}`, loggerSource);
-            const currentNetwork = getCurrentNetwork(coin);
+            const currentNetwork = Storage.getCurrentNetwork(coin);
             const wallet = Wallets.getWalletByCoin(coin);
-            const addressValidationResult = wallet.isAddressValidForSending(address, currentNetwork);
+            const addressValidationResult = wallet.isAddressValidForSending(address);
             const amountValidationResult = await SendCoinsService.validateAmountToBeSent(
                 coinAmount,
                 isSendAll,
@@ -159,7 +163,7 @@ export class SendCoinsService {
                 const fiatFeeAmounts = await CoinsToFiatRatesService.convertCoinAmountsToFiat(
                     coin.feeCoin,
                     txsDataResult.txsDataArray.map(result =>
-                        result?.fee != null ? +coin.feeCoin.atomsToCoinAmount(result.fee) : undefined
+                        result?.fee != null ? coin.feeCoin.atomsToCoinAmount(result.fee) : undefined
                     )
                 );
 
@@ -168,8 +172,6 @@ export class SendCoinsService {
                         return {
                             txData: txData,
                             coinFee: txData.fee != null ? coin.feeCoin.atomsToCoinAmount(txData.fee) : null,
-                            coinFeeTrimmed:
-                                txData.fee != null ? coin.feeCoin.atomsToCoinAmountSignificantString(txData.fee) : null,
                             fiatFee: fiatFeeAmounts[index] != null ? fiatFeeAmounts[index] : null,
                         };
                     }
@@ -184,7 +186,7 @@ export class SendCoinsService {
                                 `${
                                     item?.txData
                                         ? `tx:${item?.txData?.toMiniString && item.txData.toMiniString()}`
-                                        : `error:${JSON.stringify(item)}`
+                                        : `error:${safeStringify(item)}`
                                 }`
                         )
                         .join("\n")}\n`,
@@ -198,8 +200,9 @@ export class SendCoinsService {
                     isFeeCoinBalanceNotEnoughForAllOptions: txsDataResult.isFeeCoinBalanceNotEnoughForAllOptions,
                 };
             } else {
-                const description = `${addressValidationResult.errorDescription ||
-                    ""}${amountValidationResult.errorDescription || ""}`;
+                const description = `${
+                    addressValidationResult.errorDescription || ""
+                }${amountValidationResult.errorDescription || ""}`;
                 const howToFix = `${addressValidationResult.howToFix || ""}${amountValidationResult.howToFix || ""}`;
 
                 Logger.log(`Validation failed. ${description}. ${howToFix}`, loggerSource);
@@ -231,7 +234,7 @@ export class SendCoinsService {
             Logger.log(`Start broadcasting ${txData.amount}->${txData.address}`, loggerSource);
 
             const wallet = Wallets.getWalletByCoin(coin);
-            const { mnemonic, passphrase } = getDecryptedWalletCredentials(password);
+            const { mnemonic, passphrase } = AuthService.getDecryptedWalletCredentials(password);
             const pushedTxIdOrError = await wallet.createTransactionAndBroadcast(mnemonic, passphrase, txData);
 
             if (pushedTxIdOrError.errorDescription) {
@@ -248,7 +251,7 @@ export class SendCoinsService {
                 TRANSACTION_PUSHED_EVENT,
                 null,
                 pushedTxIdOrError,
-                coin.atomsToCoinAmount("" + txData.amount),
+                coin.atomsToCoinAmount(txData.amount),
                 txData.fee,
                 coin.ticker
             );
@@ -279,15 +282,13 @@ export class SendCoinsService {
         try {
             if (coin.doesUseDifferentCoinFee()) {
                 try {
-                    wallet.actualizeBalanceCacheWithAmountAtoms("" + txData.amount, -1);
+                    wallet.actualizeBalanceCacheWithAmountAtoms(txData.amount, -1);
                 } catch (e) {
                     logError(e, loggerSource);
                 }
-                Wallets.getWalletByCoin(coin.feeCoin).actualizeBalanceCacheWithAmountAtoms("" + txData.fee, -1);
+                Wallets.getWalletByCoin(coin.feeCoin).actualizeBalanceCacheWithAmountAtoms(txData.fee, -1);
             } else {
-                const sumAtomsString = BigNumber.from("" + txData.amount)
-                    .add(BigNumber.from("" + txData.fee))
-                    .toString();
+                const sumAtomsString = BigNumber(txData.amount).plus(txData.fee).toFixed(0, BigNumber.ROUND_FLOOR);
                 wallet.actualizeBalanceCacheWithAmountAtoms(sumAtomsString, -1);
             }
         } catch (e) {

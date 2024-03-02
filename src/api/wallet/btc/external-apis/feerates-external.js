@@ -1,10 +1,11 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { FeeRate } from "../models/feeRate";
-import { Coins } from "../../coins";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { FeeRate } from "../models/feeRate.js";
+import { Coins } from "../../coins.js";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 // TODO: [feature, moderate] Add mempool.space provider https://mempool.space/docs/api/rest#get-recommended-fees task_id=a8370ae7b99049b092f31f761a95b54d
 class BitgoBtcFeeRatesProvider extends ExternalApiProvider {
@@ -92,10 +93,12 @@ const robustFeeRatsRetriever = new CachedRobustExternalApiCallerService(
     SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS
 );
 
-export async function getFeesFromExtService() {
-    try {
-        return await robustFeeRatsRetriever.callExternalAPICached();
-    } catch (e) {
-        improveAndRethrow(e, "getFeesFromExtService");
+export class BtcFeeRatesProvider {
+    static async getFeesFromExtService() {
+        try {
+            return await robustFeeRatsRetriever.callExternalAPICached();
+        } catch (e) {
+            improveAndRethrow(e, "getFeesFromExtService");
+        }
     }
 }

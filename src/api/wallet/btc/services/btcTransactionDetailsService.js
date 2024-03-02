@@ -1,7 +1,9 @@
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import { transactionsDataProvider } from "./internal/transactionsDataProvider";
-import { retrieveTransactionData } from "../external-apis/transactionDataAPI";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { logError } from "../../../common/utils/errorUtils.js";
+import { transactionsDataProvider } from "./internal/transactionsDataProvider.js";
+import { BtcTransactionDetailsProvider } from "../external-apis/transactionDataAPI.js";
+import { Storage } from "../../../common/services/internal/storage.js";
 
 export class BtcTransactionDetailsService {
     /**
@@ -26,7 +28,7 @@ export class BtcTransactionDetailsService {
      */
     static async isTransactionBelongsToBitcoin(txId) {
         try {
-            const tx = await retrieveTransactionData(txId, getCurrentNetwork());
+            const tx = await BtcTransactionDetailsProvider.retrieveTransactionData(txId, Storage.getCurrentNetwork());
 
             return !!tx;
         } catch (e) {

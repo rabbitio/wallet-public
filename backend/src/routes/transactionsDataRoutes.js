@@ -1,6 +1,7 @@
 import express from "express";
-import { apiVersionPrefix } from "../controllers/controllerUtils";
-import TransactionsDataController from "../controllers/transactionsData";
+
+import { apiVersionPrefix } from "../controllers/controllerUtils.js";
+import TransactionsDataController from "../controllers/transactionsData.js";
 
 const router = express.Router({});
 

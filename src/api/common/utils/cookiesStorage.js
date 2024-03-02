@@ -1,5 +1,6 @@
 import * as setCookieParser from "set-cookie-parser";
-import { improveAndRethrow } from "./errorUtils";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
 class CookiesStorage {
     constructor() {

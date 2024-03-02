@@ -1,9 +1,10 @@
-import axios from "axios";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-import { postponeExecution, safeStringify } from "../../../utils/browserUtils";
-import { improveAndRethrow, logError } from "../../../utils/errorUtils";
-import { externalServicesStatsCollector } from "./externalServicesStatsCollector";
-import { concurrentCalculationsMetadataHolder } from "../../internal/concurrentCalculationsMetadataHolder";
+import { postponeExecution, safeStringify } from "../../../utils/browserUtils.js";
+import { logError } from "../../../utils/errorUtils.js";
+import { externalServicesStatsCollector } from "./externalServicesStatsCollector.js";
+import { concurrentCalculationsMetadataHolder } from "../../internal/concurrentCalculationsMetadataHolder.js";
+import AxiosAdapter from "../../../adapters/axiosAdapter.js";
 
 /**
  * TODO: [refactoring, critical] update backend copy of this service. Also there is a task to extract this
@@ -180,7 +181,10 @@ export default class RobustExternalAPICallerService {
                     do {
                         if (subRequestIndex === 0 && pageNumber === 0) {
                             provider.actualizeLastCalledTimestamp();
-                            responsesForPages[pageNumber] = await axios[httpMethods[subRequestIndex]](...axiosParams);
+                            responsesForPages[pageNumber] = await AxiosAdapter.call(
+                                httpMethods[subRequestIndex],
+                                ...axiosParams
+                            );
                             externalServicesStatsCollector.externalServiceCalledWithoutError(provider.getApiGroupId());
                         } else {
                             if (pageNumber > 0) {
@@ -209,7 +213,7 @@ export default class RobustExternalAPICallerService {
                                         return await postponeUntilRpsExceeded(recursionLevel + 1);
                                     }
                                     provider.actualizeLastCalledTimestamp();
-                                    return await axios[httpMethods[subRequestIndex]](...axiosParams);
+                                    return await AxiosAdapter.call(httpMethods[subRequestIndex], ...axiosParams);
                                 }, waitingTimeMS);
                             };
 

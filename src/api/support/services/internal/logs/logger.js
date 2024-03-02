@@ -1,4 +1,4 @@
-import { LogsStorage } from "./logsStorage";
+import { LogsStorage } from "./logsStorage.js";
 
 export class Logger {
     /**

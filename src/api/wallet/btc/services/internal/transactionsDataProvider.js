@@ -1,31 +1,30 @@
-import { getCurrentNetwork } from "../../../../common/services/internal/storage";
-import { improveAndRethrow, logError } from "../../../../common/utils/errorUtils";
-import { retrieveTransactionData } from "../../external-apis/transactionDataAPI";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Storage } from "../../../../common/services/internal/storage.js";
+import { logError } from "../../../../common/utils/errorUtils.js";
+import { BtcTransactionDetailsProvider } from "../../external-apis/transactionDataAPI.js";
 import {
     EventBus,
     NEW_BLOCK_DEDUPLICATED_EVENT,
     NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
-} from "../../../../common/adapters/eventbus";
-import { getNetworkByAddress } from "../../lib/addresses";
-import { TransactionsDataRetrieverService } from "./transactionsDataRetrieverService";
-import { CancelProcessing } from "../../../../common/services/utils/robustExteranlApiCallerService/cancelProcessing";
-import { currentBlockService } from "./currentBlockService";
+} from "../../../../common/adapters/eventbus.js";
+import { BitcoinAddresses } from "../../lib/addresses.js";
+import { TransactionsDataRetrieverService } from "./transactionsDataRetrieverService.js";
+import { CancelProcessing } from "../../../../common/services/utils/robustExteranlApiCallerService/cancelProcessing.js";
+import { currentBlockService } from "./currentBlockService.js";
 import {
     filterTransactionsSpendingTheSameUtxosAsGivenTransaction,
     removeDeclinedDoubleSpendingTransactionsFromList,
     setDoubleSpendFlag,
     setSpendTxId,
-} from "../../lib/transactions/txs-list-calculations";
-import { Logger } from "../../../../support/services/internal/logs/logger";
-import AddressesServiceInternal from "./addressesServiceInternal";
-import {
-    composeTransactionsHistoryItems,
-    getExtendedTransactionDetails,
-} from "../../lib/transactions/transactions-history";
-import { CacheAndConcurrentRequestsResolver } from "../../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
-import AddressesService from "../addressesService";
-import { Transaction } from "../../models/transaction/transaction";
-import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../../common/utils/ttlConstants";
+} from "../../lib/transactions/txs-list-calculations.js";
+import { Logger } from "../../../../support/services/internal/logs/logger.js";
+import AddressesServiceInternal from "./addressesServiceInternal.js";
+import { BtcTransactionsHistory, getExtendedTransactionDetails } from "../../lib/transactions/transactions-history.js";
+import { CacheAndConcurrentRequestsResolver } from "../../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
+import AddressesService from "../addressesService.js";
+import { Transaction } from "../../models/transaction/transaction.js";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../../common/utils/ttlConstants.js";
 
 /**
  * Manages BTC transactions cache and its actualization.
@@ -104,16 +103,16 @@ class TransactionsDataProvider {
         try {
             const transactionsData = this._cacheAndRequestsResolver.getCached(this._cacheKey) ?? [];
             const unconfirmedTransactions = transactionsData.filter(tx => tx.confirmations === 0);
-            const promises = unconfirmedTransactions.map(tx => retrieveTransactionData(tx.txid, getCurrentNetwork()));
+            const promises = unconfirmedTransactions.map(tx =>
+                BtcTransactionDetailsProvider.retrieveTransactionData(tx.txid, Storage.getCurrentNetwork())
+            );
             const unconfirmedTxsData = ((await Promise.all(promises)) ?? []).filter(tx => tx instanceof Transaction);
             const transactionIdsToBeRemovedFromCache = [];
             const notEmptyData = unconfirmedTxsData.reduce((prev, current, index) => {
                 if (!current) {
                     const idOfCheckingTransaction = unconfirmedTransactions[index].txid;
-                    const isThereUnconfirmedDoubleSpendingTxsForCurrentOne = !!filterTransactionsSpendingTheSameUtxosAsGivenTransaction(
-                        current,
-                        unconfirmedTxsData
-                    );
+                    const isThereUnconfirmedDoubleSpendingTxsForCurrentOne =
+                        !!filterTransactionsSpendingTheSameUtxosAsGivenTransaction(current, unconfirmedTxsData);
                     if (!isThereUnconfirmedDoubleSpendingTxsForCurrentOne) {
                         /**
                          * Here we are processing case when we have some unconfirmed tx in cache but its data was not
@@ -329,8 +328,10 @@ class TransactionsDataProvider {
         const addressesUpdateTimestamps = [];
         const loggerSource = "_requestTransactionsDataAndMergeWithCached";
         try {
-            const network = getCurrentNetwork();
-            const addressesOfNetwork = addresses.filter(address => getNetworkByAddress(address).key === network.key);
+            const network = Storage.getCurrentNetwork();
+            const addressesOfNetwork = addresses.filter(
+                address => BitcoinAddresses.getNetworkByAddress(address).key === network.key
+            );
             // TODO: [refactoring, moderate] We have a duplicated cache expiration logic inside the TransactionsDataRetrieverService
             let newData = await TransactionsDataRetrieverService.performTransactionsRetrieval(
                 addressesOfNetwork,
@@ -372,7 +373,10 @@ class TransactionsDataProvider {
             }
             let data = dataRes?.cachedData ?? [];
             if (!data.find(tx => tx.txid === txId)) {
-                const gotTx = await retrieveTransactionData(txId, getCurrentNetwork());
+                const gotTx = await BtcTransactionDetailsProvider.retrieveTransactionData(
+                    txId,
+                    Storage.getCurrentNetwork()
+                );
                 if (gotTx && Array.isArray(addresses?.internal) && Array.isArray(addresses?.external)) {
                     const isTransactionRelatedToCurrentWallet = [
                         ...gotTx.inputs.map(input => input.address),
@@ -409,7 +413,7 @@ class TransactionsDataProvider {
             const transactionsData = this._cacheAndRequestsResolver.getCached(this._cacheKey) ?? [];
             const newTxs = newData.filter(newTx => !transactionsData.find(tx => tx.txid === newTx.txid));
             const addresses = allAddresses ?? (await AddressesServiceInternal.getAllUsedAddresses());
-            const txHistoryItems = composeTransactionsHistoryItems(addresses, newTxs);
+            const txHistoryItems = BtcTransactionsHistory.composeTransactionsHistoryItems(addresses, newTxs);
             newTxs.length && EventBus.dispatch(NEW_NOT_LOCAL_TRANSACTIONS_EVENT, null, txHistoryItems);
         } catch (e) {
             improveAndRethrow(e, "_notifyAboutDiscoveredTransactions");

@@ -13,21 +13,21 @@ export class SwapProvider {
         RETRIABLE_FAIL: "retriableFail",
     };
 
-    // TODO: [dev] finish
     static SWAP_STATUSES = {
         WAITING_FOR_PAYMENT: "waiting_for_payment", // public +
+        CONFIRMING: "confirming",
         PAYMENT_RECEIVED: "payment_received", // public +
         EXCHANGING: "exchanging", // session full // public +
         COMPLETED: "completed", // session full  // public +
         REFUNDED: "refunded", // session full  // public +
         EXPIRED: "expired", // public +
-        ERROR: "error", // public +
+        FAILED: "failed", // public +
     };
 
     /**
      * @return {number} milliseconds TTL
      */
-    getSwapDetailsTtlMs() {
+    getSwapCreationInfoTtlMs() {
         throw new Error("Not implemented in base");
     }
 
@@ -48,19 +48,19 @@ export class SwapProvider {
      *
      * @param fromCoin {Coin}
      * @param toCoin {Coin}
-     * @param amountCoins {number}
+     * @param amountCoins {string}
      * @return {Promise<({
      *            result: false,
      *            reason: string,
-     *            smallestMin: (number|null|undefined),
-     *            greatestMax: (number|null|undefined),
+     *            smallestMin: (string|null|undefined),
+     *            greatestMax: (string|null|undefined),
      *         }|{
      *            result: true,
-     *            min: (number|null),
-     *            max: (number|null),
-     *            smallestMin: (number|null),
-     *            greatestMax: (number|null),
-     *            rate: number,
+     *            min: (string|null),
+     *            max: (string|null),
+     *            smallestMin: (string|null),
+     *            greatestMax: (string|null),
+     *            rate: (string|null),
      *            durationMinutesRange: string,
      *            [rawSwapData]: Object
      *         })>}
@@ -74,7 +74,7 @@ export class SwapProvider {
      *
      * @param fromCoin {Coin}
      * @param toCoin {Coin}
-     * @param amount {number}
+     * @param amount {string}
      * @param toAddress {string}
      * @param refundAddress {string}
      * @param rawSwapData {Object|null}
@@ -82,12 +82,12 @@ export class SwapProvider {
      *                     result: true,
      *                     swapId: string,
      *                     fromCoin: Coin,
-     *                     fromAmount: number,
+     *                     fromAmount: string,
      *                     fromAddress: string,
      *                     toCoin: Coin,
-     *                     toAmount: number,
+     *                     toAmount: string,
      *                     toAddress: string,
-     *                     rate: number
+     *                     rate: string
      *                 }|{
      *                     result: false,
      *                     reason: string,
@@ -100,6 +100,7 @@ export class SwapProvider {
 
     /**
      * Retrieves details and status for swaps by given ids.
+     * If some swap is not found by id then there is no item in return list.
      *
      * @param swapIds {string[]}
      * @return {Promise<{result: false, reason: string}|{result:true, swaps: ExistingSwap[]}>}

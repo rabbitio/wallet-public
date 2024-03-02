@@ -1,5 +1,6 @@
-import { doApiCall, urlWithPrefix } from "../../common/backend-api/utils";
-import { improveAndRethrow } from "../../common/utils/errorUtils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { doApiCall, urlWithPrefix } from "../../common/backend-api/utils.js";
 
 const serverEndpointEntity = "fiatPayments";
 

@@ -1,14 +1,15 @@
-import { Wallet } from "../common/models/wallet";
-import { improveAndRethrow } from "../../common/utils/errorUtils";
-import { tron } from "./tron";
-import { TrxAddressesService } from "./services/trxAddressesService";
-import { TronTransactionsHistoryService } from "./services/tronTransactionsHistoryService";
-import { TronBlockchainBalancesService } from "./services/tronBlockchainBalancesService";
-import { TronTransactionsProvider } from "./external-apis/tronTransactionsProvider";
-import { TronTransactionDetailsService } from "./services/tronTransactionDetailsService";
-import { TronSendTransactionService } from "./services/tronSendTransactionService";
-import { getCurrentNetwork } from "../../common/services/internal/storage";
-import { validateTronAddress } from "./lib/addresses";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Wallet } from "../common/models/wallet.js";
+import { tron } from "./tron.js";
+import { TrxAddressesService } from "./services/trxAddressesService.js";
+import { TronTransactionsHistoryService } from "./services/tronTransactionsHistoryService.js";
+import { TronBlockchainBalancesService } from "./services/tronBlockchainBalancesService.js";
+import { TronTransactionsProvider } from "./external-apis/tronTransactionsProvider.js";
+import { TronTransactionDetailsService } from "./services/tronTransactionDetailsService.js";
+import { TronSendTransactionService } from "./services/tronSendTransactionService.js";
+import { Storage } from "../../common/services/internal/storage.js";
+import { validateTronAddress } from "./lib/addresses.js";
 
 class TronWallet extends Wallet {
     constructor() {
@@ -85,7 +86,7 @@ class TronWallet extends Wallet {
                 address,
                 coinAmount,
                 isSendAll,
-                getCurrentNetwork(this.coin),
+                Storage.getCurrentNetwork(this.coin),
                 balanceCoins,
                 isAddressFake
             );

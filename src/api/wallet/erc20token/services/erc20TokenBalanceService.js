@@ -1,9 +1,11 @@
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import { EthAddressesService } from "../../eth/services/ethAddressesService";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import { Erc20AllBalancesProvider } from "../external-apis/erc20AllBalancesProvider";
-import { Erc20SingleBalanceProvider } from "../external-apis/erc20SingleBalanceProvider";
-import { Coins } from "../../coins";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { logError } from "../../../common/utils/errorUtils.js";
+import { EthAddressesService } from "../../eth/services/ethAddressesService.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { Erc20AllBalancesProvider } from "../external-apis/erc20AllBalancesProvider.js";
+import { Erc20SingleBalanceProvider } from "../external-apis/erc20SingleBalanceProvider.js";
+import { Coins } from "../../coins.js";
 
 export class Erc20TokenBalanceService {
     /**
@@ -40,7 +42,7 @@ export class Erc20TokenBalanceService {
                 throw new Error(`Failed to get balance for coin from several providers: ${coin.ticker}`);
             }
             const balanceCoins = coin.atomsToCoinAmount(balance);
-            Logger.log(`Balance for ${coin.ticker} ${balanceCoins}`);
+            Logger.log(`Balance for ${coin.ticker} ${balanceCoins}`, "calculateBalance");
 
             return balanceCoins;
         } catch (e) {

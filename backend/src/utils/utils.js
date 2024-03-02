@@ -1,29 +1,6 @@
 import { mkdirSync } from "fs";
-import { configure } from "log4js";
+import log4js from "log4js";
 import Hashes from "jshashes";
-
-export function improveAndRethrow(e, settingFunction, additionalMessage) {
-    const message = improvedErrorMessage(e, settingFunction, additionalMessage);
-    if (e) {
-        e.message = message;
-        if (!e.alternativeStack) {
-            const tempObj = {};
-            Error.captureStackTrace(tempObj);
-            e.alternativeStack = tempObj.stack;
-        }
-        throw e; // to preserve existing stacktrace if present
-    }
-    throw new Error(message);
-}
-
-function improvedErrorMessage(e, settingFunction, additionalMessage) {
-    let message = `\nFunction call ${settingFunction} failed.`;
-
-    e && e.message && (message += `Error message: ${e.message}. `);
-    additionalMessage && (message += `${additionalMessage} `);
-
-    return message;
-}
 
 export function configureLogging() {
     // Make a log directory, just in case it isn't there
@@ -38,9 +15,9 @@ export function configureLogging() {
     }
 
     try {
-        configure("./src/log4js.json");
+        log4js.configure("./src/log4js.json");
     } catch (e) {
-        configure("./backend/src/log4js.json");
+        log4js.configure("./backend/src/log4js.json");
     }
 }
 

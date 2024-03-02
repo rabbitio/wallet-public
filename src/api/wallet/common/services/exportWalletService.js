@@ -1,8 +1,8 @@
 import xml2js from "xml2js";
 
-import { Logger } from "../../../support/services/internal/logs/logger";
-import { EventBus, WALLET_DATA_EXPORTED_EVENT } from "../../../common/adapters/eventbus";
-import { Wallets } from "../wallets";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { EventBus, WALLET_DATA_EXPORTED_EVENT } from "../../../common/adapters/eventbus.js";
+import { Wallets } from "../wallets.js";
 
 export default class ExportWalletService {
     static downloadedFilenameWithoutExtension = "wallet";

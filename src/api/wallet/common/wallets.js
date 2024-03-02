@@ -1,18 +1,21 @@
-import { improveAndRethrow } from "../../common/utils/errorUtils";
-import { Coins } from "../coins";
-import { tronWallet } from "../trx/tronWallet";
-import { ethereumWallet } from "../eth/ethereumWallet";
-import { bitcoinWallet } from "../btc/bitcoinWallet";
-import { Erc20TokenWallet } from "../erc20token/models/erc20TokenWallet";
-import { Trc20TokenWallet } from "../trc20token/models/trc20TokenWallet";
-import { TRC20 } from "../trc20token/trc20Protocol";
-import { ERC20 } from "../erc20token/erc20Protocol";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Coins } from "../coins.js";
+import { tronWallet } from "../trx/tronWallet.js";
+import { ethereumWallet } from "../eth/ethereumWallet.js";
+import { bitcoinWallet } from "../btc/bitcoinWallet.js";
+import { Erc20TokenWallet } from "../erc20token/models/erc20TokenWallet.js";
+import { Trc20TokenWallet } from "../trc20token/models/trc20TokenWallet.js";
+import { TRC20 } from "../trc20token/trc20Protocol.js";
+import { ERC20 } from "../erc20token/erc20Protocol.js";
 
 /**
  * This is the main service to manage wallets.
  * You should access wallet singletons via this service.
  * Wallet objects are being compared by references to singletons all over the app so use only singletons
  * and never instantiate Wallet or its descendants manually.
+ *
+ * TODO: [refactoring, high] Rename
  */
 export class Wallets {
     static _WALLETS = [

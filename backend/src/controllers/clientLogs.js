@@ -1,9 +1,10 @@
-import { getLogger } from "log4js";
-import { processInternalError, processSuccess, processWrongRequestData } from "./controllerUtils";
-import { ClientLogsService } from "../services/clientLogsService";
-import { DOWNLOAD_CLIENT_LOG_FILE_EP_NUMBER, SAVE_CLIENT_LOGS_EP_NUMBER } from "./endpointNumbers";
+import log4js from "log4js";
 
-const log = getLogger("clientLogs");
+import { ControllerUtils, processWrongRequestData } from "./controllerUtils.js";
+import { ClientLogsService } from "../services/clientLogsService.js";
+import { DOWNLOAD_CLIENT_LOG_FILE_EP_NUMBER, SAVE_CLIENT_LOGS_EP_NUMBER } from "./endpointNumbers.js";
+
+const log = log4js.getLogger("clientLogs");
 
 export default class ClientLogs {
     /**
@@ -46,9 +47,9 @@ export default class ClientLogs {
             await ClientLogsService.saveLogsAsFile(req.params.logsId, req.body);
 
             log.debug("Logs saved successfully. Sending 201.");
-            processSuccess(res, 201);
+            ControllerUtils.processSuccess(res, 201);
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to save client logs to file", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to save client logs to file", e);
         }
     }
 
@@ -96,10 +97,10 @@ export default class ClientLogs {
                 res.download(filePath);
             } else {
                 log.debug("Logs file was not found. Sending 404.");
-                processSuccess(res, 404);
+                ControllerUtils.processSuccess(res, 404);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to save client logs to file", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to save client logs to file", e);
         }
     }
 }

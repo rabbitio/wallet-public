@@ -1,15 +1,16 @@
-import { Input } from "../models/transaction/input";
-import { Output } from "../models/transaction/output";
-import { Transaction } from "../models/transaction/transaction";
-import { ExternalBlocksApiCaller } from "./blocksAPI";
-import RobustExternalAPICallerService from "../../../common/services/utils/robustExteranlApiCallerService/robustExternalAPICallerService";
-import { Coins } from "../../coins";
-import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
-import { getHash } from "../../../common/adapters/crypto-utils";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { getOutputTypeByAddress } from "../lib/utxos";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Input } from "../models/transaction/input.js";
+import { Output } from "../models/transaction/output.js";
+import { Transaction } from "../models/transaction/transaction.js";
+import { ExternalBlocksApiCaller } from "./blocksAPI.js";
+import RobustExternalAPICallerService from "../../../common/services/utils/robustExteranlApiCallerService/robustExternalAPICallerService.js";
+import { Coins } from "../../coins.js";
+import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
+import { getHash } from "../../../common/adapters/crypto-utils.js";
+import { getOutputTypeByAddress } from "../lib/utxos.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 
 const mappingOfTxIndexesToHashes = new Map();
 

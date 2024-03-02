@@ -1,13 +1,14 @@
 import { ethers } from "ethers";
-import { Coin } from "../../common/models/coin";
-import { Network } from "../../common/models/networks";
-import { bip44Scheme } from "../../btc/lib/addresses-schemes";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { tron } from "../../trx/tron";
-import { NumbersUtils } from "../../common/utils/numbersUtils";
-import { AmountUtils } from "../../common/utils/amountUtils";
-import { TRC20 } from "../trc20Protocol";
-import { TRON_BLOCKCHAIN } from "../../trx/tronBlockchain";
+
+import { AmountUtils } from "@rabbitio/ui-kit";
+
+import { Coin } from "../../common/models/coin.js";
+import { Network } from "../../common/models/networks.js";
+import { bip44Scheme } from "../../btc/lib/addresses-schemes.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { tron } from "../../trx/tron.js";
+import { TRC20 } from "../trc20Protocol.js";
+import { TRON_BLOCKCHAIN } from "../../trx/tronBlockchain.js";
 
 export class Trc20Token extends Coin {
     /**
@@ -36,22 +37,17 @@ export class Trc20Token extends Coin {
     }
 
     atomsToCoinAmount(atoms) {
-        return ethers.utils.formatUnits("" + atoms, this.digits);
-    }
-
-    atomsToCoinAmountSignificantString(atoms, maxNumberLength = null) {
-        const coinAmountString = ethers.utils.formatUnits("" + atoms, this.digits);
-        return NumbersUtils.trimCurrencyAmount(coinAmountString, this.digits, maxNumberLength);
+        return AmountUtils.removeRedundantRightZerosFromNumberString(ethers.utils.formatUnits("" + atoms, this.digits));
     }
 
     coinAmountToAtoms(coinsAmount) {
-        coinsAmount = AmountUtils.trimDigitsAfterPeriod(coinsAmount, this.digits, false);
+        coinsAmount = AmountUtils.trim(coinsAmount, this.digits);
         return ethers.utils.parseUnits(coinsAmount, this.digits).toString();
     }
 
     composeUrlToTransactionExplorer(txId) {
         return `https://tronscan.org/#/transaction/${
-            getCurrentNetwork(this)?.key === this.mainnet.key ? "" : `${this.testnet.key}/`
+            Storage.getCurrentNetwork(this)?.key === this.mainnet.key ? "" : `${this.testnet.key}/`
         }${txId}`;
     }
 

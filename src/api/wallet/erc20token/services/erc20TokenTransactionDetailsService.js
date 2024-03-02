@@ -1,5 +1,7 @@
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import { EthTransactionDetailsService } from "../../eth/services/ethTransactionDetailsService";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { logError } from "../../../common/utils/errorUtils.js";
+import { EthTransactionDetailsService } from "../../eth/services/ethTransactionDetailsService.js";
 
 export class Erc20TokenTransactionDetailsService {
     /**

@@ -1,4 +1,4 @@
-import { Coins } from "../../coins";
+import { Coins } from "../../coins.js";
 
 /**
  * Model representing the transaction as history item of a wallet

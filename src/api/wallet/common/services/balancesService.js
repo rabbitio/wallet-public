@@ -1,9 +1,12 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import CoinsToFiatRatesService from "./coinsToFiatRatesService";
-import { Wallets } from "../wallets";
-import { cache } from "../../../common/utils/cache";
-import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
-import { SMALL_TTL_FOR_CACHE_L2_MS } from "../../../common/utils/ttlConstants";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import CoinsToFiatRatesService from "./coinsToFiatRatesService.js";
+import { Wallets } from "../wallets.js";
+import { cache } from "../../../common/utils/cache.js";
+import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
+import { SMALL_TTL_FOR_CACHE_L2_MS } from "../../../common/utils/ttlConstants.js";
 
 export class BalancesService {
     // TODO: [tests, moderate] add units for caching for existing tests
@@ -33,7 +36,7 @@ export class BalancesService {
      * Returns coins balances
      *
      * @param [walletsList=null] {Array<Wallet>} list of wallets to get the balances for. All wallets by default
-     * @return {Promise<Array<number>>} returns a promise resolving to array of balances in coin denomination
+     * @return {Promise<Array<string>>} returns a promise resolving to array of balances in coin denomination
      */
     static async getBalances(walletsList = null) {
         try {
@@ -53,7 +56,7 @@ export class BalancesService {
      * @param [walletsList=null] {Wallet[]}
      * @return {Promise<{
      *             coin: Coin,
-     *             balanceCoins: (string|number),
+     *             balanceCoins: string,
      *             balanceFiat: string,
      *             fiatCurrencyCode: string,
      *             fiatCurrencyDecimals: number,
@@ -71,14 +74,13 @@ export class BalancesService {
                 coin: walletsList[index].coin,
                 amounts: [balance],
             }));
-            const fiatBalancesForCoins = await CoinsToFiatRatesService.convertCoinsAmountsToCurrentlySelectedFiat(
-                balancesForCoins
-            );
+            const fiatBalancesForCoins =
+                await CoinsToFiatRatesService.convertCoinsAmountsToCurrentlySelectedFiat(balancesForCoins);
 
             return fiatBalancesForCoins.map((coinAndFiatBalance, index) => ({
                 coin: coinAndFiatBalance.coin,
                 balanceCoins: balancesForCoins[index].amounts[0],
-                balanceFiat: coinAndFiatBalance.amountsFiat[0],
+                balanceFiat: "" + coinAndFiatBalance.amountsFiat[0], // TODO: [dev] fix fiat conversions to string task_id=1e692bcfabbe487a9d1638fc8ff17448
                 fiatCurrencyCode: coinAndFiatBalance.fiatCurrencyCode,
                 fiatCurrencyDecimals: coinAndFiatBalance.fiatCurrencyDecimals,
                 change24hPercent: coinAndFiatBalance.change24hPercent,
@@ -118,37 +120,44 @@ export class BalancesService {
                 (prev, wallet, index) => {
                     const yesterdayCoinToUSDRate =
                         balancesData[index].coinToUsdRate != null && balancesData[index].change24hPercent != null
-                            ? +balancesData[index].coinToUsdRate / (1 + +balancesData[index].change24hPercent / 100)
+                            ? BigNumber(balancesData[index].coinToUsdRate).div(
+                                  BigNumber(balancesData[index].change24hPercent).div("100").plus("1")
+                              )
                             : null;
                     const usdToCurrentFiatRate =
                         balancesData[index].coinToFiatRate != null && balancesData[index].coinToUsdRate != null
-                            ? +balancesData[index].coinToFiatRate / +balancesData[index].coinToUsdRate
+                            ? BigNumber(balancesData[index].coinToFiatRate).div(balancesData[index].coinToUsdRate)
                             : null;
                     return {
-                        today:
-                            prev.today +
-                            (balancesData[index].balanceFiat != null ? +balancesData[index].balanceFiat : 0),
-                        yesterday:
-                            prev.yesterday +
-                            (yesterdayCoinToUSDRate != null && usdToCurrentFiatRate != null
-                                ? balancesData[index].balanceCoins * yesterdayCoinToUSDRate * usdToCurrentFiatRate
-                                : 0),
+                        today: prev.today.plus(
+                            balancesData[index].balanceFiat != null
+                                ? BigNumber(balancesData[index].balanceFiat)
+                                : BigNumber("0")
+                        ),
+                        yesterday: prev.yesterday.plus(
+                            yesterdayCoinToUSDRate != null && usdToCurrentFiatRate != null
+                                ? BigNumber(balancesData[index].balanceCoins)
+                                      .times(yesterdayCoinToUSDRate)
+                                      .times(usdToCurrentFiatRate)
+                                : BigNumber("0")
+                        ),
                     };
                 },
-                { today: 0, yesterday: 0 }
+                { today: BigNumber("0"), yesterday: BigNumber("0") }
             );
 
-            let portfolioGrows24hPerCents = 0;
-            if (sumBalanceInCurrentFiatForTwoDays.yesterday !== 0) {
-                portfolioGrows24hPerCents =
-                    ((sumBalanceInCurrentFiatForTwoDays.today - sumBalanceInCurrentFiatForTwoDays.yesterday) * 100) /
-                    sumBalanceInCurrentFiatForTwoDays.yesterday;
+            let portfolioGrows24hPerCents = BigNumber("0");
+            if (!sumBalanceInCurrentFiatForTwoDays.yesterday.isZero()) {
+                portfolioGrows24hPerCents = sumBalanceInCurrentFiatForTwoDays.today
+                    .minus(sumBalanceInCurrentFiatForTwoDays.yesterday)
+                    .times("100")
+                    .div(sumBalanceInCurrentFiatForTwoDays.yesterday);
             }
 
-            const fiatData = CoinsToFiatRatesService.getCurrentFiatCurrencyData(); // TODO: [tests, high] add unit tests
+            const fiatData = CoinsToFiatRatesService.getCurrentFiatCurrencyData(); // TODO: [tests, moderate] actualize unit tests
             const result = {
-                summaryFiatBalance: sumBalanceInCurrentFiatForTwoDays.today.toFixed(fiatData.decimalCount),
-                portfolioGrowsTodayPerCents: portfolioGrows24hPerCents.toFixed(2),
+                summaryFiatBalance: AmountUtils.trim(sumBalanceInCurrentFiatForTwoDays.today, fiatData.decimalCount),
+                portfolioGrowsTodayPerCents: AmountUtils.trim(portfolioGrows24hPerCents, 2),
                 fiatCurrencyCode: fiatData.currency,
                 fiatCurrencySymbol: fiatData.symbol.length === 1 ? fiatData.symbol : null,
             };
@@ -165,6 +174,11 @@ export class BalancesService {
         }
     }
 
+    /**
+     * @param walletsList {Wallet[]}
+     * @return {Promise<string[]>}
+     * @private
+     */
     // TODO: [tests, moderate] add units for caching for existing tests
     static async _getWalletsBalances(walletsList) {
         let walletsToRequestBalancesFor;

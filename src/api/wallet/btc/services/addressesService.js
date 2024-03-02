@@ -1,35 +1,29 @@
 import { v4 } from "uuid";
 
-import {
-    getAccountsData,
-    getCurrentNetwork,
-    getDataPassword,
-    getWalletId,
-} from "../../../common/services/internal/storage";
-import { hasMinConfirmations } from "../lib/transactions/transactions-utils";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Storage } from "../../../common/services/internal/storage.js";
+import { hasMinConfirmations } from "../lib/transactions/transactions-utils.js";
 import {
     CHANGE_SCHEME,
-    createNewExternalAddressByScheme,
     EXTERNAL_CHANGE_INDEX,
     EXTERNAL_SCHEME,
-    getAddressByIndex,
     getExternalAddressPath,
-    getNetworkByAddress,
+    BitcoinAddresses,
     INTERNAL_CHANGE_INDEX,
     LEGACY_SCHEME,
-} from "../lib/addresses";
-import Address from "../../common/models/address";
-import CurrentAddressUtils from "./utils/currentAddressUtils";
-import AddressesDataApi from "../../common/backend-api/addressesDataApi";
-import AddressesDataAdapter from "../../common/backend-api/adapters/addressesDataAdapter";
-import { transactionsDataProvider } from "./internal/transactionsDataProvider";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import { EventBus, NEW_ADDRESS_CREATED_EVENT } from "../../../common/adapters/eventbus";
-import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
-import { PreferencesService } from "../../common/services/preferencesService";
-import { UserDataAndSettings } from "../../common/models/userDataAndSettings";
-import { MODERATE_TTL_FOR_RELATIVELY_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
+} from "../lib/addresses.js";
+import Address from "../../common/models/address.js";
+import CurrentAddressUtils from "./utils/currentAddressUtils.js";
+import AddressesDataApi from "../../common/backend-api/addressesDataApi.js";
+import AddressesDataAdapter from "../../common/backend-api/adapters/addressesDataAdapter.js";
+import { transactionsDataProvider } from "./internal/transactionsDataProvider.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { EventBus, NEW_ADDRESS_CREATED_EVENT } from "../../../common/adapters/eventbus.js";
+import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
+import { PreferencesService } from "../../common/services/preferencesService.js";
+import { UserDataAndSettings } from "../../common/models/userDataAndSettings.js";
+import { MODERATE_TTL_FOR_RELATIVELY_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 // TODO: [refactoring, moderate] remove redundant addresses related logic from this class task_id=2dfd7adefe9d48acbe0ecb6f83fd68f7
 export default class AddressesService {
@@ -107,14 +101,19 @@ export default class AddressesService {
      * @param [password] {string} optional password for data encryption
      * @returns {{ initialIndexesData: { p: string, i: number}[], initialAddressesData: { h: string, encData: string }[] }}
      */
-    static createInitialAddressesData(accountsData, password = getDataPassword()) {
+    static createInitialAddressesData(accountsData, password = Storage.getDataPassword()) {
         const loggerSource = "createInitialAddressesData";
         try {
             Logger.log(`Start creating initial addresses data`, loggerSource);
 
-            const network = getCurrentNetwork();
-            const { newAddress } = createNewExternalAddressByScheme(accountsData, network, [], EXTERNAL_SCHEME);
-            const { newAddress: legacyAddress } = createNewExternalAddressByScheme(
+            const network = Storage.getCurrentNetwork();
+            const { newAddress } = BitcoinAddresses.createNewExternalAddressByScheme(
+                accountsData,
+                network,
+                [],
+                EXTERNAL_SCHEME
+            );
+            const { newAddress: legacyAddress } = BitcoinAddresses.createNewExternalAddressByScheme(
                 accountsData,
                 network,
                 [],
@@ -168,8 +167,10 @@ export default class AddressesService {
         try {
             Logger.log(`Start updating addresses data ${address}: "${newLabel}"`, loggerSource);
 
-            const newAddressData = new Address(address, newLabel, creationTime).encryptAndSerialize(getDataPassword());
-            const result = await AddressesDataApi.updateAddressData(getWalletId(), uuid, newAddressData);
+            const newAddressData = new Address(address, newLabel, creationTime).encryptAndSerialize(
+                Storage.getDataPassword()
+            );
+            const result = await AddressesDataApi.updateAddressData(Storage.getWalletId(), uuid, newAddressData);
 
             if (result === null) {
                 Logger.log("Address not found, returning error", loggerSource);
@@ -251,7 +252,7 @@ export default class AddressesService {
                 throw new Error("Address uuid should be not empty string. ");
             }
 
-            await AddressesDataApi.deleteAddressData(getWalletId(), addressUUID);
+            await AddressesDataApi.deleteAddressData(Storage.getWalletId(), addressUUID);
 
             Logger.log(`Address data was removed ${addressUUID}`, loggerSource);
         } catch (e) {
@@ -266,16 +267,18 @@ export default class AddressesService {
      */
     static async getAllAddressesData() {
         try {
-            const list = await AddressesDataApi.getAddressesData(getWalletId());
-            const dataPassword = getDataPassword();
+            const list = await AddressesDataApi.getAddressesData(Storage.getWalletId());
+            const dataPassword = Storage.getDataPassword();
 
-            const currentNetwork = getCurrentNetwork();
+            const currentNetwork = Storage.getCurrentNetwork();
             return list
                 .map(addressDataItem => ({
                     ...Address.decryptAndDeserialize(addressDataItem.encryptedAddressData, dataPassword),
                     uuid: addressDataItem.uuid,
                 }))
-                .filter(addressData => getNetworkByAddress(addressData.address).key === currentNetwork.key);
+                .filter(
+                    addressData => BitcoinAddresses.getNetworkByAddress(addressData.address).key === currentNetwork.key
+                );
         } catch (e) {
             improveAndRethrow(e, "getAllAddressesData");
         }
@@ -291,11 +294,11 @@ export default class AddressesService {
      */
     static async getCurrentChangeAddress() {
         try {
-            const network = getCurrentNetwork();
+            const network = Storage.getCurrentNetwork();
             return await CurrentAddressUtils._getCurrentAddress(
-                getAccountsData(),
+                Storage.getAccountsData(),
                 network,
-                getWalletId(),
+                Storage.getWalletId(),
                 CHANGE_SCHEME,
                 network.defaultAccountIndex,
                 INTERNAL_CHANGE_INDEX
@@ -324,13 +327,13 @@ export default class AddressesService {
                 return result?.cachedData;
             }
 
-            const network = getCurrentNetwork();
+            const network = Storage.getCurrentNetwork();
             const scheme = this.SCHEMES_BY_ADDRESS_TYPE.get(addressType);
 
             const currentAddress = await CurrentAddressUtils._getCurrentAddress(
-                getAccountsData(),
+                Storage.getAccountsData(),
                 network,
-                getWalletId(),
+                Storage.getWalletId(),
                 scheme,
                 network.defaultAccountIndex,
                 EXTERNAL_CHANGE_INDEX
@@ -354,8 +357,8 @@ export default class AddressesService {
     // TODO: [tests, moderate]
     static async getLastAddresses(request) {
         try {
-            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
-            const network = getCurrentNetwork();
+            const indexes = await AddressesDataApi.getAddressesIndexes(Storage.getWalletId());
+            const network = Storage.getCurrentNetwork();
             return request.reduce((prev, requestItem) => {
                 const scheme = this.SCHEMES_BY_ADDRESS_TYPE.get(requestItem.type);
 
@@ -366,14 +369,14 @@ export default class AddressesService {
                 );
                 const baseIndex = AddressesDataAdapter.getIndexByPath(indexes, path);
                 const changeNode = scheme.deriveNeuteredChangeNodeForAccount(
-                    getAccountsData(),
+                    Storage.getAccountsData(),
                     network,
                     network.defaultAccountIndex,
                     requestItem.change ? 1 : 0
                 );
 
                 for (let i = 0; i < requestItem.count && baseIndex - i >= 0; ++i) {
-                    prev.push(getAddressByIndex(scheme, changeNode, baseIndex - i, network));
+                    prev.push(BitcoinAddresses.getAddressByIndex(scheme, changeNode, baseIndex - i, network));
                 }
 
                 return prev;
@@ -385,18 +388,18 @@ export default class AddressesService {
 }
 
 async function createAddressBySchemeAndIncrementValue(scheme, label) {
-    const walletId = getWalletId();
+    const walletId = Storage.getWalletId();
     const addressesIndexes = await AddressesDataApi.getAddressesIndexes(walletId);
 
-    const { newAddress, coinIndex, accountIndex, changeIndex } = createNewExternalAddressByScheme(
-        getAccountsData(),
-        getCurrentNetwork(),
+    const { newAddress, coinIndex, accountIndex, changeIndex } = BitcoinAddresses.createNewExternalAddressByScheme(
+        Storage.getAccountsData(),
+        Storage.getCurrentNetwork(),
         addressesIndexes,
         scheme
     );
     const path = scheme.getChangeNodePath(coinIndex, accountIndex, changeIndex);
 
-    const encryptedAddressData = new Address(newAddress, label).encryptAndSerialize(getDataPassword());
+    const encryptedAddressData = new Address(newAddress, label).encryptAndSerialize(Storage.getDataPassword());
     const addressUUID = v4();
     const addressesData = [{ uuid: addressUUID, encryptedAddressData }];
 

@@ -1,11 +1,12 @@
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { Coins } from "../../coins";
-import { safeStringify } from "../../../common/utils/browserUtils";
-import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { safeStringify } from "../../../common/utils/browserUtils.js";
+import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 class EthFeeRatesBlockNativeProvider extends ExternalApiProvider {
     constructor() {
@@ -82,7 +83,8 @@ class EtherscanEthFeeRatesProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const networkPrefix = getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet ? "" : "-goerli";
+            const networkPrefix =
+                Storage.getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet ? "" : "-goerli";
             // NOTE: add api key if you decide to use paid API '&apikey=YourApiKeyToken'
             return `https://api${networkPrefix}.etherscan.io/api?module=gastracker&action=gasoracle`;
         } catch (e) {

@@ -1,8 +1,8 @@
-import { logError } from "../../../common/utils/errorUtils";
-import { Erc20TokenBalanceService } from "../../erc20token/services/erc20TokenBalanceService";
-import { TronBlockchainBalancesService } from "../../trx/services/tronBlockchainBalancesService";
-import { Coins } from "../../coins";
-import { ImportBtcWalletService } from "../../btc/services/importBtcWalletService";
+import { logError } from "../../../common/utils/errorUtils.js";
+import { Erc20TokenBalanceService } from "../../erc20token/services/erc20TokenBalanceService.js";
+import { TronBlockchainBalancesService } from "../../trx/services/tronBlockchainBalancesService.js";
+import { Coins } from "../../coins.js";
+import { ImportBtcWalletService } from "../../btc/services/importBtcWalletService.js";
 
 export class ImportWalletService {
     static async safelyRecogniseTokensAndScanBtcWhenImporting() {

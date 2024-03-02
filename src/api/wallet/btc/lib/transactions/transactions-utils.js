@@ -1,9 +1,10 @@
-import { getMappingOfAddressesToRandomEcPair, getNetworkByAddress } from "../addresses";
-import { getAddresses } from "../utxos";
-import { calculateFeeByFeeRate } from "../fees";
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import { buildTransactionUnsafe } from "./build-transaction";
-import { Coins } from "../../../coins";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { EcPairsUtils, BitcoinAddresses } from "../addresses.js";
+import { getAddresses } from "../utxos.js";
+import { BtcFeeCalculatorByFeeRate } from "../fees.js";
+import { BtcTransactionBuilder } from "./build-transaction.js";
+import { Coins } from "../../../coins.js";
 
 /**
  * Selects only utxos with value covering fee required to add them to transaction in terms of specified fee rate.
@@ -24,7 +25,7 @@ export function getSortedNotDustUtxosInTermsOfSpecificFeeRate(utxos, feeRate, ad
 
         const sortedUtxos = utxos.sort((utxo1, utxo2) => utxo2.value_satoshis - utxo1.value_satoshis);
         const goodUtxos = [sortedUtxos[0]];
-        const txOfBiggestUtxo = buildTransactionUnsafe(
+        const txOfBiggestUtxo = BtcTransactionBuilder.buildTransactionUnsafe(
             sortedUtxos[0].value_satoshis,
             address,
             0,
@@ -33,12 +34,20 @@ export function getSortedNotDustUtxosInTermsOfSpecificFeeRate(utxos, feeRate, ad
             ecPairsMapping,
             network
         );
-        const feeOfBiggestUtxo = calculateFeeByFeeRate(txOfBiggestUtxo, feeRate);
+        const feeOfBiggestUtxo = BtcFeeCalculatorByFeeRate.calculateFeeByFeeRate(txOfBiggestUtxo, feeRate);
         for (let i = 1; i < sortedUtxos.length; ++i) {
             const tempUtxos = [sortedUtxos[0], sortedUtxos[i]];
             const tempAmount = sortedUtxos[0].value_satoshis + sortedUtxos[i].value_satoshis;
-            const newTx = buildTransactionUnsafe(tempAmount, address, 0, null, tempUtxos, ecPairsMapping, network);
-            const newFee = calculateFeeByFeeRate(newTx, feeRate);
+            const newTx = BtcTransactionBuilder.buildTransactionUnsafe(
+                tempAmount,
+                address,
+                0,
+                null,
+                tempUtxos,
+                ecPairsMapping,
+                network
+            );
+            const newFee = BtcFeeCalculatorByFeeRate.calculateFeeByFeeRate(newTx, feeRate);
             if (newFee - feeOfBiggestUtxo <= sortedUtxos[i].value_satoshis) {
                 goodUtxos.push(sortedUtxos[i]);
             }
@@ -66,7 +75,7 @@ export function getFeePlusSendingAmountOverlapsBalanceErrorData() {
 export function getNetworkByTransaction(tx) {
     const output = tx.outputs.filter(output => output.addresses[0])[0];
     if (output) {
-        return getNetworkByAddress(output.addresses[0]);
+        return BitcoinAddresses.getNetworkByAddress(output.addresses[0]);
     }
 
     throw new Error("No address in output. Occurred during recognition of network by tx.");
@@ -76,37 +85,39 @@ export function hasMinConfirmations(tx) {
     return tx.confirmations >= Coins.COINS.BTC.minConfirmations;
 }
 
-/**
- * Calculates sum of outputs of given transactions sending to given address.
- *
- * @param address - address to calculate sum for
- * @param transactionsList - list of transactions to get outputs from
- * @returns number - sum of outputs sending to given address
- */
-export function getSumOfOutputsSendingToAddressByTransactionsList(address, transactionsList) {
-    if (!(transactionsList instanceof Array)) {
-        throw new Error("Transactions list should be an array. ");
-    }
-
-    return transactionsList.reduce((prev, tx) => {
-        if (!tx.outputs || !Array.isArray(tx.outputs) || !tx.outputs.length) {
-            return prev;
+export class BtcTransactionsCalculationUtils {
+    /**
+     * Calculates sum of outputs of given transactions sending to given address.
+     *
+     * @param address - address to calculate sum for
+     * @param transactionsList - list of transactions to get outputs from
+     * @returns number - sum of outputs sending to given address
+     */
+    static getSumOfOutputsSendingToAddressByTransactionsList(address, transactionsList) {
+        if (!(transactionsList instanceof Array)) {
+            throw new Error("Transactions list should be an array. ");
         }
 
-        return (
-            prev +
-            tx.outputs.reduce((prevOutputSum, output) => {
-                if (!output?.addresses || !Array.isArray(output.addresses) || !output.addresses.length) {
-                    return prevOutputSum;
-                }
+        return transactionsList.reduce((prev, tx) => {
+            if (!tx.outputs || !Array.isArray(tx.outputs) || !tx.outputs.length) {
+                return prev;
+            }
 
-                return (
-                    prevOutputSum +
-                    (output.addresses.find(outputAddress => outputAddress === address) ? output.value_satoshis : 0)
-                );
-            }, 0)
-        );
-    }, 0);
+            return (
+                prev +
+                tx.outputs.reduce((prevOutputSum, output) => {
+                    if (!output?.addresses || !Array.isArray(output.addresses) || !output.addresses.length) {
+                        return prevOutputSum;
+                    }
+
+                    return (
+                        prevOutputSum +
+                        (output.addresses.find(outputAddress => outputAddress === address) ? output.value_satoshis : 0)
+                    );
+                }, 0)
+            );
+        }, 0);
+    }
 }
 
 /**
@@ -122,7 +133,7 @@ export function getSumOfOutputsSendingToAddressByTransactionsList(address, trans
  */
 export function getNotDustUTXOsInTermsOfSpecificFeeRateConsideringSendingP2WPKH(utxos, feeRate, network) {
     try {
-        const mapping = getMappingOfAddressesToRandomEcPair(getAddresses(utxos), network);
+        const mapping = EcPairsUtils.getMappingOfAddressesToRandomEcPair(getAddresses(utxos), network);
         const randomAddress =
             network.key === Coins.COINS.BTC.mainnet.key
                 ? "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4"

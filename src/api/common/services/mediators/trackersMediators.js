@@ -1,3 +1,5 @@
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
 import {
     EventBus,
     SIGNED_IN_EVENT,
@@ -6,12 +8,12 @@ import {
     SWAP_TX_PUSHED_EVENT,
     TRANSACTION_PUSHED_EVENT,
     WALLET_IMPORTED_EVENT,
-} from "../../adapters/eventbus";
-import { getWalletId } from "../internal/storage";
-import { improveAndRethrow, logError } from "../../utils/errorUtils";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import CoinsToFiatRatesService from "../../../wallet/common/services/coinsToFiatRatesService";
-import { Coins } from "../../../wallet/coins";
+} from "../../adapters/eventbus.js";
+import { Storage } from "../internal/storage.js";
+import { logError } from "../../utils/errorUtils.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import CoinsToFiatRatesService from "../../../wallet/common/services/coinsToFiatRatesService.js";
+import { Coins } from "../../../wallet/coins.js";
 
 const MEASUREMENT_ID = "G-VDHZL5BZCR";
 
@@ -20,8 +22,8 @@ export const setupAnalyticsMediators = () => {
     Logger.log("Start setting up analytics mediators", loggerSource);
 
     EventBus.addEventListener(SIGNED_UP_EVENT, () => {
-        GoogleAnalyticsUtils.doActionOnGTag(["config", MEASUREMENT_ID, { user_id: getWalletId() }]);
-        MixPanelUtils.identify(getWalletId());
+        GoogleAnalyticsUtils.doActionOnGTag(["config", MEASUREMENT_ID, { user_id: Storage.getWalletId() }]);
+        MixPanelUtils.identify(Storage.getWalletId());
     });
 
     EventBus.addEventListener(SIGNED_UP_EVENT, () => {
@@ -31,8 +33,8 @@ export const setupAnalyticsMediators = () => {
     });
 
     EventBus.addEventListener(SIGNED_IN_EVENT, () => {
-        GoogleAnalyticsUtils.doActionOnGTag(["config", MEASUREMENT_ID, { user_id: getWalletId() }]);
-        MixPanelUtils.identify(getWalletId());
+        GoogleAnalyticsUtils.doActionOnGTag(["config", MEASUREMENT_ID, { user_id: Storage.getWalletId() }]);
+        MixPanelUtils.identify(Storage.getWalletId());
     });
 
     EventBus.addEventListener(TRANSACTION_PUSHED_EVENT, (event, tx_id, tx_amount, tx_fee, ticker) => {

@@ -1,5 +1,6 @@
-import { improveAndRethrow } from "./errorUtils";
 import copy from "clipboard-copy";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
 /**
  * Copies given text to clipboard inside browser.

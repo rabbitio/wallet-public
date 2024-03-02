@@ -1,8 +1,8 @@
-import { EventBus, NEW_BLOCK_EVENT, NEW_BLOCK_DEDUPLICATED_EVENT } from "../../../../common/adapters/eventbus";
-import { ExternalBlocksApiCaller } from "../../external-apis/blocksAPI";
-import { getCurrentNetwork } from "../../../../common/services/internal/storage";
-import { logError } from "../../../../common/utils/errorUtils";
-import { Logger } from "../../../../support/services/internal/logs/logger";
+import { EventBus, NEW_BLOCK_EVENT, NEW_BLOCK_DEDUPLICATED_EVENT } from "../../../../common/adapters/eventbus.js";
+import { ExternalBlocksApiCaller } from "../../external-apis/blocksAPI.js";
+import { Storage } from "../../../../common/services/internal/storage.js";
+import { logError } from "../../../../common/utils/errorUtils.js";
+import { Logger } from "../../../../support/services/internal/logs/logger.js";
 
 /**
  * Manages last block in the network - listens for it and uses long-polling just to ensure block
@@ -22,13 +22,13 @@ class CurrentBlockService {
     async initialize() {
         const loggerSource = "initialize";
         try {
-            this._currentBlockNumber = await ExternalBlocksApiCaller.retrieveCurrentBlockNumber(getCurrentNetwork());
+            this._currentBlockNumber = await ExternalBlocksApiCaller.retrieveCurrentBlockNumber(Storage.getCurrentNetwork());
 
             Logger.log(`Current block data initialized: ${this._currentBlockNumber}`, loggerSource);
 
             this._interval = setInterval(async () => {
                 try {
-                    const block = await ExternalBlocksApiCaller.retrieveCurrentBlockNumber(getCurrentNetwork());
+                    const block = await ExternalBlocksApiCaller.retrieveCurrentBlockNumber(Storage.getCurrentNetwork());
                     this._processNewBlockNumber(block);
                 } catch (e) {
                     logError(e, "blocks_lookup", "Failed to get block number in the listener");

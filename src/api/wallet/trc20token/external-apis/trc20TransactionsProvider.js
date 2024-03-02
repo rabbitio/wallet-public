@@ -1,18 +1,19 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { Coins } from "../../coins";
-import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem";
-import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem.js";
+import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
 import {
     actualizeCacheWithNewTransactionSentFromAddress,
     mergeTwoTransactionsArraysAndNotifyAboutNewTransactions,
-} from "../../common/utils/cacheActualizationUtils";
-import { computeConfirmationsCountByTimestamp } from "../../trx/lib/blocks";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
+} from "../../common/utils/cacheActualizationUtils.js";
+import { computeConfirmationsCountByTimestamp } from "../../trx/lib/blocks.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
 
 class TronscanTrc20TransactionsProvider extends ExternalApiProvider {
     constructor() {
@@ -26,7 +27,7 @@ class TronscanTrc20TransactionsProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const network = getCurrentNetwork(Coins.COINS.TRX);
+            const network = Storage.getCurrentNetwork(Coins.COINS.TRX);
             if (network !== Coins.COINS.TRX.mainnet) {
                 throw new Error("Tronscan doesn't support testnet");
             }

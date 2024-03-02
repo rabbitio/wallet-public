@@ -1,11 +1,14 @@
-import { BigNumber } from "ethers";
-import { logError } from "../../../common/utils/errorUtils";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import { Erc20transactionUtils } from "../lib/erc20transactionUtils";
-import { FeeEstimationUtils } from "../../common/utils/feeEstimationUtils";
-import { safeStringify } from "../../../common/utils/browserUtils";
-import { Erc20TransactionFeeEstimationProvider } from "../external-apis/erc20transactionFeeEstimationProvider";
-import { ERC20 } from "../erc20Protocol";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils } from "@rabbitio/ui-kit";
+
+import { logError } from "../../../common/utils/errorUtils.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { Erc20transactionUtils } from "../lib/erc20transactionUtils.js";
+import { FeeEstimationUtils } from "../../common/utils/feeEstimationUtils.js";
+import { safeStringify } from "../../../common/utils/browserUtils.js";
+import { Erc20TransactionFeeEstimationProvider } from "../external-apis/erc20transactionFeeEstimationProvider.js";
+import { ERC20 } from "../erc20Protocol.js";
 
 export class Erc20FeeEstimationService {
     /**
@@ -23,7 +26,7 @@ export class Erc20FeeEstimationService {
      * @param receiver {string} address to send tokens to
      * @param amountAtoms {string} amount of token atoms to send
      * @param network {Network} to work in
-     * @return {Promise<number>} integer number of gas units
+     * @return {Promise<string>} integer number of gas units
      */
     static async estimateGasForTransfer(token, sender, receiver, amountAtoms, network) {
         const loggerSource = "estimateGasForTransfer";
@@ -37,22 +40,22 @@ export class Erc20FeeEstimationService {
          * value than the sending using this amount will fail with ~"out of gas" error. So change this value carefully
          * and assume all the restrictions.
          */
-        const defaultMaxGasAmountForErc20Transfer = 120000;
+        const defaultMaxGasAmountForErc20Transfer = "120000";
 
         try {
             const dataHex = Erc20transactionUtils.composeEthereumTransactionDataForGivenParams(receiver, amountAtoms);
             let gasLimit;
             try {
-                const gasBigNumber = await Erc20TransactionFeeEstimationProvider.getErc20TransferFeeEstimation(
+                const res1 = await Erc20TransactionFeeEstimationProvider.getErc20TransferFeeEstimation(
                     sender,
                     token.tokenAddress,
                     dataHex,
                     defaultMaxGasAmountForErc20Transfer
                 );
-                if (!gasBigNumber instanceof BigNumber) {
-                    throw new Error("Wrong gas erc20 estimation: " + gasBigNumber);
+                if (typeof res1 !== "string") {
+                    throw new Error("Wrong gas erc20 estimation: " + res1);
                 }
-                gasLimit = gasBigNumber.toString();
+                gasLimit = res1;
             } catch (e) {
                 Logger.log(`Failed to estimate gas (we will retry): ${safeStringify(e)}`, loggerSource);
                 const res2 = await Erc20TransactionFeeEstimationProvider.getErc20TransferFeeEstimation(
@@ -61,10 +64,10 @@ export class Erc20FeeEstimationService {
                     dataHex,
                     defaultMaxGasAmountForErc20Transfer
                 );
-                gasLimit = res2.toString();
+                gasLimit = res2;
             }
 
-            if (!gasLimit || !+gasLimit) {
+            if (!gasLimit?.match(/\d+/)) {
                 Logger.log(`Gas limit is not retrieved: ${gasLimit}`, loggerSource);
             } else {
                 Logger.log(`Correct gas estimation retrieved: ${gasLimit}`, loggerSource);
@@ -77,16 +80,16 @@ export class Erc20FeeEstimationService {
              * NOTE: this increased limit the other way affects the ability to send all coins from the wallet. But
              * it still looks like a reasonable tradeoff.
              */
-            const percentToIncreaseEstimation = 25;
-            let finalValue = BigNumber.from(gasLimit).toNumber() * ((100 + percentToIncreaseEstimation) / 100);
+            const estimationIncreaseTimes = "1.25";
+            let finalValue = AmountUtils.intStr(BigNumber(gasLimit).times(estimationIncreaseTimes));
 
             /* We use also min gas limit as for some weird reason rarely ethereum provides significantly inaccurate
              * estimations and transaction sending using this limit fails due to OUT_OF_GAS.
              * This constant is just empirically discovered value that should with high probability fit the actual gas
              * amount required to perform erc20 transfer.
              */
-            const minEmpiricalGasLimit = 69000;
-            if (finalValue < minEmpiricalGasLimit) {
+            const minEmpiricalGasLimit = "69000";
+            if (BigNumber(minEmpiricalGasLimit).gt(finalValue)) {
                 finalValue = minEmpiricalGasLimit;
                 Logger.log(`Returning min empirical gas limit as the estimation is small: ${finalValue}`, loggerSource);
             } else {

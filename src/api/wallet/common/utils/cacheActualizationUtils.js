@@ -1,11 +1,14 @@
-import { BigNumber } from "ethers";
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import { TransactionsHistoryItem } from "../models/transactionsHistoryItem";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { logError } from "../../../common/utils/errorUtils.js";
+import { TransactionsHistoryItem } from "../models/transactionsHistoryItem.js";
 import {
     BALANCE_CHANGED_EXTERNALLY_EVENT,
     EventBus,
     NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
-} from "../../../common/adapters/eventbus";
+} from "../../../common/adapters/eventbus.js";
 
 /**
  * Merges old data array with new by adding the missing items from old array and all new items
@@ -211,15 +214,15 @@ export function createRawBalanceAtomsCacheProcessorForMultiBalancesProvider(coin
             if (Array.isArray(cachedList)) {
                 const coinBalanceData = cachedList.find(item => item?.ticker === coin.ticker);
                 if (coinBalanceData?.balance) {
-                    const balance = BigNumber.from("" + coinBalanceData.balance);
+                    const balance = BigNumber(coinBalanceData.balance);
                     valuesAtoms = "" + valuesAtoms;
                     let bigNumber;
                     if (sign < 0) {
-                        bigNumber = balance.gte(valuesAtoms) ? balance.sub(valuesAtoms) : BigNumber.from("0");
+                        bigNumber = balance.gte(valuesAtoms) ? balance.minus(valuesAtoms) : BigNumber("0");
                     } else {
-                        bigNumber = balance.add(valuesAtoms);
+                        bigNumber = balance.plus(valuesAtoms);
                     }
-                    coinBalanceData.balance = bigNumber.toString();
+                    coinBalanceData.balance = AmountUtils.trim(bigNumber, 0);
 
                     return { isModified: true, data: cachedList };
                 }
@@ -237,13 +240,13 @@ export function createRawBalanceAtomsCacheProcessorForSingleBalanceProvider(valu
         try {
             let data = cached;
             if (typeof cached === "string" || typeof cached === "number") {
-                const balance = BigNumber.from("" + cached);
+                const balance = BigNumber("" + cached);
                 if (sign < 0) {
-                    data = balance.gte(valuesAtoms) ? balance.sub(valuesAtoms) : BigNumber.from("0");
+                    data = balance.gte(valuesAtoms) ? balance.minus(valuesAtoms) : BigNumber("0");
                 } else {
-                    data = balance.add(valuesAtoms);
+                    data = balance.plus(valuesAtoms);
                 }
-                data = data.toString();
+                data = AmountUtils.trim(data, 0);
 
                 return { isModified: true, data: data };
             }

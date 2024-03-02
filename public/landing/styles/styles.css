@@ -484,6 +484,10 @@ section.footer {
     margin: 0;
 }
 
+section.no-margins {
+    margin: 0;
+}
+
 /* Standard section blocks */
 .section-title {
     margin-bottom: 1.75rem;

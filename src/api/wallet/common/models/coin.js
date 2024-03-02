@@ -101,21 +101,9 @@ export class Coin {
     }
 
     /**
-     * Converts the given atoms string/number to string representing the same amount in coin itself - floating point
-     * number with only significant digits after the dot
-     *
-     * @param atoms {string} atoms positive integer amount
-     * @param [maxNumberLength=null] {number|null} max length of target formatted number
-     * @return {string} coin amount floating point number as a string having only significant digits after the dot
-     */
-    atomsToCoinAmountSignificantString(atoms, maxNumberLength = null) {
-        throw new Error("Not implemented in base Coin");
-    }
-
-    /**
      * Converts the given coins amount string/number to string representing the same amount in coin atoms - integer number
      *
-     * @param coinsAmount {string|number} coins positive floating point amount
+     * @param coinsAmount {string} coins positive floating point amount
      * @return {string} coin atoms amount integer number as a string
      */
     coinAmountToAtoms(coinsAmount) {
@@ -137,7 +125,7 @@ export class Coin {
      * like satoshi/byte or gWei/gas. This function adds the described denomination string to the given amount
      * as a suffix and returns the result string ready to be show to a user.
      *
-     * @param coinAtomsString {string|number} coin atoms positive integer amount
+     * @param coinAtomsString {string} coin atoms positive integer amount
      * @return {string} string of coin amount and fee rate units
      */
     coinAtomsFeeRateToCommonlyUsedAmountFormatWithDenominationString(coinAtomsString) {

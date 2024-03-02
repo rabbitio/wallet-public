@@ -1,7 +1,9 @@
 import { v4 } from "uuid";
 import pbkdf2 from "pbkdf2";
 import util from "util";
-import { getLogger } from "log4js";
+import log4js from "log4js";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
 import {
     createCollectionsIfNotPresent,
@@ -10,20 +12,19 @@ import {
     isFindAndUpdateOneResultValid,
     isInsertOneResultValid,
     isUpdateOneResultValid,
-} from "./mongoUtil";
-import EncryptedIpsService from "./encryptedIpsService";
-import { improveAndRethrow } from "../utils/utils";
+} from "./mongoUtil.js";
+import EncryptedIpsService from "./encryptedIpsService.js";
 import {
     LOGIN_LOCK_PERIOD_MS,
     MAX_FAILED_LOGIN_ATTEMPTS_COUNT,
     PASSWORD_SALT,
     SESSION_EXPIRATION_TIME,
-} from "../properties";
-import { dbConnectionHolder } from "../utils/dbConnectionHolder";
-import { TransactionsDataService } from "./transactionsDataService";
-import AddressesDataService, { addressesDataDbCollectionName } from "./addressesDataService";
+} from "../properties.js";
+import { dbConnectionHolder } from "../utils/dbConnectionHolder.js";
+import { TransactionsDataService } from "./transactionsDataService.js";
+import AddressesDataService, { addressesDataDbCollectionName } from "./addressesDataService.js";
 
-const log = getLogger("walletsService");
+const log = log4js.getLogger("walletsService");
 
 export const walletsDbCollectionName = "wallets";
 
@@ -114,7 +115,9 @@ export default class WalletsService {
             }
 
             log.debug("Trying to find saved wallet.");
-            const savedWallet = await (await dbConnectionHolder.getCollection(walletsDbCollectionName)).findOne({
+            const savedWallet = await (
+                await dbConnectionHolder.getCollection(walletsDbCollectionName)
+            ).findOne({
                 walletId,
             });
             if (!savedWallet) {

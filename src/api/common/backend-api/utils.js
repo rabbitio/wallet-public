@@ -1,13 +1,14 @@
-import axios from "axios";
 import Cookie from "js-cookie";
 
-import { API_URL, IS_TESTING } from "../../../properties";
-import { cookieStorage } from "../utils/cookiesStorage";
-import { EventBus, NO_AUTHENTICATION_EVENT } from "../adapters/eventbus";
-import { improveAndRethrow } from "../utils/errorUtils";
-import { getCurrentIpHash } from "../services/internal/storage";
-import { WALLET_EXISTS } from "./apiErrorCodes";
-import { postponeExecution, safeStringify } from "../utils/browserUtils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { API_URL, IS_TESTING } from "../../../properties.js";
+import { cookieStorage } from "../utils/cookiesStorage.js";
+import { EventBus, NO_AUTHENTICATION_EVENT } from "../adapters/eventbus.js";
+import { Storage } from "../services/internal/storage.js";
+import { WALLET_EXISTS } from "./apiErrorCodes.js";
+import { postponeExecution, safeStringify } from "../utils/browserUtils.js";
+import AxiosAdapter from "../adapters/axiosAdapter.js";
 
 export const API_VERSION_PREFIX = "/api/v1";
 export const urlWithPrefix = `${API_URL}${API_VERSION_PREFIX}`;
@@ -31,17 +32,17 @@ export async function doApiCall(
 
         let response;
         if (method === "get") {
-            response = await axios.get(endpoint, { headers });
+            response = await AxiosAdapter.get(endpoint, { headers });
         } else if (method === "post") {
-            response = await axios.post(endpoint, data, { headers });
+            response = await AxiosAdapter.post(endpoint, data, { headers });
         } else if (method === "put") {
-            response = await axios.put(endpoint, data, { headers });
+            response = await AxiosAdapter.put(endpoint, data, { headers });
         } else if (method === "patch") {
-            response = await axios.patch(endpoint, data, { headers });
+            response = await AxiosAdapter.patch(endpoint, data, { headers });
         } else if (method === "delete") {
             const config = { headers };
             data && (config.data = data);
-            response = await axios.delete(endpoint, config);
+            response = await AxiosAdapter.delete(endpoint, config);
         }
 
         IS_TESTING && cookieStorage.saveCookiesLocally(response); // Workaround for integration testing
@@ -84,8 +85,8 @@ async function addIpHashParameterToUrl(url, ipHash = null, waitNSecondsForIPHash
         while (iterations > 0 && !ipHash) {
             ipHash =
                 iterations === waitNSecondsForIPHash
-                    ? getCurrentIpHash()
-                    : await postponeExecution(getCurrentIpHash, 1000);
+                    ? Storage.getCurrentIpHash()
+                    : await postponeExecution(Storage.getCurrentIpHash, 1000);
             --iterations;
         }
 

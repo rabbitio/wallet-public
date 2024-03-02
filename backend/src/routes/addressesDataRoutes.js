@@ -1,8 +1,8 @@
 import express from "express";
 
-import AddressesDataController from "../controllers/addressesData";
-import { apiVersionPrefix } from "../controllers/controllerUtils";
-import { addressesDataDbCollectionName } from "../services/addressesDataService";
+import AddressesDataController from "../controllers/addressesData.js";
+import { apiVersionPrefix } from "../controllers/controllerUtils.js";
+import { addressesDataDbCollectionName } from "../services/addressesDataService.js";
 
 const basePrefix = `${apiVersionPrefix}/${addressesDataDbCollectionName}`;
 

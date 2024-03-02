@@ -1,10 +1,12 @@
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { BigNumber } from "ethers";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
+import { BigNumber } from "bignumber.js";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 class AlchemyEthereumTransactionsCountProvider extends ExternalApiProvider {
     constructor() {
@@ -34,7 +36,7 @@ class AlchemyEthereumTransactionsCountProvider extends ExternalApiProvider {
 
     getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
         try {
-            return BigNumber.from(response?.data?.result).toNumber();
+            return BigNumber(response?.data?.result).toNumber();
         } catch (e) {
             improveAndRethrow(e, "AlchemyEthereumTransactionsCountProvider.getDataByResponse");
         }

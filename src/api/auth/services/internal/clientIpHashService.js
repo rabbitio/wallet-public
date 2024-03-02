@@ -1,9 +1,11 @@
-import { getSaltedHash } from "../../../common/adapters/crypto-utils";
-import { getDataPassword, saveCurrentIpHash } from "../../../common/services/internal/storage";
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import { CLIENT_IP_HASH_LIFETIME } from "../../../../properties";
-import IpAddressProvider from "../../external-apis/ipAddressProviders";
-import { IpsServiceInternal } from "./ipsServiceInternal";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { getSaltedHash } from "../../../common/adapters/crypto-utils.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { logError } from "../../../common/utils/errorUtils.js";
+import { CLIENT_IP_HASH_LIFETIME } from "../../../../properties.js";
+import IpAddressProvider from "../../external-apis/ipAddressProviders.js";
+import { IpsServiceInternal } from "./ipsServiceInternal.js";
 
 export default class ClientIpHashService {
     /**
@@ -61,9 +63,9 @@ export default class ClientIpHashService {
 async function provideIpHash() {
     let ip = await IpAddressProvider.getClientIpAddress();
     ip = IpsServiceInternal.ipToStringOfBytes(ip);
-    const ipHash = getSaltedHash(ip, getDataPassword() || "");
+    const ipHash = getSaltedHash(ip, Storage.getDataPassword() || "");
 
-    saveCurrentIpHash(ipHash);
+    Storage.saveCurrentIpHash(ipHash);
 
     return ipHash;
 }

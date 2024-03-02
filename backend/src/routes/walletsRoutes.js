@@ -1,8 +1,8 @@
 import express from "express";
 
-import { apiVersionPrefix } from "../controllers/controllerUtils";
-import WalletsController from "../controllers/wallets";
-import { walletsDbCollectionName } from "../services/walletsService";
+import { apiVersionPrefix } from "../controllers/controllerUtils.js";
+import WalletsController from "../controllers/wallets.js";
+import { walletsDbCollectionName } from "../services/walletsService.js";
 
 const router = express.Router({});
 

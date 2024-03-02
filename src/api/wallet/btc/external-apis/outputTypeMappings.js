@@ -1,5 +1,5 @@
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { P2PKH_SCRIPT_TYPE, P2SH_SCRIPT_TYPE, P2WPKH_SCRIPT_TYPE } from "../lib/utxos";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { P2PKH_SCRIPT_TYPE, P2SH_SCRIPT_TYPE, P2WPKH_SCRIPT_TYPE } from "../lib/utxos.js";
 
 export const mappingsPerProvider = new Map([
     [

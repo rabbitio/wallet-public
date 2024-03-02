@@ -2,7 +2,7 @@ import bitcoinJs from "bitcoinjs-lib";
 import bip32 from "bip32";
 import bip39 from "bip39";
 
-import { BitcoinJsAdapter } from "../adapters/bitcoinJsAdapter";
+import { BitcoinJsAdapter } from "../adapters/bitcoinJsAdapter.js";
 
 /**
  * This module covers schemes that are used in derivation paths utilized in creation of addresses of specific types.

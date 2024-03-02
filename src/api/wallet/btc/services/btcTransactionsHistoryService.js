@@ -1,7 +1,8 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import AddressesServiceInternal from "./internal/addressesServiceInternal";
-import { transactionsDataProvider } from "./internal/transactionsDataProvider";
-import { composeTransactionsHistoryItems } from "../lib/transactions/transactions-history";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import AddressesServiceInternal from "./internal/addressesServiceInternal.js";
+import { transactionsDataProvider } from "./internal/transactionsDataProvider.js";
+import { BtcTransactionsHistory } from "../lib/transactions/transactions-history.js";
 
 export class BtcTransactionsHistoryService {
     /**
@@ -15,7 +16,7 @@ export class BtcTransactionsHistoryService {
             const allAddressesSingleArray = allAddresses.internal.concat(allAddresses.external);
             const allTransactions = await transactionsDataProvider.getTransactionsByAddresses(allAddressesSingleArray);
 
-            return composeTransactionsHistoryItems(allAddresses, allTransactions);
+            return BtcTransactionsHistory.composeTransactionsHistoryItems(allAddresses, allTransactions);
         } catch (e) {
             improveAndRethrow(e, "getBtcTransactionsHistory");
         }

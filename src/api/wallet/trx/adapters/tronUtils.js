@@ -1,12 +1,13 @@
 import { ethers } from "ethers";
 import TronWebLib from "tronweb";
 
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { Coins } from "../../coins";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { safeStringify } from "../../../common/utils/browserUtils";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { safeStringify } from "../../../common/utils/browserUtils.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 
 const url = `${API_KEYS_PROXY_URL}/${ApiGroups.TRONGRID.backendProxyIdGenerator(Coins.COINS.TRX.mainnet)}`;
 const urlTestnet = `${API_KEYS_PROXY_URL}/${ApiGroups.TRONGRID.backendProxyIdGenerator(Coins.COINS.TRX.testnet)}`;
@@ -22,7 +23,7 @@ class TronUtils {
 
     _getLibByCurrentNetwork() {
         try {
-            if (getCurrentNetwork(Coins.COINS.TRX) === Coins.COINS.TRX.mainnet) {
+            if (Storage.getCurrentNetwork(Coins.COINS.TRX) === Coins.COINS.TRX.mainnet) {
                 return this._lib;
             }
             if (this._libTestnet == null) {
@@ -185,7 +186,17 @@ class TronUtils {
             const signedTransaction = await this._getLibByCurrentNetwork().trx.sign(unsignedTransaction, privateKey);
             const result = await this._getLibByCurrentNetwork().trx.sendRawTransaction(signedTransaction);
             const id = result?.transaction?.txID;
-            if (!id) throw new Error("Failed to broadcast transaction: " + safeStringify(unsignedTransaction));
+            if (!id)
+                throw new Error(
+                    "Failed to broadcast transaction. Unsigned: " +
+                        safeStringify(unsignedTransaction) +
+                        "\nSigned: " +
+                        safeStringify(signedTransaction) +
+                        "\nResult: " +
+                        safeStringify(result) +
+                        "\n message decoded: " +
+                        Buffer.from(result?.message ?? "", "hex").toString()
+                );
             return id;
         } catch (e) {
             improveAndRethrow(e, "_signAndBroadcastTransaction");
@@ -262,7 +273,7 @@ class TronUtils {
         fromAddressBase58,
         toAddressBase58,
         amountAtomsString,
-        feeLimitSuns = 100000000
+        feeLimitSuns = 100_000_000
     ) {
         try {
             const result = await this._buildTrc20TransferTransactionInternalFormat(

@@ -1,10 +1,11 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { TronBlockchainTransactionDetailsProvider } from "../external-apis/tronTransactionDetailsProvider";
-import { TrxAddressesService } from "./trxAddressesService";
-import { TronTransactionsProvider } from "../external-apis/tronTransactionsProvider";
-import { Coins } from "../../coins";
-import { Trc20TransactionsProvider } from "../../trc20token/external-apis/trc20TransactionsProvider";
-import { TRC20 } from "../../trc20token/trc20Protocol";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { TronBlockchainTransactionDetailsProvider } from "../external-apis/tronTransactionDetailsProvider.js";
+import { TrxAddressesService } from "./trxAddressesService.js";
+import { TronTransactionsProvider } from "../external-apis/tronTransactionsProvider.js";
+import { Coins } from "../../coins.js";
+import { Trc20TransactionsProvider } from "../../trc20token/external-apis/trc20TransactionsProvider.js";
+import { TRC20 } from "../../trc20token/trc20Protocol.js";
 
 export class TronTransactionDetailsService {
     // TODO: [tests, moderate] sophisticated logic, prays for unit tests
@@ -46,10 +47,8 @@ export class TronTransactionDetailsService {
                 }
                 if (result != null && result.fees == null && !detailsProviderWasCalled) {
                     // Performing additional request to get missing fee as all trc20 txs list providers return no fee data
-                    const detailsItemsWithFee = await TronBlockchainTransactionDetailsProvider.getTronTransactionDetails(
-                        txId,
-                        address
-                    );
+                    const detailsItemsWithFee =
+                        await TronBlockchainTransactionDetailsProvider.getTronTransactionDetails(txId, address);
                     result = detailsItemsWithFee?.find(
                         item => item.ticker === result.ticker && item.type === result.type
                     );

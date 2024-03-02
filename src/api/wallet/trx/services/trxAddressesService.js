@@ -1,11 +1,13 @@
 import bitcoinJs from "bitcoinjs-lib";
 import { ethers } from "ethers";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { getAccountsData, getCurrentNetwork } from "../../../common/services/internal/storage";
-import { Coins } from "../../coins";
-import { bip44Scheme } from "../../btc/lib/addresses-schemes";
-import { KeysBip44 } from "../../common/lib/keysBip44";
-import { getDecryptedWalletCredentials } from "../../../auth/services/authService";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { bip44Scheme } from "../../btc/lib/addresses-schemes.js";
+import { KeysBip44 } from "../../common/lib/keysBip44.js";
+import { AuthService } from "../../../auth/services/authService.js";
 
 export class TrxAddressesService {
     /**
@@ -16,8 +18,8 @@ export class TrxAddressesService {
      */
     static getCurrentTrxAddress() {
         try {
-            const network = getCurrentNetwork(Coins.COINS.TRX);
-            const accountsData = getAccountsData();
+            const network = Storage.getCurrentNetwork(Coins.COINS.TRX);
+            const accountsData = Storage.getAccountsData();
             const accountData = accountsData.getAccountData(bip44Scheme, network, 0);
             const publicKey = KeysBip44.generateAddressPublicKeyByAccountPublicKey(accountData);
             return this._calculateAddressByPublicKey(publicKey);
@@ -34,8 +36,8 @@ export class TrxAddressesService {
      */
     static exportAddressesWithPrivateKeys(password) {
         try {
-            const ethNetwork = getCurrentNetwork(Coins.COINS.TRX);
-            const { mnemonic, passphrase } = getDecryptedWalletCredentials(password);
+            const ethNetwork = Storage.getCurrentNetwork(Coins.COINS.TRX);
+            const { mnemonic, passphrase } = AuthService.getDecryptedWalletCredentials(password);
             const { publicKey, privateKey } = KeysBip44.generateKeysForAccountAddressByWalletCredentials(
                 mnemonic,
                 passphrase,

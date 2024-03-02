@@ -1,4 +1,4 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
 export class EthTransactionsUtils {
     /**

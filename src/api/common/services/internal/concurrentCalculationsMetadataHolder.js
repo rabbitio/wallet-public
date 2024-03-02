@@ -1,7 +1,7 @@
 import { v4 } from "uuid";
-import { logError } from "../../utils/errorUtils";
-import { IS_TESTING } from "../../../../properties";
-import { ConsoleLogger } from "../../../support/services/internal/logs/consoleLogger";
+import { logError } from "../../utils/errorUtils.js";
+import { IS_TESTING } from "../../../../properties.js";
+import { ConsoleLogger } from "../../../support/services/internal/logs/consoleLogger.js";
 
 // TODO: [refactoring, low] Consider removing this logic task_id=c360f2af75764bde8badd9ff1cc00d48
 class ConcurrentCalculationsMetadataHolder {

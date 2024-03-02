@@ -1,3 +1,5 @@
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
 import {
     AUTHENTICATION_DISCOVERED_EVENT,
     BALANCE_CHANGED_EXTERNALLY_EVENT,
@@ -17,32 +19,27 @@ import {
     WALLET_DATA_EXPORTED_EVENT,
     WALLET_DELETED_EVENT,
     WALLET_IMPORTED_EVENT,
-} from "../../adapters/eventbus";
-import { improveAndRethrow, logError } from "../../utils/errorUtils";
-import { transactionsDataProvider } from "../../../wallet/btc/services/internal/transactionsDataProvider";
-import UtxosService from "../../../wallet/btc/services/internal/utxosService";
-import { getCurrentSmallestFeeRate } from "../../../wallet/btc/services/feeRatesService";
-import {
-    getCurrentNetwork,
-    getIsNotFoundSessionMessageShownForLastLostSession,
-    saveIsNotFoundSessionMessageShownForLastLostSession,
-    setDoNotRemoveClientLogsWhenSignedOut,
-} from "../internal/storage";
-import PaymentService from "../../../wallet/btc/services/paymentService";
-import { isJustLoggedOut } from "../../../auth/services/authService";
-import { IS_TESTING } from "../../../../properties";
-import { setupAnalyticsMediators } from "./trackersMediators";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import { logWalletDataSlice } from "../../../support/services/internal/logs/scheduledLogger";
-import { LogsStorage } from "../../../support/services/internal/logs/logsStorage";
-import AddressesService from "../../../wallet/btc/services/addressesService";
-import { CoinsListService } from "../../../wallet/common/services/coinsListService";
-import TransactionsHistoryService from "../../../wallet/common/services/transactionsHistoryService";
-import { Coins } from "../../../wallet/coins";
-import { UserDataAndSettings } from "../../../wallet/common/models/userDataAndSettings";
-import { PreferencesService } from "../../../wallet/common/services/preferencesService";
-import { BalancesService } from "../../../wallet/common/services/balancesService";
-import { Wallets } from "../../../wallet/common/wallets";
+} from "../../adapters/eventbus.js";
+import { logError } from "../../utils/errorUtils.js";
+import { transactionsDataProvider } from "../../../wallet/btc/services/internal/transactionsDataProvider.js";
+import UtxosService from "../../../wallet/btc/services/internal/utxosService.js";
+import { getCurrentSmallestFeeRate } from "../../../wallet/btc/services/feeRatesService.js";
+import { Storage } from "../internal/storage.js";
+import PaymentService from "../../../wallet/btc/services/paymentService.js";
+import { isJustLoggedOut } from "../../../auth/services/authService.js";
+import { IS_TESTING } from "../../../../properties.js";
+import { setupAnalyticsMediators } from "./trackersMediators.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { logWalletDataSlice } from "../../../support/services/internal/logs/scheduledLogger.js";
+import { LogsStorage } from "../../../support/services/internal/logs/logsStorage.js";
+import AddressesService from "../../../wallet/btc/services/addressesService.js";
+import { CoinsListService } from "../../../wallet/common/services/coinsListService.js";
+import TransactionsHistoryService from "../../../wallet/common/services/transactionsHistoryService.js";
+import { Coins } from "../../../wallet/coins.js";
+import { UserDataAndSettings } from "../../../wallet/common/models/userDataAndSettings.js";
+import { PreferencesService } from "../../../wallet/common/services/preferencesService.js";
+import { BalancesService } from "../../../wallet/common/services/balancesService.js";
+import { Wallets } from "../../../wallet/common/wallets.js";
 
 function initializeTransactionsProvider() {
     const loggerSource = "initializeTransactionsProvider";
@@ -79,19 +76,22 @@ export function setupMediators(
                 WALLET_IMPORTED_EVENT,
                 THERE_IS_SESSION_ON_APP_INITIALIZATION_EVENT,
             ].forEach(event => {
+                // Initialization activities
                 try {
-                    EventBus.addEventListener(event, () => saveIsNotFoundSessionMessageShownForLastLostSession(false));
+                    EventBus.addEventListener(event, () =>
+                        Storage.saveIsNotFoundSessionMessageShownForLastLostSession(false)
+                    );
                     EventBus.addEventListener(event, initializeTransactionsProvider);
-                    EventBus.addEventListener(event, async function() {
+                    EventBus.addEventListener(event, async function () {
                         await CoinsListService.getEnabledCoinsSortedByFiatBalance();
                     });
-                    EventBus.addEventListener(event, async function() {
+                    EventBus.addEventListener(event, async function () {
                         await TransactionsHistoryService.getTransactionsList(
                             Coins.getEnabledCoinsTickers(),
                             Number.MAX_SAFE_INTEGER
                         );
                     });
-                    EventBus.addEventListener(event, async function() {
+                    EventBus.addEventListener(event, async function () {
                         await AddressesService.getCurrentExternalAddress();
                     });
                     PreferencesService.scheduleWalletDataSynchronization();
@@ -103,15 +103,15 @@ export function setupMediators(
         EventBus.addEventListener(NO_AUTHENTICATION_EVENT, async () => {
             try {
                 if (isJustLoggedOut()) return;
-                if (!getIsNotFoundSessionMessageShownForLastLostSession()) {
-                    saveIsNotFoundSessionMessageShownForLastLostSession(true);
+                if (!Storage.getIsNotFoundSessionMessageShownForLastLostSession()) {
+                    Storage.saveIsNotFoundSessionMessageShownForLastLostSession(true);
                     handleNotFoundSession();
                     handleLogout();
                 }
             } catch (e) {
                 try {
                     logError(e, "NO_AUTHENTICATION_EVENT_handler");
-                    saveIsNotFoundSessionMessageShownForLastLostSession(true);
+                    Storage.saveIsNotFoundSessionMessageShownForLastLostSession(true);
                     handleNotFoundSession();
                     handleLogout();
                 } catch (e) {
@@ -147,7 +147,7 @@ export function setupMediators(
                         const thereAreNewBtcTransactions = coins.find(coin => coin.ticker === Coins.COINS.BTC.ticker);
                         if (thereAreNewBtcTransactions) {
                             const rate = await getCurrentSmallestFeeRate(
-                                getCurrentNetwork(),
+                                Storage.getCurrentNetwork(),
                                 PaymentService.BLOCKS_COUNTS_FOR_OPTIONS
                             );
                             await UtxosService.calculateBalance(rate, true);
@@ -196,7 +196,7 @@ export function setupMediators(
         });
 
         [TRANSACTION_PUSHED_EVENT, FIAT_CURRENCY_CHANGED_EVENT].forEach(event => {
-            EventBus.addEventListener(event, function() {
+            EventBus.addEventListener(event, function () {
                 try {
                     BalancesService.invalidateCaches();
                     CoinsListService.invalidateCaches();
@@ -260,7 +260,7 @@ export function setupMediators(
                         item => item?.setting === UserDataAndSettings.SETTINGS.DONT_REMOVE_CLIENT_LOGS_WHEN_SIGNED_OUT
                     );
                 if (doNotRemoveClientLogsWhenSignedOut?.value != null) {
-                    setDoNotRemoveClientLogsWhenSignedOut("" + doNotRemoveClientLogsWhenSignedOut.value);
+                    Storage.setDoNotRemoveClientLogsWhenSignedOut("" + doNotRemoveClientLogsWhenSignedOut.value);
                 }
             } catch (e) {
                 logError(e, CURRENT_PREFERENCES_EVENT + "_handler");

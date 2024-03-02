@@ -1,6 +1,7 @@
-import { improveAndRethrow } from "../../common/utils/errorUtils";
-import { ApiCallWrongResponseError, doApiCall, urlWithPrefix } from "../../common/backend-api/utils";
-import { UserDataAndSettings, UserSettingValue } from "../../wallet/common/models/userDataAndSettings";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ApiCallWrongResponseError, doApiCall, urlWithPrefix } from "../../common/backend-api/utils.js";
+import { UserDataAndSettings, UserSettingValue } from "../../wallet/common/models/userDataAndSettings.js";
 
 // TODO: [tests, moderate] Implement unit tests for these functions
 // TODO: [refactoring, moderate] organize as a class

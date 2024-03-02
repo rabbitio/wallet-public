@@ -1,23 +1,17 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import {
-    addClientIpHash,
-    addWalletIdAndSessionId,
-    processInternalError,
-    processSuccess,
-    validateRequestDataAndResponseOnErrors,
-} from "./controllerUtils";
+import { ControllerUtils } from "./controllerUtils.js";
 
-import schemas from "../models/joi_schemas";
-import EncryptedIpsService from "../services/encryptedIpsService";
+import schemas from "../models/joi_schemas.js";
+import EncryptedIpsService from "../services/encryptedIpsService.js";
 import {
     DELETE_ENCRYPTED_IPS_EP_NUMBER,
     GET_ENCRYPTED_IPS_EP_NUMBER,
     IS_IP_HASH_PRESENT_EP_NUMBER,
     SAVE_ENCRYPTED_IP_EP_NUMBER,
-} from "./endpointNumbers";
+} from "./endpointNumbers.js";
 
-const log = getLogger("encryptedIps");
+const log = log4js.getLogger("encryptedIps");
 
 export class EncryptedIpsController {
     /**
@@ -52,8 +46,8 @@ export class EncryptedIpsController {
         const endpointNumber = SAVE_ENCRYPTED_IP_EP_NUMBER;
 
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, req.body));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, req.body));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.saveEncryptedIpScheme,
@@ -65,10 +59,10 @@ export class EncryptedIpsController {
                 await EncryptedIpsService.saveIP(data.walletId, data.encryptedIp, data.ipHash);
 
                 log.debug("Encrypted IP has been saved, sending 201.");
-                processSuccess(res, 201);
+                ControllerUtils.processSuccess(res, 201);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Error occurred during the saving of encrypted IP. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Error occurred during the saving of encrypted IP. ", e);
         }
     }
 
@@ -102,8 +96,8 @@ export class EncryptedIpsController {
         const endpointNumber = GET_ENCRYPTED_IPS_EP_NUMBER;
 
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, {}));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, {}));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.getEncryptedIpsScheme,
@@ -119,11 +113,11 @@ export class EncryptedIpsController {
                     res.status(404).json({ encryptedIps: [] });
                 } else {
                     log.debug("Encrypted IPs have been retrieved, sending 200 and them.");
-                    processSuccess(res, 200, { encryptedIps });
+                    ControllerUtils.processSuccess(res, 200, { encryptedIps });
                 }
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Error occurred during the getting of encrypted IPs: ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Error occurred during the getting of encrypted IPs: ", e);
         }
     }
 
@@ -156,8 +150,8 @@ export class EncryptedIpsController {
         const endpointNumber = DELETE_ENCRYPTED_IPS_EP_NUMBER;
 
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, req.body));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, req.body));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.deleteEncryptedIpsScheme,
@@ -172,10 +166,10 @@ export class EncryptedIpsController {
                  * still being achieved - there is no such document in DB
                  */
                 log.debug("Encrypted IPs have been deleted, sending 204.");
-                processSuccess(res, 204);
+                ControllerUtils.processSuccess(res, 204);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Error occurred during the deletion of encrypted IPs. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Error occurred during the deletion of encrypted IPs. ", e);
         }
     }
 
@@ -208,8 +202,8 @@ export class EncryptedIpsController {
         const endpointNumber = IS_IP_HASH_PRESENT_EP_NUMBER;
 
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, { ipHash: req.query && req.query.ipHash }));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, { ipHash: req.query && req.query.ipHash }));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.isIpHashPresentScheme,
@@ -222,14 +216,14 @@ export class EncryptedIpsController {
 
                 if (isPresent) {
                     log.debug("Encrypted IP is present, sending 200.");
-                    processSuccess(res, 200);
+                    ControllerUtils.processSuccess(res, 200);
                 } else {
-                    processSuccess(res, 404);
+                    ControllerUtils.processSuccess(res, 404);
                     log.debug("Encrypted IP is not present, sending 404.");
                 }
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Error occurred during checking presence of IP hash. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Error occurred during checking presence of IP hash. ", e);
         }
     }
 }

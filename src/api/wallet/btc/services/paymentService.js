@@ -1,25 +1,20 @@
 import bip39 from "bip39";
 
-import { getCurrentNetwork, getWalletId } from "../../../common/services/internal/storage";
-import {
-    getEcPairsToAddressesMapping,
-    isAddressValid,
-    isP2pkhAddress,
-    isP2shAddress,
-    isSegWitAddress,
-} from "../lib/addresses";
-import { getCurrentFeeRate } from "./feeRatesService";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { getAddresses } from "../lib/utxos";
-import AddressesService from "./addressesService";
-import UtxosService from "./internal/utxosService";
-import AddressesDataApi from "../../common/backend-api/addressesDataApi";
-import { EventBus, USER_READY_TO_SEND_TRANSACTION_EVENT } from "../../../common/adapters/eventbus";
-import { buildTransaction } from "../lib/transactions/build-transaction";
-import { createFakeSendAllTransaction, createFakeTransaction } from "../lib/transactions/fake-transactions";
-import { broadcastTransaction } from "./internal/transactionsBroadcastingService";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import { Coins } from "../../coins";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Storage } from "../../../common/services/internal/storage.js";
+import { EcPairsUtils, BitcoinAddresses } from "../lib/addresses.js";
+import { BtcFeeRatesService } from "./feeRatesService.js";
+import { getAddresses } from "../lib/utxos.js";
+import AddressesService from "./addressesService.js";
+import UtxosService from "./internal/utxosService.js";
+import AddressesDataApi from "../../common/backend-api/addressesDataApi.js";
+import { EventBus, USER_READY_TO_SEND_TRANSACTION_EVENT } from "../../../common/adapters/eventbus.js";
+import { BtcTransactionBuilder } from "../lib/transactions/build-transaction.js";
+import { BtcFakeTransactionsBuilder } from "../lib/transactions/fake-transactions.js";
+import { BtcTransactionBroadcastingService } from "./internal/transactionsBroadcastingService.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { Coins } from "../../coins.js";
 
 export default class PaymentService {
     static BLOCKS_COUNTS_FOR_OPTIONS = [1, 5, 10, 25]; // WARNING: changing order will cause wrong fee options calculation
@@ -37,9 +32,14 @@ export default class PaymentService {
         try {
             Logger.log(`Start broadcasting ${txData.amount} satoshi to ${txData.address}`, loggerSource);
             const seedHex = bip39.mnemonicToSeedHex(mnemonic, passphrase);
-            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
-            const mapping = getEcPairsToAddressesMapping(getAddresses(txData.utxos), seedHex, txData.network, indexes);
-            const transaction = buildTransaction(
+            const indexes = await AddressesDataApi.getAddressesIndexes(Storage.getWalletId());
+            const mapping = EcPairsUtils.getEcPairsToAddressesMapping(
+                getAddresses(txData.utxos),
+                seedHex,
+                txData.network,
+                indexes
+            );
+            const transaction = BtcTransactionBuilder.buildTransaction(
                 txData.amount,
                 txData.address,
                 txData.change,
@@ -49,7 +49,10 @@ export default class PaymentService {
                 txData.network
             );
 
-            const transactionId = await broadcastTransaction(transaction, txData.network);
+            const transactionId = await BtcTransactionBroadcastingService.broadcastTransaction(
+                transaction,
+                txData.network
+            );
 
             Logger.log(`Transaction was pushed ${transactionId}`, loggerSource);
 
@@ -91,7 +94,9 @@ export default class PaymentService {
         const loggerSource = "createTransactionsWithFakeSignatures";
         try {
             const resolvedPromises = await Promise.all([
-                ...this.BLOCKS_COUNTS_FOR_OPTIONS.map(blocksCount => getCurrentFeeRate(network, blocksCount)),
+                ...this.BLOCKS_COUNTS_FOR_OPTIONS.map(blocksCount =>
+                    BtcFeeRatesService.getCurrentFeeRate(network, blocksCount)
+                ),
                 UtxosService.getAllSpendableUtxos(),
                 !isSendAll ? AddressesService.getCurrentChangeAddress() : null,
             ]);
@@ -103,10 +108,17 @@ export default class PaymentService {
             let resultsArray = feeRates.map(feeRate => {
                 let txData;
                 if (isSendAll) {
-                    txData = createFakeSendAllTransaction(address, feeRate, utxos, network);
+                    txData = BtcFakeTransactionsBuilder.createFakeSendAllTransaction(address, feeRate, utxos, network);
                 } else {
-                    const satoshies = Number(Coins.COINS.BTC.coinAmountToAtoms(amountBtc));
-                    txData = createFakeTransaction(satoshies, address, changeAddress, feeRate, utxos, network);
+                    const satoshies = Coins.COINS.BTC.coinAmountToAtoms(amountBtc);
+                    txData = BtcFakeTransactionsBuilder.createFakeTransaction(
+                        satoshies,
+                        address,
+                        changeAddress,
+                        feeRate,
+                        utxos,
+                        network
+                    );
                 }
 
                 if (!txData?.errorDescription) {
@@ -149,7 +161,7 @@ export default class PaymentService {
      */
     static isAddressValidForSending(address) {
         try {
-            return validateTargetAddress(address, getCurrentNetwork());
+            return validateTargetAddress(address, Storage.getCurrentNetwork());
         } catch (e) {
             improveAndRethrow(e, "isAddressValidForSending");
         }
@@ -174,8 +186,12 @@ function validateTargetAddress(address, currentNetwork) {
     }
 
     // TODO: [feature, high] add taproot support task_id=436e6743418647dd8bf656cd5e887742
-    if (isAddressValid(address, currentNetwork)) {
-        if (isP2pkhAddress(address) || isP2shAddress(address) || isSegWitAddress(address)) {
+    if (BitcoinAddresses.isAddressValid(address, currentNetwork)) {
+        if (
+            BitcoinAddresses.isP2pkhAddress(address) ||
+            BitcoinAddresses.isP2shAddress(address) ||
+            BitcoinAddresses.isSegWitAddress(address)
+        ) {
             return {
                 result: true,
                 address: address,

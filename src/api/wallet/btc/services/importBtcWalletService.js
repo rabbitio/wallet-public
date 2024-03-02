@@ -1,13 +1,13 @@
-import { Logger } from "../../../support/services/internal/logs/logger";
-import AddressesServiceInternal from "./internal/addressesServiceInternal";
-import { SupportedSchemes } from "../lib/addresses-schemes";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import AddressesServiceInternal from "./internal/addressesServiceInternal.js";
+import { SupportedSchemes } from "../lib/addresses-schemes.js";
+import { Storage } from "../../../common/services/internal/storage.js";
 
 export class ImportBtcWalletService {
     static async grabBtcWalletHistoricalDataAndSave() {
         const loggerSource = "grabBtcWalletHistoricalDataAndSave";
         try {
-            await AddressesServiceInternal.performScanningOfAddresses([getCurrentNetwork()], SupportedSchemes);
+            await AddressesServiceInternal.performScanningOfAddresses([Storage.getCurrentNetwork()], SupportedSchemes);
 
             Logger.log("Addresses scanning performed successfully during the import", loggerSource);
         } catch (e) {

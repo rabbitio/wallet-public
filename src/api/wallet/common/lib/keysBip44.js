@@ -1,6 +1,8 @@
 import bip32 from "bip32";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { bip44Scheme } from "../../btc/lib/addresses-schemes";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { bip44Scheme } from "../../btc/lib/addresses-schemes.js";
 
 export class KeysBip44 {
     /**

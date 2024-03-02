@@ -1,5 +1,5 @@
-import { getPathWithParams } from "../utils/browserUtils";
-import { Logger } from "../../support/services/internal/logs/logger";
+import { getPathWithParams } from "../utils/browserUtils.js";
+import { Logger } from "../../support/services/internal/logs/logger.js";
 
 /**
  * Provides API to save URL Path in memory and retrieve it later. Useful for cases when the user is being auto signed out.

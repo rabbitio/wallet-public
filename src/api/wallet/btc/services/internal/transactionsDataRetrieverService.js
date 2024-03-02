@@ -1,7 +1,8 @@
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import { performNoBatchTransactionsDataRetrieval } from "../../external-apis/noBatchTransactionsAPI";
-import { performBatchTransactionsDataRetrieval } from "../../external-apis/batchTransactionsAPI";
-import { Logger } from "../../../../support/services/internal/logs/logger";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { performNoBatchTransactionsDataRetrieval } from "../../external-apis/noBatchTransactionsAPI.js";
+import { performBatchTransactionsDataRetrieval } from "../../external-apis/batchTransactionsAPI.js";
+import { Logger } from "../../../../support/services/internal/logs/logger.js";
 
 export class TransactionsDataRetrieverService {
     static isBatchRetrievalModeWorkingRightNow() {

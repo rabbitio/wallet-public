@@ -1,20 +1,15 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import {
-    addClientIpHash,
-    addWalletIdAndSessionId,
-    processInternalError, processSuccess,
-    validateRequestDataAndResponseOnErrors
-} from "./controllerUtils";
-import schemas from "../models/joi_schemas";
-import { TransactionsDataService } from "../services/transactionsDataService";
+import { ControllerUtils } from "./controllerUtils.js";
+import schemas from "../models/joi_schemas.js";
+import { TransactionsDataService } from "../services/transactionsDataService.js";
 import {
     GET_TRANSACTION_DATA_EP_NUMBER,
     SAVE_TRANSACTION_DATA_EP_NUMBER,
     UPDATE_TRANSACTION_DATA_EP_NUMBER,
-} from "./endpointNumbers";
+} from "./endpointNumbers.js";
 
-const log = getLogger("transactionsData");
+const log = log4js.getLogger("transactionsData");
 
 export default class TransactionsDataController {
     /**
@@ -45,19 +40,28 @@ export default class TransactionsDataController {
         log.debug("Start saving transaction data.");
         const endpointNumber = SAVE_TRANSACTION_DATA_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, req.body));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(res, data, schemas.saveTransactionDataScheme, endpointNumber);
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, req.body));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
+                res,
+                data,
+                schemas.saveTransactionDataScheme,
+                endpointNumber
+            );
 
             if (isRequestValid) {
                 log.debug("Request data valid, start saving transaction data.");
 
-                await TransactionsDataService.saveTransactionData(data.walletId, data.transactionIdHash, data.encryptedNote);
+                await TransactionsDataService.saveTransactionData(
+                    data.walletId,
+                    data.transactionIdHash,
+                    data.encryptedNote
+                );
 
                 log.debug("Transaction data have been saved, sending 201.");
-                processSuccess(res, 201);
+                ControllerUtils.processSuccess(res, 201);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Error occurred during the saving of transaction data. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Error occurred during the saving of transaction data. ", e);
         }
     }
 
@@ -90,8 +94,8 @@ export default class TransactionsDataController {
         log.debug("Start getting transactions data.");
         const endpointNumber = GET_TRANSACTION_DATA_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, req.body));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, req.body));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.getTransactionsDataScheme,
@@ -100,18 +104,21 @@ export default class TransactionsDataController {
 
             if (isRequestValid) {
                 log.debug("Request data valid, start getting transactions data.");
-                const transactionsData = await TransactionsDataService.getTransactionsData(data.walletId, data.transactionIdHashes);
+                const transactionsData = await TransactionsDataService.getTransactionsData(
+                    data.walletId,
+                    data.transactionIdHashes
+                );
 
                 if (transactionsData && transactionsData.length) {
                     log.debug("Transactions data have been retrieved, sending 200.");
-                    processSuccess(res, 200, transactionsData);
+                    ControllerUtils.processSuccess(res, 200, transactionsData);
                 } else {
                     log.debug("Transaction data have not been found, sending 404.");
-                    processSuccess(res, 404);
+                    ControllerUtils.processSuccess(res, 404);
                 }
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Error occurred during the retrieving of transactions data. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Error occurred during the retrieving of transactions data. ", e);
         }
     }
 
@@ -143,20 +150,29 @@ export default class TransactionsDataController {
         log.debug("Start updating transaction data.");
         const endpointNumber = UPDATE_TRANSACTION_DATA_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, req.body));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(res, data, schemas.updateTransactionDataScheme, endpointNumber);
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, req.body));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
+                res,
+                data,
+                schemas.updateTransactionDataScheme,
+                endpointNumber
+            );
 
             if (isRequestValid) {
                 log.debug("Request data valid, start updating transaction data.");
 
-                const updated = await TransactionsDataService.updateTransactionData(data.walletId, data.transactionIdHash, data.encryptedNote);
+                const updated = await TransactionsDataService.updateTransactionData(
+                    data.walletId,
+                    data.transactionIdHash,
+                    data.encryptedNote
+                );
                 // TODO: [feature, critical] Process 404 case
 
                 log.debug("Transaction data have been updated, sending 200.");
-                processSuccess(res, 200, updated);
+                ControllerUtils.processSuccess(res, 200, updated);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Error occurred during the updating of transaction data. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Error occurred during the updating of transaction data. ", e);
         }
     }
 }

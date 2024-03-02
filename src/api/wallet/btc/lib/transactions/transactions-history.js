@@ -1,28 +1,24 @@
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import { MAX_RBF_SEQUENCE } from "./build-transaction";
-import { TransactionsHistoryItem } from "../../../common/models/transactionsHistoryItem";
-import { Coins } from "../../../coins";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-/**
- * Composes btc transactions history items
- *
- * @param allAddresses {{ internal: string[], external: string[] }} all addresses of the wallet
- * @param allTransactions {Transaction[]} transactions data list
- * @return {TransactionsHistoryItem[]} history items list
- */
-export function composeTransactionsHistoryItems(allAddresses, allTransactions) {
-    try {
-        let historyItems = [];
-        allTransactions.forEach(tx => {
-            historyItems = historyItems.concat(getSendingHistoryItems(tx, allAddresses));
-            historyItems = historyItems.concat(getReceivingHistoryItems(tx, allAddresses));
-        });
+import { MAX_RBF_SEQUENCE } from "./build-transaction.js";
+import { TransactionsHistoryItem } from "../../../common/models/transactionsHistoryItem.js";
+import { Coins } from "../../../coins.js";
 
-        historyItems.sort((item1, item2) => item2.time - item1.time);
+export class BtcTransactionsHistory {
+    static composeTransactionsHistoryItems(allAddresses, allTransactions) {
+        try {
+            let historyItems = [];
+            allTransactions.forEach(tx => {
+                historyItems = historyItems.concat(getSendingHistoryItems(tx, allAddresses));
+                historyItems = historyItems.concat(getReceivingHistoryItems(tx, allAddresses));
+            });
 
-        return historyItems;
-    } catch (e) {
-        improveAndRethrow(e, "composeTransactionsHistoryItems");
+            historyItems.sort((item1, item2) => item2.time - item1.time);
+
+            return historyItems;
+        } catch (e) {
+            improveAndRethrow(e, "composeTransactionsHistoryItems");
+        }
     }
 }
 

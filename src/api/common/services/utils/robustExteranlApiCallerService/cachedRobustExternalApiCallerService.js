@@ -1,8 +1,10 @@
-import RobustExternalAPICallerService from "./robustExternalAPICallerService";
-import { improveAndRethrow, logError } from "../../../utils/errorUtils";
-import { getHash } from "../../../adapters/crypto-utils";
-import { CacheAndConcurrentRequestsResolver } from "./cacheAndConcurrentRequestsResolver";
-import { safeStringify } from "../../../utils/browserUtils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import RobustExternalAPICallerService from "./robustExternalAPICallerService.js";
+import { logError } from "../../../utils/errorUtils.js";
+import { getHash } from "../../../adapters/crypto-utils.js";
+import { CacheAndConcurrentRequestsResolver } from "./cacheAndConcurrentRequestsResolver.js";
+import { safeStringify } from "../../../utils/browserUtils.js";
 
 /**
  * Extended edit of RobustExternalApiCallerService supporting cache and management of concurrent requests
@@ -131,8 +133,8 @@ export class CachedRobustExternalApiCallerService {
                 typeof customHashFunctionForParams === "function"
                     ? customHashFunctionForParams(parametersValues)
                     : !parametersValues
-                    ? ""
-                    : getHash(safeStringify(parametersValues));
+                      ? ""
+                      : getHash(safeStringify(parametersValues));
             return `${this._provider.bio}-${hash}`;
         } catch (e) {
             improveAndRethrow(e, this._provider.bio + "_calculateCacheId");

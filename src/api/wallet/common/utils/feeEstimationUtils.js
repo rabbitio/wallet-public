@@ -1,5 +1,5 @@
-import { TRC20 } from "../../trc20token/trc20Protocol";
-import { ERC20 } from "../../erc20token/erc20Protocol";
+import { TRC20 } from "../../trc20token/trc20Protocol.js";
+import { ERC20 } from "../../erc20token/erc20Protocol.js";
 
 export class FeeEstimationUtils {
     /**

@@ -1,6 +1,8 @@
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import { EthereumBlockchainTransactionFeeProvider } from "../external-apis/ethereumBlockchainTransactionFeeProvider";
-import { EthereumTransactionsHistoryService } from "./ethereumTransactionsHistoryService";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { logError } from "../../../common/utils/errorUtils.js";
+import { EthereumBlockchainTransactionFeeProvider } from "../external-apis/ethereumBlockchainTransactionFeeProvider.js";
+import { EthereumTransactionsHistoryService } from "./ethereumTransactionsHistoryService.js";
 
 export class EthTransactionDetailsService {
     /**

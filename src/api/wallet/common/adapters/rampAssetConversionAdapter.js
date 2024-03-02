@@ -1,5 +1,6 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { Coins } from "../../coins";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Coins } from "../../coins.js";
 
 export default class RampAssetConversionAdapter {
     /**

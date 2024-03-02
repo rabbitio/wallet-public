@@ -1,8 +1,9 @@
 import schedule from "node-schedule";
-import { getLogger } from "log4js";
-import FiatRatesService from "../services/fiatRatesService";
+import log4js from "log4js";
 
-const log = getLogger("fiatRatesService");
+import FiatRatesService from "../services/fiatRatesService.js";
+
+const log = log4js.getLogger("fiatRatesService");
 
 /**
  * Schedules rates retrieval to keep the rates document in DB up to date

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
 /**
  * Template service needed to avoid duplication of the same logic when we need to call
@@ -7,7 +7,7 @@ import { getLogger } from "log4js";
  * we just try another.
  */
 export default class RobustExternalAPICallerService {
-    log = getLogger("robustExternalAPICallerService");
+    log = log4js.getLogger("robustExternalAPICallerService");
 
     /**
      * TODO: [refactoring, moderate] use classes instead of passing objects

@@ -16,7 +16,7 @@ export class Wallet {
     /**
      * Calculates balance for this wallet's coin
      *
-     * @return {Promise<number|string>} number or string in coin amount, not coin's atoms!!
+     * @return {Promise<string>} string in coin amount, not coin's atoms!!
      */
     async calculateBalance() {
         throw new Error("Not implemented in base Wallet class");
@@ -96,7 +96,7 @@ export class Wallet {
      * @param coinAmount {string} amount to be sent
      * @param isSendAll {boolean} whether transaction should send all available coins or not
      * @param currentNetwork {Network} network to create the fake transaction for
-     * @param balanceCoins {number|string} balance of coin we are creating transactions for
+     * @param balanceCoins {string} balance of coin we are creating transactions for
      * @param [isAddressFake=false] use this flag if the target address passed is not the same you plan to actually
      *                              use when sending transaction. It can affect fee estimation.
      * @return {Promise<

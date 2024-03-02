@@ -1,7 +1,8 @@
 import bitcoinJs from "bitcoinjs-lib";
+import { BigNumber } from "bignumber.js";
 
-import { FeeRate } from "../models/feeRate";
-import { Coins } from "../../coins";
+import { FeeRate } from "../models/feeRate.js";
+import { Coins } from "../../coins.js";
 
 export const DEFAULT_RATES = [
     new FeeRate(Coins.COINS.BTC.mainnet.key, 1, 30),
@@ -21,19 +22,24 @@ export const MIN_FEE_RATES = [
     new FeeRate(Coins.COINS.BTC.testnet.key, null, 1),
 ];
 
-/**
- * Returns virtual size of transaction multiplied with passed rate per byte.
- *
- * @param transaction - tx to calculate fee for
- * @param feeRatePerByte - rate to calculate fee for
- * @returns Number - fee for given tx & rate
- */
-export function calculateFeeByFeeRate(transaction, feeRatePerByte) {
-    if (!(transaction instanceof bitcoinJs.Transaction)) throw new Error("Invalid transaction type. ");
-    if (!(feeRatePerByte instanceof FeeRate)) {
-        throw new Error("Invalid fee rate type: " + JSON.stringify(feeRatePerByte));
-    }
+export class BtcFeeCalculatorByFeeRate {
 
-    // TODO: [bug, critical] Virtual size can be different for different builds of the same transaction
-    return transaction.virtualSize() * feeRatePerByte.rate;
+    /**
+     * Returns virtual size of transaction multiplied with passed rate per byte.
+     *
+     * @param transaction - tx to calculate fee for
+     * @param feeRatePerByte - rate to calculate fee for
+     * @returns Number - fee for given tx & rate
+     */
+    static calculateFeeByFeeRate(transaction, feeRatePerByte) {
+        if (!(transaction instanceof bitcoinJs.Transaction)) throw new Error("Invalid transaction type. ");
+        if (!(feeRatePerByte instanceof FeeRate)) {
+            throw new Error("Invalid fee rate type: " + JSON.stringify(feeRatePerByte));
+        }
+
+        // TODO: [bug, critical] Virtual size can be different for different builds of the same transaction
+        return BigNumber(transaction.virtualSize())
+            .times(feeRatePerByte.rate)
+            .toNumber();
+    }
 }

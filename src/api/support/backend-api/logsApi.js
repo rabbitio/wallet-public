@@ -1,4 +1,4 @@
-import { doApiCall, urlWithPrefix } from "../../common/backend-api/utils";
+import { doApiCall, urlWithPrefix } from "../../common/backend-api/utils.js";
 
 export class LogsApi {
     static path = "logs";

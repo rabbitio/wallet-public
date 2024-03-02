@@ -1,11 +1,13 @@
-import CoinsToFiatRatesService from "../../wallet/common/services/coinsToFiatRatesService";
-import { AmountUtils } from "../../wallet/common/utils/amountUtils";
-import { Logger } from "../../support/services/internal/logs/logger";
-import { safeStringify } from "../../common/utils/browserUtils";
-import { SwapProvider } from "../external-apis/swapProvider";
-import { improveAndRethrow } from "../../common/utils/errorUtils";
-import EmailsApi from "../../support/backend-api/emailAPI";
-import { ExistingSwapWithFiatData } from "../models/existingSwapWithFiatData";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import CoinsToFiatRatesService from "../../wallet/common/services/coinsToFiatRatesService.js";
+import { Logger } from "../../support/services/internal/logs/logger.js";
+import { safeStringify } from "../../common/utils/browserUtils.js";
+import { SwapProvider } from "../external-apis/swapProvider.js";
+import EmailsApi from "../../support/backend-api/emailAPI.js";
+import { ExistingSwapWithFiatData } from "../models/existingSwapWithFiatData.js";
 
 export class SwapUtils {
     /**
@@ -22,11 +24,11 @@ export class SwapUtils {
      * @param toCoin {Coin}
      * @return {Promise<{
      *             result: true,
-     *             min: number,
+     *             min: string,
      *             fiatMin: (number|null),
-     *             max: number,
+     *             max: string,
      *             fiatMax: (number|null),
-     *             rate: (number|null),
+     *             rate: (string|null),
      *         }|{
      *             result: false,
      *             reason: string
@@ -37,16 +39,16 @@ export class SwapUtils {
         try {
             /* We use some amount here that should fit at least some of the limits of the swap providers.
              * So we are going to get some rate to be used as the default for the on-flight calculations before we get
-             * the exact rate (that should be retrieved by getSwapDetails method) for a specific amount.
+             * the exact rate (that should be retrieved by getSwapCreationInfo method) for a specific amount.
              */
-            const defaultAmountUsd = 300;
+            const defaultAmountUsd = BigNumber("300");
             const coinUsdRate = await CoinsToFiatRatesService.getCoinToUSDRate(fromCoin);
-            const coinAmountForDefaultUsdAmount = AmountUtils.trimCryptoAmountByCoin(
-                defaultAmountUsd / +coinUsdRate?.rate,
-                fromCoin
+            const coinAmountForDefaultUsdAmount = AmountUtils.trim(
+                defaultAmountUsd.div(coinUsdRate?.rate),
+                fromCoin.digits
             );
             Logger.log(`Init: ${coinAmountForDefaultUsdAmount} ${fromCoin.ticker}->${toCoin.ticker}`, loggerSource);
-            const details = await swapProvider.getSwapInfo(fromCoin, toCoin, +coinAmountForDefaultUsdAmount);
+            const details = await swapProvider.getSwapInfo(fromCoin, toCoin, coinAmountForDefaultUsdAmount);
             if (!details) {
                 throw new Error("The details are empty: " + safeStringify(details));
             }
@@ -71,7 +73,7 @@ export class SwapUtils {
                 fiatMin: fiatMin,
                 max: details?.greatestMax,
                 fiatMax: fiatMax,
-                rate: details?.rate ?? null,
+                rate: AmountUtils.trim(details.rate, 30),
             };
             Logger.log(`Returning: ${safeStringify(result)}`, loggerSource);
             return result;
@@ -95,10 +97,17 @@ export class SwapUtils {
     }
 
     /**
+     * If some swap is not found by id then there is no item in return list.
      *
      * @param swapProvider {SwapProvider}
      * @param swapIds {string[]}
-     * @return {Promise<{result: true, swaps: ExistingSwapWithFiatData[]}|{result: false, reason: string}>}
+     * @return {Promise<{
+     *             result: true,
+     *             swaps: ExistingSwapWithFiatData[]
+     *         }|{
+     *             result: false,
+     *             reason: string
+     *         }>}
      */
     static async getExistingSwapsDetailsWithFiatAmounts(swapProvider, swapIds) {
         try {

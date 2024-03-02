@@ -1,10 +1,12 @@
 import { ethers } from "ethers";
-import { bip44Scheme } from "../../btc/lib/addresses-schemes";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { getAccountsData, getCurrentNetwork } from "../../../common/services/internal/storage";
-import { Coins } from "../../coins";
-import { getDecryptedWalletCredentials } from "../../../auth/services/authService";
-import { KeysBip44 } from "../../common/lib/keysBip44";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { bip44Scheme } from "../../btc/lib/addresses-schemes.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { AuthService } from "../../../auth/services/authService.js";
+import { KeysBip44 } from "../../common/lib/keysBip44.js";
 
 export class EthAddressesService {
     /**
@@ -14,8 +16,8 @@ export class EthAddressesService {
      */
     static getCurrentEthAddress() {
         try {
-            const ethNetwork = getCurrentNetwork(Coins.COINS.ETH);
-            const accountsData = getAccountsData();
+            const ethNetwork = Storage.getCurrentNetwork(Coins.COINS.ETH);
+            const accountsData = Storage.getAccountsData();
             const accountData = accountsData.getAccountData(bip44Scheme, ethNetwork, 0);
             const publicKey = KeysBip44.generateAddressPublicKeyByAccountPublicKey(accountData);
 
@@ -33,8 +35,8 @@ export class EthAddressesService {
      */
     static exportAddressesWithPrivateKeys(password) {
         try {
-            const ethNetwork = getCurrentNetwork(Coins.COINS.ETH);
-            const { mnemonic, passphrase } = getDecryptedWalletCredentials(password);
+            const ethNetwork = Storage.getCurrentNetwork(Coins.COINS.ETH);
+            const { mnemonic, passphrase } = AuthService.getDecryptedWalletCredentials(password);
             const { publicKey, privateKey } = KeysBip44.generateKeysForAccountAddressByWalletCredentials(
                 mnemonic,
                 passphrase,

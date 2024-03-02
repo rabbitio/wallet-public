@@ -1,6 +1,7 @@
 import express from "express";
-import { apiVersionPrefix } from "../controllers/controllerUtils";
-import NotificationsController from "../controllers/notifications";
+
+import { apiVersionPrefix } from "../controllers/controllerUtils.js";
+import NotificationsController from "../controllers/notifications.js";
 
 const router = express.Router({});
 

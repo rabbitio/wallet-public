@@ -1,10 +1,11 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import { improveAndRethrow } from "../utils/utils";
-import { dbConnectionHolder } from "../utils/dbConnectionHolder";
-import { isFindAndUpdateOneResultValid } from "./mongoUtil";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-const log = getLogger("encryptedWalletPaymentIdsService");
+import { dbConnectionHolder } from "../utils/dbConnectionHolder.js";
+import { isFindAndUpdateOneResultValid } from "./mongoUtil.js";
+
+const log = log4js.getLogger("encryptedWalletPaymentIdsService");
 
 export class EncryptedWalletPaymentIdsService {
     static dbCollectionName = "encryptedWalletPaymentIds";

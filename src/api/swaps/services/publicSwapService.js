@@ -1,55 +1,18 @@
-import { improveAndRethrow } from "../../common/utils/errorUtils";
-import { SwapspaceSwapProvider } from "../external-apis/swapspaceSwapProvider";
-import { SwapProvider } from "../external-apis/swapProvider";
-import { Logger } from "../../support/services/internal/logs/logger";
-import CoinsToFiatRatesService from "../../wallet/common/services/coinsToFiatRatesService";
-import { safeStringify } from "../../common/utils/browserUtils";
-import { Coin } from "../../wallet/common/models/coin";
-import { EventBus, SWAP_CREATED_EVENT } from "../../common/adapters/eventbus";
-import { SwapUtils } from "../utils/swapUtils";
-import { Wallets } from "../../wallet/common/wallets";
-import { getSwapIds, setSwapIds } from "../../common/services/internal/storage";
+import { BigNumber } from "bignumber.js";
 
-export class PublicSwapDetails {
-    /**
-     * @param fromCoin {Coin}
-     * @param toCoin {Coin}
-     * @param fromAmountCoins {string}
-     * @param toAmountCoins {string}
-     * @param rate {number}
-     * @param rawSwapData {Object}
-     * @param min {number}
-     * @param fiatMin {number}
-     * @param max {number}
-     * @param fiatMax {number}
-     * @param durationMinutesRange {string}
-     */
-    constructor(
-        fromCoin,
-        toCoin,
-        fromAmountCoins,
-        toAmountCoins,
-        rate,
-        rawSwapData,
-        min,
-        fiatMin,
-        max,
-        fiatMax,
-        durationMinutesRange
-    ) {
-        this.fromCoin = fromCoin;
-        this.toCoin = toCoin;
-        this.fromAmountCoins = fromAmountCoins;
-        this.toAmountCoins = toAmountCoins;
-        this.rate = rate;
-        this.rawSwapData = rawSwapData;
-        this.min = min;
-        this.fiatMin = fiatMin;
-        this.max = max;
-        this.fiatMax = fiatMax;
-        this.durationMinutesRange = durationMinutesRange;
-    }
-}
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { SwapspaceSwapProvider } from "../external-apis/swapspaceSwapProvider.js";
+import { SwapProvider } from "../external-apis/swapProvider.js";
+import { Logger } from "../../support/services/internal/logs/logger.js";
+import CoinsToFiatRatesService from "../../wallet/common/services/coinsToFiatRatesService.js";
+import { safeStringify } from "../../common/utils/browserUtils.js";
+import { Coin } from "../../wallet/common/models/coin.js";
+import { EventBus, SWAP_CREATED_EVENT } from "../../common/adapters/eventbus.js";
+import { SwapUtils } from "../utils/swapUtils.js";
+import { Wallets } from "../../wallet/common/wallets.js";
+import { Storage } from "../../common/services/internal/storage.js";
+import { PublicSwapCreationInfo } from "../models/publicSwapCreationInfo.js";
 
 export class PublicSwapService {
     static _swapProvider = new SwapspaceSwapProvider();
@@ -84,6 +47,23 @@ export class PublicSwapService {
         }
     }
 
+    /**
+     * Retrieves initial data for swapping two coins.
+     *
+     * @param fromCoin {Coin}
+     * @param toCoin {Coin}
+     * @return {Promise<{
+     *             result: true,
+     *             min: string,
+     *             fiatMin: (number|null),
+     *             max: string,
+     *             fiatMax: (number|null),
+     *             rate: (string|null)
+     *         }|{
+     *             result: false,
+     *             reason: string
+     *         }>}
+     */
     static async getInitialPublicSwapData(fromCoin, toCoin) {
         try {
             const result = await SwapUtils.getInitialSwapData(this._swapProvider, fromCoin, toCoin);
@@ -102,10 +82,29 @@ export class PublicSwapService {
         }
     }
 
+    /**
+     * Retrieves swap details that can be used to create swap.
+     *
+     * @param fromCoin {Coin}
+     * @param toCoin {Coin}
+     * @param fromAmountCoins {string}
+     * @return {Promise<{
+     *             result: false,
+     *             reason: string,
+     *             min: (string|null),
+     *             max: (string|null),
+     *             rate: (string|undefined),
+     *             fiatMin: (number|null),
+     *             fiatMax: (number|null)
+     *         }|{
+     *             result: true,
+     *             swapCreationInfo: PublicSwapCreationInfo
+     *         }>}
+     */
     static async getPublicSwapDetails(fromCoin, toCoin, fromAmountCoins) {
         const loggerSource = "getPublicSwapDetails";
         try {
-            const details = await this._swapProvider.getSwapInfo(fromCoin, toCoin, +fromAmountCoins);
+            const details = await this._swapProvider.getSwapInfo(fromCoin, toCoin, fromAmountCoins);
             const min = details.result ? details.min : details.smallestMin;
             const max = details.result ? details.max : details.greatestMax;
             const fiatData = await CoinsToFiatRatesService.convertCoinsAmountsToCurrentlySelectedFiat([
@@ -113,14 +112,14 @@ export class PublicSwapService {
             ]);
             const [fiatMin, fiatMax] = fiatData[0].amountsFiat;
 
-            const composeFailResult = (reason, feeBalanceCoins) => ({
+            const composeFailResult = reason => ({
                 result: false,
                 reason: reason,
                 min: min ?? null,
                 fiatMin: fiatMin,
                 max: max ?? null,
                 fiatMax: fiatMax,
-                rate: details.rate ?? undefined, // Suitable for validation errors like exceeding balance
+                rate: details.rate ?? null,
             });
 
             if (!details.result) {
@@ -132,16 +131,17 @@ export class PublicSwapService {
                 }
             }
 
-            if (typeof min === "number" && fromAmountCoins < min) {
+            const fromAmountBigNumber = BigNumber(fromAmountCoins);
+            if (typeof min === "string" && fromAmountBigNumber.lt(min)) {
                 return composeFailResult(this.PUBLIC_SWAP_DETAILS_FAIL_REASONS.AMOUNT_LESS_THAN_MIN_SWAPPABLE);
-            } else if (typeof max === "number" && fromAmountCoins > max) {
+            } else if (typeof max === "string" && fromAmountBigNumber.gt(max)) {
                 return composeFailResult(this.PUBLIC_SWAP_DETAILS_FAIL_REASONS.AMOUNT_HIGHER_THAN_MAX_SWAPPABLE);
             }
 
-            const toAmountCoins = String(+fromAmountCoins * details.rate);
+            const toAmountCoins = AmountUtils.trim(fromAmountBigNumber.times(details.rate), fromCoin.digits);
             const result = {
                 result: true,
-                swapDetails: new PublicSwapDetails(
+                swapCreationInfo: new PublicSwapCreationInfo(
                     fromCoin,
                     toCoin,
                     fromAmountCoins,
@@ -158,10 +158,10 @@ export class PublicSwapService {
             Logger.log(
                 `Result: ${safeStringify({
                     result: result.result,
-                    swapDetails: {
-                        ...result.swapDetails,
-                        fromCoin: result?.swapDetails?.fromCoin?.ticker,
-                        toCoin: result?.swapDetails?.toCoin?.ticker,
+                    swapCreationInfo: {
+                        ...result.swapCreationInfo,
+                        fromCoin: result?.swapCreationInfo?.fromCoin?.ticker,
+                        toCoin: result?.swapCreationInfo?.toCoin?.ticker,
                     },
                 })}`,
                 loggerSource
@@ -194,27 +194,52 @@ export class PublicSwapService {
         }
     }
 
-    static async createPublicSwap(fromCoin, toCoin, fromAmount, swapDetails, toAddress, refundAddress) {
+    /**
+     * Creates swap by given params.
+     *
+     * @param fromCoin {Coin}
+     * @param toCoin {Coin}
+     * @param fromAmount {string}
+     * @param swapCreationInfo {PublicSwapCreationInfo}
+     * @param toAddress {string}
+     * @param refundAddress {string}
+     * @return {Promise<{
+     *             result: true,
+     *             fiatCurrencyCode: string,
+     *             toCoin: Coin,
+     *             fromAmountFiat: (number|null),
+     *             address: string,
+     *             durationMinutesRange: string,
+     *             fromAmount: string,
+     *             toAmount: string,
+     *             toAmountFiat: (number|null),
+     *             fiatCurrencyDecimals: number,
+     *             fromCoin: Coin,
+     *             rate: string,
+     *             swapId: string
+     *         }|{
+     *             result: false,
+     *             reason: string
+     *         }>}
+     */
+    static async createPublicSwap(fromCoin, toCoin, fromAmount, swapCreationInfo, toAddress, refundAddress) {
         const loggerSource = "createPublicSwap";
         try {
-            if (typeof fromAmount === "string") {
-                fromAmount = Number(fromAmount);
-            }
             if (
                 !(fromCoin instanceof Coin) ||
                 !(toCoin instanceof Coin) ||
-                typeof fromAmount !== "number" ||
+                typeof fromAmount !== "string" ||
                 typeof toAddress !== "string" ||
                 typeof refundAddress !== "string" ||
-                !(swapDetails instanceof PublicSwapDetails)
+                !(swapCreationInfo instanceof PublicSwapCreationInfo)
             ) {
-                throw new Error(`Wrong input: ${fromCoin.ticker} ${toCoin.ticker} ${fromAmount} ${swapDetails}`);
+                throw new Error(`Wrong input: ${fromCoin.ticker} ${toCoin.ticker} ${fromAmount} ${swapCreationInfo}`);
             }
             Logger.log(
                 `Start: ${fromAmount} ${fromCoin.ticker} -> ${toCoin.ticker}. Details: ${safeStringify({
-                    ...swapDetails,
-                    fromCoin: swapDetails?.fromCoin?.ticker,
-                    toCoin: swapDetails?.toCoin?.ticker,
+                    ...swapCreationInfo,
+                    fromCoin: swapCreationInfo?.fromCoin?.ticker,
+                    toCoin: swapCreationInfo?.toCoin?.ticker,
                 })}`,
                 loggerSource
             );
@@ -225,7 +250,7 @@ export class PublicSwapService {
                 fromAmount,
                 toAddress,
                 refundAddress,
-                swapDetails.rawSwapData
+                swapCreationInfo.rawSwapData
             );
             Logger.log(
                 `Created:${safeStringify({ ...result, fromCoin: fromCoin?.ticker, toCoin: toCoin?.ticker })}`,
@@ -268,8 +293,8 @@ export class PublicSwapService {
                     fiatCurrencyCode: currentFiatCurrencyData.currency,
                     fiatCurrencyDecimals: currentFiatCurrencyData.decimalCount,
                     rate: result.rate,
-                    durationMinutesRange: swapDetails.durationMinutesRange,
-                    address: result.fromAddress, // TODO: tenfold check
+                    durationMinutesRange: swapCreationInfo.durationMinutesRange,
+                    address: result.fromAddress, // CRITICAL: this is the address to send coins to swaps provider
                 };
 
                 this._savePublicSwapIdLocally(result.swapId);
@@ -291,7 +316,13 @@ export class PublicSwapService {
      * Retrieves swap details and status for existing swaps by their ids.
      *
      * @param swapIds {string[]}
-     * @return {Promise<{result: true, swaps: ExistingSwapWithFiatData[]}|{result: false, reason: string}>}
+     * @return {Promise<{
+     *              result: true,
+     *              swaps: ExistingSwapWithFiatData[]
+     *         }|{
+     *              result: false,
+     *              reason: string
+     *         }>}
      *         error reason is one of PUBLIC_SWAPS_COMMON_ERRORS
      */
     static async getPublicExistingSwapDetailsAndStatus(swapIds) {
@@ -315,7 +346,13 @@ export class PublicSwapService {
     /**
      * Retrieves the whole available swaps history by ids saved locally.
      *
-     * @return {Promise<{result: true, swaps: ExistingSwapWithFiatData[]}|{result: false, reason: string}>}
+     * @return {Promise<{
+     *             result: true,
+     *             swaps: ExistingSwapWithFiatData[]
+     *         }|{
+     *             result: false,
+     *             reason: string
+     *         }>}
      */
     static async getPublicSwapsHistory() {
         try {
@@ -335,10 +372,10 @@ export class PublicSwapService {
      */
     static _savePublicSwapIdLocally(swapId) {
         try {
-            const saved = getSwapIds();
+            const saved = Storage.getSwapIds();
             const ids = typeof saved === "string" && saved.length > 0 ? saved.split(",") : [];
             ids.push(swapId);
-            setSwapIds(ids.join(","));
+            Storage.setSwapIds(ids.join(","));
         } catch (e) {
             improveAndRethrow(e, "_savePublicSwapIdLocally");
         }
@@ -350,7 +387,7 @@ export class PublicSwapService {
      */
     static _getPublicSwapIdsSavedLocally() {
         try {
-            const saved = getSwapIds();
+            const saved = Storage.getSwapIds();
             return typeof saved === "string" && saved.length > 0 ? saved.split(",") : [];
         } catch (e) {
             improveAndRethrow(e, "_getPublicSwapIdsSavedLocally");

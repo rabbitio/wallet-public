@@ -1,6 +1,7 @@
-import { improveAndRethrow } from "../../common/utils/errorUtils";
-import { ApiCallWrongResponseError } from "../../common/backend-api/utils";
-import { doApiCall, urlWithPrefix } from "../../common/backend-api/utils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ApiCallWrongResponseError } from "../../common/backend-api/utils.js";
+import { doApiCall, urlWithPrefix } from "../../common/backend-api/utils.js";
 
 export class EncryptedWalletPaymentIdsApi {
     static endpoint = "encryptedWalletPaymentIds";

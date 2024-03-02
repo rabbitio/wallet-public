@@ -1,20 +1,22 @@
-import { BigNumber } from "ethers";
+import { BigNumber } from "bignumber.js";
 
-import { tronUtils } from "../adapters/tronUtils";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { TxData } from "../../common/models/tx-data";
-import { Trc20TransferEnergyEstimationProvider } from "../../trc20token/external-apis/trc20TransferEnergyEstimationProvider";
-import { TrxAddressesService } from "./trxAddressesService";
-import { Coins } from "../../coins";
-import { TronNetworkConstantsService } from "./tronNetworkConstantsService";
-import { TronBlockchainBalancesService } from "./tronBlockchainBalancesService";
-import { validateTronAddress } from "../lib/addresses";
-import { KeysBip44 } from "../../common/lib/keysBip44";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { safeStringify } from "../../../common/utils/browserUtils";
-import { FeeEstimationUtils } from "../../common/utils/feeEstimationUtils";
-import { TronAccountExistenceProvider } from "../external-apis/tronAccountExistanceProvider";
-import { TRC20 } from "../../trc20token/trc20Protocol";
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { tronUtils } from "../adapters/tronUtils.js";
+import { TxData } from "../../common/models/tx-data.js";
+import { Trc20TransferEnergyEstimationProvider } from "../../trc20token/external-apis/trc20TransferEnergyEstimationProvider.js";
+import { TrxAddressesService } from "./trxAddressesService.js";
+import { Coins } from "../../coins.js";
+import { TronNetworkConstantsService } from "./tronNetworkConstantsService.js";
+import { TronBlockchainBalancesService } from "./tronBlockchainBalancesService.js";
+import { validateTronAddress } from "../lib/addresses.js";
+import { KeysBip44 } from "../../common/lib/keysBip44.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { safeStringify } from "../../../common/utils/browserUtils.js";
+import { FeeEstimationUtils } from "../../common/utils/feeEstimationUtils.js";
+import { TronAccountExistenceProvider } from "../external-apis/tronAccountExistanceProvider.js";
+import { TRC20 } from "../../trc20token/trc20Protocol.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
 
 // TODO: [tests, critical] Units required
 export class TronSendTransactionService {
@@ -60,16 +62,16 @@ export class TronSendTransactionService {
                  */
                 coinAmount = balanceCoins;
             }
-            const amountToSendAtoms = coin.coinAmountToAtoms("" + coinAmount);
+            const amountToSendAtoms = coin.coinAmountToAtoms(coinAmount);
             const addressFromBase58 = TrxAddressesService.getCurrentTrxAddress();
-            let requiredBandwidth = 0;
-            let requiredEnergy = 0;
-            let priceForTargetAccountCreationSuns = 0;
+            let requiredBandwidth = "0";
+            let requiredEnergy = "0";
+            let priceForTargetAccountCreationSuns = "0";
             if (coin.protocol === TRC20) {
                 /* If the passed address is fake we use random not activated valid address as empirically we discovered
                  * that not activated tron addresses require significantly more energy to send to them.
                  *
-                 * NOTE: we are ok to use really random address here as it is used only for estimation and isn't being
+                 * NOTE: we should use really random address here as it is used only for estimation and isn't being
                  * saved for any further steps.
                  */
                 const randomNotActivatedAddressBase58 = "TKSrBySJ5LKzwDiwhMMqtwt8T7FL766ZfU";
@@ -88,16 +90,15 @@ export class TronSendTransactionService {
                         amountToSendAtoms
                     ),
                 ]);
-                requiredEnergy = resolvedPromises[0];
-                requiredBandwidth = resolvedPromises[1]?.length;
+                requiredEnergy = AmountUtils.intStr(resolvedPromises[0]);
+                requiredBandwidth = AmountUtils.intStr(resolvedPromises[1]?.length);
             } else if (coin === Coins.COINS.TRX) {
                 /* We use some 100% present account address because tron fails to create transaction if account doesn't exist
                  * NOTE 1: supported testnet is nile
                  * NOTE 2: you will not be able to send to this address - fee estimation will fail
                  */
-                const existingAccount = FeeEstimationUtils.getWalletAddressToUseAsFromAddressForTokenSendingEstimation(
-                    TRC20
-                );
+                const existingAccount =
+                    FeeEstimationUtils.getWalletAddressToUseAsFromAddressForTokenSendingEstimation(TRC20);
                 /* This value should not exceed tron balance of the hardcoded address we use for estimation. So we
                  * use the smallest possible. Greater value can add just few bytes to the hex transaction. We handle
                  * this by increasing the whole estimation a bit below.
@@ -108,7 +109,7 @@ export class TronSendTransactionService {
                     addressToBase58,
                     sendAmountSunsForEstimation
                 );
-                requiredBandwidth = hexTrxSendTx.length;
+                requiredBandwidth = AmountUtils.intStr(hexTrxSendTx.length);
                 /* We set 1 TRX fee if we don't know exact address the transaction will be sent to as the actual target
                  * address can be 'not activated' and for such addresses we should add 1 TRX fee to the whole estimation.
                  * And if we know the exact target address we check its existence and add 1 TRX fee if it is
@@ -117,110 +118,95 @@ export class TronSendTransactionService {
                  * Note that this works only for TRX-TRX transfers. This is not applicable for TRC20 transfers.
                  */
                 if (isAddressFake) {
-                    priceForTargetAccountCreationSuns = 1_000_000;
+                    priceForTargetAccountCreationSuns = "1000000";
                 } else {
-                    const doesTargetAddressExist = await TronAccountExistenceProvider.doesTronAccountExist(
-                        addressToBase58
-                    );
-                    priceForTargetAccountCreationSuns = doesTargetAddressExist ? 0 : 1_000_000;
+                    const doesAddressExist = await TronAccountExistenceProvider.doesTronAccountExist(addressToBase58);
+                    priceForTargetAccountCreationSuns = doesAddressExist ? "0" : "1000000";
                 }
             } else {
                 throw new Error("Not supported coin passed: " + coin?.ticker);
             }
-            // TODO: [feature, critical] Ignore available resources when sending to not existing address as it costs 1TRX + 100 bandw??? task_id=67589bd2e5634e23aae35ad1935d4c2d
-            const [
-                { bandwidthPriceSuns, energyPriceSuns },
-                { availableBandwidth, availableEnergy },
-            ] = await Promise.all([
-                TronNetworkConstantsService.getTronResourcesPrices(),
-                TronBlockchainBalancesService.getTronAccountResources(),
-            ]);
-            const bandwidthMultiplier = 1.1; // Because bandwidth is not exactly 1:1 with length, but usually pretty the same
-            const requiredBandwidthMultiplied = requiredBandwidth * bandwidthMultiplier;
-            // Tron uses free bandwidth only if it can completely cover the required bandwidth amount
-            const bandwidthToPayFor =
-                requiredBandwidthMultiplied > (availableBandwidth ?? 0) ? requiredBandwidthMultiplied : 0;
-            const bandwidthFee = bandwidthToPayFor * bandwidthPriceSuns;
-            const energyToPayFor =
-                requiredEnergy > (availableEnergy ?? 0) ? requiredEnergy - (availableEnergy ?? 0) : 0;
-            const energyFee = energyToPayFor * energyPriceSuns;
-            const multiplierToMinimizeTheRiskOfStackingDueToNotEnoughFee = 1.05;
-            const totalFeeSuns =
-                Math.round((bandwidthFee + energyFee) * multiplierToMinimizeTheRiskOfStackingDueToNotEnoughFee) +
-                priceForTargetAccountCreationSuns;
-
+            const [{ bandwidthPriceSuns, energyPriceSuns }, { availableBandwidth, availableEnergy }] =
+                await Promise.all([
+                    TronNetworkConstantsService.getTronResourcesPrices(),
+                    TronBlockchainBalancesService.getTronAccountResources(),
+                ]);
+            const bandwidthMultiplier = "1.1"; // Because bandwidth is not exactly 1:1 with length, but usually pretty the same
+            const requiredBandwidthMultiplied = BigNumber(requiredBandwidth).times(bandwidthMultiplier);
+            let bandwidthToPayFor = requiredBandwidthMultiplied;
+            if (
+                requiredBandwidthMultiplied.lte(availableBandwidth ?? "0") &&
+                BigNumber(priceForTargetAccountCreationSuns).eq("0")
+            ) {
+                /* Tron uses free bandwidth only if it can cover the whole required bandwidth amount.
+                 * Also it is not documented clearly, but TRX->TRX sending to not-activated account fails when we try
+                 * to send all available coins minus 1 TRX activation fee with bandwidth covered from account stock.
+                 *
+                 * So the free bandwidth will be used only when it covers the required bandwidth completely and we send
+                 * TRX to activated address.
+                 */
+                bandwidthToPayFor = BigNumber("0");
+            }
+            const bandwidthFee = bandwidthToPayFor.times(bandwidthPriceSuns);
+            const energyToPayFor = BigNumber(requiredEnergy).gt(availableEnergy ?? "0")
+                ? BigNumber(requiredEnergy).minus(availableEnergy ?? "0")
+                : BigNumber("0");
+            const energyFee = energyToPayFor.times(energyPriceSuns);
+            const multiplierToMinimizeTheRiskOfStackingDueToNotEnoughFee = "1.05";
+            const totalFeeSuns = BigNumber(bandwidthFee)
+                .plus(energyFee)
+                .times(multiplierToMinimizeTheRiskOfStackingDueToNotEnoughFee)
+                .plus(priceForTargetAccountCreationSuns);
             let sendingCoinBalanceAtoms = coin.coinAmountToAtoms(balanceCoins);
             let finalAmountAtoms = amountToSendAtoms;
             if (isSendAll && !usesDifferentCoinFee) {
                 /* Here we finally set correct sending amount for send all case for Tron coin case.
                  * Now this is possible as we have fee value here.
+                 * Note: case sending TRC20 token was handled above so the amount for this case is correct here.
                  */
-                finalAmountAtoms = BigNumber.from(sendingCoinBalanceAtoms)
-                    .sub(totalFeeSuns)
-                    .toString();
+                finalAmountAtoms = AmountUtils.intStr(BigNumber(sendingCoinBalanceAtoms).minus(totalFeeSuns));
             }
             let feeBalanceAtoms = sendingCoinBalanceAtoms;
             if (usesDifferentCoinFee) {
+                /* If we are working with TRC20 token here we need to request the TRX balance
+                 * for further calculations. */
                 const feeBalanceCoins = await TronBlockchainBalancesService.getBalance(coin.feeCoin);
                 feeBalanceAtoms = coin.feeCoin.coinAmountToAtoms(feeBalanceCoins);
             }
             // TODO: [refactoring, moderate] extract this logic as it is coin-independent and is being duplicated
             let isEnoughBalance;
             if (isSendAll && usesDifferentCoinFee) {
-                isEnoughBalance = BigNumber.from(feeBalanceAtoms).gte(totalFeeSuns);
+                isEnoughBalance = BigNumber(feeBalanceAtoms).gte(totalFeeSuns);
             } else if (isSendAll && !usesDifferentCoinFee) {
                 // We cannot send less than 1 sun in pure TRX transfer tx so comparing strictly here
-                isEnoughBalance = BigNumber.from(sendingCoinBalanceAtoms).gt(totalFeeSuns);
+                isEnoughBalance = BigNumber(sendingCoinBalanceAtoms).gt(totalFeeSuns);
             } else if (usesDifferentCoinFee) {
                 isEnoughBalance =
-                    BigNumber.from(feeBalanceAtoms).gte(totalFeeSuns) &&
-                    BigNumber.from(sendingCoinBalanceAtoms).gte(amountToSendAtoms);
+                    BigNumber(feeBalanceAtoms).gte(totalFeeSuns) &&
+                    BigNumber(sendingCoinBalanceAtoms).gte(amountToSendAtoms);
             } else {
-                isEnoughBalance = BigNumber.from(sendingCoinBalanceAtoms).gte(
-                    BigNumber.from(amountToSendAtoms).add(totalFeeSuns)
+                isEnoughBalance = BigNumber(sendingCoinBalanceAtoms).gte(
+                    BigNumber(amountToSendAtoms).plus(totalFeeSuns)
                 );
             }
 
-            // TODO: [refactoring, critical] remove this after testing
-            // eslint-disable-next-line no-console
-            console.log(
-                "FEE features: ",
-                "Ban price",
-                bandwidthPriceSuns,
-                ". band available",
-                availableBandwidth,
-                ". Band = (len)",
-                requiredBandwidth,
-                ". Band to pay for (cnt)",
-                bandwidthToPayFor,
-                ". Band fee suns",
-                bandwidthFee,
-                ". Energy price",
-                energyPriceSuns,
-                ". Energy available",
-                availableEnergy,
-                ". Energy est",
-                requiredEnergy,
-                ". Energy exc avail",
-                energyToPayFor,
-                ". Energy fee suns",
-                energyFee,
-                ". Total fee suns",
-                totalFeeSuns,
-                ". Send coin balance",
-                sendingCoinBalanceAtoms,
-                ". Fee coin balance",
-                feeBalanceAtoms,
-                ". Is enough =",
-                isEnoughBalance,
-                ". Final amount",
-                finalAmountAtoms
+            Logger.log(
+                `Tron fee features:\nBandw. price: ${bandwidthPriceSuns}\n Bandw. available: ${availableBandwidth}\nBandw. (len): ${requiredBandwidth}\nBandw. to pay for (cnt): ${bandwidthToPayFor.toString()}\nBandw. fee suns: ${bandwidthFee.toString()}\nEnergy price (suns): ${energyPriceSuns}\nEnergy available:${availableEnergy}\nEnergy est.:%{requiredEnergy}\nEnergy exc. avail.:${energyToPayFor.toString()}\nEnergy fee suns: ${energyFee.toString()}\nTotal fee suns: ${totalFeeSuns.toString()}\nSend coin balance: ${sendingCoinBalanceAtoms}\nFee coin balance:${feeBalanceAtoms}\nIs enough: ${isEnoughBalance}\nFinal amount: ${finalAmountAtoms}`
             );
 
             const txsData = [
-                new TxData(finalAmountAtoms, addressToBase58, null, totalFeeSuns, null, null, network, {
-                    rate: energyPriceSuns,
-                }),
+                new TxData(
+                    finalAmountAtoms,
+                    addressToBase58,
+                    null,
+                    AmountUtils.intStr(totalFeeSuns),
+                    null,
+                    null,
+                    network,
+                    {
+                        rate: energyPriceSuns,
+                    }
+                ),
             ];
 
             /**
@@ -230,7 +216,7 @@ export class TronSendTransactionService {
             return {
                 result: true,
                 txsDataArray: txsData,
-                isFeeCoinBalanceZero: feeBalanceAtoms === "0",
+                isFeeCoinBalanceZero: BigNumber(feeBalanceAtoms).isZero(),
                 isFeeCoinBalanceNotEnoughForAllOptions: !isEnoughBalance,
             };
         } catch (e) {
@@ -243,7 +229,7 @@ export class TronSendTransactionService {
             const keys = KeysBip44.generateKeysForAccountAddressByWalletCredentials(
                 mnemonic,
                 passphrase,
-                getCurrentNetwork(coin),
+                Storage.getCurrentNetwork(coin),
                 0,
                 0
             );

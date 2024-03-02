@@ -1,11 +1,12 @@
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { Coins } from "../../coins";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils";
-import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
 
 class TrongridCurrentBlockProvider extends ExternalApiProvider {
     constructor() {
@@ -28,7 +29,7 @@ class TronscanCurrentBlockProvider extends ExternalApiProvider {
     }
 
     composeQueryString(params, subRequestIndex = 0) {
-        const network = getCurrentNetwork(Coins.COINS.TRX);
+        const network = Storage.getCurrentNetwork(Coins.COINS.TRX);
         if (network !== Coins.COINS.TRX.mainnet) {
             throw new Error("Deliberate fail to stop processing for tronscan as it doesn't support testnet for tron");
         }
@@ -48,7 +49,7 @@ class TronscanCurrentBlockProvider extends ExternalApiProvider {
 //     }
 //
 //     composeQueryString(params, subRequestIndex = 0) {
-//         const network = getCurrentNetwork(Coins.COINS.TRX) === Coins.COINS.TRX.mainnet ? "mainnet" : "testnet";
+//         const network = Storage.getCurrentNetwork(Coins.COINS.TRX) === Coins.COINS.TRX.mainnet ? "mainnet" : "testnet";
 //         return `https://trx.getblock.io/${GETBL_PR_K}/${network}/wallet/getnowblock`;
 //     }
 //
@@ -74,7 +75,7 @@ export class TronCurrentBlockProvider {
     );
     static async getCurrentTronBlock() {
         try {
-            const network = getCurrentNetwork(Coins.COINS.TRX);
+            const network = Storage.getCurrentNetwork(Coins.COINS.TRX);
             return await this._provider.callExternalAPICached(
                 [],
                 10000,

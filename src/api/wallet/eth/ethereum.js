@@ -1,11 +1,13 @@
 import { ethers } from "ethers";
-import { getCurrentNetwork } from "../../common/services/internal/storage";
-import { NumbersUtils } from "../common/utils/numbersUtils";
-import { bip44Scheme } from "../btc/lib/addresses-schemes";
-import { Coin } from "../common/models/coin";
-import { Network } from "../common/models/networks";
-import { AmountUtils } from "../common/utils/amountUtils";
-import { ETHEREUM_BLOCKCHAIN } from "./ethereumBlockchain";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils } from "@rabbitio/ui-kit";
+
+import { Storage } from "../../common/services/internal/storage.js";
+import { bip44Scheme } from "../btc/lib/addresses-schemes.js";
+import { Coin } from "../common/models/coin.js";
+import { Network } from "../common/models/networks.js";
+import { ETHEREUM_BLOCKCHAIN } from "./ethereumBlockchain.js";
 
 class Ethereum extends Coin {
     constructor() {
@@ -27,28 +29,23 @@ class Ethereum extends Coin {
     }
 
     atomsToCoinAmount(atoms) {
-        return NumbersUtils.removeRedundantRightZerosFromNumberString(ethers.utils.formatEther(atoms));
-    }
-
-    atomsToCoinAmountSignificantString(atoms, maxNumberLength = null) {
-        const coinAmountString = ethers.utils.formatEther(atoms);
-        return NumbersUtils.trimCurrencyAmount(coinAmountString, this.digits, maxNumberLength);
+        return AmountUtils.removeRedundantRightZerosFromNumberString(ethers.utils.formatEther(atoms));
     }
 
     coinAmountToAtoms(coinsAmount) {
-        coinsAmount = AmountUtils.trimDigitsAfterPeriod(coinsAmount, this.digits, false);
+        coinsAmount = AmountUtils.trim(coinsAmount, this.digits);
         return ethers.utils.parseEther(coinsAmount).toString();
     }
 
     composeUrlToTransactionExplorer(txId) {
-        if (getCurrentNetwork(this)?.key === this.mainnet.key) {
+        if (Storage.getCurrentNetwork(this)?.key === this.mainnet.key) {
             return `https://blockchair.com/ethereum/transaction/${txId}?from=rabbitio`;
         }
         return `https://${this.testnet.key}etherscan.io/tx/${txId}`;
     }
 
     coinAtomsFeeRateToCommonlyUsedAmountFormatWithDenominationString(coinAtomsString) {
-        return (+ethers.utils.formatUnits("" + coinAtomsString, "gwei")).toFixed(1) + " gw/gas";
+        return BigNumber(ethers.utils.formatUnits("" + coinAtomsString, "gwei")).toFixed(1) + " gw/gas";
     }
 }
 

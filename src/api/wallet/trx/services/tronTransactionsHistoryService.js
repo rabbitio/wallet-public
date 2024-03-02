@@ -1,6 +1,7 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { TronTransactionsProvider } from "../external-apis/tronTransactionsProvider";
-import { TrxAddressesService } from "./trxAddressesService";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { TronTransactionsProvider } from "../external-apis/tronTransactionsProvider.js";
+import { TrxAddressesService } from "./trxAddressesService.js";
 
 export class TronTransactionsHistoryService {
     static async getTrxTransactionsHistory() {

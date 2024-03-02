@@ -1,10 +1,12 @@
-import { Coin } from "../common/models/coin";
-import { Network } from "../common/models/networks";
-import { bip44Scheme } from "../btc/lib/addresses-schemes";
-import { NumbersUtils } from "../common/utils/numbersUtils";
-import { getCurrentNetwork } from "../../common/services/internal/storage";
-import { AmountUtils } from "../common/utils/amountUtils";
-import { TRON_BLOCKCHAIN } from "./tronBlockchain";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils } from "@rabbitio/ui-kit";
+
+import { Coin } from "../common/models/coin.js";
+import { Network } from "../common/models/networks.js";
+import { bip44Scheme } from "../btc/lib/addresses-schemes.js";
+import { Storage } from "../../common/services/internal/storage.js";
+import { TRON_BLOCKCHAIN } from "./tronBlockchain.js";
 
 class Tron extends Coin {
     constructor() {
@@ -29,21 +31,19 @@ class Tron extends Coin {
     }
 
     atomsToCoinAmount(atoms) {
-        return NumbersUtils.removeRedundantRightZerosFromNumberString((+atoms / 1000000).toFixed(this.digits));
-    }
-
-    atomsToCoinAmountSignificantString(atoms, maxNumberLength = null) {
-        return NumbersUtils.trimCurrencyAmount(+atoms / 1000000, this.digits, maxNumberLength);
+        return AmountUtils.removeRedundantRightZerosFromNumberString(
+            AmountUtils.trim(BigNumber(atoms).div(1_000_000), this.digits)
+        );
     }
 
     coinAmountToAtoms(coinsAmount) {
-        coinsAmount = AmountUtils.trimDigitsAfterPeriod(coinsAmount, this.digits);
-        return NumbersUtils.removeRedundantRightZerosFromNumberString(Math.floor(coinsAmount * 1000000));
+        const atoms = AmountUtils.trim(BigNumber(coinsAmount).times(1_000_000), this.digits);
+        return AmountUtils.removeRedundantRightZerosFromNumberString(atoms);
     }
 
     composeUrlToTransactionExplorer(txId) {
         return `https://tronscan.org/#/transaction/${
-            getCurrentNetwork(this)?.key === this.mainnet.key ? "" : `${this.testnet.key}/`
+            Storage.getCurrentNetwork(this)?.key === this.mainnet.key ? "" : `${this.testnet.key}/`
         }${txId}`;
     }
 

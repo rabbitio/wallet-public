@@ -1,25 +1,28 @@
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import { transactionsDataProvider } from "../internal/transactionsDataProvider";
-import { getTXIDSendingGivenOutput } from "../../lib/utxos";
-import { Utxo } from "../../models/transaction/utxo";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-/**
- * @param internalAddresses {string[]}
- * @param externalAddresses {string[]}
- * @param network {Network}
- * @return {Promise<{internal: Utxo[], external: Utxo[]}>}
- */
-export async function getAllUTXOs(internalAddresses, externalAddresses, network) {
-    try {
-        const allAddresses = [...internalAddresses, ...externalAddresses];
-        const utxos = await getUTXOsByAddressesArray(allAddresses);
+import { transactionsDataProvider } from "../internal/transactionsDataProvider.js";
+import { Utxos } from "../../lib/utxos.js";
+import { Utxo } from "../../models/transaction/utxo.js";
 
-        return {
-            internal: utxos.filter(utxo => internalAddresses.find(address => address === utxo.address)),
-            external: utxos.filter(utxo => externalAddresses.find(address => address === utxo.address)),
-        };
-    } catch (e) {
-        improveAndRethrow(e, "getAllUTXOs");
+export class BtcUtxosUtils {
+    /**
+     * @param internalAddresses {string[]}
+     * @param externalAddresses {string[]}
+     * @param network {Network}
+     * @return {Promise<{internal: Utxo[], external: Utxo[]}>}
+     */
+    static async getAllUTXOs(internalAddresses, externalAddresses, network) {
+        try {
+            const allAddresses = [...internalAddresses, ...externalAddresses];
+            const utxos = await getUTXOsByAddressesArray(allAddresses);
+
+            return {
+                internal: utxos.filter(utxo => internalAddresses.find(address => address === utxo.address)),
+                external: utxos.filter(utxo => externalAddresses.find(address => address === utxo.address)),
+            };
+        } catch (e) {
+            improveAndRethrow(e, "getAllUTXOs");
+        }
     }
 }
 
@@ -47,7 +50,7 @@ async function getUTXOsByAddressesArray(addresses) {
                     .filter(
                         output =>
                             output.spend_txid == null && // Double check as some providers gives no data about txs spending
-                            getTXIDSendingGivenOutput(output, tx.txid, transactionsData) == null
+                            Utxos.getTXIDSendingGivenOutput(output, tx.txid, transactionsData) == null
                     )
                     .map(
                         output =>

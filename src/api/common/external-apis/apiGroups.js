@@ -1,5 +1,5 @@
-import { getCurrentNetwork } from "../services/internal/storage";
-import { Coins } from "../../wallet/coins";
+import { Storage } from "../services/internal/storage.js";
+import { Coins } from "../../wallet/coins.js";
 
 /**
  * Models a group of APIs provided by the same owner and used for different services in our app.
@@ -30,7 +30,7 @@ export const ApiGroups = {
      * per month. So we can add it if not enough current RPS.
      */
     ETHERSCAN: new ApiGroup("etherscan", 0.17), // Actually 0.2 but fails sometime, so we use smaller
-    ALCHEMY: new ApiGroup("alchemy", 0.3, network => `alchemy-${(network || getCurrentNetwork(Coins.COINS.ETH)).key}`),
+    ALCHEMY: new ApiGroup("alchemy", 0.3, network => `alchemy-${(network || Storage.getCurrentNetwork(Coins.COINS.ETH)).key}`),
     BLOCKSTREAM: new ApiGroup("blockstream", 0.2),
     BLOCKCHAIN_INFO: new ApiGroup("blockchain.info", 1),
     BLOCKNATIVE: new ApiGroup("blocknative", 0.5),
@@ -38,7 +38,7 @@ export const ApiGroups = {
     TRONGRID: new ApiGroup(
         "trongrid",
         0.3,
-        network => `trongrid-${(network || getCurrentNetwork(Coins.COINS.TRX)).key}`
+        network => `trongrid-${(network || Storage.getCurrentNetwork(Coins.COINS.TRX)).key}`
     ),
     TRONSCAN: new ApiGroup("tronscan", 0.3),
     GETBLOCK: new ApiGroup("getblock", 0.3),

@@ -1,5 +1,6 @@
-import { getTXIDSendingGivenOutput } from "../utxos";
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Utxos } from "../utxos.js";
 
 /**
  * Removes unconfirmed double_spending transactions from list if there is confirmed one spending the same UTXO(s)
@@ -98,7 +99,7 @@ export function setSpendTxId(transactions) {
     try {
         transactions.forEach(tx =>
             tx.outputs.forEach(output => {
-                output.spend_txid = getTXIDSendingGivenOutput(output, tx.txid, transactions) ?? output.spend_txid;
+                output.spend_txid = Utxos.getTXIDSendingGivenOutput(output, tx.txid, transactions) ?? output.spend_txid;
             })
         );
 

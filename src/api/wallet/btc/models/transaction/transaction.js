@@ -1,8 +1,9 @@
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import { Input } from "./input";
-import { Output } from "./output";
-import { getDustThreshold, getOutputTypeByAddress } from "../../lib/utxos";
-import { MAX_RBF_SEQUENCE } from "../../lib/transactions/build-transaction";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Input } from "./input.js";
+import { Output } from "./output.js";
+import { Utxos, getOutputTypeByAddress } from "../../lib/utxos.js";
+import { MAX_RBF_SEQUENCE } from "../../lib/transactions/build-transaction.js";
 
 export class Transaction {
     constructor(
@@ -58,7 +59,7 @@ export class Transaction {
             const to = txData.address;
             const outputs = [new Output([to], txData.amount, getOutputTypeByAddress(to), null, 0)];
             const change = txData.utxos.reduce((p, c) => p + c.value_satoshis, 0) - txData.amount - txData.fee;
-            if (change > getDustThreshold(to)) {
+            if (change > Utxos.getDustThreshold(to)) {
                 outputs.push(
                     new Output([txData.changeAddress], change, getOutputTypeByAddress(txData.changeAddress), null, 1)
                 );

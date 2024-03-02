@@ -1,6 +1,6 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { ApiCallWrongResponseError } from "../../../common/backend-api/utils";
-import { doApiCall, urlWithPrefix } from "../../../common/backend-api/utils";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ApiCallWrongResponseError, doApiCall, urlWithPrefix } from "../../../common/backend-api/utils.js";
 
 // TODO: [tests, moderate] Implement unit tests
 export class TransactionDataApi {

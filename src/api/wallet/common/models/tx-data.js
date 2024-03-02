@@ -1,3 +1,5 @@
+import { safeStringify } from "../../../common/utils/browserUtils.js";
+
 /**
  * Class to memorize data for transaction that has been checked with fake signatures.
  * Useful to build real transaction from the validated data without any checks.
@@ -5,10 +7,10 @@
  */
 export class TxData {
     /**
-     * @param amount {number|string} the amount to be sent in coin atoms (satoshi, wei etc.)
+     * @param amount {string} the amount to be sent in coin atoms (satoshi, wei etc.)
      * @param address {string} target address for transaction
-     * @param change {number|null} change in coin atoms
-     * @param fee {number|string} fee in coin atoms
+     * @param change {string|null} change in coin atoms
+     * @param fee {string} fee in coin atoms
      * @param changeAddress {string|null} for coins having change address the address to send change to
      * @param utxos {Utxo[]|null} btc-specific - unspent outputs
      * @param network {Network} Network the tx is checked in
@@ -17,7 +19,7 @@ export class TxData {
      */
     constructor(amount, address, change, fee, changeAddress, utxos, network, feeRate) {
         if (!feeRate?.rate) {
-            throw new Error("Wrong fee rate format when creating TxData: " + JSON.stringify(feeRate));
+            throw new Error("Wrong fee rate format when creating TxData: " + safeStringify(feeRate));
         }
 
         this.amount = amount;

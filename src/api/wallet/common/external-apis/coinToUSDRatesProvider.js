@@ -1,12 +1,14 @@
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import { Coins } from "../../coins";
-import { rabbitTickerToStandardTicker } from "./utils/tickersAdapter";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider";
-import { ApiGroups } from "../../../common/external-apis/apiGroups";
-import { ApiGroupCoinIdAdapters, areCoinsSupportedByCex } from "../adapters/apiGroupCoinIdAdapters";
-import { cache } from "../../../common/utils/cache";
-import { LONG_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { logError } from "../../../common/utils/errorUtils.js";
+import { Coins } from "../../coins.js";
+import { TickersAdapter } from "./utils/tickersAdapter.js";
+import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
+import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
+import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { ApiGroupCoinIdAdapters, areCoinsSupportedByCex } from "../adapters/apiGroupCoinIdAdapters.js";
+import { cache } from "../../../common/utils/cache.js";
+import { LONG_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 // TODO: [feature, low] add provider (only some tokens): https://api.blockchain.com/v3/exchange/tickers
 // TODO: [feature, low] add provider (only some tokens): https://api.crypto.com/v2/public/get-ticker RPS=100 https://exchange-docs.crypto.com/spot/index.html#rate-limits
@@ -43,7 +45,7 @@ class CoincapCoinsToUsdRatesProvider extends ExternalApiProvider {
 
             return params[0].map(coin => {
                 const data = coinsData.find(
-                    item => rabbitTickerToStandardTicker(coin.ticker, coin.protocol) === item.symbol
+                    item => TickersAdapter.rabbitTickerToStandardTicker(coin.ticker, coin.protocol) === item.symbol
                 );
                 if (!data) throw new Error(`No rate found for ${coin.ticker}`);
                 if (!data?.priceUsd) throw new Error("Wrong price for 'coincap'");
@@ -91,7 +93,7 @@ class CexCoinsToUsdRatesProvider extends ExternalApiProvider {
                 if (
                     !coinsData.find(
                         item =>
-                            `${rabbitTickerToStandardTicker(enabledCoins[i].ticker, enabledCoins[i].protocol)}:USD` ===
+                            `${TickersAdapter.rabbitTickerToStandardTicker(enabledCoins[i].ticker, enabledCoins[i].protocol)}:USD` ===
                             (item?.pair ?? "").toUpperCase()
                     )
                 ) {
@@ -102,7 +104,7 @@ class CexCoinsToUsdRatesProvider extends ExternalApiProvider {
             coinsData = enabledCoins.map(coin => {
                 const coinData = coinsData.find(
                     item =>
-                        `${rabbitTickerToStandardTicker(coin.ticker, coin.protocol)}:USD` ===
+                        `${TickersAdapter.rabbitTickerToStandardTicker(coin.ticker, coin.protocol)}:USD` ===
                         (item?.pair ?? "").toUpperCase()
                 );
                 if (!coinData?.last) throw new Error("Wrong price for 'cex'");
@@ -156,7 +158,8 @@ class CoingeckoCoinsToUsdRatesProvider extends ExternalApiProvider {
             const result = allSupportedCoins.map(coin => {
                 const data = coinsData.find(
                     item =>
-                        rabbitTickerToStandardTicker(coin.ticker, coin.protocol) === (item?.symbol ?? "").toUpperCase()
+                        TickersAdapter.rabbitTickerToStandardTicker(coin.ticker, coin.protocol) ===
+                        (item?.symbol ?? "").toUpperCase()
                 );
                 if (!data) throw new Error(`No rate found for ${coin.ticker} in coingecko`);
                 if (!data?.current_price) throw new Error("Wrong price for 'coingecko'");
@@ -212,7 +215,7 @@ class MessariCoinsToUsdRatesProvider extends ExternalApiProvider {
                 const coinData = coinsData.find(
                     item =>
                         (item?.symbol ?? "").toUpperCase() ===
-                        rabbitTickerToStandardTicker(enabledCoins[i].ticker, enabledCoins[i].protocol)
+                        TickersAdapter.rabbitTickerToStandardTicker(enabledCoins[i].ticker, enabledCoins[i].protocol)
                 );
                 if (!coinData) throw new Error("Wrong coin symbol for 'messari' " + enabledCoins[i].ticker);
                 if (!coinData?.metrics?.market_data?.price_usd)
@@ -291,7 +294,7 @@ class CoinToUSDRatesProvider {
 }
 
 const hashFunctionForCacheIdForCoinsList = coins =>
-    coins.map(coin => rabbitTickerToStandardTicker(coin.ticker, coin.protocol)).join(",") +
+    coins.map(coin => TickersAdapter.rabbitTickerToStandardTicker(coin.ticker, coin.protocol)).join(",") +
     "_ccfe9f34-e3db-4e8f-b7c4-9128f3578188";
 
 function saveAllSupportedCoinsRatesToPersistentCache(result) {

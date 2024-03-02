@@ -1,19 +1,16 @@
-import {
-    calculateBalanceByWalletData,
-    calculateDustBalanceByWalletData,
-    getAllSpendableUtxosByWalletData,
-} from "../../lib/utxos";
-import { getAccountsData, getCurrentNetwork, getWalletId } from "../../../../common/services/internal/storage";
-import { getAllUTXOs } from "../utils/utxosUtils";
-import AddressesDataApi from "../../../common/backend-api/addressesDataApi";
-import AddressesServiceInternal from "./addressesServiceInternal";
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import { Logger } from "../../../../support/services/internal/logs/logger";
-import { CacheAndConcurrentRequestsResolver } from "../../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
-import { createRawBalanceAtomsCacheProcessorForSingleBalanceProvider } from "../../../common/utils/cacheActualizationUtils";
-import { BALANCE_CHANGED_EXTERNALLY_EVENT, EventBus } from "../../../../common/adapters/eventbus";
-import { Coins } from "../../../coins";
-import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../../common/utils/ttlConstants";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Utxos } from "../../lib/utxos.js";
+import { Storage } from "../../../../common/services/internal/storage.js";
+import { BtcUtxosUtils } from "../utils/utxosUtils.js";
+import AddressesDataApi from "../../../common/backend-api/addressesDataApi.js";
+import AddressesServiceInternal from "./addressesServiceInternal.js";
+import { Logger } from "../../../../support/services/internal/logs/logger.js";
+import { CacheAndConcurrentRequestsResolver } from "../../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
+import { createRawBalanceAtomsCacheProcessorForSingleBalanceProvider } from "../../../common/utils/cacheActualizationUtils.js";
+import { BALANCE_CHANGED_EXTERNALLY_EVENT, EventBus } from "../../../../common/adapters/eventbus.js";
+import { Coins } from "../../../coins.js";
+import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../../common/utils/ttlConstants.js";
 
 export default class UtxosService {
     static _balanceCacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
@@ -73,14 +70,19 @@ export default class UtxosService {
     // TODO: [tests, critical] At least integration
     static async getAllSpendableUtxos(allAddresses = null) {
         try {
-            const network = getCurrentNetwork();
+            const network = Storage.getCurrentNetwork();
             if (!allAddresses) {
                 allAddresses = await AddressesServiceInternal.getAllUsedAddresses();
             }
-            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
-            const allUtxos = await getAllUTXOs(allAddresses.internal, allAddresses.external, network);
+            const indexes = await AddressesDataApi.getAddressesIndexes(Storage.getWalletId());
+            const allUtxos = await BtcUtxosUtils.getAllUTXOs(allAddresses.internal, allAddresses.external, network);
 
-            return getAllSpendableUtxosByWalletData(getAccountsData(), allUtxos, indexes, getCurrentNetwork());
+            return Utxos.getAllSpendableUtxosByWalletData(
+                Storage.getAccountsData(),
+                allUtxos,
+                indexes,
+                Storage.getCurrentNetwork()
+            );
         } catch (e) {
             improveAndRethrow(e, "getAllSpendableUtxos");
         }
@@ -110,10 +112,10 @@ export default class UtxosService {
             if (!result?.canStartDataRetrieval) {
                 return result?.cachedData;
             }
-            const network = getCurrentNetwork();
-            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
+            const network = Storage.getCurrentNetwork();
+            const indexes = await AddressesDataApi.getAddressesIndexes(Storage.getWalletId());
             const allAddresses = await AddressesServiceInternal.getAllUsedAddresses(indexes);
-            const allUtxos = await getAllUTXOs(allAddresses.internal, allAddresses.external, network);
+            const allUtxos = await BtcUtxosUtils.getAllUTXOs(allAddresses.internal, allAddresses.external, network);
 
             const utxosToString = utxos => utxos.map(utxo => utxo.toMiniString()).join("\n");
             Logger.log(
@@ -122,8 +124,13 @@ export default class UtxosService {
                 loggerSource
             );
 
-            const balanceValues = calculateBalanceByWalletData(getAccountsData(), allUtxos, indexes, network);
-            const dust = feeRate && calculateDustBalanceByWalletData(allUtxos, feeRate, network);
+            const balanceValues = Utxos.calculateBalanceByWalletData(
+                Storage.getAccountsData(),
+                allUtxos,
+                indexes,
+                network
+            );
+            const dust = feeRate && Utxos.calculateDustBalanceByWalletData(allUtxos, feeRate, network);
             const balanceValuesAndDust = { ...balanceValues, dust: dust ?? null };
 
             if (

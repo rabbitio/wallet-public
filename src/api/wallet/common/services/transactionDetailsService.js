@@ -1,11 +1,12 @@
-import { Logger } from "../../../support/services/internal/logs/logger";
-// import FiatPaymentsService from "../../../purchases/services/FiatPaymentsService";
-import CoinsToFiatRatesService from "./coinsToFiatRatesService";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { TransactionsDataService } from "./transactionsDataService";
-import { Coins } from "../../coins";
-import { Wallets } from "../wallets";
-import { TransactionCoinService } from "./internal/transactionCoinService";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+// import FiatPaymentsService from "../../../purchases/services/FiatPaymentsService.js";
+import CoinsToFiatRatesService from "./coinsToFiatRatesService.js";
+import { TransactionsDataService } from "./internal/transactionsDataService.js";
+import { Coins } from "../../coins.js";
+import { Wallets } from "../wallets.js";
+import { TransactionCoinService } from "./internal/transactionCoinService.js";
 
 export class TransactionDetailsService {
     /**
@@ -39,9 +40,11 @@ export class TransactionDetailsService {
      *             note: string|undefined,
      *             isRbfAble: boolean,
      *             purchaseData: ({ paymentId: string, amountWithCurrencyString: string } | null)
-     *         }|null>}
-     *         Address is target for outgoing transaction; receiving for incoming transaction.
-     *         Rate is at transaction creation time.
+     *         }|null)>}
+     *          @description unconfirmedTime: undefined is for confirmed transactions
+     *          @description address: target for outgoing transaction; receiving for incoming transaction
+     *          @description fiatConversionRate: rate at transaction creation time
+     *          @description note: optional - undefined means there is no note
      */
     // TODO: [tests, moderate] Units
     static async getTransactionDetails(txId, ticker, transactionType = null) {
@@ -73,9 +76,10 @@ export class TransactionDetailsService {
             const feeCoinAmount = transaction.fees != null ? coin.feeCoin.atomsToCoinAmount(transaction.fees) : null;
             let fiatCurrencyData = CoinsToFiatRatesService.getCurrentFiatCurrencyData();
             let [[fiatAmount, fiatFee], coinToCurrentFiatRateAtCreationDate /*, purchasesData*/] = await Promise.all([
-                CoinsToFiatRatesService.convertCoinAmountsToFiat(coin, [+coinAmount, +(feeCoinAmount ?? 0)]),
+                CoinsToFiatRatesService.convertCoinAmountsToFiat(coin, [coinAmount, feeCoinAmount ?? "0"]),
                 CoinsToFiatRatesService.getCoinToCurrentFiatCurrencyRateForSpecificDate(coin, transaction.time),
-                // FiatPaymentsService.getPurchaseDataForTransactions([transaction.txid]), // TODO: [feature, moderate] enable if binance connect support this feature task_id=16127916f375490aa6b526675a6c72e4
+                // TODO: [feature, moderate] enable when will become relevant. task_id=16127916f375490aa6b526675a6c72e4
+                // FiatPaymentsService.getPurchaseDataForTransactions([transaction.txid]),
             ]);
 
             if (coin.doesUseDifferentCoinFee() && transaction.fees != null) {
@@ -91,10 +95,10 @@ export class TransactionDetailsService {
                 status: TransactionDetailsService.isIncreasingFee(transaction)
                     ? "increasing_fee"
                     : transaction.confirmations >= coin.minConfirmations
-                    ? "confirmed"
-                    : transaction.confirmations > 0
-                    ? "confirming" // TODO: [refactoring, moderate] Since 0.8.0 we no more guarantee the number of confirmations so maybe we should completely remove the "confirming" status logic from whole app. task_id=ad6f057e8a2b4c9ab9addcfda5f172b5
-                    : "unconfirmed",
+                      ? "confirmed"
+                      : transaction.confirmations > 0
+                        ? "confirming" // TODO: [refactoring, moderate] Since 0.8.0 we no more guarantee the number of confirmations so maybe we should completely remove the "confirming" status logic from whole app. task_id=ad6f057e8a2b4c9ab9addcfda5f172b5
+                        : "unconfirmed",
                 unconfirmedTime: transaction.confirmations < coin.minConfirmations ? unconfirmedTime : undefined,
                 confirmations: transaction.confirmations,
                 explorerLink: coin.composeUrlToTransactionExplorer(txId),
@@ -141,5 +145,21 @@ export class TransactionDetailsService {
             transaction.double_spend === true &&
             !transaction.is_most_probable_double_spend
         );
+    }
+
+    /**
+     * Saves given note for transaction id
+     *
+     * @param transactionId {string} id of transaction to save data for
+     * @param note {string}
+     * @returns {Promise<void>}
+     */
+    static async saveTransactionNote(transactionId, note) {
+        const loggerSource = "saveTransactionData";
+        try {
+            await TransactionsDataService.saveTransactionData(transactionId, { note: note });
+        } catch (e) {
+            improveAndRethrow(e, loggerSource);
+        }
     }
 }

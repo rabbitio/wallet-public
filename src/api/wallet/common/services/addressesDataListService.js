@@ -1,8 +1,10 @@
-import { getSumOfOutputsSendingToAddressByTransactionsList } from "../../btc/lib/transactions/transactions-utils";
-import { improveAndRethrow, logError } from "../../../common/utils/errorUtils";
-import AddressesService from "../../btc/services/addressesService";
-import CoinsToFiatRatesService from "./coinsToFiatRatesService";
-import { Coins } from "../../coins";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { BtcTransactionsCalculationUtils } from "../../btc/lib/transactions/transactions-utils.js";
+import { logError } from "../../../common/utils/errorUtils.js";
+import AddressesService from "../../btc/services/addressesService.js";
+import CoinsToFiatRatesService from "./coinsToFiatRatesService.js";
+import { Coins } from "../../coins.js";
 
 export default class AddressesDataListService {
     static DEFAULT_SORT = "creationDate_desc";
@@ -165,7 +167,10 @@ async function fillAmounts(addressesDataList) {
 
     return addressesDataList.map(addressData => {
         const sumSatoshi = transactionsOfAddresses
-            ? getSumOfOutputsSendingToAddressByTransactionsList(addressData.address, transactionsOfAddresses)
+            ? BtcTransactionsCalculationUtils.getSumOfOutputsSendingToAddressByTransactionsList(
+                  addressData.address,
+                  transactionsOfAddresses
+              )
             : null;
 
         return {

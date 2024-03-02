@@ -1,19 +1,14 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import schemas from "../models/joi_schemas";
+import schemas from "../models/joi_schemas.js";
 import {
-    addClientIpHash,
-    addWalletIdAndSessionId,
     DATA_VALIDATION_ERROR_ID,
     processFailedAuthentication,
-    processInternalError,
-    processSuccess,
     processWrongRequestData,
-    validateRequestDataAndResponseOnErrors,
-} from "./controllerUtils";
-import WalletsService from "../services/walletsService";
-import { SESSION_EXPIRATION_TIME } from "../properties";
-
+    ControllerUtils,
+} from "./controllerUtils.js";
+import WalletsService from "../services/walletsService.js";
+import { SESSION_EXPIRATION_TIME } from "../properties.js";
 import {
     AUTHENTICATE_EP_NUMBER,
     CHANGE_PASSWORD_EP_NUMBER,
@@ -24,9 +19,9 @@ import {
     GET_WALLET_DATA_EP_NUMBER,
     LOGOUT_EP_NUMBER,
     SAVE_SETTINGS_EP_NUMBER,
-} from "./endpointNumbers";
+} from "./endpointNumbers.js";
 
-const log = getLogger("walletsController");
+const log = log4js.getLogger("walletsController");
 
 export default class WalletsController {
     /**
@@ -63,7 +58,7 @@ export default class WalletsController {
         try {
             const data = req.body;
             const options = { shouldNotCheckSession: true, shouldNotCheckIp: true };
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.createSchema,
@@ -94,14 +89,14 @@ export default class WalletsController {
                     log.debug("Session created, setting session cookies and returning 201 with wallet data.");
                     res.cookie("sessionId", wallet.sessionId, { maxAge: SESSION_EXPIRATION_TIME });
                     res.cookie("walletId", wallet.walletId);
-                    processSuccess(res, 201, {
+                    ControllerUtils.processSuccess(res, 201, {
                         sessionId: wallet.sessionId,
                         sessionExpirationTime: wallet.sessionExpirationTime,
                     });
                 }
             }
         } catch (e) {
-            processInternalError(
+            ControllerUtils.processInternalError(
                 res,
                 endpointNumber,
                 "Internal error occurred during the creation of wallet with session. ",
@@ -149,9 +144,9 @@ export default class WalletsController {
         log.debug("Start authentication.");
         const endpointNumber = AUTHENTICATE_EP_NUMBER;
         try {
-            const data = addClientIpHash(req, req.body);
+            const data = ControllerUtils.addClientIpHash(req, req.body);
             const options = { shouldNotCheckSession: true };
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.authenticateSchema,
@@ -177,14 +172,14 @@ export default class WalletsController {
                     } catch (e) {
                         log.error("Failed to add wallet data to response after authentication", e);
                     }
-                    processSuccess(res, 201, { ...checkResult, walletData: walletData });
+                    ControllerUtils.processSuccess(res, 201, { ...checkResult, walletData: walletData });
                 } else {
                     log.info("Authentication failed, sending 403 and error object. ");
                     processFailedAuthentication(res, endpointNumber, checkResult);
                 }
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Internal error occurred during the authentication. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Internal error occurred during the authentication. ", e);
         }
     }
 
@@ -215,10 +210,10 @@ export default class WalletsController {
         const endpointNumber = CHECK_PASSPHRASE_EP_NUMBER;
         try {
             const passphraseHash = req.query && req.query.passphraseHash;
-            const data = addWalletIdAndSessionId(req, { passphraseHash });
+            const data = ControllerUtils.addWalletIdAndSessionId(req, { passphraseHash });
             delete data["sessionId"];
             const options = { shouldNotCheckSession: true, shouldNotCheckIp: true };
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.checkPassphraseSchema,
@@ -231,10 +226,10 @@ export default class WalletsController {
                 const checkResult = await WalletsService.checkPassphrase(data.walletId, data.passphraseHash);
 
                 log.debug("Successfully checked. Returning check result");
-                processSuccess(res, 200, checkResult);
+                ControllerUtils.processSuccess(res, 200, checkResult);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Internal error occurred during the passphrase checking. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Internal error occurred during the passphrase checking. ", e);
         }
     }
 
@@ -266,8 +261,8 @@ export default class WalletsController {
         log.debug("Start getting wallet data.");
         const endpointNumber = GET_WALLET_DATA_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, {}));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, {}));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.getWalletDataSchema,
@@ -279,7 +274,7 @@ export default class WalletsController {
                 const walletData = await WalletsService.getWalletData(data.walletId);
 
                 log.debug("Data has been retrieved. Sending 200 and returning data.");
-                processSuccess(res, 200, {
+                ControllerUtils.processSuccess(res, 200, {
                     walletId: walletData.walletId,
                     creationTime: walletData.creationTime,
                     lastPasswordChangeDate: walletData.lastPasswordChangeDate,
@@ -287,7 +282,7 @@ export default class WalletsController {
                 });
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Internal error occurred during the data retrieval. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Internal error occurred during the data retrieval. ", e);
         }
     }
 
@@ -318,8 +313,8 @@ export default class WalletsController {
         log.debug("Start logout.");
         const endpointNumber = LOGOUT_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, {}));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, {}));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.logoutSchema,
@@ -332,10 +327,10 @@ export default class WalletsController {
                 res.cookie("sessionId", "", { maxAge: -1 });
 
                 log.debug("Session has been removed (+ from cookies). Sending 200.");
-                processSuccess(res, 200);
+                ControllerUtils.processSuccess(res, 200);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Internal error occurred during the logout. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Internal error occurred during the logout. ", e);
         }
     }
 
@@ -371,8 +366,8 @@ export default class WalletsController {
         const endpointNumber = DELETE_WALLET_EP_NUMBER;
         try {
             const passwordHash = req.query && req.query.passwordHash;
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, { passwordHash }));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, { passwordHash }));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.deleteWalletSchema,
@@ -387,11 +382,11 @@ export default class WalletsController {
                 log.info(
                     `Wallet has ${result.result ? "" : "not "}been deleted. Sending 20${result.result ? "4" : "0"}.`
                 );
-                result.result && processSuccess(res, 204, { result: true });
-                !result.result && processSuccess(res, 200, { result: false });
+                result.result && ControllerUtils.processSuccess(res, 204, { result: true });
+                !result.result && ControllerUtils.processSuccess(res, 200, { result: false });
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to delete wallet due to internal error. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to delete wallet due to internal error. ", e);
         }
     }
 
@@ -426,8 +421,8 @@ export default class WalletsController {
         const endpointNumber = CHECK_PASSWORD_EP_NUMBER;
         try {
             const passwordHash = req.query && req.query.passwordHash;
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, { passwordHash }));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, { passwordHash }));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.checkPasswordSchema,
@@ -440,10 +435,10 @@ export default class WalletsController {
                 const result = await WalletsService.checkPassword(data.walletId, data.passwordHash);
 
                 log.info("Password has been checked. Sending 200 and check result.");
-                processSuccess(res, 200, { result });
+                ControllerUtils.processSuccess(res, 200, { result });
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to check the password due to internal error. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to check the password due to internal error. ", e);
         }
     }
 
@@ -479,8 +474,8 @@ export default class WalletsController {
         log.info("Start changing password.");
         const endpointNumber = CHANGE_PASSWORD_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, req.body));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, req.body));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.changePasswordSchema,
@@ -497,10 +492,10 @@ export default class WalletsController {
                 );
 
                 log.info("Password has been changed. Sending 200.");
-                processSuccess(res, 200, result);
+                ControllerUtils.processSuccess(res, 200, result);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to change the password due to internal error. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to change the password due to internal error. ", e);
         }
     }
 
@@ -541,8 +536,8 @@ export default class WalletsController {
         log.info("Start saving settings.");
         const endpointNumber = SAVE_SETTINGS_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, { settings: req.body }));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, { settings: req.body }));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.saveSettingsSchema,
@@ -555,10 +550,10 @@ export default class WalletsController {
                 await WalletsService.saveSettings(data.walletId, req.body);
 
                 log.info("Settings been saved. Sending 204.");
-                processSuccess(res, 204);
+                ControllerUtils.processSuccess(res, 204);
             }
         } catch (e) {
-            processInternalError(res, endpointNumber, "Failed to save settings due to internal error. ", e);
+            ControllerUtils.processInternalError(res, endpointNumber, "Failed to save settings due to internal error. ", e);
         }
     }
 }

@@ -1,6 +1,8 @@
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
 import { v4 } from "uuid";
-import { cache } from "../../../utils/cache";
-import { improveAndRethrow, logError } from "../../../utils/errorUtils";
+import { cache } from "../../../utils/cache.js";
+import { logError } from "../../../utils/errorUtils.js";
 
 /**
  * This util helps to avoid duplicated calls to a shared resource.
@@ -466,7 +468,7 @@ class ManagerOfRequestsToTheSameResource {
                  */
                 const it = this;
                 return new Promise((resolve, reject) => {
-                    setTimeout(function() {
+                    setTimeout(function () {
                         try {
                             resolve(
                                 it._waitForCalculationIdToFinish(requestHash, activeCalculationId, attemptIndex + 1)

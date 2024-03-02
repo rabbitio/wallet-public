@@ -1,8 +1,9 @@
-import DedicatedNotificationsService from "./dedicatedNotificationsService";
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import Notification, { NOTIFICATIONS_TYPES } from "../../../models/notification";
-import TransactionsHistoryService from "../../../../wallet/common/services/transactionsHistoryService";
-import { Coins } from "../../../../wallet/coins";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import DedicatedNotificationsService from "./dedicatedNotificationsService.js";
+import Notification, { NOTIFICATIONS_TYPES } from "../../../models/notification.js";
+import TransactionsHistoryService from "../../../../wallet/common/services/transactionsHistoryService.js";
+import { Coins } from "../../../../wallet/coins.js";
 
 /**
  * disabled @since 0.8.2 task_id=014bd7ea795c49b0b5f38caadabc60df

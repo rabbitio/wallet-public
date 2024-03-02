@@ -1,81 +1,148 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import { improveAndRethrow } from "../utils/utils";
-import EncryptedIpsService from "../services/encryptedIpsService";
-import walletsService from "../services/walletsService";
-import { dbConnectionHolder } from "../utils/dbConnectionHolder";
-import { joiValidate } from "../utils/joiValidationWrapper";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-const log = getLogger("controllerUtils");
+import EncryptedIpsService from "../services/encryptedIpsService.js";
+import walletsService from "../services/walletsService.js";
+import { dbConnectionHolder } from "../utils/dbConnectionHolder.js";
+import { JoiValidationWrapper } from "../utils/joiValidationWrapper.js";
+
+const log = log4js.getLogger("controllerUtils");
 
 export const DATA_VALIDATION_ERROR_ID = 1;
 
-/**
- * Validates given request and send response for standard errors.
- *
- * @param res - response to be sent if needed
- * @param data - json data to be checked by given scheme
- *               - should contain walletId parameter to check session/ip (excepting case when the shouldNotCheckIp is false)
- *               - should contain sessionId parameter (excepting case when the shouldNotCheckSession is false)
- *               - should contain clientIpHash parameter (excepting case when the shouldNotCheckIp is false)
- * @param scheme - scheme to check given data
- * @param endpointNumber - number of endpoint received this request
- * @param options - object of options:
- *                  {
- *                      shouldNotCheckSession: true/false, // Whether we should not check session
- *                      shouldNotCheckIp: true/false, // Whether we should not check ip
- *                      howToFixValidationError: "message" // Additional message for validation errors about possible fix
- *                  }
- * @returns Promise resolving to true if request is valid or false otherwise
- */
-export async function validateRequestDataAndResponseOnErrors(res, data, scheme, endpointNumber, options = {}) {
-    try {
-        log.debug("Start validation of request data.");
+export class ControllerUtils {
+    /**
+     * Validates given request and send response for standard errors.
+     *
+     * @param res - response to be sent if needed
+     * @param data - json data to be checked by given scheme
+     *               - should contain walletId parameter to check session/ip (excepting case when the shouldNotCheckIp is false)
+     *               - should contain sessionId parameter (excepting case when the shouldNotCheckSession is false)
+     *               - should contain clientIpHash parameter (excepting case when the shouldNotCheckIp is false)
+     * @param scheme - scheme to check given data
+     * @param endpointNumber - number of endpoint received this request
+     * @param options - object of options:
+     *                  {
+     *                      shouldNotCheckSession: true/false, // Whether we should not check session
+     *                      shouldNotCheckIp: true/false, // Whether we should not check ip
+     *                      howToFixValidationError: "message" // Additional message for validation errors about possible fix
+     *                  }
+     * @returns Promise resolving to true if request is valid or false otherwise
+     */
+    static async validateRequestDataAndResponseOnErrors(res, data, scheme, endpointNumber, options = {}) {
+        try {
+            log.debug("Start validation of request data.");
 
-        const joiResult = joiValidate(data, scheme);
-        const validationError = (scheme && joiResult && joiResult.error) || null;
-        if (validationError === null) {
-            log.debug("Request data valid, starting authentication.");
+            const joiResult = JoiValidationWrapper.joiValidate(data, scheme);
+            const validationError = (scheme && joiResult && joiResult.error) || null;
+            if (validationError === null) {
+                log.debug("Request data valid, starting authentication.");
 
-            if (!options.shouldNotCheckSession) {
-                const sessionCheckResult = await checkSession(data.walletId, data.sessionId, res);
-                if (!sessionCheckResult.result) {
-                    processInvalidSession(res, 403000 + endpointNumber, sessionCheckResult);
-                    return false;
+                if (!options.shouldNotCheckSession) {
+                    const sessionCheckResult = await checkSession(data.walletId, data.sessionId, res);
+                    if (!sessionCheckResult.result) {
+                        processInvalidSession(res, 403000 + endpointNumber, sessionCheckResult);
+                        return false;
+                    }
                 }
-            }
 
-            if (!options.shouldNotCheckIp) {
-                const ipCheckResult = await EncryptedIpsService.isIpHashWhitelisted(data.walletId, data.clientIpHash);
-                if (!ipCheckResult) {
-                    processForbiddenIp(res, 403000 + endpointNumber);
-                    return false;
+                if (!options.shouldNotCheckIp) {
+                    const ipCheckResult = await EncryptedIpsService.isIpHashWhitelisted(
+                        data.walletId,
+                        data.clientIpHash
+                    );
+                    if (!ipCheckResult) {
+                        processForbiddenIp(res, 403000 + endpointNumber);
+                        return false;
+                    }
                 }
-            }
 
-            return true;
-        } else {
-            if (
-                validationError.message &&
-                (validationError.message.includes("sessionId") || validationError.message.includes("walletId"))
-            ) {
-                processInvalidSession(res, 403000 + endpointNumber, { result: false, reason: "session_not_found" });
-            } else if (validationError.message && validationError.message.includes("clientIpHash")) {
-                processForbiddenIp(res, 403000 + endpointNumber);
+                return true;
             } else {
-                processWrongRequestData(
-                    res,
-                    endpointNumber,
-                    validationError,
-                    options.howToFixValidationError,
-                    DATA_VALIDATION_ERROR_ID
-                );
-            }
+                if (
+                    validationError.message &&
+                    (validationError.message.includes("sessionId") || validationError.message.includes("walletId"))
+                ) {
+                    processInvalidSession(res, 403000 + endpointNumber, { result: false, reason: "session_not_found" });
+                } else if (validationError.message && validationError.message.includes("clientIpHash")) {
+                    processForbiddenIp(res, 403000 + endpointNumber);
+                } else {
+                    processWrongRequestData(
+                        res,
+                        endpointNumber,
+                        validationError,
+                        options.howToFixValidationError,
+                        DATA_VALIDATION_ERROR_ID
+                    );
+                }
 
-            return false;
+                return false;
+            }
+        } catch (e) {
+            improveAndRethrow(e, "validateRequestDataAndResponseOnErrors");
         }
-    } catch (e) {
-        improveAndRethrow(e, "validateRequestDataAndResponseOnErrors");
+    }
+
+    /**
+     * Sends response about internal error. Also tries to fix DB error if cause is DB error.
+     *
+     * @param res - response to be sent
+     * @param endpointNumber - number of endpoint sending this response
+     * @param message - message to put in response object
+     * @param e - error that caused this call
+     */
+    static processInternalError(res, endpointNumber, message, e) {
+        log.error(message, e);
+
+        res.status(500).json({
+            description: message,
+            errorCodeInternal: 500000 + endpointNumber,
+            howToFix: "Contact system owner. ",
+        });
+
+        dbConnectionHolder.reconnectToDbIfNeeded();
+    }
+
+    static addWalletIdAndSessionId(req, data) {
+        if (!req) {
+            throw new Error(`Request parameter is empty. Got ${req}. `);
+        }
+
+        if (!data) {
+            throw new Error(`data parameter should be not empty but got ${data}. `);
+        }
+
+        data["walletId"] =
+            (req.params && req.params.walletId) ||
+            (req.cookies && req.cookies.walletId) ||
+            (req.body && req.body.walletId) ||
+            null;
+        data["sessionId"] = (req.cookies && req.cookies.sessionId) || null;
+
+        return data;
+    }
+
+    static addClientIpHash(req, data) {
+        if (!req) {
+            throw new Error(`Request parameter is empty. Got ${req}. `);
+        }
+
+        if (!data) {
+            throw new Error(`data parameter should be not empty but got ${data}. `);
+        }
+
+        data["clientIpHash"] = (req.query && req.query.clientIpHash) || null;
+
+        return data;
+    }
+
+    static processSuccess(res, statusCode, payload = null) {
+        if (payload != null) {
+            res.status(statusCode).json(payload);
+        } else {
+            res.status(statusCode).send();
+        }
     }
 }
 
@@ -161,81 +228,14 @@ export function processFailedAuthentication(res, endpointNumber, checkResult) {
     res.status(403).json(errorObject);
 }
 
-/**
- * Sends response about internal error. Also tries to fix DB error if cause is DB error.
- *
- * @param res - response to be sent
- * @param endpointNumber - number of endpoint sending this response
- * @param message - message to put in response object
- * @param e - error that caused this call
- */
-export function processInternalError(res, endpointNumber, message, e) {
-    log.error(message, e);
-
-    res.status(500).json({
-        description: message,
-        errorCodeInternal: 500000 + endpointNumber,
-        howToFix: "Contact system owner. ",
-    });
-
-    dbConnectionHolder.reconnectToDbIfNeeded();
-}
-
-export function addWalletIdAndSessionId(req, data) {
-    if (!req) {
-        throw new Error(`Request parameter is empty. Got ${req}. `);
-    }
-
-    if (!data) {
-        throw new Error(`data parameter should be not empty but got ${data}. `);
-    }
-
-    data["walletId"] =
-        (req.params && req.params.walletId) ||
-        (req.cookies && req.cookies.walletId) ||
-        (req.body && req.body.walletId) ||
-        null;
-    data["sessionId"] = (req.cookies && req.cookies.sessionId) || null;
-
-    return data;
-}
-
-export function addClientIpHash(req, data) {
-    if (!req) {
-        throw new Error(`Request parameter is empty. Got ${req}. `);
-    }
-
-    if (!data) {
-        throw new Error(`data parameter should be not empty but got ${data}. `);
-    }
-
-    data["clientIpHash"] = (req.query && req.query.clientIpHash) || null;
-
-    return data;
-}
-
 export const onlyIfDoesntStartWith = (path, middleware) => {
-    return function(req, res, next) {
+    return function (req, res, next) {
         if (req.path.startsWith(path)) {
-            // TODO: [dev] remove after dev testing
-            // eslint-disable-next-line no-console
-            console.log("MATCH: ", req.path, path);
             return next();
         } else {
-            // TODO: [dev] remove after dev testing
-            // eslint-disable-next-line no-console
-            console.log("DISSS: ", req.path, path);
             return middleware(req, res, next);
         }
     };
 };
 
 export const apiVersionPrefix = "/api/v1";
-
-export function processSuccess(res, statusCode, payload = null) {
-    if (payload != null) {
-        res.status(statusCode).json(payload);
-    } else {
-        res.status(statusCode).send();
-    }
-}

@@ -1,21 +1,24 @@
-import { BigNumber, ethers } from "ethers";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import { TxData } from "../../common/models/tx-data";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { Coins } from "../../coins";
-import { KeysBip44 } from "../../common/lib/keysBip44";
-import { ethFeeRatesProvider } from "../external-apis/ethFeeRatesProvider";
-import { EthBalanceService } from "./ethBalanceService";
-import { Erc20transactionUtils } from "../../erc20token/lib/erc20transactionUtils";
-import { EthereumPushTransactionProvider } from "../external-apis/ethereumPushTransactionProvider";
-import { safeStringify } from "../../../common/utils/browserUtils";
-import { EthereumTransactionsCountProvider } from "../external-apis/ethereumTransactionsCountProvider";
-import { EthAddressesService } from "./ethAddressesService";
-import { EthereumBlockchainFeeDataProvider } from "../external-apis/ethereumBlockchainFeeDataProvider";
+import { ethers } from "ethers";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { TxData } from "../../common/models/tx-data.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { KeysBip44 } from "../../common/lib/keysBip44.js";
+import { ethFeeRatesProvider } from "../external-apis/ethFeeRatesProvider.js";
+import { EthBalanceService } from "./ethBalanceService.js";
+import { Erc20transactionUtils } from "../../erc20token/lib/erc20transactionUtils.js";
+import { EthereumPushTransactionProvider } from "../external-apis/ethereumPushTransactionProvider.js";
+import { safeStringify } from "../../../common/utils/browserUtils.js";
+import { EthereumTransactionsCountProvider } from "../external-apis/ethereumTransactionsCountProvider.js";
+import { EthAddressesService } from "./ethAddressesService.js";
+import { EthereumBlockchainFeeDataProvider } from "../external-apis/ethereumBlockchainFeeDataProvider.js";
 
 export class EthSendTransactionService {
-    static GAS_LIMIT_FOR_ETHER_TRANSFER = BigNumber.from("21000");
+    static GAS_LIMIT_FOR_ETHER_TRANSFER = "21000";
 
     /**
      * Validates address and amount and tries to create transactions for 4 speed options with fake signatures
@@ -28,8 +31,8 @@ export class EthSendTransactionService {
      * @param coinAmount {string|null} amount to be validated in coin denomination, null for isSendAll=true
      * @param isSendAll {boolean} whether transaction should send all available coins or not
      * @param network {Network} coin to create the fake transaction for
-     * @param balanceCoins {number|string} balance of coin we are creating transactions for
-     * @param gasLimit {BigNumber} amount of gas units these transactions are aiming to spend
+     * @param balanceCoins {string} balance of coin we are creating transactions for
+     * @param gasLimit {string} amount of gas units these transactions are aiming to spend
      * @return {Promise<
      *         {
      *             result: true,
@@ -44,7 +47,7 @@ export class EthSendTransactionService {
      *             isFeeCoinBalanceNotEnoughForAllOptions: boolean,
      *         }>}
      *         Each correctly calculated TxData contain "rate" filed filled with the object
-     *         { rate: string, maxPriorityFeePerGasWei: BigNumber } (rate in wei)
+     *         { rate: string, maxPriorityFeePerGasWei: string } (rate in wei)
      */
     static async createEthereumBlockchainCoinTransactionsWithFakeSignatures(
         coin,
@@ -56,14 +59,17 @@ export class EthSendTransactionService {
         gasLimit = this.GAS_LIMIT_FOR_ETHER_TRANSFER
     ) {
         try {
-            const sendBalanceAtoms = coin.coinAmountToAtoms("" + balanceCoins);
+            const sendBalanceAtoms = coin.coinAmountToAtoms(balanceCoins);
             let feeBalance = coin.doesUseDifferentCoinFee() ? await EthBalanceService.getEthWalletBalance() : null;
             const feeBalanceAtoms = feeBalance == null ? sendBalanceAtoms : coin.feeCoin.coinAmountToAtoms(feeBalance);
             const { baseFeePerGas, optionsForMaxPriorityFeePerGas } = await ethFeeRatesProvider.retrieveEthFeeRates();
 
             let result;
             let isAtLeastOneOptionCoverable;
-            if (!baseFeePerGas || optionsForMaxPriorityFeePerGas.find(option => typeof option !== "number")) {
+            if (
+                typeof baseFeePerGas !== "number" ||
+                optionsForMaxPriorityFeePerGas.find(option => typeof option !== "number")
+            ) {
                 const data = await optsForOneRate(
                     network,
                     gasLimit,
@@ -79,7 +85,7 @@ export class EthSendTransactionService {
             } else {
                 const data = optsForSeveralRates(
                     optionsForMaxPriorityFeePerGas,
-                    baseFeePerGas,
+                    AmountUtils.intStr(baseFeePerGas),
                     gasLimit,
                     coinAmount,
                     isSendAll,
@@ -92,7 +98,7 @@ export class EthSendTransactionService {
                 isAtLeastOneOptionCoverable = data.isAtLeastOneOptionCoverable;
                 result = data.result;
             }
-            result.isFeeCoinBalanceZero = feeBalanceAtoms === "0";
+            result.isFeeCoinBalanceZero = BigNumber(feeBalanceAtoms).isZero();
             result.isFeeCoinBalanceNotEnoughForAllOptions = !isAtLeastOneOptionCoverable;
 
             return result;
@@ -115,7 +121,7 @@ export class EthSendTransactionService {
     static async createEthTransactionAndBroadcast(coin, mnemonic, passphrase, txData) {
         const loggerSource = "createEthTransactionAndBroadcast";
         try {
-            const network = getCurrentNetwork(coin);
+            const network = Storage.getCurrentNetwork(coin);
             const { privateKey } = KeysBip44.generateKeysForAccountAddressByWalletCredentials(
                 mnemonic,
                 passphrase,
@@ -129,8 +135,8 @@ export class EthSendTransactionService {
                 type: 0x02, // EIP-1559 - transactions supporting new fee calculation
                 from: myAddress,
                 to: coin === Coins.COINS.ETH ? txData.address : coin.tokenAddress,
-                value: coin === Coins.COINS.ETH ? BigNumber.from(txData.amount) : BigNumber.from("0"),
-                maxFeePerGas: BigNumber.from(txData.feeRate.rate),
+                value: coin === Coins.COINS.ETH ? ethers.BigNumber.from(txData.amount) : ethers.BigNumber.from("0"),
+                maxFeePerGas: ethers.BigNumber.from(txData.feeRate.rate),
                 maxPriorityFeePerGas: txData.feeRate.maxPriorityFeePerGasWei,
                 gasLimit: txData.feeRate.gasLimit,
                 nonce: txsCount,
@@ -170,18 +176,50 @@ export class EthSendTransactionService {
     }
 }
 
-const chooseAmount = function(coin, coinAmount, isSendAll, feeAtoms, balanceOfSendingCoinAtoms, balanceOfFeeCoinAtoms) {
+/**
+ * @param coin {Coin}
+ * @param coinAmount {string}
+ * @param isSendAll {boolean}
+ * @param feeAtoms {string}
+ * @param balanceOfSendingCoinAtoms {string}
+ * @param balanceOfFeeCoinAtoms {string}
+ * @return {string}
+ */
+const chooseAmount = function (
+    coin,
+    coinAmount,
+    isSendAll,
+    feeAtoms,
+    balanceOfSendingCoinAtoms,
+    balanceOfFeeCoinAtoms
+) {
     if (!isSendAll) {
         return coin.coinAmountToAtoms(coinAmount);
     }
-    const balanceAtomsBigN = BigNumber.from(balanceOfFeeCoinAtoms);
-    return coin.doesUseDifferentCoinFee()
-        ? balanceOfSendingCoinAtoms
-        : balanceAtomsBigN.gte(feeAtoms)
-        ? balanceAtomsBigN.sub(feeAtoms).toString()
-        : "0";
+
+    if (coin.doesUseDifferentCoinFee()) {
+        // sending all token balance case
+        return balanceOfSendingCoinAtoms;
+    }
+    const etherBalance = BigNumber(balanceOfFeeCoinAtoms ?? balanceOfSendingCoinAtoms);
+    if (etherBalance.gte(feeAtoms)) {
+        // sending all ether balance case
+        return AmountUtils.intStr(etherBalance.minus(feeAtoms));
+    }
+    return "0";
 };
 
+/**
+ * @param network {Network}
+ * @param gasLimit {string}
+ * @param coinsAmount {string}
+ * @param isSendAll {boolean}
+ * @param sendBalanceAtoms {string}
+ * @param feeBalanceAtoms {string}
+ * @param address {string}
+ * @param coin {Coin}
+ * @return {Promise<{result: {result: boolean, txsDataArray: TxData[]}, isAtLeastOneOptionCoverable: boolean}>}
+ */
 async function optsForOneRate(
     network,
     gasLimit,
@@ -194,27 +232,39 @@ async function optsForOneRate(
 ) {
     // Fallback logic to return 4 identical fee options calculated by single option Alchemy data if major rates retrieval fails
     const { maxFeePerGas, maxPriorityFeePerGas } = await EthereumBlockchainFeeDataProvider.getEthereumFeeData();
-    const feeAtoms = maxFeePerGas.mul(gasLimit).toString();
+    const feeAtoms = AmountUtils.intStr(BigNumber(maxFeePerGas).times(gasLimit));
     const correctAtomsAmount = chooseAmount(coin, coinsAmount, isSendAll, feeAtoms, sendBalanceAtoms, feeBalanceAtoms);
-    const rateAtoms = maxFeePerGas.toString();
 
     return {
         result: {
             result: true,
             txsDataArray: new Array(4).fill(
                 new TxData(correctAtomsAmount, address, null, feeAtoms, null, null, network, {
-                    rate: rateAtoms,
-                    maxPriorityFeePerGasWei: maxPriorityFeePerGas.toString(),
+                    rate: maxFeePerGas,
+                    maxPriorityFeePerGasWei: maxPriorityFeePerGas,
                     gasLimit: gasLimit,
                 })
             ),
         },
-        isAtLeastOneOptionCoverable: BigNumber.from(feeAtoms)
-            .add(coin.doesUseDifferentCoinFee() ? "0" : correctAtomsAmount)
+        isAtLeastOneOptionCoverable: BigNumber(feeAtoms)
+            .plus(coin.doesUseDifferentCoinFee() ? "0" : correctAtomsAmount)
             .lte(feeBalanceAtoms),
     };
 }
 
+/**
+ * @param ratesGWei {number[]}
+ * @param baseFeePerGas {string}
+ * @param gasLimit {string}
+ * @param coinsAmount {string}
+ * @param isSendAll {boolean}
+ * @param sendBalanceAtoms {string}
+ * @param feeBalanceAtoms {string}
+ * @param coin {Coin}
+ * @param address {string}
+ * @param network {Network}
+ * @return {{result: {result: boolean, txsDataArray: TxData[]}, isAtLeastOneOptionCoverable: boolean}}
+ */
 function optsForSeveralRates(
     ratesGWei,
     baseFeePerGas,
@@ -228,8 +278,12 @@ function optsForSeveralRates(
     network
 ) {
     const feeData = ratesGWei.map(maxPriorityFeePerGasOption => {
+        const gweiDecimalPlaces = 9;
         const fee = ethers.utils
-            .parseUnits(`${(+baseFeePerGas + +maxPriorityFeePerGasOption).toFixed(9)}`, "gwei")
+            .parseUnits(
+                AmountUtils.trim(BigNumber(baseFeePerGas).plus(maxPriorityFeePerGasOption), gweiDecimalPlaces),
+                "gwei"
+            )
             .mul(gasLimit)
             .toString();
         return {
@@ -239,8 +293,8 @@ function optsForSeveralRates(
         };
     });
     const feeIsCoverableFlags = feeData.map(d => {
-        return BigNumber.from(d.feeWeiString)
-            .add(coin.doesUseDifferentCoinFee() ? "0" : d.correctedAtomsAmount)
+        return BigNumber(d.feeWeiString)
+            .plus(coin.doesUseDifferentCoinFee() ? "0" : d.correctedAtomsAmount)
             .lte(feeBalanceAtoms);
     });
     const isAtLeastOneOptionCoverable = !!feeIsCoverableFlags.find(flag => flag);
@@ -264,10 +318,10 @@ function optsForSeveralRates(
              * the digits after dot. Then we parse this multiplied sum using "7" as units number
              * (gWei is 10^-9, so 10^-9 * 100 = 10^-7).
              */
-            const rateAtoms = ethers.utils.parseUnits(
-                "" + Math.round(((+baseFeePerGas ?? 0) + (+d.maxPriorityFeePerGasOption ?? 0)) * 100),
-                7
-            );
+            const rate = BigNumber(baseFeePerGas ?? "0").plus(d.maxPriorityFeePerGasOption ?? "0");
+            const hundredfoldRate = AmountUtils.intStr(rate.times("100"));
+            const gweiTimes100DecimalPlaces = 7;
+            const rateAtoms = ethers.utils.parseUnits(hundredfoldRate, gweiTimes100DecimalPlaces).toString();
             return new TxData(d.correctedAtomsAmount, address, null, d.feeWeiString, null, null, network, {
                 rate: rateAtoms,
                 maxPriorityFeePerGasWei: ethers.utils.parseUnits("" + d.maxPriorityFeePerGasOption, "gwei"),

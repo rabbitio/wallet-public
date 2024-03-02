@@ -1,21 +1,15 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 
-import {
-    addClientIpHash,
-    addWalletIdAndSessionId,
-    processInternalError,
-    processSuccess,
-    validateRequestDataAndResponseOnErrors,
-} from "./controllerUtils";
+import { ControllerUtils } from "./controllerUtils.js";
 
-import schemas from "../models/joi_schemas";
+import schemas from "../models/joi_schemas.js";
 import {
     GET_PAYMENTS_NOTIFICATIONS_EP_NUMBER,
     GET_TRANSACTIONS_TO_PAYMENTS_MAPPING_EP_NUMBER,
-} from "./endpointNumbers";
-import TransactionsToPaymentsService from "../services/transactionsToPaymentsService";
+} from "./endpointNumbers.js";
+import TransactionsToPaymentsService from "../services/transactionsToPaymentsService.js";
 
-const log = getLogger("fiatPaymentsController");
+const log = log4js.getLogger("fiatPaymentsController");
 
 export class FiatPaymentsController {
     /**
@@ -48,8 +42,8 @@ export class FiatPaymentsController {
         log.debug("Start getting transactions to payments mapping.");
         const endpointNumber = GET_TRANSACTIONS_TO_PAYMENTS_MAPPING_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, req.body));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, req.body));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.getTransactionsToPaymentsMapping,
@@ -64,14 +58,14 @@ export class FiatPaymentsController {
 
                 if (transactionsData && transactionsData.length) {
                     log.debug("Mapping retrieved, sending 200.");
-                    processSuccess(res, 200, transactionsData);
+                    ControllerUtils.processSuccess(res, 200, transactionsData);
                 } else {
                     log.debug("Mapping is empty, sending 404.");
-                    processSuccess(res, 404);
+                    ControllerUtils.processSuccess(res, 404);
                 }
             }
         } catch (e) {
-            processInternalError(
+            ControllerUtils.processInternalError(
                 res,
                 endpointNumber,
                 "Error occurred during the retrieving the transactions to payments mapping. ",
@@ -110,8 +104,8 @@ export class FiatPaymentsController {
         log.debug("Start getting notifications about the payments for given transaction ids.");
         const endpointNumber = GET_PAYMENTS_NOTIFICATIONS_EP_NUMBER;
         try {
-            const data = addWalletIdAndSessionId(req, addClientIpHash(req, req.body));
-            const isRequestValid = await validateRequestDataAndResponseOnErrors(
+            const data = ControllerUtils.addWalletIdAndSessionId(req, ControllerUtils.addClientIpHash(req, req.body));
+            const isRequestValid = await ControllerUtils.validateRequestDataAndResponseOnErrors(
                 res,
                 data,
                 schemas.getPaymentNotifications,
@@ -125,14 +119,14 @@ export class FiatPaymentsController {
 
                 if (notificationsData && notificationsData.length) {
                     log.debug("Notifications retrieved, sending 200.");
-                    processSuccess(res, 200, notificationsData);
+                    ControllerUtils.processSuccess(res, 200, notificationsData);
                 } else {
                     log.debug("Notification not found, sending 404.");
-                    processSuccess(res, 404);
+                    ControllerUtils.processSuccess(res, 404);
                 }
             }
         } catch (e) {
-            processInternalError(
+            ControllerUtils.processInternalError(
                 res,
                 endpointNumber,
                 "Error occurred during the retrieving notifications for payments. ",

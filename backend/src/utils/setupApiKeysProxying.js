@@ -1,12 +1,14 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 import { createProxyMiddleware } from "http-proxy-middleware";
-import { improveAndRethrow } from "./utils";
+
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
 import {
     ALCHEMY_API_KEY_ETH_TESTNET,
     ALCHEMY_API_KEY_ETH_MAINNET,
     SWAPSPACE_API_KEY,
     TRONGRID_API_KEY,
-} from "../properties";
+} from "../properties.js";
 
 // TODO: [tests, critical] easier than to test it manually
 /**
@@ -15,7 +17,7 @@ import {
  */
 export function setupApiKeysProxying(apiKeysProxyBasePath) {
     try {
-        const logger = getLogger("apiKeysProxy");
+        const logger = log4js.getLogger("apiKeysProxy");
         logger.level = "debug";
         const basePath = `^${apiKeysProxyBasePath}`;
         const generatePreserveOriginalPathFunc = id => path => path.replace(`${apiKeysProxyBasePath}/${id}`, "");

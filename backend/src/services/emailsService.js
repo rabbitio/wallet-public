@@ -1,10 +1,11 @@
-import { getLogger } from "log4js";
+import log4js from "log4js";
 import nodemailer from "nodemailer";
 
-import { improveAndRethrow } from "../utils/utils";
-import { SUPPORT_EMAIL, SUPPORT_EMAIL_PASSWORD, EMAIL_BRIDGE_HOST, EMAIL_BRIDGE_PORT } from "../properties";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-const log = getLogger("emailsService");
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_PASSWORD, EMAIL_BRIDGE_HOST, EMAIL_BRIDGE_PORT } from "../properties.js";
+
+const log = log4js.getLogger("emailsService");
 
 export default class EmailsService {
     static _transporter = nodemailer.createTransport({

@@ -1,18 +1,20 @@
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { Coins } from "../../coins";
-import { BalancesService } from "./balancesService";
-import { Wallets } from "../wallets";
-import { NumbersUtils } from "../utils/numbersUtils";
-import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver";
+import { BigNumber } from "bignumber.js";
+
+import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Coins } from "../../coins.js";
+import { BalancesService } from "./balancesService.js";
+import { Wallets } from "../wallets.js";
+import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
 import {
     BALANCE_CHANGED_EXTERNALLY_EVENT,
     FIAT_CURRENCY_CHANGED_EVENT,
     INCREASE_FEE_IS_FINISHED_EVENT,
     NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
     TRANSACTION_PUSHED_EVENT,
-} from "../../../common/adapters/eventbus";
-import { safeStringify } from "../../../common/utils/browserUtils";
-import { SMALL_TTL_FOR_CACHE_L2_MS } from "../../../common/utils/ttlConstants";
+} from "../../../common/adapters/eventbus.js";
+import { safeStringify } from "../../../common/utils/browserUtils.js";
+import { SMALL_TTL_FOR_CACHE_L2_MS } from "../../../common/utils/ttlConstants.js";
 
 /**
  * Provides API to get the coins list with related data
@@ -55,18 +57,14 @@ export class CoinsListService {
      *
      * @param [coins=null] {Array<Coin>} list of coins to get the data for. All enabled coins by default
      * @return {Promise<{
-     *             ticker: string,
-     *             tickerPrintable: string,
+     *             coin: Coin,
      *             latinName: string,
      *             fiatCurrencyCode: string,
      *             coinToFiatRate: string|null,
      *             coinFiatRateChange24hPercent: number|null,
      *             balance: string,
-     *             balanceTrimmed: string,
-     *             balanceTrimmedShortened: string,
      *             balanceFiat: string|null,
-     *             balanceFiatTrimmed: string|null
-     *             }[]>}
+     *         }[]>}
      *         Some values can be null if no data is retrieved
      */
     static async getEnabledCoinsSortedByFiatBalance(coins = null) {
@@ -102,36 +100,17 @@ export class CoinsListService {
             }
 
             const unsortedList = balancesWithFiat.map((balanceItem, index) => {
-                const isBalanceZero = balanceItem.balanceCoins === 0 || /^[0.,]+$/.test(balanceItem.balanceCoins);
-                let balanceNotTrimmed =
-                    typeof balanceItem.balanceCoins === "number"
-                        ? balanceItem.balanceCoins.toFixed(requestedEnabledCoins[index].digits)
-                        : balanceItem.balanceCoins;
-                balanceNotTrimmed = isBalanceZero
-                    ? Number(0).toFixed(requestedEnabledCoins[index].digits)
-                    : NumbersUtils.removeRedundantRightZerosFromNumberString(balanceNotTrimmed);
-                const balanceTrimmed = NumbersUtils.trimCurrencyAmount(
-                    balanceNotTrimmed,
-                    requestedEnabledCoins[index].digits,
-                    13
-                );
-                const balanceTrimmedShortened = NumbersUtils.trimCurrencyAmount(
-                    balanceNotTrimmed,
-                    requestedEnabledCoins[index].digits,
-                    10
-                );
+                const isBalanceZero = /^[0.,]+$/.test(balanceItem.balanceCoins);
+                let balanceNotTrimmed = isBalanceZero
+                    ? AmountUtils.trim("0", requestedEnabledCoins[index].digits)
+                    : AmountUtils.removeRedundantRightZerosFromNumberString(balanceItem.balanceCoins);
                 const balanceFiat = balanceItem.balanceFiat;
-                const balanceFiatTrimmed =
-                    balanceFiat != null
-                        ? NumbersUtils.trimCurrencyAmount(balanceFiat, balanceItem.fiatCurrencyDecimals, 10)
-                        : null;
                 return {
-                    ticker: requestedEnabledCoins[index].ticker,
-                    tickerPrintable: requestedEnabledCoins[index].tickerPrintable,
+                    coin: requestedEnabledCoins[index],
                     latinName: requestedEnabledCoins[index].latinName,
                     fiatCurrencyCode: balanceItem.fiatCurrencyCode,
                     coinToFiatRate: balanceItem.coinToFiatRate
-                        ? balanceItem.coinToFiatRate.toFixed(balanceItem.fiatCurrencyDecimals)
+                        ? AmountUtils.trim(balanceItem.coinToFiatRate, balanceItem.fiatCurrencyDecimals)
                         : null,
                     coinFiatRateChange24hPercent: balanceItem.change24hPercent
                         ? isBalanceZero
@@ -139,14 +118,14 @@ export class CoinsListService {
                             : +balanceItem.change24hPercent
                         : null,
                     balance: balanceNotTrimmed,
-                    balanceTrimmed: balanceTrimmed,
-                    balanceTrimmedShortened: balanceTrimmedShortened,
                     balanceFiat: balanceFiat == null ? null : "" + balanceFiat,
-                    balanceFiatTrimmed: balanceFiatTrimmed,
                 };
             });
 
-            const sorted = unsortedList.sort((coin1, coin2) => +coin2.balanceFiat - +coin1.balanceFiat);
+            const sorted = unsortedList.sort((coin1, coin2) => {
+                const diff = BigNumber(coin2.balanceFiat).minus(coin1.balanceFiat);
+                return diff.isNegative() ? -1 : diff.isZero() ? 0 : 1;
+            });
 
             if (sorted.length === allEnabledCoins.length) {
                 this._cacheAndRequestsResolver.saveCachedData(cacheId, result?.lockId, sorted);

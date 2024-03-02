@@ -1,33 +1,23 @@
 import bitcoinJs from "bitcoinjs-lib";
 
-import { isAmountDustForAddress, P2PKH_SCRIPT_TYPE, P2SH_SCRIPT_TYPE, P2WPKH_SCRIPT_TYPE } from "../utxos";
-import { EcPairsMappingEntry } from "../addresses";
-import { Utxo } from "../../models/transaction/utxo";
-import { Network } from "../../../common/models/networks";
-import { improveAndRethrow } from "../../../../common/utils/errorUtils";
-import { BitcoinJsAdapter } from "../../adapters/bitcoinJsAdapter";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { Utxos, P2PKH_SCRIPT_TYPE, P2SH_SCRIPT_TYPE, P2WPKH_SCRIPT_TYPE } from "../utxos.js";
+import { EcPairsMappingEntry } from "../addresses.js";
+import { Utxo } from "../../models/transaction/utxo.js";
+import { Network } from "../../../common/models/networks.js";
+import { BitcoinJsAdapter } from "../../adapters/bitcoinJsAdapter.js";
 
 export const MAX_RBF_SEQUENCE = 0xffffffff - 2; // 4294967293
 export const FORBID_RBF_SEQUENCE = 0xffffffff; // 4294967295
 
-/**
- * Builds transaction prohibiting dust output creation.
- * See docs for buildTransactionByCheckDustFlag.
- */
-export function buildTransaction(
-    amount,
-    address,
-    change,
-    changeAddress,
-    utxos,
-    ecPairsMappingToAddresses,
-    network,
-    sequence
-) {
-    const allowDustAmountToBeSent = false;
-    return buildTransactionByCheckDustFlag(
+export class BtcTransactionBuilder {
+    /**
+     * Builds transaction prohibiting dust output creation.
+     * See docs for buildTransactionByCheckDustFlag.
+     */
+    static buildTransaction(
         amount,
-        allowDustAmountToBeSent,
         address,
         change,
         changeAddress,
@@ -35,27 +25,27 @@ export function buildTransaction(
         ecPairsMappingToAddresses,
         network,
         sequence
-    );
-}
+    ) {
+        const allowDustAmountToBeSent = false;
+        return buildTransactionByCheckDustFlag(
+            amount,
+            allowDustAmountToBeSent,
+            address,
+            change,
+            changeAddress,
+            utxos,
+            ecPairsMappingToAddresses,
+            network,
+            sequence
+        );
+    }
 
-/**
- * Builds transaction possibly producing dust output.
- * See docs for buildTransactionByCheckDustFlag.
- */
-export function buildTransactionUnsafe(
-    amount,
-    address,
-    change,
-    changeAddress,
-    utxos,
-    ecPairsMappingToAddresses,
-    network,
-    sequence
-) {
-    const allowDustAmountToBeSent = true;
-    return buildTransactionByCheckDustFlag(
+    /**
+     * Builds transaction possibly producing dust output.
+     * See docs for buildTransactionByCheckDustFlag.
+     */
+    static buildTransactionUnsafe(
         amount,
-        allowDustAmountToBeSent,
         address,
         change,
         changeAddress,
@@ -63,7 +53,20 @@ export function buildTransactionUnsafe(
         ecPairsMappingToAddresses,
         network,
         sequence
-    );
+    ) {
+        const allowDustAmountToBeSent = true;
+        return buildTransactionByCheckDustFlag(
+            amount,
+            allowDustAmountToBeSent,
+            address,
+            change,
+            changeAddress,
+            utxos,
+            ecPairsMappingToAddresses,
+            network,
+            sequence
+        );
+    }
 }
 
 /**
@@ -98,16 +101,20 @@ function buildTransactionByCheckDustFlag(
             throw new Error("Address should be not empty string.");
         }
 
-        const dustCheckResult = isAmountDustForAddress(amount, address);
+        const dustCheckResult = Utxos.isAmountDustForAddress(amount, address);
+        // TODO: [feature, moderate] temp solution as we will reimplement this when integrating taproot and switch to strings
+        amount = typeof amount === "string" ? Number(amount) : amount;
         if (typeof amount !== "number" || amount < 0 || (!allowDustAmountToBeSent && dustCheckResult.result)) {
             throw new Error(`Bad amount, should be number greater or equal to ${dustCheckResult.threshold}.`);
         }
 
+        // TODO: [feature, moderate] temp solution as we will reimplement this when integrating taproot and switch to strings
+        change = typeof change === "string" ? Number(change) : change;
         if (typeof change !== "number" || change < 0) {
             throw new Error("Bad change amount, should be number greater or equal to 0.");
         }
 
-        const changeDustCheckResult = isAmountDustForAddress(change, changeAddress);
+        const changeDustCheckResult = Utxos.isAmountDustForAddress(change, changeAddress);
         if (!changeDustCheckResult.result && (typeof changeAddress !== "string" || changeAddress === "")) {
             throw new Error("Change address should be not empty string.");
         }
@@ -116,7 +123,7 @@ function buildTransactionByCheckDustFlag(
             throw new Error("Empty ecPairs to addresses mapping.");
         } else {
             ecPairsMappingToAddresses.forEach(mappingEntry => {
-                if (!mappingEntry instanceof EcPairsMappingEntry) {
+                if (!(mappingEntry instanceof EcPairsMappingEntry)) {
                     throw new Error("Mapping entries in array are of wrong type.");
                 }
             });
@@ -126,7 +133,7 @@ function buildTransactionByCheckDustFlag(
             throw new Error("Empty utxos set.");
         } else {
             utxos.forEach(utxo => {
-                if (!utxo instanceof Utxo) {
+                if (!(utxo instanceof Utxo)) {
                     throw new Error("Utxos in array are of wrong type.");
                 }
 
@@ -139,7 +146,7 @@ function buildTransactionByCheckDustFlag(
             });
         }
 
-        if (!network instanceof Network) {
+        if (!(network instanceof Network)) {
             throw new Error("Network type is wrong.");
         }
 

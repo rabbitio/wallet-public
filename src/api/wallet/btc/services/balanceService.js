@@ -1,11 +1,12 @@
-import UtxosService from "./internal/utxosService";
-import PaymentService from "./paymentService";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { getCurrentSmallestFeeRate } from "./feeRatesService";
-import { getCurrentNetwork } from "../../../common/services/internal/storage";
-import { Logger } from "../../../support/services/internal/logs/logger";
-import CoinsToFiatRatesService from "../../common/services/coinsToFiatRatesService";
-import { Coins } from "../../coins";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import UtxosService from "./internal/utxosService.js";
+import PaymentService from "./paymentService.js";
+import { getCurrentSmallestFeeRate } from "./feeRatesService.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Logger } from "../../../support/services/internal/logs/logger.js";
+import CoinsToFiatRatesService from "../../common/services/coinsToFiatRatesService.js";
+import { Coins } from "../../coins.js";
 
 export default class BalanceService {
     /**
@@ -25,7 +26,7 @@ export default class BalanceService {
         try {
             Logger.log("Start getting balance", loggerSource);
 
-            const network = getCurrentNetwork();
+            const network = Storage.getCurrentNetwork();
             const currentSmallestFeeRate = await getCurrentSmallestFeeRate(
                 network,
                 PaymentService.BLOCKS_COUNTS_FOR_OPTIONS
@@ -61,14 +62,14 @@ export default class BalanceService {
     /**
      * Calculates and returns unconfirmed wallet balance.
      *
-     * @return {Promise<number>}
+     * @return {Promise<string>}
      */
     static async getUnconfirmedWalletBalance() {
         const loggerSource = "getUnconfirmedWalletBalance";
         try {
             Logger.log("Start getting balance", loggerSource);
             const balanceData = await UtxosService.calculateBalance();
-            const unconfirmedBtcAmount = Number(Coins.COINS.BTC.atomsToCoinAmount("" + balanceData.unconfirmed));
+            const unconfirmedBtcAmount = Coins.COINS.BTC.atomsToCoinAmount("" + balanceData.unconfirmed);
             Logger.log(`Returning: ${unconfirmedBtcAmount}`, loggerSource);
             return unconfirmedBtcAmount;
         } catch (e) {

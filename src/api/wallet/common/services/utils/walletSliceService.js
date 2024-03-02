@@ -1,21 +1,21 @@
-import AddressesDataApi from "../../backend-api/addressesDataApi";
-import { getCurrentNetwork, getWalletId } from "../../../../common/services/internal/storage";
-import AddressesServiceInternal from "../../../btc/services/internal/addressesServiceInternal";
-import { getAllUTXOs } from "../../../btc/services/utils/utxosUtils";
-import { logError } from "../../../../common/utils/errorUtils";
-import { Coins } from "../../../coins";
-import { BalancesService } from "../balancesService";
-import { Wallets } from "../../wallets";
-import { transactionsDataProvider } from "../../../btc/services/internal/transactionsDataProvider";
+import AddressesDataApi from "../../backend-api/addressesDataApi.js";
+import { Storage } from "../../../../common/services/internal/storage.js";
+import AddressesServiceInternal from "../../../btc/services/internal/addressesServiceInternal.js";
+import { BtcUtxosUtils } from "../../../btc/services/utils/utxosUtils.js";
+import { logError } from "../../../../common/utils/errorUtils.js";
+import { Coins } from "../../../coins.js";
+import { BalancesService } from "../balancesService.js";
+import { Wallets } from "../../wallets.js";
+import { transactionsDataProvider } from "../../../btc/services/internal/transactionsDataProvider.js";
 
 export class WalletSliceService {
     static async getCurrentWalletDataSliceString() {
         try {
             // TODO: [bug, critical] add independent errors hadling per data part to avoid failing all data sclice if specific call fails
-            const indexes = await AddressesDataApi.getAddressesIndexes(getWalletId());
+            const indexes = await AddressesDataApi.getAddressesIndexes(Storage.getWalletId());
             const wallets = Wallets.getWalletsForAllEnabledCoins();
             let addressesBtc = await AddressesServiceInternal.getAllUsedAddresses(indexes);
-            let utxos = await getAllUTXOs(addressesBtc.internal, addressesBtc.external, getCurrentNetwork());
+            let utxos = await BtcUtxosUtils.getAllUTXOs(addressesBtc.internal, addressesBtc.external, Storage.getCurrentNetwork());
             let balances = await BalancesService.getBalances(wallets);
             let transactionsBtc = (
                 await transactionsDataProvider.getTransactionsByAddresses([

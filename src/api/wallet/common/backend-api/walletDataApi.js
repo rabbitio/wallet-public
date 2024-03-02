@@ -1,6 +1,7 @@
-import { ApiCallWrongResponseError, doApiCall, urlWithPrefix } from "../../../common/backend-api/utils";
-import { improveAndRethrow } from "../../../common/utils/errorUtils";
-import { UserDataAndSettings, UserSettingValue } from "../models/userDataAndSettings";
+import { improveAndRethrow } from "@rabbitio/ui-kit";
+
+import { ApiCallWrongResponseError, doApiCall, urlWithPrefix } from "../../../common/backend-api/utils.js";
+import { UserDataAndSettings, UserSettingValue } from "../models/userDataAndSettings.js";
 
 // TODO: [refactoring, high] Rename to AccountDataApi
 export class WalletDataApi {
