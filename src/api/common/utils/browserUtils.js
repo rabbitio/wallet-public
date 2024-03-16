@@ -79,48 +79,6 @@ export function postponeExecution(execution, timeoutMS = 1000) {
     });
 }
 
-/**
- * Stringify given object by use of JSON.stringify but handles circular structures and "response", "request" properties
- * to avoid stringing redundant data when printing errors containing request/response objects.
- *
- * @param object - object to be stringed
- * @param indent - custom indentation
- * @return {string} - stringed object
- */
-export const safeStringify = (object, indent = 2) => {
-    let cache = [];
-    const retVal = JSON.stringify(
-        object,
-        (key, value) => {
-            if (key.toLowerCase().includes("request")) {
-                return JSON.stringify({
-                    body: value?.body,
-                    query: value?.query,
-                    headers: value?.headers,
-                });
-            }
-
-            if (key.toLowerCase().includes("response")) {
-                return JSON.stringify({
-                    statusText: value?.statusText,
-                    status: value?.status,
-                    data: value?.data,
-                    headers: value?.headers,
-                });
-            }
-
-            return typeof value === "object" && value !== null
-                ? cache.includes(value)
-                    ? "duplicated reference" // Duplicate reference found, discard key
-                    : cache.push(value) && value // Store value in our collection
-                : value;
-        },
-        indent
-    );
-    cache = null;
-    return retVal;
-};
-
 export function redirect(path) {
     window.location.replace(path);
 }

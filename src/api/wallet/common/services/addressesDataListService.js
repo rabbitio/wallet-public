@@ -1,7 +1,6 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { BtcTransactionsCalculationUtils } from "../../btc/lib/transactions/transactions-utils.js";
-import { logError } from "../../../common/utils/errorUtils.js";
 import AddressesService from "../../btc/services/addressesService.js";
 import CoinsToFiatRatesService from "./coinsToFiatRatesService.js";
 import { Coins } from "../../coins.js";
@@ -162,7 +161,11 @@ async function fillAmounts(addressesDataList) {
     try {
         transactionsOfAddresses = await AddressesService.getConfirmedTransactionsSendingToAddresses(pureAddresses);
     } catch (e) {
-        logError(e, "fillAmounts", "Failed to retrieve the list of transactions to calculate the addresses amounts");
+        Logger.logError(
+            e,
+            "fillAmounts",
+            "Failed to retrieve the list of transactions to calculate the addresses amounts"
+        );
     }
 
     return addressesDataList.map(addressData => {

@@ -63,7 +63,6 @@
         "buffer": "6.0.3",
         "concurrently": "3.6.1",
         "copy": "0.3.2",
-        "cross-env": "7.0.3",
         "dotenv": "8.6.0",
         "dotenv-expand": "5.1.0",
         "eslint-config-prettier": "9.1.0",
@@ -89,7 +88,7 @@
         "stream-browserify": "3.0.0"
     },
     "dependencies": {
-        "@rabbitio/ui-kit": "1.0.0-beta.10",
+        "@rabbitio/ui-kit": "^1.0.0-beta.24",
         "@ramp-network/ramp-instant-sdk": "3.0.0",
         "@redux-devtools/extension": "3.3.0",
         "@use-gesture/react": "10.3.0",
@@ -100,7 +99,9 @@
         "bip39": "2.6.0",
         "bitcoinjs-lib": "4.0.5",
         "body-scroll-lock": "3.1.5",
+        "cheerio": "1.0.0-rc.12",
         "clipboard-copy": "4.0.1",
+        "cross-env": "7.0.3",
         "crypto-js": "3.3.0",
         "date-fns": "3.3.1",
         "ethers": "5.7.2",

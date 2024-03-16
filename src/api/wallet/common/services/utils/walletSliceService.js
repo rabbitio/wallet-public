@@ -1,8 +1,9 @@
+import { Logger } from "@rabbitio/ui-kit";
+
 import AddressesDataApi from "../../backend-api/addressesDataApi.js";
 import { Storage } from "../../../../common/services/internal/storage.js";
 import AddressesServiceInternal from "../../../btc/services/internal/addressesServiceInternal.js";
 import { BtcUtxosUtils } from "../../../btc/services/utils/utxosUtils.js";
-import { logError } from "../../../../common/utils/errorUtils.js";
 import { Coins } from "../../../coins.js";
 import { BalancesService } from "../balancesService.js";
 import { Wallets } from "../../wallets.js";
@@ -11,11 +12,15 @@ import { transactionsDataProvider } from "../../../btc/services/internal/transac
 export class WalletSliceService {
     static async getCurrentWalletDataSliceString() {
         try {
-            // TODO: [bug, critical] add independent errors hadling per data part to avoid failing all data sclice if specific call fails
+            // TODO: [bug, critical] add independent errors handling per data part to avoid failing all data slice if specific call fails
             const indexes = await AddressesDataApi.getAddressesIndexes(Storage.getWalletId());
             const wallets = Wallets.getWalletsForAllEnabledCoins();
             let addressesBtc = await AddressesServiceInternal.getAllUsedAddresses(indexes);
-            let utxos = await BtcUtxosUtils.getAllUTXOs(addressesBtc.internal, addressesBtc.external, Storage.getCurrentNetwork());
+            let utxos = await BtcUtxosUtils.getAllUTXOs(
+                addressesBtc.internal,
+                addressesBtc.external,
+                Storage.getCurrentNetwork()
+            );
             let balances = await BalancesService.getBalances(wallets);
             let transactionsBtc = (
                 await transactionsDataProvider.getTransactionsByAddresses([
@@ -67,7 +72,7 @@ export class WalletSliceService {
 
             return walletSlice;
         } catch (e) {
-            logError(e, "getCurrentWalletDataSliceString");
+            Logger.logError(e, "getCurrentWalletDataSliceString");
         }
     }
 }

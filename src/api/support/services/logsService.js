@@ -1,10 +1,8 @@
 import { v4 } from "uuid";
 
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger, LogsStorage } from "@rabbitio/ui-kit";
 
 import { LogsApi } from "../backend-api/logsApi.js";
-import { LogsStorage } from "./internal/logs/logsStorage.js";
-import { Logger } from "./internal/logs/logger.js";
 
 export default class LogsService {
     /**

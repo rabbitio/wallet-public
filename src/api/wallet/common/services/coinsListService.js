@@ -1,6 +1,6 @@
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+import { AmountUtils, improveAndRethrow, safeStringify } from "@rabbitio/ui-kit";
 
 import { Coins } from "../../coins.js";
 import { BalancesService } from "./balancesService.js";
@@ -13,7 +13,6 @@ import {
     NEW_NOT_LOCAL_TRANSACTIONS_EVENT,
     TRANSACTION_PUSHED_EVENT,
 } from "../../../common/adapters/eventbus.js";
-import { safeStringify } from "../../../common/utils/browserUtils.js";
 import { SMALL_TTL_FOR_CACHE_L2_MS } from "../../../common/utils/ttlConstants.js";
 
 /**

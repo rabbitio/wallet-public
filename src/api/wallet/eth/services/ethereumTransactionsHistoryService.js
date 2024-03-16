@@ -1,6 +1,5 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
-import { logError } from "../../../common/utils/errorUtils.js";
 import { EthTransactionsProvider } from "../external-apis/ethTransactionsProvider.js";
 import { EthAddressesService } from "./ethAddressesService.js";
 import { EthereumBlockchainTransactionsProvider } from "../external-apis/ethereumBlockchainTransactionsProvider.js";
@@ -41,7 +40,7 @@ export class EthereumTransactionsHistoryService {
                         onlyErc20
                     );
                 } catch (e) {
-                    logError(e, "getEthTransactionsHistory", "Failed to actualize caches for eth and erc20 txs");
+                    Logger.logError(e, "getEthTransactionsHistory", "Failed to actualize caches for eth and erc20 txs");
                 }
                 return ethereumBlockchainTransactions.filter(tx => tx.ticker === coin.ticker);
             }

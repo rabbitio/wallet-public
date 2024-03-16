@@ -1,12 +1,10 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 // import TransactionsNotificationsService from "./internal/notifications/transactionsNotificationsService.js";
 import AdminNotificationsService from "./internal/notifications/adminNotificationsService.js";
 import { Storage } from "../../common/services/internal/storage.js";
-import { logError } from "../../common/utils/errorUtils.js";
 import Notification from "../models/notification.js";
 // import FiatPaymentsNotificationsService from "./internal/notifications/fiatPaymentsNotificationsService.js";
-import { Logger } from "../../support/services/internal/logs/logger.js";
 import { PreferencesService } from "../../wallet/common/services/preferencesService.js";
 import { UserDataAndSettings } from "../../wallet/common/models/userDataAndSettings.js";
 
@@ -67,7 +65,7 @@ class NotificationsService {
             );
             const notificationsPromises = this._dedicatedServices.map(service =>
                 service.getUnseenNotificationsList(+lastNotificationsViewTimestamp || 0, forceFetchData).catch(e => {
-                    logError(e, "_getUnseenNotificationsList", "One of notifications services failed");
+                    Logger.logError(e, "_getUnseenNotificationsList", "One of notifications services failed");
                     return [];
                 })
             );
@@ -104,7 +102,7 @@ class NotificationsService {
                 service
                     .getWholeNotificationsList(creationTime)
                     .catch(e =>
-                        logError(
+                        Logger.logError(
                             e,
                             "getWholeListOfNotifications",
                             "Failed to retrieve whole notifications list from some service"

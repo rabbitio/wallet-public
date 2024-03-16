@@ -1,7 +1,6 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, safeStringify, Logger } from "@rabbitio/ui-kit";
 
-import { postponeExecution, safeStringify } from "../../../utils/browserUtils.js";
-import { logError } from "../../../utils/errorUtils.js";
+import { postponeExecution } from "../../../utils/browserUtils.js";
 import { externalServicesStatsCollector } from "./externalServicesStatsCollector.js";
 import { concurrentCalculationsMetadataHolder } from "../../internal/concurrentCalculationsMetadataHolder.js";
 import AxiosAdapter from "../../../adapters/axiosAdapter.js";
@@ -20,7 +19,7 @@ export default class RobustExternalAPICallerService {
      * @param providersData {ExternalApiProvider[]} array of providers
      * @param [logger] {function} function to be used for logging
      */
-    constructor(bio, providersData, logger = logError) {
+    constructor(bio, providersData, logger = Logger.logError) {
         providersData.forEach(provider => {
             if ((!provider.endpoint && provider.endpoint !== "") || !provider.httpMethod) {
                 throw new Error(`Wrong format of providers data for: ${JSON.stringify(provider)}`);
@@ -32,7 +31,7 @@ export default class RobustExternalAPICallerService {
         this.providers = providersData;
         providersData.forEach(provider => provider.resetNiceFactor());
         this.bio = bio;
-        this._logger = logError;
+        this._logger = Logger.logError;
     }
 
     static defaultRPSFactor = 1;

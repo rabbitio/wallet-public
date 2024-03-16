@@ -24,8 +24,7 @@ export default class RecentSwaps {
         const endpointNumber = RECENT_SWAPS_EP_NUMBER;
         try {
             const swaps = getSwapsList(10);
-
-            log.debug("Swaps retrieved successfully. Sending 200.");
+            log.debug("Swaps retrieved successfully. Sending 200. Count:" + swaps?.length);
             ControllerUtils.processSuccess(res, 200, { swaps: swaps });
         } catch (e) {
             ControllerUtils.processInternalError(res, endpointNumber, "Failed to retrieve swaps", e);

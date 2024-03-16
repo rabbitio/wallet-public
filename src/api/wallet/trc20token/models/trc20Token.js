@@ -1,8 +1,7 @@
 import { ethers } from "ethers";
 
-import { AmountUtils } from "@rabbitio/ui-kit";
+import { AmountUtils, Coin } from "@rabbitio/ui-kit";
 
-import { Coin } from "../../common/models/coin.js";
 import { Network } from "../../common/models/networks.js";
 import { bip44Scheme } from "../../btc/lib/addresses-schemes.js";
 import { Storage } from "../../../common/services/internal/storage.js";

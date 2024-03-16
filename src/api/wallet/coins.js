@@ -354,12 +354,4 @@ export class Coins {
             improveAndRethrow(e, "getCoinByContractAddress");
         }
     }
-
-    static tickerAndProtocol(coin) {
-        try {
-            return `${coin.tickerPrintable}${coin.protocol ? " " + coin.protocol.protocol : ""}`;
-        } catch (e) {
-            improveAndRethrow(e, "tickerAndProtocol");
-        }
-    }
 }

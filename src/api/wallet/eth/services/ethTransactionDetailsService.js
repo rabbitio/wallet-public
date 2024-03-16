@@ -1,6 +1,5 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
-import { logError } from "../../../common/utils/errorUtils.js";
 import { EthereumBlockchainTransactionFeeProvider } from "../external-apis/ethereumBlockchainTransactionFeeProvider.js";
 import { EthereumTransactionsHistoryService } from "./ethereumTransactionsHistoryService.js";
 
@@ -18,7 +17,7 @@ export class EthTransactionDetailsService {
             const txs = allCoinTxs.filter(t => t.txid === txId);
             return (txs ?? []).length > 0;
         } catch (e) {
-            logError(
+            Logger.logError(
                 e,
                 "isTransactionBelongsToEther",
                 "We treat this error as that the checking tx is not belonging to ETH"

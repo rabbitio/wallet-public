@@ -1,6 +1,5 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
-import { logError } from "../../../common/utils/errorUtils.js";
 import { transactionsDataProvider } from "./internal/transactionsDataProvider.js";
 import { BtcTransactionDetailsProvider } from "../external-apis/transactionDataAPI.js";
 import { Storage } from "../../../common/services/internal/storage.js";
@@ -32,7 +31,7 @@ export class BtcTransactionDetailsService {
 
             return !!tx;
         } catch (e) {
-            logError(
+            Logger.logError(
                 e,
                 "isTransactionBelongsToBitcoin",
                 "We treat this error as that the checking tx is not belonging to BTC"

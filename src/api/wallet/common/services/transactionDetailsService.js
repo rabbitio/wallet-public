@@ -1,6 +1,5 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 // import FiatPaymentsService from "../../../purchases/services/FiatPaymentsService.js";
 import CoinsToFiatRatesService from "./coinsToFiatRatesService.js";
 import { TransactionsDataService } from "./internal/transactionsDataService.js";

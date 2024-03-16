@@ -1,5 +1,6 @@
+import { Logger } from "@rabbitio/ui-kit";
+
 import { getPathWithParams } from "../utils/browserUtils.js";
-import { Logger } from "../../support/services/internal/logs/logger.js";
 
 /**
  * Provides API to save URL Path in memory and retrieve it later. Useful for cases when the user is being auto signed out.

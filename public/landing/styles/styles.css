@@ -1132,25 +1132,8 @@ section.hero .learn-more .button-item {
     margin-top: 1rem;
 }
 
-.content-zigzag-image-container .backdrop-image {
+.content-zigzag-image-container .hero-image {
     width: 100%;
-}
-
-.content-zigzag-image-container .coin-wallet-icon {
-    position: absolute;
-    width: 20%;
-    bottom: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.content-zigzag-image-container .coin-wallet-title {
-    position: absolute;
-    width: 30%;
-    top: 62%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2vw;
 }
 
 @media (max-width: 900px) {

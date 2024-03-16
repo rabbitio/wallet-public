@@ -1,4 +1,5 @@
-import { logError } from "../../../common/utils/errorUtils.js";
+import { Logger } from "@rabbitio/ui-kit";
+
 import { Erc20TokenBalanceService } from "../../erc20token/services/erc20TokenBalanceService.js";
 import { TronBlockchainBalancesService } from "../../trx/services/tronBlockchainBalancesService.js";
 import { Coins } from "../../coins.js";
@@ -11,7 +12,8 @@ export class ImportWalletService {
             const coinsToEnable = Coins.getDefaultEnabledCoinsList();
             const erc20TokensToEnable = await Erc20TokenBalanceService.getSupportedErc20TokensHavingNonZeroBalance();
             // We don't get eth balance here separately as we usually have ether enabled for all new wallets
-            const trxOrTrc20TokensToEnable = await TronBlockchainBalancesService.getTronOrTrc20TokensHavingNotZeroBalance();
+            const trxOrTrc20TokensToEnable =
+                await TronBlockchainBalancesService.getTronOrTrc20TokensHavingNotZeroBalance();
             [...erc20TokensToEnable, ...trxOrTrc20TokensToEnable].forEach(token => {
                 if (!coinsToEnable.find(coin => coin === token)) {
                     coinsToEnable.push(token);
@@ -19,7 +21,7 @@ export class ImportWalletService {
             });
             await Coins.setCurrentEnabledCoins(coinsToEnable);
         } catch (e) {
-            logError(e, "safelyRecogniseTokensAndScanBtcWhenImporting");
+            Logger.logError(e, "safelyRecogniseTokensAndScanBtcWhenImporting");
         }
     }
 }

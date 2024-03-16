@@ -1,6 +1,4 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
-
-import { logError } from "../../../utils/errorUtils.js";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 class ExternalServicesStatsCollector {
     constructor() {
@@ -73,7 +71,7 @@ class ExternalServicesStatsCollector {
                 })
                 .sort((s1, s2) => s1.failsPerCent - s2.failsPerCent);
         } catch (e) {
-            logError(e, "getStats");
+            Logger.logError(e, "getStats");
         }
     }
 }

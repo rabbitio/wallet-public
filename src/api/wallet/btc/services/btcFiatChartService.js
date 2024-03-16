@@ -1,6 +1,5 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
-import { logError } from "../../../common/utils/errorUtils.js";
 import CoinsToFiatRatesService from "../../common/services/coinsToFiatRatesService.js";
 import FiatRatesApi from "../backend-api/fiatRatesApi.js";
 import { Coins } from "../../coins.js";
@@ -205,7 +204,7 @@ async function updateTodayValue(instance) {
         const rate = await CoinsToFiatRatesService.getCoinToCurrentFiatCurrencyRateForSpecificDate(Coins.COINS.BTC);
         rate && instance.updateTodayValueAndRecalculateRates(rate);
     } catch (e) {
-        logError(e, null, "Failed to get btc-usd rate for chart data service.");
+        Logger.logError(e, null, "Failed to get btc-usd rate for chart data service.");
     }
 }
 

@@ -1,4 +1,5 @@
-import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { Logger } from "@rabbitio/ui-kit";
+
 import AddressesServiceInternal from "./internal/addressesServiceInternal.js";
 import { SupportedSchemes } from "../lib/addresses-schemes.js";
 import { Storage } from "../../../common/services/internal/storage.js";

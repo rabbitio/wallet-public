@@ -1,11 +1,10 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, safeStringify } from "@rabbitio/ui-kit";
 
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
-import { safeStringify } from "../../../common/utils/browserUtils.js";
 import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 
 class EthFeeRatesBlockNativeProvider extends ExternalApiProvider {

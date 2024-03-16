@@ -1,8 +1,6 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
-import { logError } from "../../../common/utils/errorUtils.js";
 import { EthAddressesService } from "../../eth/services/ethAddressesService.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 import { Erc20AllBalancesProvider } from "../external-apis/erc20AllBalancesProvider.js";
 import { Erc20SingleBalanceProvider } from "../external-apis/erc20SingleBalanceProvider.js";
 import { Coins } from "../../coins.js";
@@ -22,7 +20,7 @@ export class Erc20TokenBalanceService {
             try {
                 balances = await Erc20AllBalancesProvider.getErc20Balances(address);
             } catch (e) {
-                logError(e, "Erc20TokenBalanceService.calculateBalance", "Failed to get erc20 batch balances");
+                Logger.logError(e, "Erc20TokenBalanceService.calculateBalance", "Failed to get erc20 batch balances");
             }
             let balance;
             if (balances != null) {

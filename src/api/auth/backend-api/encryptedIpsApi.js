@@ -1,7 +1,6 @@
 import { improveAndRethrow } from "@rabbitio/ui-kit";
 
-import { ApiCallWrongResponseError } from "../../common/backend-api/utils.js";
-import { doApiCall, urlWithPrefix } from "../../common/backend-api/utils.js";
+import { ApiCallWrongResponseError, doApiCall, urlWithPrefix } from "../../common/backend-api/utils.js";
 
 // TODO: [tests, moderate] Implement unit tests
 /**

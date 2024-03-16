@@ -1,10 +1,8 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, safeStringify, Logger } from "@rabbitio/ui-kit";
 
 import RobustExternalAPICallerService from "./robustExternalAPICallerService.js";
-import { logError } from "../../../utils/errorUtils.js";
 import { getHash } from "../../../adapters/crypto-utils.js";
 import { CacheAndConcurrentRequestsResolver } from "./cacheAndConcurrentRequestsResolver.js";
-import { safeStringify } from "../../../utils/browserUtils.js";
 
 /**
  * Extended edit of RobustExternalApiCallerService supporting cache and management of concurrent requests
@@ -31,7 +29,7 @@ export class CachedRobustExternalApiCallerService {
         maxCallAttemptsToWaitForAlreadyRunningRequest = 100,
         timeoutBetweenAttemptsToCheckWhetherAlreadyRunningRequestFinished = 1000
     ) {
-        this._provider = new RobustExternalAPICallerService(`cached_${bio}`, providersData, logError);
+        this._provider = new RobustExternalAPICallerService(`cached_${bio}`, providersData, Logger.logError);
         this._cacheTtlMs = cacheTtlMs;
         this._cahceAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
             bio,

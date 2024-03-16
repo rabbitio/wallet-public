@@ -1,8 +1,7 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
-
 import { v4 } from "uuid";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
+
 import { cache } from "../../../utils/cache.js";
-import { logError } from "../../../utils/errorUtils.js";
 
 /**
  * This util helps to avoid duplicated calls to a shared resource.
@@ -346,7 +345,7 @@ class ManagerOfRequestsToTheSameResource {
 
             return await this._waitForCalculationIdToFinish(requestHash, activeCalculationIdForHash, 0);
         } catch (e) {
-            logError(e, `startCalculationOrWaitForActiveToFinish_${this.bio}`);
+            Logger.logError(e, `startCalculationOrWaitForActiveToFinish_${this.bio}`);
         }
 
         return null;
@@ -480,7 +479,7 @@ class ManagerOfRequestsToTheSameResource {
                 });
             }
         } catch (e) {
-            logError(e, "_waitForCalculationIdToFinish", "Failed to wait for active calculation id change.");
+            Logger.logError(e, "_waitForCalculationIdToFinish", "Failed to wait for active calculation id change.");
             return false;
         }
     }

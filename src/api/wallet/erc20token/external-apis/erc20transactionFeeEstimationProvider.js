@@ -1,11 +1,10 @@
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+import { AmountUtils, improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
 import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 

@@ -1,6 +1,6 @@
-import { PublicSwapCreationInfo } from "../../../swaps/models/publicSwapCreationInfo.js";
+import { BaseSwapCreationInfo } from "@rabbitio/ui-kit";
 
-export class SwapCreationInfo extends PublicSwapCreationInfo {
+export class SwapCreationInfo extends BaseSwapCreationInfo {
     /**
      * @param fromCoin {Coin}
      * @param toCoin {Coin}

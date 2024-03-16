@@ -1,6 +1,6 @@
+import { Logger } from "@rabbitio/ui-kit";
+
 import { EventBus, NEW_BLOCK_EVENT } from "../../../../common/adapters/eventbus.js";
-import { logError } from "../../../../common/utils/errorUtils.js";
-import { Logger } from "../../../../support/services/internal/logs/logger.js";
 import { Storage } from "../../../../common/services/internal/storage.js";
 import { Coins } from "../../../coins.js";
 
@@ -21,7 +21,7 @@ class BlocksListener {
                 this._socket.send('{"op":"blocks_sub"}');
                 Logger.log(`On open websoket performed`, loggerSource);
             } catch (e) {
-                logError(e, loggerSource, "Failed to open blocks socket");
+                Logger.logError(e, loggerSource, "Failed to open blocks socket");
             }
         };
 
@@ -34,7 +34,7 @@ class BlocksListener {
 
                 Logger.log(`On message websoket performed. Block ${data?.x?.height}`, loggerSource);
             } catch (e) {
-                logError(e, loggerSource, "Failed to handle message from blocks socket");
+                Logger.logError(e, loggerSource, "Failed to handle message from blocks socket");
             }
         };
 
@@ -43,15 +43,15 @@ class BlocksListener {
                 this.setupListeningForNewBlocks();
                 Logger.log("On socket close - setup of listening was done", loggerSource);
             } catch (e) {
-                logError(e, loggerSource, "Failed to handle block socket closing");
+                Logger.logError(e, loggerSource, "Failed to handle block socket closing");
             }
         };
 
         this._socket.onerror = error => {
             try {
-                logError(error, "Websocket has failed");
+                Logger.logError(error, "Websocket has failed");
             } catch (e) {
-                logError(e, loggerSource, "Failed to handle socket error");
+                Logger.logError(e, loggerSource, "Failed to handle socket error");
             }
         };
     }

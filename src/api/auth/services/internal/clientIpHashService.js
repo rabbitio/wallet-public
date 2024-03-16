@@ -1,8 +1,7 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { getSaltedHash } from "../../../common/adapters/crypto-utils.js";
 import { Storage } from "../../../common/services/internal/storage.js";
-import { logError } from "../../../common/utils/errorUtils.js";
 import { CLIENT_IP_HASH_LIFETIME } from "../../../../properties.js";
 import IpAddressProvider from "../../external-apis/ipAddressProviders.js";
 import { IpsServiceInternal } from "./ipsServiceInternal.js";
@@ -38,7 +37,7 @@ export default class ClientIpHashService {
             return await provideIpHash();
         } catch (e) {
             // TODO: [bug, moderate] setup retrying for IP address retrieval task_id=9e8398855f6b43ad83875fe475c6110e
-            logError(e, "provideIpHashStored");
+            Logger.logError(e, "provideIpHashStored");
         }
     }
 
@@ -80,7 +79,7 @@ function scheduleUpdateOfClientIPAddressHash() {
             try {
                 await ClientIpHashService.provideIpHashStoredAndItsUpdate();
             } catch (e) {
-                logError(e, null, "Failed to execute provideIpHashStoredAndItsUpdate. ");
+                Logger.logError(e, null, "Failed to execute provideIpHashStoredAndItsUpdate. ");
             }
         })();
     }, CLIENT_IP_HASH_LIFETIME);

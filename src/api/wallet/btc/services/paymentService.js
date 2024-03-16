@@ -1,6 +1,6 @@
 import bip39 from "bip39";
 
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { Storage } from "../../../common/services/internal/storage.js";
 import { EcPairsUtils, BitcoinAddresses } from "../lib/addresses.js";
@@ -13,7 +13,6 @@ import { EventBus, USER_READY_TO_SEND_TRANSACTION_EVENT } from "../../../common/
 import { BtcTransactionBuilder } from "../lib/transactions/build-transaction.js";
 import { BtcFakeTransactionsBuilder } from "../lib/transactions/fake-transactions.js";
 import { BtcTransactionBroadcastingService } from "./internal/transactionsBroadcastingService.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 import { Coins } from "../../coins.js";
 
 export default class PaymentService {

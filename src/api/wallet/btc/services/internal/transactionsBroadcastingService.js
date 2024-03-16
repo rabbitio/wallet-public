@@ -1,7 +1,6 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { BtcTransactionPushingProvider } from "../../external-apis/btcTransactionPushingProvider.js";
-import { Logger } from "../../../../support/services/internal/logs/logger.js";
 
 export class BtcTransactionBroadcastingService {
     /**

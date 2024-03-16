@@ -1,12 +1,10 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { BtcFeeRatesProvider } from "../external-apis/feerates-external.js";
 import { FEE_LIFETIME } from "../../../../properties.js";
-import { logError } from "../../../common/utils/errorUtils.js";
 import { DEFAULT_RATES } from "../lib/fees.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { postponeExecution } from "../../../common/utils/browserUtils.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 import { FeeRate } from "../models/feeRate.js";
 
 /**
@@ -78,7 +76,7 @@ export class BtcFeeRatesService {
                         loggerSource
                     );
                 } catch (e) {
-                    logError(e, loggerSource, "Failed to get external fee rates");
+                    Logger.logError(e, loggerSource, "Failed to get external fee rates");
                 } finally {
                     isRetrievingRates = false;
                 }
@@ -86,7 +84,7 @@ export class BtcFeeRatesService {
 
             const currentRate = feesRates?.length && filterRatesForBlocksCount(feesRates, blocksCount, network);
             if (!currentRate) {
-                logError(
+                Logger.logError(
                     new Error("No fee rates have been got. Default will be returned: " + JSON.stringify(rate)),
                     loggerSource
                 );
@@ -94,7 +92,7 @@ export class BtcFeeRatesService {
                 return currentRate;
             }
         } catch (e) {
-            logError(e, loggerSource);
+            Logger.logError(e, loggerSource);
         }
 
         return rate;
@@ -116,7 +114,7 @@ function getFeesFromCache() {
 
         return FeeRate.deserializeArray(serializedFeeRates);
     } catch (e) {
-        logError(e, "getFeesFromCache");
+        Logger.logError(e, "getFeesFromCache");
         return null;
     }
 }

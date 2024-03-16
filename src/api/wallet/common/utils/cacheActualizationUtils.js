@@ -1,8 +1,7 @@
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+import { AmountUtils, improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
-import { logError } from "../../../common/utils/errorUtils.js";
 import { TransactionsHistoryItem } from "../models/transactionsHistoryItem.js";
 import {
     BALANCE_CHANGED_EXTERNALLY_EVENT,
@@ -35,7 +34,7 @@ export function mergeTwoArraysByItemIdFieldName(
             try {
                 shouldHandleNewItems && handleNewItems(newItems);
             } catch (e) {
-                logError(e, "safeHandleNewItems");
+                Logger.logError(e, "safeHandleNewItems");
             }
         };
 
@@ -44,7 +43,7 @@ export function mergeTwoArraysByItemIdFieldName(
             try {
                 shouldHandleNewValues && handleNewValues(itemsHavingNewValues);
             } catch (e) {
-                logError(e, "safeHandleNewValues");
+                Logger.logError(e, "safeHandleNewValues");
             }
         };
 

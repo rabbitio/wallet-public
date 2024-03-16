@@ -1,6 +1,6 @@
 import { BigNumber } from "bignumber.js";
 
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { TransactionsDataService } from "./internal/transactionsDataService.js";
 // import FiatPaymentsService from "../../../purchases/services/FiatPaymentsService.js";
@@ -8,7 +8,6 @@ import { TransactionDetailsService } from "./transactionDetailsService.js";
 import CoinsToFiatRatesService from "./coinsToFiatRatesService.js";
 import { Coins } from "../../coins.js";
 import { Wallets } from "../wallets.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
 import {
     BALANCE_CHANGED_EXTERNALLY_EVENT,

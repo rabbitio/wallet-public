@@ -19,4 +19,8 @@ export class TickersAdapter {
         if (protocol && protocol.protocol) return ticker.split(protocol.protocol)[0];
         return ticker;
     };
+
+    static filterRabbitTicker(ticker) {
+        return /^[0-9a-zA-Z]+$/.test(ticker) ? ticker : false;
+    }
 }

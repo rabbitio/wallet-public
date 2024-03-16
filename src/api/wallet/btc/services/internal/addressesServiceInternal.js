@@ -1,6 +1,6 @@
 import bip39 from "bip39";
 
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import AddressesDataApi from "../../../common/backend-api/addressesDataApi.js";
 import { Storage } from "../../../../common/services/internal/storage.js";
@@ -12,7 +12,6 @@ import {
 } from "../../lib/addresses.js";
 import CurrentAddressUtils from "../utils/currentAddressUtils.js";
 import { decrypt } from "../../../../common/adapters/crypto-utils.js";
-import { Logger } from "../../../../support/services/internal/logs/logger.js";
 
 // TODO: [ether, critical] add support for all coins here
 export default class AddressesServiceInternal {

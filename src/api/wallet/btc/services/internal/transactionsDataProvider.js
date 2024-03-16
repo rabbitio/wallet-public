@@ -1,7 +1,6 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { Storage } from "../../../../common/services/internal/storage.js";
-import { logError } from "../../../../common/utils/errorUtils.js";
 import { BtcTransactionDetailsProvider } from "../../external-apis/transactionDataAPI.js";
 import {
     EventBus,
@@ -18,7 +17,6 @@ import {
     setDoubleSpendFlag,
     setSpendTxId,
 } from "../../lib/transactions/txs-list-calculations.js";
-import { Logger } from "../../../../support/services/internal/logs/logger.js";
 import AddressesServiceInternal from "./addressesServiceInternal.js";
 import { BtcTransactionsHistory, getExtendedTransactionDetails } from "../../lib/transactions/transactions-history.js";
 import { CacheAndConcurrentRequestsResolver } from "../../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
@@ -66,7 +64,7 @@ class TransactionsDataProvider {
                 this._cancelProcessingHolder = null;
             }
         } catch (e) {
-            logError(e, "_doFullScanning", "Failed to cancel previous full scanning");
+            Logger.logError(e, "_doFullScanning", "Failed to cancel previous full scanning");
         }
 
         let lockAcquisitionResult;
@@ -92,7 +90,7 @@ class TransactionsDataProvider {
             );
             return finalTxsList;
         } catch (e) {
-            logError(e, "_doFullScanning");
+            Logger.logError(e, "_doFullScanning");
         } finally {
             this._cacheAndRequestsResolver.releaseLock(this._cacheKey, lockAcquisitionResult?.lockId);
             this._cancelProcessingHolder = null;
@@ -349,7 +347,7 @@ class TransactionsDataProvider {
             Logger.log(`Retrieved ${finalTxsList.length} BTC transactions`, loggerSource);
             return finalTxsList;
         } catch (e) {
-            logError(e, loggerSource, "Transactions data retrieval failed");
+            Logger.logError(e, loggerSource, "Transactions data retrieval failed");
             return [];
         }
     }

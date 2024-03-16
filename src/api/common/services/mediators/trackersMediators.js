@@ -1,4 +1,4 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import {
     EventBus,
@@ -10,8 +10,6 @@ import {
     WALLET_IMPORTED_EVENT,
 } from "../../adapters/eventbus.js";
 import { Storage } from "../internal/storage.js";
-import { logError } from "../../utils/errorUtils.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 import CoinsToFiatRatesService from "../../../wallet/common/services/coinsToFiatRatesService.js";
 import { Coins } from "../../../wallet/coins.js";
 
@@ -110,10 +108,10 @@ class GoogleAnalyticsUtils {
             if (window.gtag) {
                 window.gtag(...parameters);
             } else {
-                logError(null, "doActionOnGTag", "No gtag found");
+                Logger.logError(null, "doActionOnGTag", "No gtag found");
             }
         } catch (e) {
-            logError(e, "doActionOnGTag", "Failed to do gtag action: " + JSON.stringify(parameters));
+            Logger.logError(e, "doActionOnGTag", "Failed to do gtag action: " + JSON.stringify(parameters));
         }
     }
 }
@@ -126,10 +124,14 @@ class MixPanelUtils {
                 // eslint-disable-next-line no-console
                 console.log("Mixpanel sendEvent result: " + result);
             } else {
-                logError(null, "sendEvent", "No mixpanel found");
+                Logger.logError(null, "sendEvent", "No mixpanel found");
             }
         } catch (e) {
-            logError(e, "sendEvent", "Failed to do mixpanel action: " + eventName + " - " + JSON.stringify(parameters));
+            Logger.logError(
+                e,
+                "sendEvent",
+                "Failed to do mixpanel action: " + eventName + " - " + JSON.stringify(parameters)
+            );
         }
     }
 
@@ -142,10 +144,10 @@ class MixPanelUtils {
                     console.log("Mixpanel identify result: " + result);
                 }
             } else {
-                logError(null, "identify", "No mixpanel found");
+                Logger.logError(null, "identify", "No mixpanel found");
             }
         } catch (e) {
-            logError(e, "identify", "Failed to identify.");
+            Logger.logError(e, "identify", "Failed to identify.");
         }
     }
 }

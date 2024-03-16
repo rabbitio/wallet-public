@@ -1,9 +1,8 @@
 import { ethers } from "ethers";
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+import { AmountUtils, improveAndRethrow, safeStringify, Logger } from "@rabbitio/ui-kit";
 
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 import { TxData } from "../../common/models/tx-data.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
@@ -12,7 +11,6 @@ import { ethFeeRatesProvider } from "../external-apis/ethFeeRatesProvider.js";
 import { EthBalanceService } from "./ethBalanceService.js";
 import { Erc20transactionUtils } from "../../erc20token/lib/erc20transactionUtils.js";
 import { EthereumPushTransactionProvider } from "../external-apis/ethereumPushTransactionProvider.js";
-import { safeStringify } from "../../../common/utils/browserUtils.js";
 import { EthereumTransactionsCountProvider } from "../external-apis/ethereumTransactionsCountProvider.js";
 import { EthAddressesService } from "./ethAddressesService.js";
 import { EthereumBlockchainFeeDataProvider } from "../external-apis/ethereumBlockchainFeeDataProvider.js";
@@ -278,7 +276,7 @@ function optsForSeveralRates(
     network
 ) {
     const feeData = ratesGWei.map(maxPriorityFeePerGasOption => {
-        const gweiDecimalPlaces = 9;
+        const gweiDecimalPlaces = 9; // 1 Gwei = 1e-9 ETH
         const fee = ethers.utils
             .parseUnits(
                 AmountUtils.trim(BigNumber(baseFeePerGas).plus(maxPriorityFeePerGasOption), gweiDecimalPlaces),

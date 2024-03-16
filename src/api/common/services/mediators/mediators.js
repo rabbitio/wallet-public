@@ -1,4 +1,4 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger, LogsStorage } from "@rabbitio/ui-kit";
 
 import {
     AUTHENTICATION_DISCOVERED_EVENT,
@@ -20,7 +20,6 @@ import {
     WALLET_DELETED_EVENT,
     WALLET_IMPORTED_EVENT,
 } from "../../adapters/eventbus.js";
-import { logError } from "../../utils/errorUtils.js";
 import { transactionsDataProvider } from "../../../wallet/btc/services/internal/transactionsDataProvider.js";
 import UtxosService from "../../../wallet/btc/services/internal/utxosService.js";
 import { getCurrentSmallestFeeRate } from "../../../wallet/btc/services/feeRatesService.js";
@@ -29,9 +28,7 @@ import PaymentService from "../../../wallet/btc/services/paymentService.js";
 import { isJustLoggedOut } from "../../../auth/services/authService.js";
 import { IS_TESTING } from "../../../../properties.js";
 import { setupAnalyticsMediators } from "./trackersMediators.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 import { logWalletDataSlice } from "../../../support/services/internal/logs/scheduledLogger.js";
-import { LogsStorage } from "../../../support/services/internal/logs/logsStorage.js";
 import AddressesService from "../../../wallet/btc/services/addressesService.js";
 import { CoinsListService } from "../../../wallet/common/services/coinsListService.js";
 import TransactionsHistoryService from "../../../wallet/common/services/transactionsHistoryService.js";
@@ -51,7 +48,7 @@ function initializeTransactionsProvider() {
 
             Logger.log("Successfully initialized", loggerSource);
         } catch (e) {
-            logError(e, loggerSource, "Failed to initialize transactions data provider");
+            Logger.logError(e, loggerSource, "Failed to initialize transactions data provider");
         }
     })();
 }
@@ -110,12 +107,12 @@ export function setupMediators(
                 }
             } catch (e) {
                 try {
-                    logError(e, "NO_AUTHENTICATION_EVENT_handler");
+                    Logger.logError(e, "NO_AUTHENTICATION_EVENT_handler");
                     Storage.saveIsNotFoundSessionMessageShownForLastLostSession(true);
                     handleNotFoundSession();
                     handleLogout();
                 } catch (e) {
-                    logError(e, "NO_AUTHENTICATION_EVENT_handler error handling");
+                    Logger.logError(e, "NO_AUTHENTICATION_EVENT_handler error handling");
                 }
             }
         });
@@ -124,7 +121,7 @@ export function setupMediators(
             try {
                 handleLogout();
             } catch (e) {
-                logError(e, "LOGGED_OUT_EVENT listener");
+                Logger.logError(e, "LOGGED_OUT_EVENT listener");
             }
         });
 
@@ -134,7 +131,7 @@ export function setupMediators(
                     transactionsDataProvider.resetState();
                     PreferencesService.removeWalletDataSyncInterval();
                 } catch (e) {
-                    logError(e, event + "_handler");
+                    Logger.logError(e, event + "_handler");
                 }
             })
         );
@@ -153,7 +150,7 @@ export function setupMediators(
                             await UtxosService.calculateBalance(rate, true);
                         }
                     } catch (e) {
-                        logError(e, `${NEW_NOT_LOCAL_TRANSACTIONS_EVENT}_handler`);
+                        Logger.logError(e, `${NEW_NOT_LOCAL_TRANSACTIONS_EVENT}_handler`);
                     }
                 })();
             });
@@ -190,7 +187,7 @@ export function setupMediators(
                     // Then we call UI action at last order to use results of all the processing performed above (caches removal/expiration)
                     handleNewNotLocalTxs();
                 } catch (e) {
-                    logError(e, `${event.type}_handler`);
+                    Logger.logError(e, `${event.type}_handler`);
                 }
             });
         });
@@ -202,7 +199,7 @@ export function setupMediators(
                     CoinsListService.invalidateCaches();
                     TransactionsHistoryService.invalidateCaches();
                 } catch (e) {
-                    logError(e, event + "_handler");
+                    Logger.logError(e, event + "_handler");
                 }
             });
         });
@@ -223,7 +220,7 @@ export function setupMediators(
                         try {
                             await logWalletDataSlice();
                         } catch (e) {
-                            logError(e, event + "_handler-slice");
+                            Logger.logError(e, event + "_handler-slice");
                         }
                     })();
                 })
@@ -233,7 +230,7 @@ export function setupMediators(
             try {
                 handleDiscoveredAuthentication();
             } catch (e) {
-                logError(e, AUTHENTICATION_DISCOVERED_EVENT + "_handler");
+                Logger.logError(e, AUTHENTICATION_DISCOVERED_EVENT + "_handler");
             }
         });
 
@@ -247,7 +244,7 @@ export function setupMediators(
                 try {
                     LogsStorage.removeAllClientLogs();
                 } catch (e) {
-                    logError(e, event + "_handler-remove-logs");
+                    Logger.logError(e, event + "_handler-remove-logs");
                 }
             })
         );
@@ -260,15 +257,15 @@ export function setupMediators(
                         item => item?.setting === UserDataAndSettings.SETTINGS.DONT_REMOVE_CLIENT_LOGS_WHEN_SIGNED_OUT
                     );
                 if (doNotRemoveClientLogsWhenSignedOut?.value != null) {
-                    Storage.setDoNotRemoveClientLogsWhenSignedOut("" + doNotRemoveClientLogsWhenSignedOut.value);
+                    LogsStorage.setDoNotRemoveClientLogsWhenSignedOut("" + doNotRemoveClientLogsWhenSignedOut.value);
                 }
             } catch (e) {
-                logError(e, CURRENT_PREFERENCES_EVENT + "_handler");
+                Logger.logError(e, CURRENT_PREFERENCES_EVENT + "_handler");
             }
         });
 
         Logger.log("Successfully initialized mediators", loggerSource);
     } catch (e) {
-        logError(e, loggerSource);
+        Logger.logError(e, loggerSource);
     }
 }

@@ -1,6 +1,7 @@
 import xml2js from "xml2js";
 
-import { Logger } from "../../../support/services/internal/logs/logger.js";
+import { Logger } from "@rabbitio/ui-kit";
+
 import { EventBus, WALLET_DATA_EXPORTED_EVENT } from "../../../common/adapters/eventbus.js";
 import { Wallets } from "../wallets.js";
 

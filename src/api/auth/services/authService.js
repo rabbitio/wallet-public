@@ -2,12 +2,10 @@ import bip39 from "bip39";
 import secureRandom from "secure-random";
 import Cookie from "js-cookie";
 
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
-import { Logger } from "../../support/services/internal/logs/logger.js";
 import { decrypt, encrypt, getHash } from "../../common/adapters/crypto-utils.js";
 import { Storage } from "../../common/services/internal/storage.js";
-import { logError } from "../../common/utils/errorUtils.js";
 import { SupportedSchemes } from "../../wallet/btc/lib/addresses-schemes.js";
 import { AccountsData } from "../../wallet/btc/lib/accounts.js";
 import {
@@ -568,7 +566,7 @@ function setTimeoutLookingForAuthentication() {
                 checkAuthTimeoutId = null;
             }
         } catch (e) {
-            logError(e, "checkAuthenticationInterval");
+            Logger.logError(e, "checkAuthenticationInterval");
         }
     }, 60 * 1000);
 }

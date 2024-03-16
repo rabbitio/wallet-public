@@ -1,6 +1,5 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
-import { logError } from "../../../common/utils/errorUtils.js";
 import { EthTransactionDetailsService } from "../../eth/services/ethTransactionDetailsService.js";
 
 export class Erc20TokenTransactionDetailsService {
@@ -32,7 +31,7 @@ export class Erc20TokenTransactionDetailsService {
             const tx = await EthTransactionDetailsService.getEthereumBlockchainTransactionDetails(coin, txId, null);
             return !!tx;
         } catch (e) {
-            logError(
+            Logger.logError(
                 e,
                 "doesTxBelongToErc20Token",
                 "We treat this error as that the checking tx is not belonging to " + coin.ticker

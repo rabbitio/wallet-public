@@ -1,9 +1,8 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { EncryptedWalletPaymentIdsApi } from "../backend-api/encryptedWalletPaymentIdsApi.js";
 import { Storage } from "../../common/services/internal/storage.js";
 import { decrypt, encrypt } from "../../common/adapters/crypto-utils.js";
-import { Logger } from "../../support/services/internal/logs/logger.js";
 
 export class EncryptedWalletPaymentIdsService {
     /**

@@ -1,11 +1,10 @@
 import { ethers } from "ethers";
 import TronWebLib from "tronweb";
 
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, safeStringify } from "@rabbitio/ui-kit";
 
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
-import { safeStringify } from "../../../common/utils/browserUtils.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 

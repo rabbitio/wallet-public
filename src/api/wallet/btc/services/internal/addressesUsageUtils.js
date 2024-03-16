@@ -1,7 +1,6 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { transactionsDataProvider } from "./transactionsDataProvider.js";
-import { logError } from "../../../../common/utils/errorUtils.js";
 import { TransactionsDataRetrieverService } from "./transactionsDataRetrieverService.js";
 
 export class AddressesUsageUtils {
@@ -28,7 +27,7 @@ export class AddressesUsageUtils {
                  */
                 await transactionsDataProvider.updateTransactionsCache(transactions);
             } catch (e) {
-                logError(e, "getAddressesUsage", "Failed to update transactions cache");
+                Logger.logError(e, "getAddressesUsage", "Failed to update transactions cache");
             }
 
             return addresses.map(address => {

@@ -1,5 +1,5 @@
-import { logError } from "../../../../common/utils/errorUtils.js";
-import { Logger } from "./logger.js";
+import { Logger } from "@rabbitio/ui-kit";
+
 import { externalServicesStatsCollector } from "../../../../common/services/utils/robustExteranlApiCallerService/externalServicesStatsCollector.js";
 import { WalletSliceService } from "../../../../wallet/common/services/utils/walletSliceService.js";
 
@@ -11,7 +11,7 @@ export class ScheduledLogger {
                 setInterval(logExternalServicesStats, 600 * 1000);
                 Logger.log("Setup performed", "logExternalServicesStatsPeriodically");
             } catch (e) {
-                logError(e, "logExternalServicesStatsPeriodically");
+                Logger.logError(e, "logExternalServicesStatsPeriodically");
             }
         })();
     }
@@ -22,7 +22,7 @@ export class ScheduledLogger {
                 setInterval(logWalletDataSlice, 600 * 1000);
                 Logger.log("Setup performed", "logWalletSlicePeriodically");
             } catch (e) {
-                logError(e, "logWalletSlicePeriodically");
+                Logger.logError(e, "logWalletSlicePeriodically");
             }
         })();
     }
@@ -35,7 +35,7 @@ export async function logExternalServicesStats() {
             "logExternalServicesStats"
         );
     } catch (e) {
-        logError(e, "logExternalServicesStats");
+        Logger.logError(e, "logExternalServicesStats");
     }
 }
 
@@ -44,6 +44,6 @@ export async function logWalletDataSlice() {
         const dataSliceString = await WalletSliceService.getCurrentWalletDataSliceString();
         Logger.log(`WALLET DATA SLICE:\n${dataSliceString}`, "logWalletDataSlice");
     } catch (e) {
-        logError(e, "logWalletDataSlice");
+        Logger.logError(e, "logWalletDataSlice");
     }
 }

@@ -1,6 +1,5 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
-import { logError } from "../../../common/utils/errorUtils.js";
 import { Coins } from "../../coins.js";
 import { TickersAdapter } from "./utils/tickersAdapter.js";
 import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
@@ -284,7 +283,7 @@ class CoinToUSDRatesProvider {
             );
         } catch (e) {
             if (persistentCacheForAllSupported?.data != null) {
-                logError(e, "getCoinsToUSDRates");
+                Logger.logError(e, "getCoinsToUSDRates");
                 return persistentCacheForAllSupported.data;
             } else {
                 improveAndRethrow(e, `${this.bio}.getCoinsToUSDRates`);

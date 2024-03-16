@@ -1,11 +1,10 @@
 import bip39 from "bip39";
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+import { AmountUtils, improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { Storage } from "../../../common/services/internal/storage.js";
 import { BtcFeeRatesService } from "./feeRatesService.js";
-import { logError } from "../../../common/utils/errorUtils.js";
 import { DEFAULT_RATES, MIN_FEE_RATES } from "../lib/fees.js";
 import AddressesService from "./addressesService.js";
 import { Utxos } from "../lib/utxos.js";
@@ -16,7 +15,6 @@ import UtxosService from "./internal/utxosService.js";
 import { TransactionsDataService } from "../../common/services/internal/transactionsDataService.js";
 import { BtcRbfUtils } from "../lib/transactions/rbf.js";
 import { BtcTransactionBroadcastingService } from "./internal/transactionsBroadcastingService.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 import { AuthService } from "../../../auth/services/authService.js";
 import CoinsToFiatRatesService from "../../common/services/coinsToFiatRatesService.js";
 import { Coins } from "../../coins.js";
@@ -274,7 +272,11 @@ async function saveNoteForNewTransactionWithoutFailing(oldTxId, newTxId) {
             await TransactionsDataService.saveTransactionData(newTxId, { note: data[0].note });
         }
     } catch (e) {
-        logError(e, "saveNoteForNewTransactionWithoutFailing", "Failed to save old note for new transaction after RBF");
+        Logger.logError(
+            e,
+            "saveNoteForNewTransactionWithoutFailing",
+            "Failed to save old note for new transaction after RBF"
+        );
     }
 }
 
@@ -298,7 +300,7 @@ function actualizeTransactionsCacheWithoutFailing(params, oldFee, newFee, networ
         const balanceDiffString = AmountUtils.intStr(BigNumber(newFee).minus(oldFee));
         btcWallet.actualizeBalanceCacheWithAmountAtoms(balanceDiffString, -1);
     } catch (e) {
-        logError(e, loggerSource, `Failed to actualize cache for rbf new tx ${newTransactionId}`);
+        Logger.logError(e, loggerSource, `Failed to actualize cache for rbf new tx ${newTransactionId}`);
     }
 }
 

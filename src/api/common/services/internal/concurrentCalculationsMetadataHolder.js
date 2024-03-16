@@ -1,5 +1,7 @@
 import { v4 } from "uuid";
-import { logError } from "../../utils/errorUtils.js";
+
+import { Logger } from "@rabbitio/ui-kit";
+
 import { IS_TESTING } from "../../../../properties.js";
 import { ConsoleLogger } from "../../../support/services/internal/logs/consoleLogger.js";
 
@@ -44,7 +46,7 @@ class ConcurrentCalculationsMetadataHolder {
 
             return calculation;
         } catch (e) {
-            logError(e, "endCalculation");
+            Logger.logError(e, "endCalculation");
         }
     }
 

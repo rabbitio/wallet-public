@@ -27,18 +27,3 @@ function sendNoBounceEvent() {
 }
 
 setTimeout(sendNoBounceEvent, 15000);
-
-document.addEventListener("DOMContentLoaded", () => {
-    // eslint-disable-next-line no-undef
-    new Splide(".splide").mount().on("visible", () => {
-        const slidesIndexes = [1, 2, 3, 4];
-        slidesIndexes.forEach(slideIndex => {
-            const textElement = document.getElementById("slide-text-" + slideIndex);
-            if (document.getElementById("splide01-slide0" + slideIndex).className.includes("is-visible")) {
-                textElement.style.display = "inline";
-            } else {
-                textElement.style.display = "none";
-            }
-        });
-    });
-});

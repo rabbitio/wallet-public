@@ -1,18 +1,15 @@
 import { BigNumber } from "bignumber.js";
 
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, safeStringify, Logger } from "@rabbitio/ui-kit";
 
 import { Coins } from "../../coins.js";
 import { Wallets } from "../wallets.js";
 import { Utxos } from "../../btc/lib/utxos.js";
-import { logError } from "../../../common/utils/errorUtils.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import CoinsToFiatRatesService from "./coinsToFiatRatesService.js";
 import { AuthService } from "../../../auth/services/authService.js";
 import { EventBus, TRANSACTION_PUSHED_EVENT } from "../../../common/adapters/eventbus.js";
 import { TransactionsDataService } from "./internal/transactionsDataService.js";
-import { safeStringify } from "../../../common/utils/browserUtils.js";
 
 export class SendCoinsService {
     /**
@@ -79,7 +76,7 @@ export class SendCoinsService {
             if (BigNumber(amountAtoms).gt(BigNumber(balanceAtoms))) {
                 return {
                     result: false,
-                    errorDescription: "The entered amount is greater than the balance you can spend ",
+                    errorDescription: "The entered amount is greater than the balance you can spend. ",
                     howToFix: `Input amount less than ${currentBalance} ${coin.ticker}. `,
                 };
             }
@@ -277,14 +274,14 @@ export class SendCoinsService {
         try {
             wallet.actualizeLocalCachesWithNewTransactionData(coin, txData, txId);
         } catch (e) {
-            logError(e, loggerSource, "Failed to actualize wallet caches");
+            Logger.logError(e, loggerSource, "Failed to actualize wallet caches");
         }
         try {
             if (coin.doesUseDifferentCoinFee()) {
                 try {
                     wallet.actualizeBalanceCacheWithAmountAtoms(txData.amount, -1);
                 } catch (e) {
-                    logError(e, loggerSource);
+                    Logger.logError(e, loggerSource);
                 }
                 Wallets.getWalletByCoin(coin.feeCoin).actualizeBalanceCacheWithAmountAtoms(txData.fee, -1);
             } else {
@@ -292,7 +289,7 @@ export class SendCoinsService {
                 wallet.actualizeBalanceCacheWithAmountAtoms(sumAtomsString, -1);
             }
         } catch (e) {
-            logError(e, loggerSource, "Failed to actualize balances caches");
+            Logger.logError(e, loggerSource, "Failed to actualize balances caches");
         }
     }
 }

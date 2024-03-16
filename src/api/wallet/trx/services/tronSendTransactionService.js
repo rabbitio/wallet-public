@@ -1,6 +1,6 @@
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+import { AmountUtils, improveAndRethrow, safeStringify, Logger } from "@rabbitio/ui-kit";
 
 import { tronUtils } from "../adapters/tronUtils.js";
 import { TxData } from "../../common/models/tx-data.js";
@@ -12,11 +12,9 @@ import { TronBlockchainBalancesService } from "./tronBlockchainBalancesService.j
 import { validateTronAddress } from "../lib/addresses.js";
 import { KeysBip44 } from "../../common/lib/keysBip44.js";
 import { Storage } from "../../../common/services/internal/storage.js";
-import { safeStringify } from "../../../common/utils/browserUtils.js";
 import { FeeEstimationUtils } from "../../common/utils/feeEstimationUtils.js";
 import { TronAccountExistenceProvider } from "../external-apis/tronAccountExistanceProvider.js";
 import { TRC20 } from "../../trc20token/trc20Protocol.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 
 // TODO: [tests, critical] Units required
 export class TronSendTransactionService {

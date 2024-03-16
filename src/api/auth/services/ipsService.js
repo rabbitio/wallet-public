@@ -1,4 +1,4 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { decrypt, encrypt, getSaltedHash } from "../../common/adapters/crypto-utils.js";
 import { Storage } from "../../common/services/internal/storage.js";
@@ -8,7 +8,6 @@ import {
     isIpHashPresent,
     saveEncryptedIpAddress,
 } from "../backend-api/encryptedIpsApi.js";
-import { Logger } from "../../support/services/internal/logs/logger.js";
 import { IpsServiceInternal } from "./internal/ipsServiceInternal.js";
 import IpAddressProvider from "../external-apis/ipAddressProviders.js";
 

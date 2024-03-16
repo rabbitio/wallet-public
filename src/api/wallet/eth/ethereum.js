@@ -1,11 +1,10 @@
 import { ethers } from "ethers";
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils } from "@rabbitio/ui-kit";
+import { AmountUtils, Coin } from "@rabbitio/ui-kit";
 
 import { Storage } from "../../common/services/internal/storage.js";
 import { bip44Scheme } from "../btc/lib/addresses-schemes.js";
-import { Coin } from "../common/models/coin.js";
 import { Network } from "../common/models/networks.js";
 import { ETHEREUM_BLOCKCHAIN } from "./ethereumBlockchain.js";
 

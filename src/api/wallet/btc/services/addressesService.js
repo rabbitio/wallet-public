@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { Storage } from "../../../common/services/internal/storage.js";
 import { hasMinConfirmations } from "../lib/transactions/transactions-utils.js";
@@ -18,7 +18,6 @@ import CurrentAddressUtils from "./utils/currentAddressUtils.js";
 import AddressesDataApi from "../../common/backend-api/addressesDataApi.js";
 import AddressesDataAdapter from "../../common/backend-api/adapters/addressesDataAdapter.js";
 import { transactionsDataProvider } from "./internal/transactionsDataProvider.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 import { EventBus, NEW_ADDRESS_CREATED_EVENT } from "../../../common/adapters/eventbus.js";
 import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
 import { PreferencesService } from "../../common/services/preferencesService.js";

@@ -1,12 +1,9 @@
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils } from "@rabbitio/ui-kit";
+import { AmountUtils, Logger, safeStringify } from "@rabbitio/ui-kit";
 
-import { logError } from "../../../common/utils/errorUtils.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 import { Erc20transactionUtils } from "../lib/erc20transactionUtils.js";
 import { FeeEstimationUtils } from "../../common/utils/feeEstimationUtils.js";
-import { safeStringify } from "../../../common/utils/browserUtils.js";
 import { Erc20TransactionFeeEstimationProvider } from "../external-apis/erc20transactionFeeEstimationProvider.js";
 import { ERC20 } from "../erc20Protocol.js";
 
@@ -99,7 +96,7 @@ export class Erc20FeeEstimationService {
             Logger.log(`Increased gas limit estimation with predefined percent: ${finalValue}`, loggerSource);
             return finalValue;
         } catch (e) {
-            logError(e, "estimateGasForTransfer");
+            Logger.logError(e, "estimateGasForTransfer");
             Logger.log(`estimateGas failed for ERC20 for ${sender}->${receiver}:${amountAtoms}. ${JSON.stringify(e)}`);
             return defaultMaxGasAmountForErc20Transfer;
         }

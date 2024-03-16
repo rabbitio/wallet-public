@@ -1,8 +1,7 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, safeStringify } from "@rabbitio/ui-kit";
 
 import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
 import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
-import { safeStringify } from "../../../common/utils/browserUtils.js";
 import RobustExternalAPICallerService from "../../../common/services/utils/robustExteranlApiCallerService/robustExternalAPICallerService.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 

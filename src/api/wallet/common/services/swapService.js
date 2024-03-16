@@ -1,6 +1,15 @@
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    AmountUtils,
+    improveAndRethrow,
+    safeStringify,
+    SwapProvider,
+    Logger,
+    Coin,
+    SwapspaceSwapProvider,
+    SwapUtils,
+} from "@rabbitio/ui-kit";
 
 import { Wallets } from "../wallets.js";
 import { Coins } from "../../coins.js";
@@ -8,19 +17,18 @@ import { cache } from "../../../common/utils/cache.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { TxData } from "../models/tx-data.js";
 import CoinsToFiatRatesService from "./coinsToFiatRatesService.js";
-import { SwapProvider } from "../../../swaps/external-apis/swapProvider.js";
 import { SendCoinsService } from "./sendCoinsService.js";
-import { safeStringify } from "../../../common/utils/browserUtils.js";
-import { SwapspaceSwapProvider } from "../../../swaps/external-apis/swapspaceSwapProvider.js";
 import { BalancesService } from "./balancesService.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
-import { Coin } from "../models/coin.js";
 import { EventBus, SWAP_CREATED_EVENT, SWAP_TX_PUSHED_EVENT } from "../../../common/adapters/eventbus.js";
 import { ETHEREUM_BLOCKCHAIN } from "../../eth/ethereumBlockchain.js";
 import { TRON_BLOCKCHAIN } from "../../trx/tronBlockchain.js";
 import { BITCOIN_BLOCKCHAIN } from "../../btc/bitcoinBlockchain.js";
-import { SwapUtils } from "../../../swaps/utils/swapUtils.js";
 import { SwapCreationInfo } from "../models/swapCreationInfo.js";
+import IpAddressProvider from "../../../auth/external-apis/ipAddressProviders.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { ERC20 } from "../../erc20token/erc20Protocol.js";
+import { TRC20 } from "../../trc20token/trc20Protocol.js";
+import { TickersAdapter } from "../external-apis/utils/tickersAdapter.js";
 
 export class SwapService {
     static SWAPS_COMMON_ERRORS = {
@@ -80,7 +88,7 @@ export class SwapService {
     async getSwappableCurrencies() {
         const loggerSource = "getSwappableCurrencies";
         try {
-            const result = await this._swapProvider.getSupportedCurrencies();
+            const result = await this._swapProvider.getDepositCurrencies();
             if (result.reason === SwapProvider.COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED) {
                 SwapUtils.safeHandleRequestsLimitExceeding();
                 return { result: false, reason: SwapService.SWAPS_COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED };
@@ -133,7 +141,7 @@ export class SwapService {
             if (!(fromCoin instanceof Coin)) {
                 throw new Error("Invalid coin provided: " + fromCoin);
             }
-            const providerResult = await this._swapProvider.getSupportedCurrencies();
+            const providerResult = await this._swapProvider.getWithdrawalCurrencies(fromCoin);
             if (!providerResult.result) {
                 if (providerResult.reason === SwapProvider.COMMON_ERRORS.REQUESTS_LIMIT_EXCEEDED) {
                     SwapUtils.safeHandleRequestsLimitExceeding();
@@ -310,7 +318,8 @@ export class SwapService {
                  * depend on min/max).
                  * Also we recalculate despite on the present data when swap all is requested.
                  */
-                details = await this._swapProvider.getSwapInfo(fromCoin, toCoin, fromAmountCoins);
+                const usdRate = (await CoinsToFiatRatesService.getCoinToUSDRate(fromCoin))?.rate ?? null;
+                details = await this._swapProvider.getSwapInfo(fromCoin, toCoin, fromAmountCoins, usdRate);
                 cache.putSessionDependentData(cacheKey, details, this.getSwapCreationInfoTtlMs());
                 Logger.log(`Fetched the swap details: ${safeStringify(details)}`, loggerSource);
             }
@@ -677,14 +686,19 @@ export class SwapService {
             const toWallet = Wallets.getWalletByCoin(toCoin);
             const toAddress = await toWallet.getCurrentAddress();
             const refundAddress = await fromWallet.getCurrentAddress();
+
             Logger.log(`To address: ${toAddress}, refund address: ${refundAddress}`, loggerSource);
+
+            const clientIp = await IpAddressProvider.getClientIpAddress();
+
             const result = await this._swapProvider.createSwap(
                 fromCoin,
                 toCoin,
                 fromAmount,
                 toAddress,
                 refundAddress,
-                swapCreationInfo.rawSwapData
+                swapCreationInfo.rawSwapData,
+                clientIp
             );
             Logger.log(
                 `Created:${safeStringify({
@@ -835,8 +849,20 @@ export class SwapService {
     }
 }
 
+function fromSwapspaceCodeAndNetworkToRabbitOOBSupportedCoin(code, network) {
+    if (code === "btc" && network === "btc") return Coins.COINS.BTC;
+    if (code === "eth" && network === "eth") return Coins.COINS.ETH;
+    if (code === "trx" && network === "trx") return Coins.COINS.TRX;
+    const protocol = network === "erc20" ? ERC20 : network === "trc20" ? TRC20 : null;
+    if (!protocol) return null;
+    const rabbitTicker = TickersAdapter.standardTickerToRabbitTicker(code, protocol.protocol);
+    return Coins.getCoinByTickerIfPresent(rabbitTicker);
+}
+
 /**
  * Currently we have the only swapping provider so using the below SwapService instance.
  * @type {SwapService}
  */
-export const swapService = new SwapService(new SwapspaceSwapProvider());
+export const swapService = new SwapService(
+    new SwapspaceSwapProvider(API_KEYS_PROXY_URL, cache, fromSwapspaceCodeAndNetworkToRabbitOOBSupportedCoin)
+);

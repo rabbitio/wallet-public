@@ -1,8 +1,7 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { decrypt, encrypt, getSaltedHash } from "../../../../common/adapters/crypto-utils.js";
 import { TransactionDataApi } from "../../backend-api/transactionDataApi.js";
-import { Logger } from "../../../../support/services/internal/logs/logger.js";
 import { Storage } from "../../../../common/services/internal/storage.js";
 
 export class TransactionsDataService {

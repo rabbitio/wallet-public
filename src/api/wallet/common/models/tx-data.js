@@ -1,4 +1,4 @@
-import { safeStringify } from "../../../common/utils/browserUtils.js";
+import { safeStringify } from "@rabbitio/ui-kit";
 
 /**
  * Class to memorize data for transaction that has been checked with fake signatures.

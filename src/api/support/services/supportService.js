@@ -1,8 +1,6 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger, EmailsApi } from "@rabbitio/ui-kit";
 
 import { SUPPORT_EMAIL } from "../../../properties.js";
-import EmailsApi from "../backend-api/emailAPI.js";
-import { Logger } from "./internal/logs/logger.js";
 
 export default class SupportService {
     /**

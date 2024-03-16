@@ -1,10 +1,9 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import UtxosService from "./internal/utxosService.js";
 import PaymentService from "./paymentService.js";
 import { getCurrentSmallestFeeRate } from "./feeRatesService.js";
 import { Storage } from "../../../common/services/internal/storage.js";
-import { Logger } from "../../../support/services/internal/logs/logger.js";
 import CoinsToFiatRatesService from "../../common/services/coinsToFiatRatesService.js";
 import { Coins } from "../../coins.js";
 

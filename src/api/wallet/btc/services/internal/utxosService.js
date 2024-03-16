@@ -1,11 +1,10 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
 
 import { Utxos } from "../../lib/utxos.js";
 import { Storage } from "../../../../common/services/internal/storage.js";
 import { BtcUtxosUtils } from "../utils/utxosUtils.js";
 import AddressesDataApi from "../../../common/backend-api/addressesDataApi.js";
 import AddressesServiceInternal from "./addressesServiceInternal.js";
-import { Logger } from "../../../../support/services/internal/logs/logger.js";
 import { CacheAndConcurrentRequestsResolver } from "../../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
 import { createRawBalanceAtomsCacheProcessorForSingleBalanceProvider } from "../../../common/utils/cacheActualizationUtils.js";
 import { BALANCE_CHANGED_EXTERNALLY_EVENT, EventBus } from "../../../../common/adapters/eventbus.js";
