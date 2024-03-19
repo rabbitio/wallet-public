@@ -535,7 +535,15 @@ export class SwapService {
     async getInitialSwapData(fromCoin, toCoin) {
         const loggerSource = "getInitialSwapData";
         try {
-            const result = await SwapUtils.getInitialSwapData(this._swapProvider, fromCoin, toCoin);
+            const coinFiatRate =
+                await CoinsToFiatRatesService.getCoinToCurrentFiatCurrencyRateForSpecificDate(fromCoin);
+            const result = await SwapUtils.getInitialSwapData(
+                this._swapProvider,
+                fromCoin,
+                toCoin,
+                coinFiatRate?.rate ? String(coinFiatRate?.rate) : null,
+                coinFiatRate?.decimalCount != null ? coinFiatRate.decimalCount : null
+            );
             if (!result.result) {
                 if (result?.reason === SwapProvider.NO_SWAPS_REASONS.NOT_SUPPORTED)
                     return { result: false, reason: SwapService.SWAP_DETAILS_FAIL_REASONS.PAIR_NOT_SUPPORTED };

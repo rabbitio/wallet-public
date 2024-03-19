@@ -17,8 +17,8 @@ export default class InputValuesProviders {
             return "";
         }
 
-        if (digitsAfterDot < 1) {
-            throw new Error("Min suffix length is 1, got " + digitsAfterDot);
+        if (digitsAfterDot < 0) {
+            throw new Error("Min suffix length is 0, got " + digitsAfterDot);
         }
 
         value = value.replace(/[,]/g, "."); // replaces commas with dots

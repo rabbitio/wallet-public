@@ -88,7 +88,7 @@
         "stream-browserify": "3.0.0"
     },
     "dependencies": {
-        "@rabbitio/ui-kit": "^1.0.0-beta.24",
+        "@rabbitio/ui-kit": "^1.0.0-beta.27",
         "@ramp-network/ramp-instant-sdk": "3.0.0",
         "@redux-devtools/extension": "3.3.0",
         "@use-gesture/react": "10.3.0",
