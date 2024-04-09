@@ -1,3 +1,3 @@
 export async function register() {
-    await import("./src/next/stubs/swapRatesList.js");
+    await import("./src/next/services/swapRatesList.js");
 }

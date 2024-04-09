@@ -1,13 +1,39 @@
+import i18NextConfig from "./next-i18next.config.cjs";
+
+/* i18next doesn't auto-recognize .cjs file extension.
+ * And we cannot use .js config due to type: "module" in package.json.
+ * So here we explicitly set the file name of i18next config so i18next will find it.
+ */
+process.env.I18NEXT_DEFAULT_CONFIG_PATH = "./next-i18next.config.cjs";
+
 const nextConfig = {
+    /*
+     * We use base path because of custom server that is backend of Rabbit Wallet.
+     * We can remove this if we make Rabbit Swaps next.js app a dedicated service.
+     */
     basePath: "/swap",
+    /*
+     * Next.js have issues working with transpiled code.
+     * So we ask next.js to transpile raw source code from our lib.
+     */
     transpilePackages: ["@rabbitio/ui-kit"],
-    i18n: {
-        // These are all the locales you want to support in your application
-        locales: ["en"],
-        // This is the default locale you want to be used when visiting a non-locale prefixed path
-        defaultLocale: "en",
-    },
+    /*
+     * Allows loading initialization scripts for next. See instrumentation.js
+     */
     experimental: { instrumentationHook: true },
-}
+    /*
+     * i18next wants its config to be a dedicated file.
+     * So we created it and just put its content here.
+     */
+    ...i18NextConfig,
+};
+
+(() => {
+    if (i18NextConfig.i18n.locales.length > 5) {
+        // WARNING! Current sitemap generator supports no more than 5 languages.
+        // Adopt it when adding more languages (max size of single sitemap is 50MB)
+        throw new Error("Such langs count not supported by sitemap generator");
+    }
+})();
 
 export default nextConfig;

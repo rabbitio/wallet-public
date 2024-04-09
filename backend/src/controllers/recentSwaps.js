@@ -4,7 +4,7 @@ import { ControllerUtils } from "./controllerUtils.js";
 import { RECENT_SWAPS_EP_NUMBER } from "./endpointNumbers.js";
 import { getSwapsList } from "../services/swapListGenerator.js";
 
-const log = log4js.getLogger("clientLogs");
+const log = log4js.getLogger("recentSwaps");
 
 export default class RecentSwaps {
     /**

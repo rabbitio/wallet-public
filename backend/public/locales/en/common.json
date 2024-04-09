@@ -1,10 +1,281 @@
 {
-    "tt": "AAA",
     "components": {
         "pages": {
             "PublicSwapPrimaryLanding": {
-                "title": "Crypto Swap Made Easy"
+                "meta": {
+                    "title": "Swap Crypto Instantly with the Lowest Fees - Rabbit Swap",
+                    "keywords": "swap crypto, crypto exchange, cryptocurrency swap, cryptocurrency exchange, swap crypto with lowest fees, exchange coins, swap tokens, fast crypto exchange, swap coins, low-cost swaps, digital asset swap, quick coin swaps",
+                    "description": "Exchange coins and tokens instantly with Rabbit Swap, the unique crypto exchange with the best rates. No sign-up required - swap coins with just one click!"
+                },
+                "hero": {
+                    "title": "Crypto Swap Made Easy",
+                    "content": "Exchange Bitcoin, Tether, Ethereum, and more than 3600 other cryptocurrencies with the lowest fees — no sign-up required. Choose a pair and get started!"
+                },
+                "how-to-swap": {
+                    "title": "How to exchange crypto with Rabbit Swap?",
+                    "content": "Using Rabbit Swap is easy and straightforward; below, you can find all the steps you need to take to swap your coins:",
+                    "items": {
+                        "1": {
+                            "title": "Create a Swap",
+                            "content": "Pick a coin pair and enter the desired amount in the form above."
+                        },
+                        "2": {
+                            "title": "Provide Your Address",
+                            "content": "Enter the address where you would like the exchanged crypto to be received."
+                        },
+                        "3": {
+                            "title": "Send Coins",
+                            "content": "Check the details and send your coins to the generated address."
+                        },
+                        "4": {
+                            "title": "Get Your Coins",
+                            "content": "Receive the exchanged crypto in a few moments!"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "Best Rates Possible",
+                    "content": "Rabbit Swap has a unique algorithm that dynamically compares rates from various liquidity providers, selecting the lowest one to ensure your exchanges always happen at the most profitable rates."
+                },
+                "wide-limits": {
+                    "title": "Lowest and Highest Limits",
+                    "content": "Having various liquidity providers also enables Rabbit Swap to offer a wide range of limits. You can exchange very small amounts as well as almost infinitely large ones."
+                },
+                "features-grid": {
+                    "title": "What Sets Rabbit Swap Apart?",
+                    "content": "Rabbit Swap is designed to make the crypto swap process cost-effective, secure, fast, and as easy as sending a text message.",
+                    "items": {
+                        "1": {
+                            "title": "No Sign-Up Required",
+                            "content": "Exchange any amount of crypto with the lowest fees and almost instant speed — no sign-up required. It can be done in just a few clicks."
+                        },
+                        "2": {
+                            "title": "Wide Range of Supported Assets",
+                            "content": "Choose from more than 3600 coins and tokens available for swapping."
+                        },
+                        "3": {
+                            "title": "Respect for Privacy",
+                            "content": "Only anonymized information is used to perform an exchange. Rabbit Swap will never request any information except your address for receiving coins."
+                        },
+                        "4": {
+                            "title": "Jedi-Level Support",
+                            "content": "While all swaps are performed completely automatically, sometimes we need to talk to someone real. Chat with one of our supporters at any time of the day or night."
+                        }
+                    }
+                },
+                "recent-swaps": {
+                    "title": "Recent Swaps in Real Time"
+                }
+            },
+            "PublicSwapAssetLanding": {
+                "meta": {
+                    "title": "Swap {{tickerWithProtocol}} Instantly with the Lowest Fees — Rabbit Swap",
+                    "keywords": "swap {{tickerWithProtocol}}, exchange {{tickerWithProtocol}}, swap {{assetName}}, exchange {{assetName}}, trade {{tickerPrintable}}, swap crypto, crypto exchange, cryptocurrency swap, cryptocurrency exchange, swap crypto with lowest fees, exchange coins, swap tokens, fast crypto exchange, swap coins, low-cost swaps, digital asset swap, quick coin swaps",
+                    "description": "Exchange {{tickerAndBracedProtocol}} instantly with Rabbit Swap — the unique crypto exchange with the best rates. No sign-up required — swap {{assetName}} with just one click!"
+                },
+                "hero": {
+                    "title": "{{tickerPrintable}} Swap Made Easy",
+                    "content": "Exchange {{nameAndBracedProtocol}} at the best rate. Instantly. No sign-up required. Go ahead, just pick the coin you'd like to swap your {{assetName}} to, and enter the amount!"
+                },
+                "how-to-swap": {
+                    "title": "How to exchange {{tickerPrintable}}?",
+                    "content": "Rabbit Swap is designed to make the {{tickerPrintable}} swap process cost-effective, secure, fast, and as easy as sending a text message.",
+                    "items": {
+                        "1": {
+                            "title": "Create a Swap",
+                            "content": "Pick a coin pair for {{tickerWithProtocol}} and enter the desired amount in the form above."
+                        },
+                        "2": {
+                            "title": "Provide Your Address",
+                            "content": "Enter the address where you would like to receive swapped coins."
+                        },
+                        "3": {
+                            "title": "Send Coins",
+                            "content": "Review the details and send your {{tickerWithProtocol}} to the generated address."
+                        },
+                        "4": {
+                            "title": "Get Your Coins",
+                            "content": "Receive your swapped coins in just a few moments!"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "Best Rates Possible",
+                    "content": "Ensure that you get the best possible rates when exchanging your {{nameAndBracedProtocol}}. Rabbit Swap dynamically compares rates from various liquidity providers and selects the best rate each time you perform an exchange."
+                },
+                "wide-limits": {
+                    "title": "Lowest and Highest Limits",
+                    "content": "By having a diverse range of liquidity providers under the hood, Rabbit Swap is essentially limitless in terms of possible swap amounts. Whether you want to exchange a few dollars or billions of dollars, Rabbit Swap can handle it."
+                },
+                "features-grid": {
+                    "title": "Why exchange {{tickerWithProtocol}} with Rabbit Swap?",
+                    "content": "Rabbit Swap is designed to make the {{tickerPrintable}} swap process cost-effective, secure, fast, and as easy as sending a text message.",
+                    "items": {
+                        "1": {
+                            "title": "No Sign-Up Required",
+                            "content": "Exchange any amount of {{nameAndBracedProtocol}} with the lowest fees and almost instant speed — no sign-up required. It can be done in just a few clicks."
+                        },
+                        "2": {
+                            "title": "Wide Range of Supported Assets",
+                            "content": "Besides of {{nameAndBracedProtocol}}, you can choose from more than 3600 coins and tokens available for swapping.."
+                        },
+                        "3": {
+                            "title": "Respect for Privacy",
+                            "content": "The exchange process relies solely on anonymized information. Rabbit Swap will never request any details other than your address for receiving coins."
+                        },
+                        "4": {
+                            "title": "Jedi-Level Support",
+                            "content": "While all swaps are performed completely automatically, sometimes we need to talk to someone real. Chat with one of our supporters at any time of the day or night."
+                        }
+                    }
+                },
+                "recent-swaps": {
+                    "title": "Recent Swaps in Real Time"
+                }
+            },
+            "PublicSwapPairLanding": {
+                "meta": {
+                    "title": "Swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} Instantly with the Lowest Fees — Rabbit Swap",
+                    "keywords": "swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, exchange {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, swap {{fromAssetName}} to {{toAssetName}}, exchange {{fromAssetName}} to {{toAssetName}}, trade {{fromTickerPrintable}}/{{toTickerPrintable}}, swap {{fromTickerPrintable}} to {{toTickerPrintable}}, exchange {{fromTickerPrintable}} to {{toTickerPrintable}}, swap crypto, crypto exchange, cryptocurrency swap, cryptocurrency exchange, swap crypto with lowest fees, exchange coins, swap tokens, fast crypto exchange, swap coins, low-cost swaps, digital asset swap, quick coin swaps",
+                    "description": "Exchange {{fromTickerAndBracedProtocol}} to {{toTickerAndBracedProtocol}} instantly with Rabbit Swap — the unique crypto exchange with the best rates. No sign-up required — swap {{fromAssetName}} to {{toAssetName}} with just one click!"
+                },
+                "hero": {
+                    "title": "{{fromTickerPrintable}} to {{toTickerPrintable}} Swap Made Easy",
+                    "content": "Exchange {{fromNameAndBracedProtocol}} to {{toNameAndBracedProtocol}} at the best rate. Instantly. No sign-up required. Go ahead, just enter the amount!"
+                },
+                "how-to-swap": {
+                    "title": "How to exchange {{fromTickerPrintable}} to {{toTickerPrintable}}?",
+                    "content": "Using Rabbit Swap is easy and straightforward; below, you can find all the steps you need to take to swap your {{fromAssetName}} to {{toAssetName}}:",
+                    "items": {
+                        "1": {
+                            "title": "Enter the Amount",
+                            "content": "Enter the desired amount of {{fromTickerWithProtocol}} you'd like to swap in the form above."
+                        },
+                        "2": {
+                            "title": "Provide Your Address",
+                            "content": "Enter the address where you would like to receive the {{toTickerWithProtocol}}."
+                        },
+                        "3": {
+                            "title": "Send Coins",
+                            "content": "Review the details and send your {{fromTickerWithProtocol}} to the generated address."
+                        },
+                        "4": {
+                            "title": "Get Your Coins",
+                            "content": "Receive your {{toTickerWithProtocol}} in just a few moments!"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "Best Rates Possible",
+                    "content": "Ensure that you get the best possible rates when exchanging your {{fromNameAndBracedProtocol}} to {{toNameAndBracedProtocol}}. Rabbit Swap dynamically compares rates from various liquidity providers and selects the best rate each time you perform an exchange."
+                },
+                "wide-limits": {
+                    "title": "Lowest and Highest Limits",
+                    "content": "By having a diverse range of liquidity providers under the hood, Rabbit Swap is essentially limitless in terms of possible swap amounts. Whether you want to exchange a few dollars or billions of dollars, Rabbit Swap can handle it."
+                },
+                "features-grid": {
+                    "title": "Why exchange {{fromTickerPrintable}} to {{toTickerPrintable}} with Rabbit Swap?",
+                    "content": "Rabbit Swap is designed to make the {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} swap process cost-effective, secure, fast, and as easy as sending a text message.",
+                    "items": {
+                        "1": {
+                            "title": "No Sign-Up Required",
+                            "content": "Exchange any amount of {{fromNameAndBracedProtocol}} and {{toNameAndBracedProtocol}} with the lowest fees and almost instant speed — no sign-up required. It can be done in just a few clicks."
+                        },
+                        "2": {
+                            "title": "Wide Range of Supported Assets",
+                            "content": "Besides of {{fromNameAndBracedProtocol}} and {{toNameAndBracedProtocol}}, you can choose from more than 3600 coins and tokens available for swapping."
+                        },
+                        "3": {
+                            "title": "Respect for Privacy",
+                            "content": "The exchange process relies solely on anonymized information. Rabbit Swap will never request any details other than your {{toNameAndBracedProtocol}} address for receiving coins."
+                        },
+                        "4": {
+                            "title": "Jedi-Level Support",
+                            "content": "While all swaps are performed completely automatically, sometimes we need to talk to someone real. Chat with one of our supporters at any time of the day or night."
+                        }
+                    }
+                },
+                "recent-swaps": {
+                    "title": "Recent Swaps in Real Time"
+                }
+            },
+            "UnexpectedErrorPage": {
+                "title": "There seems to be a problem",
+                "subtitle": "This is pretty embarrassing... the application has failed due to an unexpected error. Please reload the page or contact us at support@rabbit.io if this error happens repeatedly. We apologize for the inconvenience.",
+                "primary-button-content": "Reload the page",
+                "transparent-button-content": "Contact support",
+                "sign-in-button-content": "Home"
+            }
+        },
+        "organisms": {
+            "SwapFormWithCoinDropdowns": {
+                "SwapForm": {
+                    "swap-all-button-titles": {
+                        "enable": "Swap all",
+                        "cancel": "Cancel"
+                    },
+                    "consents": {
+                        "consent-text-rate": "Rate varies with the amount.",
+                        "consent-text": "By clicking \"Swap\" you agree with Rabbit Swap's",
+                        "terms-of-use": "Terms of Use",
+                        "and": "and",
+                        "privacy-policy": "Privacy Policy"
+                    },
+                    "information-block": {
+                        "minimum-amount": "Minimal amount: ",
+                        "maximum-amount": "Maximum amount: ",
+                        "transaction-fee": "Network fee: ",
+                        "calculating-network-fee": "Calculating network fee..",
+                        "loading-minimal-amount": "Loading minimal amount..",
+                        "swap-rate": "Rate: ",
+                        "calculating-swap-rates": "Calculating swap rates..",
+                        "pair-not-available": "Pair is not available now. Please, try again later or choose another pair."
+                    },
+                    "confirm-button-text": "Swap"
+                },
+                "errors": {
+                    "requests-limit-exceeded": "Sorry, our service is experiencing a temporary interruption due to high demand. Please try again in a few minutes. We appreciate your understanding.",
+                    "default": "Sorry, we failed to perform the last operation, please try again or contact support."
+                }
+            },
+            "LandingFooter": {
+                "single-asset": {
+                    "title": "Exchange",
+                    "item-content": "Exchange {{ticker}}"
+                },
+                "pair": {
+                    "title": "Exchange pairs",
+                    "item-content": "{{tickerFrom}} to {{tickerTo}}"
+                }
+            },
+            "AssetDropdown": {
+                "field-placeholder": "Search..",
+                "text-default": "All available assets",
+                "text-search": "Search results",
+                "text-search-fail": "Asset not found",
+                "load-more-button": "Load more"
+            },
+            "RecentSwapsTable": {
+                "table-head-tiles": {
+                    "from": "From",
+                    "to": "To",
+                    "finished": "Finished"
+                }
             }
         }
+    },
+    "common": {
+        "independent-exchange": {
+            "title": "Exchange Independently",
+            "content": "While most people conduct crypto swaps through various trading platforms, thereby entrusting their assets to these platforms, it is actually much safer to use independent exchange services such as Rabbit Swap. By doing so, you can still store your coins in secure, non-custodial wallets while performing your exchanges. This approach ensures that no one can ban or restrict your account, seize control of your coins, and ensures that the next FTX will not get away with all your coins, nor will you be affected if the SEC bans another of your favorite trading services."
+        },
+        "create-swap-cta-title": "Start Swap",
+        "page-titles": {
+            "terms-and-conditions": "Terms & Conditions",
+            "privacy-policy": "Privacy Policy",
+            "try-wallet": "Try Rabbit Wallet"
+        },
+        "native-asset-protocol": "Native",
+        "support-chat-message": "Chat with us"
     }
 }
