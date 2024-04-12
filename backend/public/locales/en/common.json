@@ -205,6 +205,22 @@
                 "primary-button-content": "Reload the page",
                 "transparent-button-content": "Contact support",
                 "sign-in-button-content": "Home"
+            },
+            "PrivacyPolicy": {
+                "title": "SWAP.RABBIT.IO PRIVACY POLICY",
+                "meta": {
+                    "title": "Privacy Policy – Rabbit Swap",
+                    "description": "Review Rabbit Swap's Privacy Policy for a clear understanding of how we handle your information on our cryptocurrency exchange platform. We prioritize transparency to ensure your privacy is protected throughout your experience.",
+                    "keywords": "privacy policy, swap crypto, crypto exchange, cryptocurrency swap, cryptocurrency exchange"
+                }
+            },
+            "TermsOfUse": {
+                "title": "SWAP.RABBIT.IO TERMS OF USE",
+                "meta": {
+                    "title": "Terms of Use – Rabbit Swap",
+                    "description": "Review Rabbit Swap's Terms of Use for clear guidelines on using our cryptocurrency exchange platform. Understand your rights and responsibilities to ensure a smooth experience.",
+                    "keywords": "terms of use, swap crypto, crypto exchange, cryptocurrency swap, cryptocurrency exchange"
+                }
             }
         },
         "organisms": {
