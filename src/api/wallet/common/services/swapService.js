@@ -872,5 +872,9 @@ function fromSwapspaceCodeAndNetworkToRabbitOOBSupportedCoin(code, network) {
  * @type {SwapService}
  */
 export const swapService = new SwapService(
-    new SwapspaceSwapProvider(API_KEYS_PROXY_URL, cache, fromSwapspaceCodeAndNetworkToRabbitOOBSupportedCoin)
+    new SwapspaceSwapProvider(
+        API_KEYS_PROXY_URL + "/swapspace",
+        cache,
+        fromSwapspaceCodeAndNetworkToRabbitOOBSupportedCoin
+    )
 );

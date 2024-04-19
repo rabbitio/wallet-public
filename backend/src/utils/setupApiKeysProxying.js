@@ -8,6 +8,7 @@ import {
     ALCHEMY_API_KEY_ETH_MAINNET,
     SWAPSPACE_API_KEY,
     TRONGRID_API_KEY,
+    SWAPSPACE_API_KEY_FOR_RATES_API,
 } from "../properties.js";
 
 // TODO: [tests, critical] easier than to test it manually
@@ -49,6 +50,12 @@ export function setupApiKeysProxying(apiKeysProxyBasePath) {
                 pathRewrite: generatePreserveOriginalPathFunc("swapspace"),
                 fqdn: `https://api.swapspace.co`,
                 customHeaders: [["Authorization", SWAPSPACE_API_KEY]],
+            },
+            SWAPSPACE_FOR_RATES_API: {
+                id: "swapspaceForRatesApi",
+                pathRewrite: generatePreserveOriginalPathFunc("swapspaceForRatesApi"),
+                fqdn: `https://api.swapspace.co`,
+                customHeaders: [["Authorization", SWAPSPACE_API_KEY_FOR_RATES_API]],
             },
         };
         const buildProxyOptions = apiParams => ({
