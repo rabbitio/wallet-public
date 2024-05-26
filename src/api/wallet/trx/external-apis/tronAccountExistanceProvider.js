@@ -1,12 +1,15 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { MODERATE_TTL_FOR_RELATIVELY_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class TronscanAccountExistenceProvider extends ExternalApiProvider {
     constructor() {
@@ -41,7 +44,7 @@ class TrongridAccountExistenceProvider extends ExternalApiProvider {
     composeQueryString(params, subRequestIndex = 0) {
         try {
             const originalApiPath = "/wallet/getaccount";
-            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.TRX)?.key)}${originalApiPath}`;
         } catch (e) {
             improveAndRethrow(e, "trongridAccountExistenceProvider.composeQueryString");
         }
@@ -72,6 +75,7 @@ class TrongridAccountExistenceProvider extends ExternalApiProvider {
 export class TronAccountExistenceProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronAccountExistenceProvider",
+        cache,
         [new TronscanAccountExistenceProvider(), new TrongridAccountExistenceProvider()],
         MODERATE_TTL_FOR_RELATIVELY_FREQ_CHANGING_DATA_MS
     );

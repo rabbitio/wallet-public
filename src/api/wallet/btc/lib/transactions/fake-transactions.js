@@ -58,9 +58,9 @@ export class BtcFakeTransactionsBuilder {
 
                     // TODO: [feature, moderate] change can be dust at the first call and not dust at second. task_id=b1bbe260001f4a74ba771b80827420a8
                     let tx = BtcTransactionBuilder.buildTransaction(
-                        AmountUtils.intStr(amount),
+                        AmountUtils.toIntegerString(amount),
                         address,
-                        AmountUtils.intStr(change),
+                        AmountUtils.toIntegerString(change),
                         changeAddress,
                         selectedUtxos,
                         ecPairsMapping,
@@ -74,9 +74,9 @@ export class BtcFakeTransactionsBuilder {
                     if (change.gte(fee)) {
                         change = change.minus(fee);
                         // TODO: [refactoring, moderate] Maybe remove this call - it is placed just to verify that build is ok. task_id=b1bbe260001f4a74ba771b80827420a8
-                        const amountString = AmountUtils.intStr(amount);
-                        const changeString = AmountUtils.intStr(change);
-                        const feeString = AmountUtils.intStr(fee);
+                        const amountString = AmountUtils.toIntegerString(amount);
+                        const changeString = AmountUtils.toIntegerString(change);
+                        const feeString = AmountUtils.toIntegerString(fee);
 
                         BtcTransactionBuilder.buildTransaction(
                             amountString,
@@ -131,7 +131,7 @@ export class BtcFakeTransactionsBuilder {
             );
 
             const amountOfGoodUtxos = goodUtxos.reduce((sum, utxo) => sum.plus(utxo.value_satoshis), BigNumber("0"));
-            const amountOfGoodUtxosString = AmountUtils.intStr(amountOfGoodUtxos);
+            const amountOfGoodUtxosString = AmountUtils.toIntegerString(amountOfGoodUtxos);
             if (Utxos.isAmountDustForAddress(amountOfGoodUtxosString, address).result) {
                 // TODO: [feature, moderate] return TxData here too. task_id=c6771140cfce44049a8ce600032bb3af
                 return getFeePlusSendingAmountOverlapsBalanceErrorData();
@@ -148,7 +148,7 @@ export class BtcFakeTransactionsBuilder {
             );
             const feeOfGoodUtxos = BigNumber(BtcFeeCalculatorByFeeRate.calculateFeeByFeeRate(txOfGoodUtxos, feeRate));
 
-            const finalAmountString = AmountUtils.intStr(amountOfGoodUtxos.minus(feeOfGoodUtxos));
+            const finalAmountString = AmountUtils.toIntegerString(amountOfGoodUtxos.minus(feeOfGoodUtxos));
             if (!Utxos.isAmountDustForAddress(finalAmountString, address).result) {
                 BtcTransactionBuilder.buildTransaction(
                     finalAmountString,
@@ -160,7 +160,7 @@ export class BtcFakeTransactionsBuilder {
                     network
                 ); // Just to verify build is ok
 
-                const feeOfGoodUtxosString = AmountUtils.intStr(feeOfGoodUtxos);
+                const feeOfGoodUtxosString = AmountUtils.toIntegerString(feeOfGoodUtxos);
                 return new TxData(
                     finalAmountString,
                     address,

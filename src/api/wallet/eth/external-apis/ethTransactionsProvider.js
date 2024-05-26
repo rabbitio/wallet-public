@@ -1,21 +1,25 @@
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    AmountUtils,
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
 import { EthTransactionsUtils } from "../lib/ethTransactionsUtils.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
 import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem.js";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import {
     actualizeCacheWithNewTransactionSentFromAddress,
     mergeTwoArraysByItemIdFieldName,
     mergeTwoTransactionsArraysAndNotifyAboutNewTransactions,
 } from "../../common/utils/cacheActualizationUtils.js";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class EtherscanEthTransactionsProvider extends ExternalApiProvider {
     constructor() {
@@ -152,6 +156,7 @@ class EtherscanEthTransactionsProvider extends ExternalApiProvider {
 export class EthTransactionsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "ethTransactionsProvider",
+        cache,
         [new EtherscanEthTransactionsProvider()],
         STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,

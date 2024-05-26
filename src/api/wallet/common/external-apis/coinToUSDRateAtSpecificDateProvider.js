@@ -1,10 +1,13 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { ApiGroupCoinIdAdapters } from "../adapters/apiGroupCoinIdAdapters.js";
 import { PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 // TODO: [feature, low] add provider (only some tokens): https://api.blockchain.com/v3/exchange/tickers
 // TODO: [feature, low] add provider (only some tokens): https://api.crypto.com/v2/public/get-ticker RPS=100 https://exchange-docs.crypto.com/spot/index.html#rate-limits
@@ -151,6 +154,7 @@ class CoinToUSDRateAtSpecificDateProvider {
     constructor(providers) {
         this._callerService = new CachedRobustExternalApiCallerService(
             "coinToUsdRateAtSpecificDate",
+            cache,
             providers,
             PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS, // Because the data is historical rate and should not be actualized
             true,

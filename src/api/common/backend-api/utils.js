@@ -1,14 +1,12 @@
 import Cookie from "js-cookie";
 
-import { improveAndRethrow, safeStringify } from "@rabbitio/ui-kit";
+import { improveAndRethrow, safeStringify, AxiosAdapter, postponeExecution } from "@rabbitio/ui-kit";
 
 import { API_URL, IS_TESTING } from "../../../properties.js";
 import { cookieStorage } from "../utils/cookiesStorage.js";
 import { EventBus, NO_AUTHENTICATION_EVENT } from "../adapters/eventbus.js";
 import { Storage } from "../services/internal/storage.js";
 import { WALLET_EXISTS } from "./apiErrorCodes.js";
-import { postponeExecution } from "../utils/browserUtils.js";
-import AxiosAdapter from "../adapters/axiosAdapter.js";
 
 export const API_VERSION_PREFIX = "/api/v1";
 export const urlWithPrefix = `${API_URL}${API_VERSION_PREFIX}`;

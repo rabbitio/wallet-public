@@ -1,15 +1,20 @@
-import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    AmountUtils,
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
 import { Coins } from "../../coins.js";
 import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem.js";
 import { tronUtils } from "../adapters/tronUtils.js";
 import { computeConfirmationsCountByTimestamp } from "../lib/blocks.js";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class TrongridTransactionDetailsProvider extends ExternalApiProvider {
     constructor() {
@@ -24,7 +29,7 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
         try {
             const endpointLastPart = subRequestIndex === 0 ? "gettransactionbyid" : "gettransactioninfobyid";
             const originalApiPath = `/wallet/${endpointLastPart}`;
-            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.TRX)?.key)}${originalApiPath}`;
         } catch (e) {
             improveAndRethrow(e, "trongridTransactionDetailsProvider.composeQueryString");
         }
@@ -43,7 +48,7 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
                 const t = response?.data ?? {};
                 const id = t?.txID;
                 const timestamp = t?.raw_data?.timestamp ?? provideFirstSeenTime(id);
-                const feeLimit = AmountUtils.intStr(t?.raw_data?.fee_limit ?? null);
+                const feeLimit = AmountUtils.toIntegerString(t?.raw_data?.fee_limit ?? null);
                 const confirmations = t?.raw_data?.timestamp ? computeConfirmationsCountByTimestamp(timestamp) : 0;
                 if ((t?.raw_data?.contract ?? [])[0]?.type === "TransferContract") {
                     const toAddress = tronUtils.hexAddressToBase58check(
@@ -51,7 +56,9 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
                     );
                     const isSelfSending = toAddress === myAddress;
                     const type = toAddress === myAddress ? "in" : "out";
-                    const amount = AmountUtils.intStr((t?.raw_data?.contract ?? [])[0]?.parameter?.value?.amount);
+                    const amount = AmountUtils.toIntegerString(
+                        (t?.raw_data?.contract ?? [])[0]?.parameter?.value?.amount
+                    );
                     return new TransactionsHistoryItem(
                         id,
                         Coins.COINS.TRX.ticker,
@@ -72,7 +79,7 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
                 const t2 = response?.data;
                 const id = t2.id;
                 const txFromFirstApiCall = iterationsData[0];
-                const improvedFee = t2.fee != null ? AmountUtils.intStr(t2.fee) : txFromFirstApiCall?.fees;
+                const improvedFee = t2.fee != null ? AmountUtils.toIntegerString(t2.fee) : txFromFirstApiCall?.fees;
                 txFromFirstApiCall && (txFromFirstApiCall.fees = improvedFee);
                 const confirmations = t2.blockTimeStamp ? computeConfirmationsCountByTimestamp(t2.blockTimeStamp) : 0;
                 const timestamp = t2.blockTimeStamp ?? provideFirstSeenTime(id);
@@ -100,7 +107,7 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
                                 );
                                 const addressTo = tronUtils.hexAddressToBase58check("41" + logItem.topics[2].slice(24));
                                 const type = addressFrom === myAddress ? "out" : addressTo === myAddress ? "in" : null;
-                                const amount = AmountUtils.intStr(`0x${logItem.data}`);
+                                const amount = AmountUtils.toIntegerString(`0x${logItem.data}`);
                                 if (type) {
                                     return new TransactionsHistoryItem(
                                         id,
@@ -134,7 +141,7 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
                         .map(internalTx => {
                             const addressFrom = tronUtils.hexAddressToBase58check(internalTx.caller_address);
                             const addressTo = tronUtils.hexAddressToBase58check(internalTx.transferTo_address);
-                            const amount = AmountUtils.intStr(internalTx.callValueInfo[0].callValue);
+                            const amount = AmountUtils.toIntegerString(internalTx.callValueInfo[0].callValue);
                             if (
                                 addressFrom &&
                                 addressTo &&
@@ -181,6 +188,7 @@ class TrongridTransactionDetailsProvider extends ExternalApiProvider {
 export class TronBlockchainTransactionDetailsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronBlockchainTransactionDetailsProvider",
+        cache,
         [new TrongridTransactionDetailsProvider()], // TODO: [feature, high] add more providers. task_id=c246262b0e7f43dfa2a9b0e30c947ad7
         STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false

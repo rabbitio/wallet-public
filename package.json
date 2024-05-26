@@ -4,6 +4,7 @@
     "main": "index.js",
     "private": true,
     "scripts": {
+        "prepare": "husky",
         "provide-prod-properties": "cross-env-shell PROP_ENV=prod \"node ./properties/provideProperties.mjs\"",
         "provide-dev-properties": "cross-env-shell PROP_ENV=dev \"node ./properties/provideProperties.mjs\"",
         "provide-local-properties": "cross-env-shell PROP_ENV=local \"node ./properties/provideProperties.mjs\"",
@@ -70,7 +71,7 @@
         "eslint-config-prettier": "9.1.0",
         "eslint-plugin-compat": "4.2.0",
         "fs-extra": "8.1.0",
-        "husky": "4.3.8",
+        "husky": "9.0.11",
         "lint-staged": "10.5.4",
         "lodash": "4.17.21",
         "mocha": "9.2.2",
@@ -90,7 +91,7 @@
         "stream-browserify": "3.0.0"
     },
     "dependencies": {
-        "@rabbitio/ui-kit": "1.0.0-beta.37",
+        "@rabbitio/ui-kit": "1.0.0-beta.71",
         "@ramp-network/ramp-instant-sdk": "3.0.0",
         "@redux-devtools/extension": "3.3.0",
         "@use-gesture/react": "10.3.0",
@@ -101,7 +102,6 @@
         "bip39": "2.6.0",
         "bitcoinjs-lib": "4.0.5",
         "body-scroll-lock": "3.1.5",
-        "clipboard-copy": "4.0.1",
         "crypto-js": "3.3.0",
         "date-fns": "3.3.1",
         "ethers": "5.7.2",
@@ -111,6 +111,7 @@
         "ipaddr.js": "1.9.1",
         "js-cookie": "2.2.1",
         "jshashes": "1.0.8",
+        "l": "0.6.0",
         "qrcode": "1.4.4",
         "querystring-es3": "0.2.1",
         "rc-slider": "10.5.0",
@@ -160,5 +161,6 @@
             "prettier --write",
             "git add"
         ]
-    }
+    },
+    "config-overrides-path": "./config-overrides.cjs"
 }

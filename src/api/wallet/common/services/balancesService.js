@@ -1,23 +1,24 @@
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+import { AmountUtils, improveAndRethrow, CacheAndConcurrentRequestsResolver } from "@rabbitio/ui-kit";
 
 import CoinsToFiatRatesService from "./coinsToFiatRatesService.js";
 import { Wallets } from "../wallets.js";
 import { cache } from "../../../common/utils/cache.js";
-import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
 import { SMALL_TTL_FOR_CACHE_L2_MS } from "../../../common/utils/ttlConstants.js";
 
 export class BalancesService {
     // TODO: [tests, moderate] add units for caching for existing tests
     static _allBalancesResolver = new CacheAndConcurrentRequestsResolver(
         "allBalances",
+        cache,
         SMALL_TTL_FOR_CACHE_L2_MS,
         false
     );
     static _balanceCacheKey = wallet => (wallet?.coin?.ticker ?? "") + "_fb868f86-b7a4-4441-aae8_balances";
     static _summaryBalanceResolver = new CacheAndConcurrentRequestsResolver(
         "summaryBalance",
+        cache,
         SMALL_TTL_FOR_CACHE_L2_MS,
         false
     );

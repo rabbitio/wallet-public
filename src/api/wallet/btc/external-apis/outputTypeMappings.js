@@ -1,4 +1,5 @@
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
+import { ApiGroups } from "@rabbitio/ui-kit";
+
 import { P2PKH_SCRIPT_TYPE, P2SH_SCRIPT_TYPE, P2WPKH_SCRIPT_TYPE } from "../lib/utxos.js";
 
 export const mappingsPerProvider = new Map([

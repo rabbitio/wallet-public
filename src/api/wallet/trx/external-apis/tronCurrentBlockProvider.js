@@ -1,12 +1,15 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class TrongridCurrentBlockProvider extends ExternalApiProvider {
     constructor() {
@@ -15,7 +18,7 @@ class TrongridCurrentBlockProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         const originalApiPath = "/wallet/getnowblock";
-        return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
+        return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.TRX)?.key)}${originalApiPath}`;
     }
 
     getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
@@ -65,6 +68,7 @@ class TronscanCurrentBlockProvider extends ExternalApiProvider {
 export class TronCurrentBlockProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronCurrentBlockProvider",
+        cache,
         [
             new TronscanCurrentBlockProvider(),
             // new GetblockTronCurrentBlockProvider(),

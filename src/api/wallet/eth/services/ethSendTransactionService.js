@@ -83,7 +83,7 @@ export class EthSendTransactionService {
             } else {
                 const data = optsForSeveralRates(
                     optionsForMaxPriorityFeePerGas,
-                    AmountUtils.intStr(baseFeePerGas),
+                    AmountUtils.toIntegerString(baseFeePerGas),
                     gasLimit,
                     coinAmount,
                     isSendAll,
@@ -202,7 +202,7 @@ const chooseAmount = function (
     const etherBalance = BigNumber(balanceOfFeeCoinAtoms ?? balanceOfSendingCoinAtoms);
     if (etherBalance.gte(feeAtoms)) {
         // sending all ether balance case
-        return AmountUtils.intStr(etherBalance.minus(feeAtoms));
+        return AmountUtils.toIntegerString(etherBalance.minus(feeAtoms));
     }
     return "0";
 };
@@ -230,7 +230,7 @@ async function optsForOneRate(
 ) {
     // Fallback logic to return 4 identical fee options calculated by single option Alchemy data if major rates retrieval fails
     const { maxFeePerGas, maxPriorityFeePerGas } = await EthereumBlockchainFeeDataProvider.getEthereumFeeData();
-    const feeAtoms = AmountUtils.intStr(BigNumber(maxFeePerGas).times(gasLimit));
+    const feeAtoms = AmountUtils.toIntegerString(BigNumber(maxFeePerGas).times(gasLimit));
     const correctAtomsAmount = chooseAmount(coin, coinsAmount, isSendAll, feeAtoms, sendBalanceAtoms, feeBalanceAtoms);
 
     return {
@@ -317,7 +317,7 @@ function optsForSeveralRates(
              * (gWei is 10^-9, so 10^-9 * 100 = 10^-7).
              */
             const rate = BigNumber(baseFeePerGas ?? "0").plus(d.maxPriorityFeePerGasOption ?? "0");
-            const hundredfoldRate = AmountUtils.intStr(rate.times("100"));
+            const hundredfoldRate = AmountUtils.toIntegerString(rate.times("100"));
             const gweiTimes100DecimalPlaces = 7;
             const rateAtoms = ethers.utils.parseUnits(hundredfoldRate, gweiTimes100DecimalPlaces).toString();
             return new TxData(d.correctedAtomsAmount, address, null, d.feeWeiString, null, null, network, {

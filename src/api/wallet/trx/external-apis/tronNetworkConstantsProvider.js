@@ -1,12 +1,15 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { LONG_TTL_FOR_REALLY_RARELY_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class TronscanNetworkConstantsProvider extends ExternalApiProvider {
     constructor() {
@@ -45,7 +48,7 @@ class TrongridNetworkConstantsProvider extends ExternalApiProvider {
     composeQueryString(params, subRequestIndex = 0) {
         try {
             const originalApiPath = "/wallet/getchainparameters";
-            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.TRX)?.key)}${originalApiPath}`;
         } catch (e) {
             improveAndRethrow(e, "trongridNetworkConstantsProvider.composeQueryString");
         }
@@ -71,6 +74,7 @@ class TrongridNetworkConstantsProvider extends ExternalApiProvider {
 export class TronNetworkConstantsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronNetworkConstantsProvider",
+        cache,
         [new TronscanNetworkConstantsProvider(), new TrongridNetworkConstantsProvider()],
         LONG_TTL_FOR_REALLY_RARELY_CHANGING_DATA_MS, // Long lifetime as the tron network parameters change really rarely
         false

@@ -1,12 +1,19 @@
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils, improveAndRethrow, Logger } from "@rabbitio/ui-kit";
+import {
+    AmountUtils,
+    improveAndRethrow,
+    Logger,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class AlchemyErc20TransactionFeeEstimationProvider extends ExternalApiProvider {
     constructor() {
@@ -15,7 +22,7 @@ class AlchemyErc20TransactionFeeEstimationProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.ETH)?.key)}`;
         } catch (e) {
             improveAndRethrow(e, "AlchemyErc20TransactionFeeEstimationProvider.composeQueryString");
         }
@@ -51,7 +58,7 @@ class AlchemyErc20TransactionFeeEstimationProvider extends ExternalApiProvider {
 
     getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
         try {
-            return AmountUtils.intStr(response?.data?.result); // Passing hex string
+            return AmountUtils.toIntegerString(response?.data?.result); // Passing hex string
         } catch (e) {
             improveAndRethrow(e, "AlchemyErc20TransactionFeeEstimationProvider.getDataByResponse");
         }
@@ -62,6 +69,7 @@ export class Erc20TransactionFeeEstimationProvider {
     static bio = "erc20TransactionFeeEstimationProvider";
     static _provider = new CachedRobustExternalApiCallerService(
         this.bio,
+        cache,
         [new AlchemyErc20TransactionFeeEstimationProvider(0)],
         SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS,
         false

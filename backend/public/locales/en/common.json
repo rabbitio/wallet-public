@@ -225,30 +225,6 @@
         },
         "organisms": {
             "SwapFormWithCoinDropdowns": {
-                "SwapForm": {
-                    "swap-all-button-titles": {
-                        "enable": "Swap all",
-                        "cancel": "Cancel"
-                    },
-                    "consents": {
-                        "consent-text-rate": "Rate varies with the amount.",
-                        "consent-text": "By clicking \"Swap\" you agree with Rabbit Swap's",
-                        "terms-of-use": "Terms of Use",
-                        "and": "and",
-                        "privacy-policy": "Privacy Policy"
-                    },
-                    "information-block": {
-                        "minimum-amount": "Minimal amount: ",
-                        "maximum-amount": "Maximum amount: ",
-                        "transaction-fee": "Network fee: ",
-                        "calculating-network-fee": "Calculating network fee..",
-                        "loading-minimal-amount": "Loading minimal amount..",
-                        "swap-rate": "Rate: ",
-                        "calculating-swap-rates": "Calculating swap rates..",
-                        "pair-not-available": "Pair is not available now. Please, try again later or choose another pair."
-                    },
-                    "confirm-button-text": "Swap"
-                },
                 "errors": {
                     "requests-limit-exceeded": "Sorry, our service is experiencing a temporary interruption due to high demand. Please try again in a few minutes. We appreciate your understanding.",
                     "default": "Sorry, we failed to perform the last operation, please try again or contact support."
@@ -277,6 +253,202 @@
                     "to": "To",
                     "finished": "Finished"
                 }
+            },
+            "SwapForm": {
+                "swap-all-button-titles": {
+                    "enable": "Swap all",
+                    "cancel": "Cancel"
+                },
+                "input": {
+                    "fiat-placeholder": "Enter fiat amount",
+                    "balance-loader-text": "Loading balance..."
+                },
+                "consents": {
+                    "consent-text": "By clicking \"Swap\" you agree with Rabbit Swap's",
+                    "terms-of-use": "Terms of Use",
+                    "and": "and",
+                    "privacy-policy": "Privacy Policy"
+                },
+                "information-block": {
+                    "minimum-amount": "Minimal amount: ",
+                    "maximum-amount": "Maximum amount: ",
+                    "transaction-fee": "Network fee: ",
+                    "calculating-network-fee": "Calculating network fee..",
+                    "loading-minimal-amount": "Loading minimal amount..",
+                    "swap-rate": "Rate: ",
+                    "calculating-swap-rates": "Calculating swap rates..",
+                    "pair-not-available": "Pair is not available now. Please, try again later or choose another pair."
+                },
+                "rateSelector": {
+                    "fixedRate": "Fixed rate",
+                    "floatingRate": "Floating rate"
+                },
+                "confirm-button-text": "Swap"
+            },
+            "SwapFlow": {
+                "meta": {
+                    "title": "Swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} in Progress - Rabbit Swap",
+                    "description": "Please Enter the Required Details for {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} Swap. Rabbit compares rates from diverse liquidity providers to secure the most optimal rate for your exchange.",
+                    "keywords": "swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, exchange {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, swap {{fromAssetName}} to {{toAssetName}}, exchange {{fromAssetName}} to {{toAssetName}}, trade {{fromTickerPrintable}}/{{toTickerPrintable}}, swap {{fromTickerPrintable}} to {{toTickerPrintable}}, exchange {{fromTickerPrintable}} to {{toTickerPrintable}}, swap crypto, crypto exchange, cryptocurrency swap, cryptocurrency exchange"
+                },
+                "support-welcome-message": "Chat with us",
+                "loader-title-details": "Loading the swap details...",
+                "common": {
+                    "rate": "Rate"
+                },
+                "cancel-swap-confirmation-step": {
+                    "title": "Cancel the swap?",
+                    "subtitle": "Closing this will recalculate the current swap rate, potentially resulting in a worse or better deal. Just so you're aware.",
+                    "cancel-swap-button-title": "Cancel anyway",
+                    "keep-swap-button-title": "Keep the rate"
+                },
+                "unexpected-error-step": {
+                    "title": "Something went wrong...",
+                    "subtitle": "Unfortunately we failed to perform the last operation. Please refresh the page and try again. Or contact support if this error happens repeatedly. We apologize for the inconvenience.",
+                    "back-button-text": "Contact us",
+                    "confirm-button-text": "Reload the page"
+                },
+                "rateModeDisclaimers": {
+                    "fixed": "With a fixed rate, the exchange rate is locked in when the swap is created. This guarantees the exact amount you will receive, protecting against market fluctuations.",
+                    "floating": "With a floating rate, the exchange rate may vary until the transaction is completed. This allows for potential market advantages but also carries the risk of rate changes."
+                },
+                "SwapFlowCreationAmounts": {
+                    "title": "Start a new swap",
+                    "subtitle": "Select a swap pair and enter an amount. Rabbit Swap will compare and pick the best rate among various liquidity providers based on the entered amount.",
+                    "errors": {
+                        "amount-less-than-min-swappable": "The amount of {{assetName}} you are trying to swap is below the accepted minimal amount.",
+                        "amount-higher-than-max-swappable": "The amount of {{assetName}} you are trying to swap is exceeding the accepted maximum amount.",
+                        "pair-not-supported": "Sorry, the selected pair is not available now. Please try again later or choose another pair."
+                    }
+                },
+                "SwapFlowCreationAddresses": {
+                    "title": "Recipient Address",
+                    "subtitle": "Please specify the address where you would like to receive the {{toCoinName}}. In the unlikely event that the swap fails, you will be refunded to the provided {{fromCoinName}} refund address.",
+                    "confirm-button-text": "Next",
+                    "recepient-address-title": "{{receivingCoinName}} recepient address",
+                    "refund-address-title": "{{sendingCoinName}} refund address",
+                    "receiving-address-extra-id": "Recipient {{extraIdName}}",
+                    "refund-address-extra-id": "Refund {{extraIdName}}",
+                    "receiving-address-extra-id-notice": "Please check if your recipient address requires a 'Memo' or 'Destination Tag' - sometimes called a tag, ID, label, or a note. Exchanges may require such ID for the deposit. Including this identifier is crucial when required, as omitting or misentering it can result in lost assets.",
+                    "refund-address-extra-id-notice": "Please check whether your refund address requires a 'Memo' or 'Destination Tag' (also referred to as a tag, ID, label, or note). It's crucial to include this identifier, as exchanges may need it to process incoming transactions accurately. Omitting or misentering it could lead to the loss of your funds.",
+                    "optional-field-placeholder": "(optional)",
+                    "address-is-contract-validation-message": "The address you entered belongs to the {{ticker}} token contract address. Sending funds to it will result in losing your money irreversibly.",
+                    "consents": {
+                        "consent-text": "By clicking \"Next\" you agree with Rabbit Swap's",
+                        "terms-of-use": "Terms of Use",
+                        "and": "and",
+                        "privacy-policy": "Privacy Policy"
+                    }
+                },
+                "SwapFlowPaymentAwaiting": {
+                    "title": "Awaiting your payment",
+                    "subtitle": "Please send the {{fromCoinName}} to the address below. The page will be updated automatically once the transaction is received.",
+                    "back-button-text": "Cancel this Swap",
+                    "extra-id-notice": "Ensure you enter the required 'Memo' or 'Destination Tag' in your wallet when sending funds. This is crucial for correct transaction processing. Incorrect information may result in lost funds.",
+                    "block-titles": {
+                        "amount-send": "Send exactly",
+                        "address": "To this address",
+                        "amount-receive": "You will receive",
+                        "timer": "Time left for payment",
+                        "swap-id": "Swap ID",
+                        "extra-id": "And specify this {{extraIdName}}"
+                    },
+                    "pushes": {
+                        "copy-amount-failed": {
+                            "title": "Copying failed",
+                            "text": "Sorry, we couldn't copy the send amount. Please refresh the page and try again."
+                        },
+                        "copy-address-failed": {
+                            "title": "Copying failed",
+                            "text": "Sorry, we couldn't copy the payment address. Please refresh the page and try again."
+                        },
+                        "copy-swap-id-failed": {
+                            "title": "Copying failed",
+                            "text": "Sorry, we couldn't copy the swap ID. Please refresh the page and try again."
+                        }
+                    }
+                },
+                "SwapFlowPaymentConfirming": {
+                    "title": "Waiting for confirmation",
+                    "subtitle": "Your transaction has been received. Please wait a moment for the transaction to be confirmed with blockchain. Once it's done the page will be updated automatically.",
+                    "block-titles": {
+                        "amount-send": "Amount to swap",
+                        "amount-receive": "Amount to receive",
+                        "address": "Recipient address",
+                        "swap-id": "Swap ID",
+                        "extra-id": "Recipient {{extraIdName}}"
+                    }
+                },
+                "SwapFlowPaymentExchanging": {
+                    "title": "Swapping your coins",
+                    "subtitle": "Your transaction has been confirmed and the swap now is in progress. Please wait a moment for it to finish. Once it's done the page will be updated automatically.",
+                    "block-titles": {
+                        "amount-send": "Amount to swap",
+                        "amount-receive": "Amount to receive",
+                        "address": "Recepient address",
+                        "swap-id": "Swap ID",
+                        "extra-id": "Recipient {{extraIdName}}"
+                    }
+                },
+                "SwapFlowPaymentCompleted": {
+                    "title": "Swap completed!",
+                    "subtitle": "Your swap is now completed and the coins have been sent to the provided address. Thank you for using Rabbit Swap.",
+                    "confirm-button-text": "Create another swap",
+                    "back-button-text": "Contact us",
+                    "block-titles": {
+                        "amount-to-swap": "Amount to swap",
+                        "amount-sent": "Amount sent",
+                        "address": "Recepient address",
+                        "swap-id": "Swap ID",
+                        "transaction-id": "Output transaction ID ({{ticker}})",
+                        "extra-id": "Recipient {{extraIdName}}"
+                    }
+                },
+                "SwapFlowPaymentRefunded": {
+                    "title": "Swap refunded",
+                    "subtitle": "We regret to inform you that your swap hasn't been completed and therefore refunded. Please contact the support team so we can check what happened. Use the Swap ID as a reference: {{swapId}}.",
+                    "confirm-button-text": "Create new swap",
+                    "back-button-text": "Contact us"
+                },
+                "SwapFlowPaymentExpired": {
+                    "title": "Swap expired",
+                    "subtitle": "Your transaction hasn't been received in time, and the swap is now expired. If you haven't sent anything, you can just create a new swap. If you already sent your coins, don't worry, just contact support so we can either recalculate the rate or send you a refund. Please use the Swap ID as a reference: {{swapId}}.",
+                    "confirm-button-text": "Create new swap"
+                },
+                "pushes": {
+                    "swap-not-found": {
+                        "title": "Swap was not found!",
+                        "text": "Sorry, swap with the provided id was not found."
+                    },
+                    "swap-init-failed": {
+                        "title": "Swap loading failed!",
+                        "text": "We've encountered an error while loading the swap details. Please reload the page and try again."
+                    },
+                    "swap-details-loading-failed": {
+                        "title": "Swap loading failed!",
+                        "text": "We've encountered an error while loading the swap details. Please reload the page and try again."
+                    },
+                    "requests-limit-exceeded": {
+                        "title": "Swap service is overloaded!",
+                        "text": "Sorry, our service is experiencing a temporary interruption due to high demand. Please try again in a few minutes. We appreciate your understanding."
+                    },
+                    "maximum-amount-exceeded": {
+                        "title": "Maximum amount exceeded",
+                        "text": "The amount you are trying to swap is exceeding the accepted maximum amount."
+                    },
+                    "minimum-amount-not-reached": {
+                        "title": "Minimal amount not reached",
+                        "text": "The amount you are trying to swap is below the accepted minimal amount."
+                    },
+                    "pair-not-supported": {
+                        "title": "Pair not available",
+                        "text": "Sorry, the selected pair is not available now. Please try again later or choose another pair."
+                    },
+                    "default-error": {
+                        "title": "Something went wrong...",
+                        "text": "Sorry, we failed to perform the last operation, please try again or contact support."
+                    }
+                }
             }
         }
     },
@@ -291,7 +463,8 @@
             "privacy-policy": "Privacy Policy",
             "try-wallet": "Try Rabbit Wallet"
         },
-        "native-asset-protocol": "Native",
-        "support-chat-message": "Chat with us"
+        "support-chat-message": "Chat with us",
+        "default-copy-button-title": "Copy",
+        "default-copy-button-tooltip": "Copied!"
     }
 }

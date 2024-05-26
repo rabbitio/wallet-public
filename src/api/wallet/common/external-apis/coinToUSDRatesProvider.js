@@ -1,10 +1,13 @@
-import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    Logger,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
 import { Coins } from "../../coins.js";
 import { TickersAdapter } from "./utils/tickersAdapter.js";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { ApiGroupCoinIdAdapters, areCoinsSupportedByCex } from "../adapters/apiGroupCoinIdAdapters.js";
 import { cache } from "../../../common/utils/cache.js";
 import { LONG_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
@@ -247,7 +250,7 @@ class CoinToUSDRatesProvider {
     constructor(providers) {
         this.bio = "coinToUSDRatesProvider";
         this._ttlMs = LONG_TTL_FOR_FREQ_CHANGING_DATA_MS;
-        this._callerService = new CachedRobustExternalApiCallerService(this.bio, providers, this._ttlMs, false);
+        this._callerService = new CachedRobustExternalApiCallerService(this.bio, cache, providers, this._ttlMs, false);
         this._attemptsCountForDataRetrieval = 1;
     }
 

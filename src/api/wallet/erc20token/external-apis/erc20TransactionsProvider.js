@@ -1,10 +1,14 @@
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    AmountUtils,
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
 import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import {
     actualizeCacheWithNewTransactionSentFromAddress,
     mergeTwoArraysByItemIdFieldName,
@@ -13,8 +17,8 @@ import {
 import { Coins } from "../../coins.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 /**
  * Currently we use free version of this provider. But we have API key with 100k requests free per month.
@@ -100,6 +104,7 @@ class EtherScanErc20TransactionsProvider extends ExternalApiProvider {
 export class Erc20TransactionsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "erc20TransactionsProvider",
+        cache,
         [new EtherScanErc20TransactionsProvider()],
         STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,

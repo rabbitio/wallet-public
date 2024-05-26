@@ -28,12 +28,4 @@ const nextConfig = {
     ...i18NextConfig,
 };
 
-(() => {
-    if (i18NextConfig.i18n.locales.length > 5) {
-        // WARNING! Current sitemap generator supports no more than 5 languages.
-        // Adopt it when adding more languages (max size of single sitemap is 50MB)
-        throw new Error("Such langs count not supported by sitemap generator");
-    }
-})();
-
 export default nextConfig;

@@ -1,4 +1,4 @@
-import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger, CacheAndConcurrentRequestsResolver, CancelProcessing } from "@rabbitio/ui-kit";
 
 import { Storage } from "../../../../common/services/internal/storage.js";
 import { BtcTransactionDetailsProvider } from "../../external-apis/transactionDataAPI.js";
@@ -9,7 +9,6 @@ import {
 } from "../../../../common/adapters/eventbus.js";
 import { BitcoinAddresses } from "../../lib/addresses.js";
 import { TransactionsDataRetrieverService } from "./transactionsDataRetrieverService.js";
-import { CancelProcessing } from "../../../../common/services/utils/robustExteranlApiCallerService/cancelProcessing.js";
 import { currentBlockService } from "./currentBlockService.js";
 import {
     filterTransactionsSpendingTheSameUtxosAsGivenTransaction,
@@ -19,10 +18,10 @@ import {
 } from "../../lib/transactions/txs-list-calculations.js";
 import AddressesServiceInternal from "./addressesServiceInternal.js";
 import { BtcTransactionsHistory, getExtendedTransactionDetails } from "../../lib/transactions/transactions-history.js";
-import { CacheAndConcurrentRequestsResolver } from "../../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
 import AddressesService from "../addressesService.js";
 import { Transaction } from "../../models/transaction/transaction.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../../common/utils/ttlConstants.js";
+import { cache } from "../../../../common/utils/cache.js";
 
 /**
  * Manages BTC transactions cache and its actualization.
@@ -40,6 +39,7 @@ class TransactionsDataProvider {
 
         this._cacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
             "btcTransactionsDataResolver",
+            cache,
             STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
             false
         );

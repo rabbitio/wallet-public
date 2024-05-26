@@ -1,17 +1,20 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
 import { TickersAdapter } from "../../common/external-apis/utils/tickersAdapter.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import {
     createRawBalanceAtomsCacheProcessorForMultiBalancesProvider,
     mergeTwoBalancesArraysAndNotifyAboutBalanceValueChange,
 } from "../../common/utils/cacheActualizationUtils.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
 import { TRC20 } from "../../trc20token/trc20Protocol.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class TronscanBlockchainBalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -52,6 +55,7 @@ class TronscanBlockchainBalanceProvider extends ExternalApiProvider {
 export class TronBlockchainBalancesProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronBlockchainBalanceProvider",
+        cache,
         [new TronscanBlockchainBalanceProvider()],
         STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,

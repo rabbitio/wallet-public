@@ -1,10 +1,9 @@
-import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger, postponeExecution } from "@rabbitio/ui-kit";
 
 import { BtcFeeRatesProvider } from "../external-apis/feerates-external.js";
 import { FEE_LIFETIME } from "../../../../properties.js";
 import { DEFAULT_RATES } from "../lib/fees.js";
 import { Storage } from "../../../common/services/internal/storage.js";
-import { postponeExecution } from "../../../common/utils/browserUtils.js";
 import { FeeRate } from "../models/feeRate.js";
 
 /**

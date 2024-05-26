@@ -1,16 +1,20 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import { Coins } from "../../coins.js";
 import { tronUtils } from "../adapters/tronUtils.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import {
     createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
     mergeSingleBalanceValuesAndNotifyAboutValueChanged,
 } from "../../common/utils/cacheActualizationUtils.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class TrongridTronBalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -19,7 +23,7 @@ class TrongridTronBalanceProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         const originalApiPath = "/wallet/getaccount";
-        return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
+        return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.TRX)?.key)}${originalApiPath}`;
     }
 
     composeBody(params, subRequestIndex = 0) {
@@ -51,6 +55,7 @@ class TrongridTronBalanceProvider extends ExternalApiProvider {
 export class TronBalanceProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronBalanceProvider",
+        cache,
         [new TrongridTronBalanceProvider()], // TODO: [feature, high] add more providers. task_id=c246262b0e7f43dfa2a9b0e30c947ad7
         STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,

@@ -1,13 +1,18 @@
 import { BigNumber } from "bignumber.js";
 
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
 import { tronUtils } from "../../trx/adapters/tronUtils.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { LONG_TTL_FOR_REALLY_RARELY_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class Trc20TransferEstimationTrongridProvider extends ExternalApiProvider {
     constructor() {
@@ -16,7 +21,7 @@ class Trc20TransferEstimationTrongridProvider extends ExternalApiProvider {
     composeQueryString(params, subRequestIndex = 0) {
         try {
             const originalApiPath = "/wallet/triggerconstantcontract";
-            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.TRX)?.key)}${originalApiPath}`;
         } catch (e) {
             improveAndRethrow(e, "Trc20TransferEstimationTrongridProvider.composeQueryString");
         }
@@ -56,6 +61,7 @@ class Trc20TransferEstimationTrongridProvider extends ExternalApiProvider {
 export class Trc20TransferEnergyEstimationProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "trc20TransferEnergyEstimationProvider",
+        cache,
         [new Trc20TransferEstimationTrongridProvider()],
         LONG_TTL_FOR_REALLY_RARELY_CHANGING_DATA_MS // Energy estimation should mot change for the same transaction, so we use long TTL
     );

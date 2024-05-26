@@ -1,11 +1,10 @@
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils, improveAndRethrow, safeStringify } from "@rabbitio/ui-kit";
+import { AmountUtils, improveAndRethrow, safeStringify, CacheAndConcurrentRequestsResolver } from "@rabbitio/ui-kit";
 
 import { Coins } from "../../coins.js";
 import { BalancesService } from "./balancesService.js";
 import { Wallets } from "../wallets.js";
-import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
 import {
     BALANCE_CHANGED_EXTERNALLY_EVENT,
     FIAT_CURRENCY_CHANGED_EVENT,
@@ -14,6 +13,7 @@ import {
     TRANSACTION_PUSHED_EVENT,
 } from "../../../common/adapters/eventbus.js";
 import { SMALL_TTL_FOR_CACHE_L2_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 /**
  * Provides API to get the coins list with related data
@@ -22,6 +22,7 @@ import { SMALL_TTL_FOR_CACHE_L2_MS } from "../../../common/utils/ttlConstants.js
 export class CoinsListService {
     static _cacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
         "coinsListService",
+        cache,
         SMALL_TTL_FOR_CACHE_L2_MS,
         false
     );

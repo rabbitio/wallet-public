@@ -1,12 +1,17 @@
 import { BigNumber } from "bignumber.js";
 
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class AlchemyEthereumTransactionsCountProvider extends ExternalApiProvider {
     constructor() {
@@ -15,7 +20,7 @@ class AlchemyEthereumTransactionsCountProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.ETH)?.key)}`;
         } catch (e) {
             improveAndRethrow(e, "AlchemyEthereumTransactionsCountProvider.composeQueryString");
         }
@@ -47,6 +52,7 @@ export class EthereumTransactionsCountProvider {
     static bio = "ethereumTransactionsCountProvider";
     static _provider = new CachedRobustExternalApiCallerService(
         this.bio,
+        cache,
         [new AlchemyEthereumTransactionsCountProvider(0)],
         SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS,
         false

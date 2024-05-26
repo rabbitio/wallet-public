@@ -1,11 +1,14 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
 import { FeeRate } from "../models/feeRate.js";
 import { Coins } from "../../coins.js";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 // TODO: [feature, moderate] Add mempool.space provider https://mempool.space/docs/api/rest#get-recommended-fees task_id=a8370ae7b99049b092f31f761a95b54d
 class BitgoBtcFeeRatesProvider extends ExternalApiProvider {
@@ -89,6 +92,7 @@ class BlockstreamBtcFeeRatesProvider extends ExternalApiProvider {
 
 const robustFeeRatsRetriever = new CachedRobustExternalApiCallerService(
     "robustFeeRatsRetriever",
+    cache,
     [new BitgoBtcFeeRatesProvider(), new BitcoinerBtcFeeRatesProvider(), new BlockstreamBtcFeeRatesProvider()],
     SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS
 );

@@ -1,6 +1,10 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import { Input } from "../models/transaction/input.js";
 import { Output } from "../models/transaction/output.js";
 import { Transaction } from "../models/transaction/transaction.js";
@@ -9,10 +13,9 @@ import { getHash } from "../../../common/adapters/crypto-utils.js";
 import { currentBlockService } from "../services/internal/currentBlockService.js";
 import { Coins } from "../../coins.js";
 import { mergeTwoArraysByItemIdFieldName } from "../../common/utils/cacheActualizationUtils.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { mappingsPerProvider } from "./outputTypeMappings.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 // TODO: [feature, moderate] Add blockchyper provider https://api.blockcypher.com/v1/btc/main/addrs/bc1qqdxrd3708yaph7zzjmqumglhxjf6qrvprgm8jn/full task_id=a8370ae7b99049b092f31f761a95b54d
 // TODO: [feature, moderate] Add mempool.space provider https://mempool.space/docs/api/rest#post-transaction task_id=a8370ae7b99049b092f31f761a95b54d task_id=a8370ae7b99049b092f31f761a95b54d
@@ -320,6 +323,7 @@ export const noBatchTransactionsProviders = [
 
 const externalTransactionsDataAPICaller = new CachedRobustExternalApiCallerService(
     "noBatchTransactionsDataAPICaller",
+    cache,
     noBatchTransactionsProviders,
     STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
     false,

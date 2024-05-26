@@ -88,8 +88,8 @@ export class TronSendTransactionService {
                         amountToSendAtoms
                     ),
                 ]);
-                requiredEnergy = AmountUtils.intStr(resolvedPromises[0]);
-                requiredBandwidth = AmountUtils.intStr(resolvedPromises[1]?.length);
+                requiredEnergy = AmountUtils.toIntegerString(resolvedPromises[0]);
+                requiredBandwidth = AmountUtils.toIntegerString(resolvedPromises[1]?.length);
             } else if (coin === Coins.COINS.TRX) {
                 /* We use some 100% present account address because tron fails to create transaction if account doesn't exist
                  * NOTE 1: supported testnet is nile
@@ -107,7 +107,7 @@ export class TronSendTransactionService {
                     addressToBase58,
                     sendAmountSunsForEstimation
                 );
-                requiredBandwidth = AmountUtils.intStr(hexTrxSendTx.length);
+                requiredBandwidth = AmountUtils.toIntegerString(hexTrxSendTx.length);
                 /* We set 1 TRX fee if we don't know exact address the transaction will be sent to as the actual target
                  * address can be 'not activated' and for such addresses we should add 1 TRX fee to the whole estimation.
                  * And if we know the exact target address we check its existence and add 1 TRX fee if it is
@@ -162,7 +162,7 @@ export class TronSendTransactionService {
                  * Now this is possible as we have fee value here.
                  * Note: case sending TRC20 token was handled above so the amount for this case is correct here.
                  */
-                finalAmountAtoms = AmountUtils.intStr(BigNumber(sendingCoinBalanceAtoms).minus(totalFeeSuns));
+                finalAmountAtoms = AmountUtils.toIntegerString(BigNumber(sendingCoinBalanceAtoms).minus(totalFeeSuns));
             }
             let feeBalanceAtoms = sendingCoinBalanceAtoms;
             if (usesDifferentCoinFee) {
@@ -197,7 +197,7 @@ export class TronSendTransactionService {
                     finalAmountAtoms,
                     addressToBase58,
                     null,
-                    AmountUtils.intStr(totalFeeSuns),
+                    AmountUtils.toIntegerString(totalFeeSuns),
                     null,
                     null,
                     network,

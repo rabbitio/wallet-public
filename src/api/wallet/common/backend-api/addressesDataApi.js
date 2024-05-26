@@ -1,8 +1,8 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, CacheAndConcurrentRequestsResolver } from "@rabbitio/ui-kit";
 
 import { ApiCallWrongResponseError, doApiCall, urlWithPrefix } from "../../../common/backend-api/utils.js";
-import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
 import { PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 export default class AddressesDataApi {
     static serverEndpointEntity = "addressesData";
@@ -69,6 +69,7 @@ export default class AddressesDataApi {
     static addressesIndexesCacheKey = "90a35f1b-14a9-4eb6-9cb2";
     static _cacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
         "addressesIndexesResolver",
+        cache,
         PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS, // TODO: [refactoring, moderate] Since 0.8.3 we don't support new addresses creation so the indexes are always the same. Refactoring required. task_id=546c83e7f4b64f39b67055a7c4ecaa48
         false
     );

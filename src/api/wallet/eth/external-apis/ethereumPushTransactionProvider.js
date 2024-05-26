@@ -1,9 +1,14 @@
-import { improveAndRethrow, safeStringify } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    safeStringify,
+    RobustExternalAPICallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
-import RobustExternalAPICallerService from "../../../common/services/utils/robustExteranlApiCallerService/robustExternalAPICallerService.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
 
 class AlchemyEthereumPushTransactionProvider extends ExternalApiProvider {
     constructor() {
@@ -12,7 +17,7 @@ class AlchemyEthereumPushTransactionProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.ETH)?.key)}`;
         } catch (e) {
             improveAndRethrow(e, "AlchemyEthereumPushTransactionProvider.composeQueryString");
         }

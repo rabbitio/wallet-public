@@ -1,6 +1,6 @@
 import { BigNumber } from "bignumber.js";
 
-import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger, CacheAndConcurrentRequestsResolver } from "@rabbitio/ui-kit";
 
 import { TransactionsDataService } from "./internal/transactionsDataService.js";
 // import FiatPaymentsService from "../../../purchases/services/FiatPaymentsService.js";
@@ -8,7 +8,6 @@ import { TransactionDetailsService } from "./transactionDetailsService.js";
 import CoinsToFiatRatesService from "./coinsToFiatRatesService.js";
 import { Coins } from "../../coins.js";
 import { Wallets } from "../wallets.js";
-import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
 import {
     BALANCE_CHANGED_EXTERNALLY_EVENT,
     FIAT_CURRENCY_CHANGED_EVENT,
@@ -17,11 +16,13 @@ import {
     TRANSACTION_PUSHED_EVENT,
 } from "../../../common/adapters/eventbus.js";
 import { SMALL_TTL_FOR_CACHE_L2_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 export default class TransactionsHistoryService {
     // TODO: [tests, moderate] add units for caching for existing tests
     static _cacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
         "transactionsHistoryService",
+        cache,
         SMALL_TTL_FOR_CACHE_L2_MS,
         false
     );

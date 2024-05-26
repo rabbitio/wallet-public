@@ -1,12 +1,18 @@
 import { BigNumber } from "bignumber.js";
 
-import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    AmountUtils,
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { Coins } from "../../coins.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class AlchemyTransactionReceiptProvider extends ExternalApiProvider {
     constructor() {
@@ -15,7 +21,7 @@ class AlchemyTransactionReceiptProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.ETH)?.key)}`;
         } catch (e) {
             improveAndRethrow(e, "alchemyTransactionReceiptProvider.composeQueryString");
         }
@@ -50,6 +56,7 @@ class AlchemyTransactionReceiptProvider extends ExternalApiProvider {
 export class EthereumBlockchainTransactionFeeProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "ethereumBlockchainTransactionFeeProvider",
+        cache,
         [new AlchemyTransactionReceiptProvider()],
         PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS, // As receipt is constant for committed transactions
         false,

@@ -1,15 +1,14 @@
 import { ethers } from "ethers";
 import TronWebLib from "tronweb";
 
-import { improveAndRethrow, safeStringify } from "@rabbitio/ui-kit";
+import { improveAndRethrow, safeStringify, ApiGroups } from "@rabbitio/ui-kit";
 
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 
-const url = `${API_KEYS_PROXY_URL}/${ApiGroups.TRONGRID.backendProxyIdGenerator(Coins.COINS.TRX.mainnet)}`;
-const urlTestnet = `${API_KEYS_PROXY_URL}/${ApiGroups.TRONGRID.backendProxyIdGenerator(Coins.COINS.TRX.testnet)}`;
+const url = `${API_KEYS_PROXY_URL}/${ApiGroups.TRONGRID.backendProxyIdGenerator(Coins.COINS.TRX.mainnet.key)}`;
+const urlTestnet = `${API_KEYS_PROXY_URL}/${ApiGroups.TRONGRID.backendProxyIdGenerator(Coins.COINS.TRX.testnet.key)}`;
 
 class TronUtils {
     constructor() {

@@ -1,9 +1,8 @@
-import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger, IpAddressProvider } from "@rabbitio/ui-kit";
 
 import { getSaltedHash } from "../../../common/adapters/crypto-utils.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { CLIENT_IP_HASH_LIFETIME } from "../../../../properties.js";
-import IpAddressProvider from "../../external-apis/ipAddressProviders.js";
 import { IpsServiceInternal } from "./ipsServiceInternal.js";
 
 export default class ClientIpHashService {

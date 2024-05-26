@@ -1,16 +1,21 @@
-import { AmountUtils, improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    AmountUtils,
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
 import { tronUtils } from "../../trx/adapters/tronUtils.js";
 import { Coins } from "../../coins.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import {
     createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
     mergeSingleBalanceValuesAndNotifyAboutValueChanged,
 } from "../../common/utils/cacheActualizationUtils.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
+import { Storage } from "../../../common/services/internal/storage.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class TrongridTrc20BalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -20,7 +25,7 @@ class TrongridTrc20BalanceProvider extends ExternalApiProvider {
     composeQueryString(params, subRequestIndex = 0) {
         try {
             const originalApiPath = "/wallet/triggerconstantcontract";
-            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPath}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.TRX)?.key)}${originalApiPath}`;
         } catch (e) {
             improveAndRethrow(e, "trongridTrc20BalanceProvider.composeQueryString");
         }
@@ -55,6 +60,7 @@ class TrongridTrc20BalanceProvider extends ExternalApiProvider {
 export class Trc20BalanceProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "trc20BalanceProvider",
+        cache,
         [new TrongridTrc20BalanceProvider()], // TODO: [feature, high] add more providers. task_id=c246262b0e7f43dfa2a9b0e30c947ad7
         STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,

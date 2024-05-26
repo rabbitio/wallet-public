@@ -1,6 +1,5 @@
-import { Logger } from "@rabbitio/ui-kit";
+import { Logger, RobustExternalAPICallerService } from "@rabbitio/ui-kit";
 
-import { externalServicesStatsCollector } from "../../../../common/services/utils/robustExteranlApiCallerService/externalServicesStatsCollector.js";
 import { WalletSliceService } from "../../../../wallet/common/services/utils/walletSliceService.js";
 
 export class ScheduledLogger {
@@ -31,7 +30,7 @@ export class ScheduledLogger {
 export async function logExternalServicesStats() {
     try {
         Logger.log(
-            `EXTERNAL SERVICES STATS:\n${JSON.stringify(externalServicesStatsCollector.getStats())}`,
+            `EXTERNAL SERVICES STATS:\n${JSON.stringify(RobustExternalAPICallerService.getStats())}`,
             "logExternalServicesStats"
         );
     } catch (e) {

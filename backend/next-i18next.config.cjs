@@ -2,7 +2,7 @@
 module.exports = {
     i18n: {
         defaultLocale: "en",
-        locales: ["en", "ru", "es"],
-        // localeDetection: false, // TODO: [dev] uncomment if we decide to disable detection
+        // https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+        locales: ["en", "ru", "es", "hi", "zh", "vi"],
     },
 };

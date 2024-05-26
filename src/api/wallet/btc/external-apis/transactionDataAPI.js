@@ -1,4 +1,9 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
 import { Input } from "../models/transaction/input.js";
 import { Output } from "../models/transaction/output.js";
@@ -7,11 +12,9 @@ import { getHash } from "../../../common/adapters/crypto-utils.js";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
 import { ExternalBlocksApiCaller } from "./blocksAPI.js";
 import { Coins } from "../../coins.js";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { mappingsPerProvider } from "./outputTypeMappings.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 // TODO: [feature, moderate] Add mempool.space provider https://mempool.space/docs/api/rest#get-transaction task_id=a8370ae7b99049b092f31f761a95b54d
 class BlockstreamTransactionDetailsProvider extends ExternalApiProvider {
@@ -187,6 +190,7 @@ class BtcDotComTransactionDetailsProvider extends ExternalApiProvider {
 
 const transactionDataAPICaller = new CachedRobustExternalApiCallerService(
     "transactionDataAPICaller",
+    cache,
     [
         new BlockstreamTransactionDetailsProvider(),
         // new BitapsTransactionDetailsProvider(),

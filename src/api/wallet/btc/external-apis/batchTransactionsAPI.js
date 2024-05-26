@@ -1,16 +1,13 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import { improveAndRethrow, RobustExternalAPICallerService, ExternalApiProvider, ApiGroups } from "@rabbitio/ui-kit";
 
 import { Input } from "../models/transaction/input.js";
 import { Output } from "../models/transaction/output.js";
 import { Transaction } from "../models/transaction/transaction.js";
 import { ExternalBlocksApiCaller } from "./blocksAPI.js";
-import RobustExternalAPICallerService from "../../../common/services/utils/robustExteranlApiCallerService/robustExternalAPICallerService.js";
 import { Coins } from "../../coins.js";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
 import { getHash } from "../../../common/adapters/crypto-utils.js";
 import { getOutputTypeByAddress } from "../lib/utxos.js";
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 
 const mappingOfTxIndexesToHashes = new Map();
 

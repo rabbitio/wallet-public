@@ -1,15 +1,18 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import {
     createRawBalanceAtomsCacheProcessorForSingleBalanceProvider,
     mergeSingleBalanceValuesAndNotifyAboutValueChanged,
 } from "../../common/utils/cacheActualizationUtils.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class EtherscanErc20SingleBalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -44,6 +47,7 @@ class EtherscanErc20SingleBalanceProvider extends ExternalApiProvider {
 export class Erc20SingleBalanceProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "erc20SingleBalanceProvider",
+        cache,
         [new EtherscanErc20SingleBalanceProvider()],
         STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,

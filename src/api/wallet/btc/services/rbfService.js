@@ -285,10 +285,10 @@ function actualizeTransactionsCacheWithoutFailing(params, oldFee, newFee, networ
     try {
         const anyStubRate = DEFAULT_RATES[0];
         const txData = new TxData(
-            AmountUtils.intStr(params.amount),
+            AmountUtils.toIntegerString(params.amount),
             params.targetAddress,
-            AmountUtils.intStr(params.newChange),
-            AmountUtils.intStr(newFee),
+            AmountUtils.toIntegerString(params.newChange),
+            AmountUtils.toIntegerString(newFee),
             params.currentChangeAddress,
             params.utxos,
             network,
@@ -297,7 +297,7 @@ function actualizeTransactionsCacheWithoutFailing(params, oldFee, newFee, networ
 
         const btcWallet = Wallets.getWalletByCoin(Coins.COINS.BTC);
         btcWallet.actualizeLocalCachesWithNewTransactionData(Coins.COINS.BTC, txData, newTransactionId);
-        const balanceDiffString = AmountUtils.intStr(BigNumber(newFee).minus(oldFee));
+        const balanceDiffString = AmountUtils.toIntegerString(BigNumber(newFee).minus(oldFee));
         btcWallet.actualizeBalanceCacheWithAmountAtoms(balanceDiffString, -1);
     } catch (e) {
         Logger.logError(e, loggerSource, `Failed to actualize cache for rbf new tx ${newTransactionId}`);

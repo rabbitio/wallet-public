@@ -78,7 +78,7 @@ export class Erc20FeeEstimationService {
              * it still looks like a reasonable tradeoff.
              */
             const estimationIncreaseTimes = "1.25";
-            let finalValue = AmountUtils.intStr(BigNumber(gasLimit).times(estimationIncreaseTimes));
+            let finalValue = AmountUtils.toIntegerString(BigNumber(gasLimit).times(estimationIncreaseTimes));
 
             /* We use also min gas limit as for some weird reason rarely ethereum provides significantly inaccurate
              * estimations and transaction sending using this limit fails due to OUT_OF_GAS.

@@ -1,19 +1,20 @@
-import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger, CacheAndConcurrentRequestsResolver } from "@rabbitio/ui-kit";
 
 import { Utxos } from "../../lib/utxos.js";
 import { Storage } from "../../../../common/services/internal/storage.js";
 import { BtcUtxosUtils } from "../utils/utxosUtils.js";
 import AddressesDataApi from "../../../common/backend-api/addressesDataApi.js";
 import AddressesServiceInternal from "./addressesServiceInternal.js";
-import { CacheAndConcurrentRequestsResolver } from "../../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
 import { createRawBalanceAtomsCacheProcessorForSingleBalanceProvider } from "../../../common/utils/cacheActualizationUtils.js";
 import { BALANCE_CHANGED_EXTERNALLY_EVENT, EventBus } from "../../../../common/adapters/eventbus.js";
 import { Coins } from "../../../coins.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../../common/utils/ttlConstants.js";
+import { cache } from "../../../../common/utils/cache.js";
 
 export default class UtxosService {
     static _balanceCacheAndRequestsResolver = new CacheAndConcurrentRequestsResolver(
         "btc_utxosService",
+        cache,
         STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false
     );

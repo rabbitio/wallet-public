@@ -1,21 +1,4 @@
-import copy from "clipboard-copy";
-
 import { improveAndRethrow } from "@rabbitio/ui-kit";
-
-/**
- * Copies given text to clipboard inside browser.
- *
- * @param text - text to be copied
- */
-export function copyBrowserTextToClipboard(text) {
-    try {
-        if (!copy(text)) {
-            throw new Error("Failed to execute copy command.");
-        }
-    } catch (e) {
-        improveAndRethrow(e, "saveTextToFile");
-    }
-}
 
 /**
  * Downloads a file with the provided text as a content
@@ -65,18 +48,6 @@ export function getDomainWithoutSubdomains(url) {
     const domainParts = domainWithSubDomains.split(".");
 
     return domainParts.slice(domainParts.length - 2).join(".");
-}
-
-export function postponeExecution(execution, timeoutMS = 1000) {
-    return new Promise((resolve, reject) => {
-        setTimeout(async () => {
-            try {
-                resolve(await execution());
-            } catch (e) {
-                reject(e);
-            }
-        }, timeoutMS);
-    });
 }
 
 export function redirect(path) {

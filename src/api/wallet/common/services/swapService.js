@@ -9,6 +9,7 @@ import {
     Coin,
     SwapspaceSwapProvider,
     SwapUtils,
+    IpAddressProvider,
 } from "@rabbitio/ui-kit";
 
 import { Wallets } from "../wallets.js";
@@ -24,7 +25,6 @@ import { ETHEREUM_BLOCKCHAIN } from "../../eth/ethereumBlockchain.js";
 import { TRON_BLOCKCHAIN } from "../../trx/tronBlockchain.js";
 import { BITCOIN_BLOCKCHAIN } from "../../btc/bitcoinBlockchain.js";
 import { SwapCreationInfo } from "../models/swapCreationInfo.js";
-import IpAddressProvider from "../../../auth/external-apis/ipAddressProviders.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { ERC20 } from "../../erc20token/erc20Protocol.js";
 import { TRC20 } from "../../trc20token/trc20Protocol.js";
@@ -319,7 +319,7 @@ export class SwapService {
                  * Also we recalculate despite on the present data when swap all is requested.
                  */
                 const usdRate = (await CoinsToFiatRatesService.getCoinToUSDRate(fromCoin))?.rate ?? null;
-                details = await this._swapProvider.getSwapInfo(fromCoin, toCoin, fromAmountCoins, usdRate);
+                details = await this._swapProvider.getSwapInfo(fromCoin, toCoin, fromAmountCoins, false, usdRate);
                 cache.putSessionDependentData(cacheKey, details, this.getSwapCreationInfoTtlMs());
                 Logger.log(`Fetched the swap details: ${safeStringify(details)}`, loggerSource);
             }
@@ -346,6 +346,7 @@ export class SwapService {
                 feeCoins: feeCoins,
                 feeFiat: feeFiat ?? undefined,
                 rate: details.rate ?? undefined, // Suitable for validation errors like exceeding balance
+                fixed: details.fixed ?? false,
             });
 
             if (!details.result) {
@@ -393,7 +394,8 @@ export class SwapService {
                     max,
                     fiatMax,
                     feeResult.fastestOptionTxData,
-                    details.durationMinutesRange
+                    details.durationMinutesRange,
+                    details.fixed ?? false
                 ),
             };
             Logger.log(
@@ -664,6 +666,7 @@ export class SwapService {
      *              feeCoins: string,
      *              feeFiat: number,
      *              durationMinutesRange: string,
+     *              fixed: boolean
      *
      *          }|{
      *              result: false,
@@ -706,7 +709,8 @@ export class SwapService {
                 toAddress,
                 refundAddress,
                 swapCreationInfo.rawSwapData,
-                clientIp
+                clientIp,
+                false
             );
             Logger.log(
                 `Created:${safeStringify({
@@ -781,6 +785,7 @@ export class SwapService {
                     feeCoins: feeCoins,
                     feeFiat: feeFiat,
                     durationMinutesRange: swapCreationInfo.durationMinutesRange,
+                    fixed: false,
                 };
                 Logger.log(
                     `Returning: ${safeStringify({

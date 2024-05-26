@@ -1,7 +1,10 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
 import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem.js";
@@ -11,9 +14,9 @@ import {
     mergeTwoTransactionsArraysAndNotifyAboutNewTransactions,
 } from "../../common/utils/cacheActualizationUtils.js";
 import { computeConfirmationsCountByTimestamp } from "../../trx/lib/blocks.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 class TronscanTrc20TransactionsProvider extends ExternalApiProvider {
     constructor() {
@@ -139,7 +142,7 @@ class TrongridTrc20TransactionsProvider extends ExternalApiProvider {
                 const parts = nextPageLink.split("trongrid.io");
                 originalApiPathAndQuery = parts[1]; // Take the path and query returned by trongrid
             }
-            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPathAndQuery}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.TRX)?.key)}${originalApiPathAndQuery}`;
         } catch (e) {
             improveAndRethrow(e, "trongridTrc20TransactionsProvider.composeQueryString");
         }
@@ -199,6 +202,7 @@ class TrongridTrc20TransactionsProvider extends ExternalApiProvider {
 export class Trc20TransactionsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "trc20TransactionsProvider",
+        cache,
         [new TronscanTrc20TransactionsProvider(), new TrongridTrc20TransactionsProvider()],
         STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS,
         false,

@@ -1,10 +1,13 @@
-import { improveAndRethrow } from "@rabbitio/ui-kit";
+import {
+    improveAndRethrow,
+    CachedRobustExternalApiCallerService,
+    ExternalApiProvider,
+    ApiGroups,
+} from "@rabbitio/ui-kit";
 
-import { ExternalApiProvider } from "../../../common/services/utils/robustExteranlApiCallerService/externalApiProvider.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
 import { TransactionsHistoryItem } from "../../common/models/transactionsHistoryItem.js";
-import { CachedRobustExternalApiCallerService } from "../../../common/services/utils/robustExteranlApiCallerService/cachedRobustExternalApiCallerService.js";
 import {
     actualizeCacheWithNewTransactionSentFromAddress,
     mergeTwoTransactionsArraysAndNotifyAboutNewTransactions,
@@ -12,9 +15,9 @@ import {
 import { tronUtils } from "../adapters/tronUtils.js";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
 import { computeConfirmationsCountByTimestamp } from "../lib/blocks.js";
-import { ApiGroups } from "../../../common/external-apis/apiGroups.js";
 import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 /**
  * WARNING: this provider returns internal transactions in non-recognizable format, and we don't process them,
@@ -136,7 +139,7 @@ class TrongridTronTransactionsProvider extends ExternalApiProvider {
                 const parts = nextPageLink.split("trongrid.io");
                 originalApiPathAndQuery = parts[1]; // Take the path and query returned by trongrid
             }
-            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator()}${originalApiPathAndQuery}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.TRX)?.key)}${originalApiPathAndQuery}`;
         } catch (e) {
             improveAndRethrow(e, "trongridTronTransactionsProvider.composeQueryString");
         }
@@ -318,6 +321,7 @@ class TrongridTronTransactionsProvider extends ExternalApiProvider {
 export class TronTransactionsProvider {
     static _provider = new CachedRobustExternalApiCallerService(
         "tronTransactionsProvider",
+        cache,
         // TODO: [feature, high] add more providers or implement rare reordering to request trongrid rarer. task_id=c246262b0e7f43dfa2a9b0e30c947ad7
         // Trongrid used with higher priority because it retrieves internal transaction also
         [new TrongridTronTransactionsProvider(), new TronscanTronTransactionsProvider()],

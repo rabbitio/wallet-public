@@ -17,6 +17,7 @@ export class SwapCreationInfo extends BaseSwapCreationInfo {
      * @param fiatMax {number|null}
      * @param txData {TxData}
      * @param durationMinutesRange {string}
+     * @param fixed {boolean}
      */
     constructor(
         fromCoin,
@@ -33,7 +34,8 @@ export class SwapCreationInfo extends BaseSwapCreationInfo {
         max,
         fiatMax,
         txData,
-        durationMinutesRange
+        durationMinutesRange,
+        fixed
     ) {
         super(
             fromCoin,
@@ -46,7 +48,8 @@ export class SwapCreationInfo extends BaseSwapCreationInfo {
             fiatMin,
             max,
             fiatMax,
-            durationMinutesRange
+            durationMinutesRange,
+            fixed
         );
         this.feeCoin = feeCoin;
         this.feeCoins = feeCoins;

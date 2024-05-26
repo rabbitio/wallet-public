@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 
-import { improveAndRethrow, Logger } from "@rabbitio/ui-kit";
+import { improveAndRethrow, Logger, CacheAndConcurrentRequestsResolver } from "@rabbitio/ui-kit";
 
 import { Storage } from "../../../common/services/internal/storage.js";
 import { hasMinConfirmations } from "../lib/transactions/transactions-utils.js";
@@ -19,10 +19,10 @@ import AddressesDataApi from "../../common/backend-api/addressesDataApi.js";
 import AddressesDataAdapter from "../../common/backend-api/adapters/addressesDataAdapter.js";
 import { transactionsDataProvider } from "./internal/transactionsDataProvider.js";
 import { EventBus, NEW_ADDRESS_CREATED_EVENT } from "../../../common/adapters/eventbus.js";
-import { CacheAndConcurrentRequestsResolver } from "../../../common/services/utils/robustExteranlApiCallerService/cacheAndConcurrentRequestsResolver.js";
 import { PreferencesService } from "../../common/services/preferencesService.js";
 import { UserDataAndSettings } from "../../common/models/userDataAndSettings.js";
 import { MODERATE_TTL_FOR_RELATIVELY_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
+import { cache } from "../../../common/utils/cache.js";
 
 // TODO: [refactoring, moderate] remove redundant addresses related logic from this class task_id=2dfd7adefe9d48acbe0ecb6f83fd68f7
 export default class AddressesService {
@@ -35,6 +35,7 @@ export default class AddressesService {
     // TODO: [tests, moderate] add units for caching for existing tests
     static _addressResolver = new CacheAndConcurrentRequestsResolver(
         "externalAddress",
+        cache,
         MODERATE_TTL_FOR_RELATIVELY_FREQ_CHANGING_DATA_MS,
         false
     );

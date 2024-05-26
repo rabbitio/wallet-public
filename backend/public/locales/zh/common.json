@@ -1,0 +1,470 @@
+{
+    "components": {
+        "pages": {
+            "PublicSwapPrimaryLanding": {
+                "meta": {
+                    "title": "以最低的费用即时兑换加密货币 - Rabbit Swap",
+                    "keywords": "加密货币交换，加密货币兑换，加密货币交易所，加密货币兑换所，最低费率交换加密货币，兑换货币，兑换代币，快速加密货币交换，兑换货币，低成本兑换，数字资产兑换，快速硬币兑换",
+                    "description": "使用 Rabbit Swap 即时兑换货币和代币，这是具有最优惠价格的独特加密货币交易所。无需注册 - 只需点击一下即可兑换货币！"
+                },
+                "hero": {
+                    "title": "轻松进行加密货币兑换",
+                    "content": "以最低费率兑换比特币、泰达币、以太坊等3600多种其他加密货币 — 无需注册。选择一对货币并开始兑换"
+                },
+                "how-to-swap": {
+                    "title": "如何使用 Rabbit Swap 兑换加密货币？",
+                    "content": "使用 Rabbit Swap 简单明了；以下是兑换货币所需的所有步骤：",
+                    "items": {
+                        "1": {
+                            "title": "创建交易",
+                            "content": "选择一个货币对，并在上面的表单中输入所需金额。"
+                        },
+                        "2": {
+                            "title": "提供您的地址",
+                            "content": "输入您想要接收兑换的加密货币的地址。"
+                        },
+                        "3": {
+                            "title": "发送货币",
+                            "content": "检查详细信息，并将您的货币发送到生成的地址。"
+                        },
+                        "4": {
+                            "title": "获取您的货币",
+                            "content": "在几分钟内收到已兑换的加密货币！"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "最佳汇率",
+                    "content": "Rabbit Swap 具有独特的算法，可动态比较各个流动性提供商的汇率，选择最低汇率，确保您的交易始终以最有利可图的汇率完成。"
+                },
+                "wide-limits": {
+                    "title": "最低和最高限额",
+                    "content": "拥有各种流动性提供商还使 Rabbit Swap 能够提供各种限额。您可以兑换非常小的金额，也可以兑换几乎无限大的金额。"
+                },
+                "features-grid": {
+                    "title": "Rabbit Swap 的特点是什么？",
+                    "content": "Rabbit Swap旨在使加密货币交兑换过程经济高效、安全、快速，如同发送短信一样简单。",
+                    "items": {
+                        "1": {
+                            "title": "无需注册",
+                            "content": "以最低的费用和几乎即时的速度兑换任何金额的加密货币 — 无需注册。只需点击几下即可完成。"
+                        },
+                        "2": {
+                            "title": "支持的资产范围广泛",
+                            "content": "可以从超过3600种可用于交换的货币和代币中进行选择。"
+                        },
+                        "3": {
+                            "title": "尊重隐私",
+                            "content": "仅使用匿名信息进行交换。Rabbit Swap 绝不会要求您提供除收币地址以外的任何信息。"
+                        },
+                        "4": {
+                            "title": "绝地级支持",
+                            "content": "虽然所有兑换都完全自动执行，但有时我们需要与真实人员交谈。在一天中的任何时间与我们的支持人员聊天。"
+                        }
+                    }
+                },
+                "recent-swaps": {
+                    "title": "最近实时兑换"
+                }
+            },
+            "PublicSwapAssetLanding": {
+                "meta": {
+                    "title": "以最低费用即时兑换{{tickerWithProtocol}} - Rabbit Swap",
+                    "keywords": "兑换{{tickerWithProtocol}}，兑换{{tickerWithProtocol}}，兑换{{assetName}}，兑换{{assetName}}，兑换{{tickerPrintable}}，加密货币兑换，加密货币兑换，加密货币交易，加密货币兑换，最低费率交换加密货币，兑换货币，交换代币，快速加密货币交换，交换货币，低成本交换，数字资产交换，快速货币兑换",
+                    "description": "立即使用 Rabbit Swap 兑换{{tickerAndBracedProtocol}} — 具有最优惠价格的独特加密货币交易所。无需注册 — 只需一键点击即可兑换{{assetName}}！"
+                },
+                "hero": {
+                    "title": "{{tickerPrintable}} 让兑换变得轻松",
+                    "content": "以最佳汇率兑换{{nameAndBracedProtocol}}。即时。无需注册。继续，只需选择您想将{{assetName}}兑换成的代币，然后输入金额即可！"
+                },
+                "how-to-swap": {
+                    "title": "如何兑换{{tickerPrintable}}？",
+                    "content": "Rabbit Swap 旨在使{{tickerPrintable}}兑换过程具有成本效益、安全、快速，犹如发送短信一样简单。",
+                    "items": {
+                        "1": {
+                            "title": "创建交易",
+                            "content": "为{{tickerWithProtocol}}选择一个货币对，然后在上方表格中输入所需的金额。"
+                        },
+                        "2": {
+                            "title": "提供您的地址",
+                            "content": "输入您希望接收交换货币的地址。"
+                        },
+                        "3": {
+                            "title": "发送货币",
+                            "content": "查看详细信息，并将{{tickerWithProtocol}}发送到生成的地址。"
+                        },
+                        "4": {
+                            "title": "获取您的货币",
+                            "content": "几分钟后即可收到兑换的货币！"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "最佳汇率",
+                    "content": "确保在交换{{nameAndBracedProtocol}}时获得最佳汇率。 Rabbit Swap会动态比较各个流动性提供商的汇率，并在您每次执行兑换时选择最佳汇率。"
+                },
+                "wide-limits": {
+                    "title": "最低和最高限额",
+                    "content": "通过拥有各种各样的流动性提供商，Rabbit Swap 的潜在互换金额基本上是无限的。无论您想交换几美元还是数十亿美元，Rabbit Swap 都可以处理。"
+                },
+                "features-grid": {
+                    "title": "为何使用 Rabbit Swap 兑换{{tickerWithProtocol}}？",
+                    "content": "Rabbit Swap 旨在使{{tickerPrintable}}交换过程具有成本效益、安全、快速，并且就像发送短信一样简单。",
+                    "items": {
+                        "1": {
+                            "title": "无需注册",
+                            "content": "以最低的费用和几乎即时的速度交换任意金额的{{nameAndBracedProtocol}} — 无需注册。只需点击几下即可完成。"
+                        },
+                        "2": {
+                            "title": "支持的资产范围广泛",
+                            "content": "除{{nameAndBracedProtocol}}外，您还可以从超过3600种可用于兑换的货币和代币中进行选择。"
+                        },
+                        "3": {
+                            "title": "尊重隐私",
+                            "content": "交换过程完全依赖于匿名信息。Rabbit Swap 绝不会要求除您接收币的地址以外的任何详细信息。"
+                        },
+                        "4": {
+                            "title": "绝地级支持",
+                            "content": "虽然所有兑换都是完全自动执行，但有时我们需要与真实人员交谈。在一天中的任何时间与我们的支持人员聊天。"
+                        }
+                    }
+                },
+                "recent-swaps": {
+                    "title": "最近实时兑换"
+                }
+            },
+            "PublicSwapPairLanding": {
+                "meta": {
+                    "title": "以最低费率即时兑换{{fromTickerWithProtocol}} 到 {{toTickerWithProtocol}} - Rabbit Swap",
+                    "keywords": "交换{{fromTickerWithProtocol}} 到 {{toTickerWithProtocol}}，兑换{{fromTickerWithProtocol}} 到 {{toTickerWithProtocol}}，交换{{fromAssetName}} 到 {{toAssetName}}，兑换{{fromAssetName}} 到 {{toAssetName}}，交易{{fromTickerPrintable}}/{{toTickerPrintable}}，交换{{fromTickerPrintable}} 到 {{toTickerPrintable}}，兑换{{fromTickerPrintable}} 到 {{toTickerPrintable}}，加密货币交换，加密货币兑换，加密货币交换，加密货币兑换，最低费率交换加密货币，兑换硬币，交换代币，快速加密货币交换，交换硬币，低成本交换，数字资产交换，快速硬币交换",
+                    "description": "使用 Rabbit Swap 即时交换{{fromTickerAndBracedProtocol}} 到 {{toTickerAndBracedProtocol}} — 具有最优惠价格的独特加密货币交易所。无需注册 — 只需一键点击即可兑换{{fromAssetName}} 到 {{toAssetName}}！"
+                },
+                "hero": {
+                    "title": "{{fromTickerPrintable}} 到 {{toTickerPrintable}} 交换变得轻松",
+                    "content": "以最佳汇率交换{{fromNameAndBracedProtocol}} 到 {{toNameAndBracedProtocol}}。立即。无需注册。继续，只需输入金额！"
+                },
+                "how-to-swap": {
+                    "title": "如何交换{{fromTickerPrintable}} 到 {{toTickerPrintable}}？",
+                    "content": "使用 Rabbit Swap 简单明了；以下是兑换{{fromAssetName}} 到 {{toAssetName}} 的所有必要步骤：",
+                    "items": {
+                        "1": {
+                            "title": "输入金额",
+                            "content": "在上方表单中输入您想要兑换的{{fromTickerWithProtocol}} 的金额。"
+                        },
+                        "2": {
+                            "title": "提供您的地址",
+                            "content": "输入您希望接收{{toTickerWithProtocol}} 的地址。"
+                        },
+                        "3": {
+                            "title": "发送货币",
+                            "content": "查看详细信息，并将您的{{fromTickerWithProtocol}} 发送到生成的地址。"
+                        },
+                        "4": {
+                            "title": "获取您的货币",
+                            "content": "稍后即可收到您的{{toTickerWithProtocol}}！"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "最佳汇率",
+                    "content": "确保您在将{{fromNameAndBracedProtocol}} 兑换为 {{toNameAndBracedProtocol}} 时获得最佳汇率。 Rabbit Swap 会动态比较各个流动性提供商的汇率，并在您每次执行兑换时选择最佳汇率。"
+                },
+                "wide-limits": {
+                    "title": "最低和最高限额",
+                    "content": "通过拥有各种各样的流动性提供商，Rabbit Swap 的潜在互换金额基本上是无限的。无论您想交换几美元还是数十亿美元，Rabbit Swap 都可以处理。"
+                },
+                "features-grid": {
+                    "title": "为何使用 Rabbit Swap 兑换{{fromTickerPrintable}} 到 {{toTickerPrintable}}？",
+                    "content": "Rabbit Swap 旨在使{{fromTickerWithProtocol}} 兑换到 {{toTickerWithProtocol}} 的过程具有成本效益、安全、快速，犹如发送短信一样简单。",
+                    "items": {
+                        "1": {
+                            "title": "无需注册",
+                            "content": "使用最低费率和几乎即时的速度交换任何金额的{{fromNameAndBracedProtocol}} 和 {{toNameAndBracedProtocol}} — 无需注册。只需点击几下即可完成。"
+                        },
+                        "2": {
+                            "title": "支持的资产范围广泛",
+                            "content": "除{{fromNameAndBracedProtocol}} 和 {{toNameAndBracedProtocol}} 外，您还可以从超过3600种可用于交换的货币和代币中进行选择。"
+                        },
+                        "3": {
+                            "title": "尊重隐私",
+                            "content": "交换过程仅依赖于匿名信息。 除了{{toNameAndBracedProtocol}} 地址之外，Rabbit Swap 永远不会要求您提供任何详细信息。"
+                        },
+                        "4": {
+                            "title": "绝地级支持",
+                            "content": "虽然所有交换都完全自动执行，但有时我们需要与真实人员交谈。在一天中的任何时间与我们的支持人员聊天。"
+                        }
+                    }
+                },
+                "recent-swaps": {
+                    "title": "最近实时兑换"
+                }
+            },
+            "UnexpectedErrorPage": {
+                "title": "似乎出了问题",
+                "subtitle": "太尴尬了... 应用程序由于意外错误而失败。如果此错误重复发生，请重新加载页面或通过 support@rabbit.io 与我们联系。对于给您带来的不便，我们深表歉意。",
+                "primary-button-content": "重新加载页面",
+                "transparent-button-content": "联系支持",
+                "sign-in-button-content": "首页"
+            },
+            "PrivacyPolicy": {
+                "title": "SWAP.RABBIT.IO 隐私政策",
+                "meta": {
+                    "title": "隐私政策 – Rabbit Swap",
+                    "description": "查看 Rabbit Swap 的隐私政策，以清楚地了解我们如何在我们的加密货币交易平台上处理您的信息。我们优先考虑透明度，以确保您的隐私在整个体验过程中受到保护。",
+                    "keywords": "隐私政策，交换加密货币，加密货币交换，加密货币交换，加密货币交换"
+                }
+            },
+            "TermsOfUse": {
+                "title": "SWAP.RABBIT.IO 使用条款",
+                "meta": {
+                    "title": "使用条款 – Rabbit Swap",
+                    "description": "查看 Rabbit Swap 的使用条款，了解使用我们的加密货币交易平台的明确指南。了解您的权利和责任，以确保顺畅的体验。",
+                    "keywords": "使用条款，交换加密货币，加密货币交换，加密货币交换，加密货币交换"
+                }
+            }
+        },
+        "organisms": {
+            "SwapFormWithCoinDropdowns": {
+                "errors": {
+                    "requests-limit-exceeded": "抱歉，由于需求量大，我们的服务暂时中断。请稍后再试。感谢您的理解。",
+                    "default": "抱歉，我们未能执行最后一次操作，请重试或联系支持。"
+                }
+            },
+            "LandingFooter": {
+                "single-asset": {
+                    "title": "兑换",
+                    "item-content": "兑换 {{ticker}}"
+                },
+                "pair": {
+                    "title": "交易对",
+                    "item-content": "{{tickerFrom}} 兑换到 {{tickerTo}}"
+                }
+            },
+            "AssetDropdown": {
+                "field-placeholder": "搜索..",
+                "text-default": "所有可用资产",
+                "text-search": "搜索结果",
+                "text-search-fail": "未找到资产",
+                "load-more-button": "加载更多"
+            },
+            "RecentSwapsTable": {
+                "table-head-tiles": {
+                    "from": "从",
+                    "to": "到",
+                    "finished": "完成"
+                }
+            },
+            "SwapForm": {
+                "swap-all-button-titles": {
+                    "enable": "全部兑换",
+                    "cancel": "取消"
+                },
+                "input": {
+                    "fiat-placeholder": "输入法定货币金额",
+                    "balance-loader-text": "正在加载余额..."
+                },
+                "consents": {
+                    "consent-text": "点击“兑换”即表示您同意 Rabbit Swap 的",
+                    "terms-of-use": "使用条款",
+                    "and": "和",
+                    "privacy-policy": "隐私政策"
+                },
+                "information-block": {
+                    "minimum-amount": "最小金额: ",
+                    "maximum-amount": "最大金额: ",
+                    "transaction-fee": "网络费: ",
+                    "calculating-network-fee": "正在计算网络费用...",
+                    "loading-minimal-amount": "正在加载最小金额..",
+                    "swap-rate": "汇率: ",
+                    "calculating-swap-rates": "正在计算交换率..",
+                    "pair-not-available": "交易对当前不可用。请稍后再试或选择其他交易对。"
+                },
+                "rateSelector": {
+                    "fixedRate": "固定汇率",
+                    "floatingRate": "浮动汇率"
+                },
+                "confirm-button-text": "交易"
+            },
+            "SwapFlow": {
+                "meta": {
+                    "title": "将 {{fromTickerWithProtocol}} 兑换成 {{toTickerWithProtocol}} 处理中 - Rabbit Swap",
+                    "description": "请提供将 {{fromTickerWithProtocol}} 兑换成 {{toTickerWithProtocol}} 所需的数据。Rabbit Swap 比较不同流动性提供商的费率，以确保为您的交易提供最佳汇率。",
+                    "keywords": "交换 {{fromTickerWithProtocol}} 到 {{toTickerWithProtocol}}, 兑换 {{fromTickerWithProtocol}} 到 {{toTickerWithProtocol}}, 交换 {{fromAssetName}} 到 {{toAssetName}}, 兑换 {{fromAssetName}} 到 {{toAssetName}}, 交易 {{fromTickerPrintable}}/{{toTickerPrintable}}, 交换 {{fromTickerPrintable}} 到 {{toTickerPrintable}}, 兑换 {{fromTickerPrintable}} 到 {{toTickerPrintable}}, 加密货币交换, 加密货币交易所, 加密货币兑换, 加密货币交换"
+                },
+                "support-welcome-message": "与我们聊天",
+                "loader-title-details": "加载交换详情...",
+                "common": {
+                    "rate": "汇率"
+                },
+                "cancel-swap-confirmation-step": {
+                    "title": "取消兑换？",
+                    "subtitle": "关闭此窗口将重新计算当前汇率，这可能导致更好或更差的交易。请记住这一点。",
+                    "cancel-swap-button-title": "继续取消",
+                    "keep-swap-button-title": "保持汇率"
+                },
+                "unexpected-error-step": {
+                    "title": "出现错误...",
+                    "subtitle": "非常抱歉，我们无法完成上一次操作。请刷新页面并重试。如果此错误再次发生，请联系支持团队。我们对造成的不便深表歉意。",
+                    "back-button-text": "联系我们",
+                    "confirm-button-text": "刷新页面"
+                },
+                "rateModeDisclaimers": {
+                    "fixed": "使用固定汇率，汇率在创建交换时锁定。这保证了您将收到的确切金额，保护您免受市场波动的影响。",
+                    "floating": "使用浮动汇率，汇率可能会在交易完成前变化。这允许潜在的市场优势，但也带来汇率变化的风险。"
+                },
+                "SwapFlowCreationAmounts": {
+                    "title": "开始新兑换",
+                    "subtitle": "选择兑换对并输入金额。Rabbit Swap 将基于输入的金额比较和选择来自多个流动性提供商的最佳汇率。",
+                    "errors": {
+                        "amount-less-than-min-swappable": "您尝试兑换的 {{assetName}} 数量低于允许的最低数量。",
+                        "amount-higher-than-max-swappable": "您尝试兑换的 {{assetName}} 数量超过允许的最大数量。",
+                        "pair-not-supported": "对不起，所选对目前不可用。请稍后重试或选择其他对。"
+                    }
+                },
+                "SwapFlowCreationAddresses": {
+                    "title": "接收地址",
+                    "subtitle": "请提供您希望接收 {{toCoinName}} 的地址。如果交换失败，您的金额将退还到指定的 {{fromCoinName}} 退款地址。",
+                    "confirm-button-text": "下一步",
+                    "recepient-address-title": "接收地址 {{receivingCoinName}}",
+                    "refund-address-title": "退款地址 {{sendingCoinName}}",
+                    "receiving-address-extra-id": "接收 {{extraIdName}}",
+                    "refund-address-extra-id": "退款 {{extraIdName}}",
+                    "receiving-address-extra-id-notice": "请检查您的接收地址是否需要“Memo”或“Destination Tag” - 有时称为标签、ID、标记或注释。交易所可能需要此标识符进行存款。包含此标识符非常重要，因为省略或错误填写可能导致资金丢失。",
+                    "refund-address-extra-id-notice": "请检查您的退款地址是否需要“Memo”或“Destination Tag”（也称为标签、ID、标记或注释）。包含此标识符非常重要，因为交易所可能需要它来正确处理传入交易。省略或错误填写可能导致资金丢失。",
+                    "optional-field-placeholder": "（可选）",
+                    "address-is-contract-validation-message": "您输入了一个 {{ticker}} 代币合约地址。发送到此地址将导致资金丢失。",
+                    "consents": {
+                        "consent-text": "点击“下一步”即表示您同意",
+                        "terms-of-use": "使用条款",
+                        "and": "和",
+                        "privacy-policy": "隐私政策"
+                    }
+                },
+                "SwapFlowPaymentAwaiting": {
+                    "title": "等待您的付款",
+                    "subtitle": "请将 {{fromCoinName}} 发送到以下地址。一旦交易被接收，页面将自动更新。",
+                    "back-button-text": "取消此交换",
+                    "extra-id-notice": "发送资金时，请确保在钱包中输入所需的“Memo”或“Destination Tag”。这是正确处理交易的关键。错误信息可能导致资金丢失。",
+                    "block-titles": {
+                        "amount-send": "发送确切",
+                        "address": "到这个地址",
+                        "amount-receive": "您将收到",
+                        "timer": "付款时间",
+                        "swap-id": "兑换ID",
+                        "extra-id": "并指定此 {{extraIdName}}"
+                    },
+                    "pushes": {
+                        "copy-amount-failed": {
+                            "title": "复制失败",
+                            "text": "非常抱歉，我们无法复制要发送金额。请刷新页面并重试。"
+                        },
+                        "copy-address-failed": {
+                            "title": "复制失败",
+                            "text": "非常抱歉，我们无法复制付款地址。请刷新页面并重试。"
+                        },
+                        "copy-swap-id-failed": {
+                            "title": "复制失败",
+                            "text": "非常抱歉，我们无法复制兑换ID。请刷新页面并重试。"
+                        }
+                    }
+                },
+                "SwapFlowPaymentConfirming": {
+                    "title": "等待确认",
+                    "subtitle": "您的交易已收到。请稍等片刻，等待区块链确认交易，完成后页面将自动更新。",
+                    "block-titles": {
+                        "amount-send": "兑换金额",
+                        "amount-receive": "接收金额",
+                        "address": "接收地址",
+                        "swap-id": "兑换 ID",
+                        "extra-id": "接收人 {{extraIdName}}"
+                    }
+                },
+                "SwapFlowPaymentExchanging": {
+                    "title": "兑换您的货币",
+                    "subtitle": "您的交易已确认，正在进行兑换，请稍等，兑换完成后页面会自动更新。",
+                    "block-titles": {
+                        "amount-send": "兑换金额",
+                        "amount-receive": "接收金额",
+                        "address": "接收地址",
+                        "swap-id": "兑换 ID",
+                        "extra-id": "接收人{{extraIdName}}"
+                    }
+                },
+                "SwapFlowPaymentCompleted": {
+                    "title": "兑换完成!",
+                    "subtitle": "您的交易已成功完成，货币已发送至您提供的地址。感谢您使用 Rabbit Swap。",
+                    "confirm-button-text": "创建新交易",
+                    "back-button-text": "联系我们",
+                    "block-titles": {
+                        "amount-to-swap": "兑换金额",
+                        "amount-sent": "发送金额",
+                        "address": "接收地址",
+                        "swap-id": "兑换 ID",
+                        "transaction-id": "发送的交易 ID ({{ticker}})",
+                        "extra-id": "接收人{{extraIdName}}"
+                    }
+                },
+                "SwapFlowPaymentRefunded": {
+                    "title": "交易退款",
+                    "subtitle": "我们很遗憾地通知您，您的兑换尚未完成，因此已退款。请联系支持团队，以便我们我们调查。请使用兑换ID 作为参考：{{swapId}}。",
+                    "confirm-button-text": "创建新交易",
+                    "back-button-text": "联系我们"
+                },
+                "SwapFlowPaymentExpired": {
+                    "title": "交易已过期",
+                    "subtitle": "您的交易未能及时接收，且已过期。如果您尚未发送您的货币，只需创建一个新交易。如果您已经发送了货币，请不要担心，只需联系支持人员，以便我们重新计算费率或向您发送退款。请使用兑换 ID 作为参考：{{swapId}}。",
+                    "confirm-button-text": "创建新交易"
+                },
+                "pushes": {
+                    "swap-not-found": {
+                        "title": "交易未找到!",
+                        "text": "对不起，未找到提供标识符的交易。"
+                    },
+                    "swap-init-failed": {
+                        "title": "加载兑换时出错!",
+                        "text": "加载兑换详细信息时遇到错误。请刷新页面并重试。"
+                    },
+                    "swap-details-loading-failed": {
+                        "title": "加载兑换换详细信息时出错!",
+                        "text": "加载兑换详细信息时遇到错误。请刷新页面并重试。"
+                    },
+                    "requests-limit-exceeded": {
+                        "title": "兑换服务超载!",
+                        "text": "对不起，由于需求量大，我们的系统暂时超载。请几分钟后再试。感谢您的理解。"
+                    },
+                    "maximum-amount-exceeded": {
+                        "title": "超过最大金额",
+                        "text": "您尝试兑换的金额超过允许的最大金额。"
+                    },
+                    "minimum-amount-not-reached": {
+                        "title": "未达到最低金额",
+                        "text": "您尝试兑换的金额低于允许的最低金额。"
+                    },
+                    "pair-not-supported": {
+                        "title": "配对不可用",
+                        "text": "对不起，所选对目前不可用。请稍后重试或选择其他对。"
+                    },
+                    "default-error": {
+                        "title": "出现错误...",
+                        "text": "对不起，我们无法完成上一次操作。请重试或联系支持。"
+                    }
+                }
+            }
+        }
+    },
+    "common": {
+        "independent-exchange": {
+            "title": "独立交易",
+            "content": "虽然大多数人通过各种交易平台进行加密货币互换，从而将资产委托给这些平台，但实际上使用 Rabbit Swap 等独立的交易所服务更加安全，确保您的货币仍存储在安全的非托管钱包中。这种方法确保没有人可以禁止或限制您的账户，夺取您的代币的控制权，并确保下一个 FTX 不会带走您所有的代币，即使 SEC 禁止您最喜欢的一种交易服务，您也不会受到影响。"
+        },
+        "create-swap-cta-title": "开始对抗",
+        "page-titles": {
+            "terms-and-conditions": "条款和条件",
+            "privacy-policy": "隐私政策",
+            "try-wallet": "试用 Rabbit Wallet"
+        },
+        "support-chat-message": "与我们聊天",
+        "default-copy-button-title": "复制",
+        "default-copy-button-tooltip": "已复制！"
+    }
+}
