@@ -245,7 +245,8 @@
                 "text-default": "सभी उपलब्ध संपत्तियाँ",
                 "text-search": "खोज परिणाम",
                 "text-search-fail": "संपत्ति नहीं मिली",
-                "load-more-button": "और लोड करें"
+                "load-more-button": "और लोड करें",
+                "text-loading": "सभी सिक्के लोड हो रहे हैं.."
             },
             "RecentSwapsTable": {
                 "table-head-tiles": {
@@ -279,14 +280,40 @@
                     "calculating-swap-rates": "स्वैप दरों की गणना हो रही है..",
                     "pair-not-available": "जोड़ी अभी उपलब्ध नहीं है। कृपया बाद में पुन: प्रयास करें या कोई अन्य पेयर चुनें।"
                 },
+                "addresses": {
+                    "recepient-address-title": "प्राप्तकर्ता का पता {{receivingCoinName}}",
+                    "refund-address-title": "रिफंड का पता {{sendingCoinName}}",
+                    "receiving-address-extra-id": "प्राप्तकर्ता {{extraIdName}}",
+                    "refund-address-extra-id": "रिफंड {{extraIdName}}",
+                    "receiving-address-extra-id-notice": "कृपया जांचें कि क्या आपके प्राप्त पते के लिए 'मेमो' या 'डेस्टिनेशन टैग' की आवश्यकता है - कभी-कभी इसे टैग, आईडी, मार्क या नोट के रूप में भी जाना जाता है। एक्सचेंजों को डिपॉजिट के लिए इस पहचानकर्ता की आवश्यकता हो सकती है। इस पहचानकर्ता को शामिल करना महत्वपूर्ण है, क्योंकि इसे छोड़ना या गलत भरना फंड की हानि का कारण बन सकता है।",
+                    "refund-address-extra-id-notice": "कृपया जांचें कि क्या आपके रिफंड पते के लिए 'मेमो' या 'डेस्टिनेशन टैग' की आवश्यकता है (जिसे टैग, आईडी, मार्क या नोट के रूप में भी जाना जाता है)। इस पहचानकर्ता को शामिल करना महत्वपूर्ण है, क्योंकि एक्सचेंजों को इस जानकारी की आवश्यकता हो सकती है। इसे छोड़ना या गलत भरना फंड की हानि का कारण बन सकता है।",
+                    "optional-field-placeholder": "(वैकल्पिक)",
+                    "address-is-contract-validation-message": "आपने {{ticker}} टोकन कॉन्ट्रैक्ट का पता दर्ज किया है। इस पते पर भेजने से आपके फंड की हानि हो जाएगी।"
+                },
                 "rateSelector": {
                     "fixedRate": "स्थिर दर",
                     "floatingRate": "चल दर"
                 },
-                "confirm-button-text": "स्वैप"
+                "confirm-button-text": "स्वैप",
+                "errors": {
+                    "amount-less-than-min-swappable": "आप जो {{assetName}} स्वैप करने की कोशिश कर रहे हैं, वह न्यूनतम अनुमत राशि से कम है।",
+                    "amount-higher-than-max-swappable": "आप जो {{assetName}} स्वैप करने की कोशिश कर रहे हैं, वह अधिकतम अनुमत राशि से अधिक है।",
+                    "pair-not-supported": "हमें खेद है, चयनित जोड़ी अभी उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें या कोई अन्य जोड़ी चुनें।"
+                }
             },
             "SwapFlow": {
                 "meta": {
+                    "step-titles": {
+                        "awaiting": "भुगतान की प्रतीक्षा · {{amountFrom}} से {{amountTo}} स्वैप - Rabbit Swap",
+                        "confirming": "भुगतान की पुष्टि · {{amountFrom}} से {{amountTo}} स्वैप - Rabbit Swap",
+                        "exchanging": "आपके सिक्कों की अदला-बदली · {{amountFrom}} से {{amountTo}} स्वैप - Rabbit Swap",
+                        "completed": "सफलतापूर्वक स्वैप किया गया! · {{amountFrom}} से {{amountTo}} स्वैप - Rabbit Swap",
+                        "refunded": "आपके सिक्कों की वापसी · {{amountFrom}} से {{amountTo}} स्वैप - Rabbit Swap",
+                        "expired": "समय सीमा समाप्त · {{amountFrom}} से {{amountTo}} स्वैप - Rabbit Swap",
+                        "failed": "स्वैप करने में विफल · {{amountFrom}} से {{amountTo}} स्वैप - Rabbit Swap",
+                        "cancellation": "क्या आप सुनिश्चित हैं? · {{amountFrom}} से {{amountTo}} स्वैप - Rabbit Swap",
+                        "error": "कुछ गलत हो गया · {{amountFrom}} से {{amountTo}} स्वैप - Rabbit Swap"
+                    },
                     "title": "{{fromTickerWithProtocol}} को {{toTickerWithProtocol}} में स्वैप करने का कार्य प्रगति पर है - Rabbit Swap",
                     "description": "कृपया {{fromTickerWithProtocol}} को {{toTickerWithProtocol}} में स्वैप करने के लिए आवश्यक जानकारी दर्ज करें। Rabbit Swap विभिन्न लिक्विडिटी प्रदाताओं से दरों की तुलना करता है ताकि आपके एक्सचेंज के लिए सबसे अनुकूल विनिमय दर सुनिश्चित की जा सके।",
                     "keywords": "{{fromTickerWithProtocol}} से {{toTickerWithProtocol}} स्वैप करें, {{fromTickerWithProtocol}} से {{toTickerWithProtocol}} स्वैप करें, {{fromAssetName}} से {{toAssetName}} स्वैप करें, {{fromAssetName}} से {{toAssetName}} ट्रेड करें, {{fromTickerPrintable}}/{{toTickerPrintable}}, स्वैप करें {{fromTickerPrintable}} से {{toTickerPrintable}}, एक्सचेंज करें {{fromTickerPrintable}} से {{toTickerPrintable}}, स्वैप क्रिप्टो, क्रिप्टो एक्सचेंज, क्रिप्टोकरेंसी स्वैप, क्रिप्टोकरेंसी एक्सचेंज"
@@ -305,40 +332,11 @@
                 "unexpected-error-step": {
                     "title": "कुछ गलत हो गया...",
                     "subtitle": "दुर्भाग्यवश, हम आखिरी ऑपरेशन को पूरा नहीं कर सके। कृपया पेज को रिफ्रेश करें और पुनः प्रयास करें। यदि यह त्रुटि फिर से होती है, तो कृपया समर्थन से संपर्क करें। असुविधा के लिए हम क्षमा चाहते हैं।",
-                    "back-button-text": "हमसे संपर्क करें",
                     "confirm-button-text": "पेज को रीलोड करें"
                 },
                 "rateModeDisclaimers": {
                     "fixed": "स्थिर दर के साथ, विनिमय दर तब लॉक हो जाती है जब स्वैप बनाया जाता है। यह आपको मिलने वाली सटीक राशि की गारंटी देता है, जिससे बाजार में उतार-चढ़ाव से बचाव होता है।",
                     "floating": "चल दर के साथ, विनिमय दर तब तक बदल सकती है जब तक लेन-देन पूरा नहीं हो जाता। इससे संभावित बाजार लाभ की अनुमति मिलती है, लेकिन दर में परिवर्तन का जोखिम भी होता है।"
-                },
-                "SwapFlowCreationAmounts": {
-                    "title": "नया स्वैप शुरू करें",
-                    "subtitle": "एक स्वैप जोड़ी चुनें और एक राशि दर्ज करें। Rabbit Swap दर्ज की गई राशि के आधार पर विभिन्न लिक्विडिटी प्रदाताओं से सबसे अच्छी विनिमय दर की तुलना और चयन करेगा।",
-                    "errors": {
-                        "amount-less-than-min-swappable": "आप जो {{assetName}} स्वैप करने की कोशिश कर रहे हैं, वह न्यूनतम अनुमत राशि से कम है।",
-                        "amount-higher-than-max-swappable": "आप जो {{assetName}} स्वैप करने की कोशिश कर रहे हैं, वह अधिकतम अनुमत राशि से अधिक है।",
-                        "pair-not-supported": "हमें खेद है, चयनित जोड़ी अभी उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें या कोई अन्य जोड़ी चुनें।"
-                    }
-                },
-                "SwapFlowCreationAddresses": {
-                    "title": "प्राप्तकर्ता का पता",
-                    "subtitle": "कृपया वह पता प्रदान करें जहां आप {{toCoinName}} प्राप्त करना चाहेंगे। असफल स्वैप के मामले में, आपकी राशि आपको {{fromCoinName}} के रिफंड पते पर वापस भेजी जाएगी।",
-                    "confirm-button-text": "अगला",
-                    "recepient-address-title": "प्राप्तकर्ता का पता {{receivingCoinName}}",
-                    "refund-address-title": "रिफंड का पता {{sendingCoinName}}",
-                    "receiving-address-extra-id": "प्राप्तकर्ता {{extraIdName}}",
-                    "refund-address-extra-id": "रिफंड {{extraIdName}}",
-                    "receiving-address-extra-id-notice": "कृपया जांचें कि क्या आपके प्राप्त पते के लिए 'मेमो' या 'डेस्टिनेशन टैग' की आवश्यकता है - कभी-कभी इसे टैग, आईडी, मार्क या नोट के रूप में भी जाना जाता है। एक्सचेंजों को डिपॉजिट के लिए इस पहचानकर्ता की आवश्यकता हो सकती है। इस पहचानकर्ता को शामिल करना महत्वपूर्ण है, क्योंकि इसे छोड़ना या गलत भरना फंड की हानि का कारण बन सकता है।",
-                    "refund-address-extra-id-notice": "कृपया जांचें कि क्या आपके रिफंड पते के लिए 'मेमो' या 'डेस्टिनेशन टैग' की आवश्यकता है (जिसे टैग, आईडी, मार्क या नोट के रूप में भी जाना जाता है)। इस पहचानकर्ता को शामिल करना महत्वपूर्ण है, क्योंकि एक्सचेंजों को इस जानकारी की आवश्यकता हो सकती है। इसे छोड़ना या गलत भरना फंड की हानि का कारण बन सकता है।",
-                    "optional-field-placeholder": "(वैकल्पिक)",
-                    "address-is-contract-validation-message": "आपने {{ticker}} टोकन कॉन्ट्रैक्ट का पता दर्ज किया है। इस पते पर भेजने से आपके फंड की हानि हो जाएगी।",
-                    "consents": {
-                        "consent-text": "\"अगला\" पर क्लिक करके, आप स्वीकार करते हैं",
-                        "terms-of-use": "उपयोग की शर्तें",
-                        "and": "और",
-                        "privacy-policy": "गोपनीयता नीति"
-                    }
                 },
                 "SwapFlowPaymentAwaiting": {
                     "title": "आपके भुगतान की प्रतीक्षा कर रहे हैं",
@@ -394,7 +392,6 @@
                     "title": "स्वैप पूरा हुआ!",
                     "subtitle": "आपका स्वैप सफलतापूर्वक पूरा हो गया है और मुद्राएं निर्दिष्ट पते पर भेज दी गई हैं। Rabbit Swap का उपयोग करने के लिए धन्यवाद।",
                     "confirm-button-text": "नया विनिमय बनाएं",
-                    "back-button-text": "हमसे संपर्क करें",
                     "block-titles": {
                         "amount-to-swap": "स्वैप करने की राशि",
                         "amount-sent": "भेजी गई राशि",
@@ -407,8 +404,7 @@
                 "SwapFlowPaymentRefunded": {
                     "title": "स्वैप लौटाया गया",
                     "subtitle": "दुर्भाग्यवश, आपका स्वैप पूरा नहीं हुआ और इसे वापस कर दिया गया है। कृपया हमारे समर्थन सेवा से संपर्क करें ताकि हम यह जांच सकें कि क्या हुआ। संदर्भ के रूप में स्वैप आईडी का उपयोग करें: {{swapId}}।",
-                    "confirm-button-text": "फिर से शुरू करें",
-                    "back-button-text": "हमसे संपर्क करें"
+                    "confirm-button-text": "फिर से शुरू करें"
                 },
                 "SwapFlowPaymentExpired": {
                     "title": "स्वैप समाप्त हो गया है",

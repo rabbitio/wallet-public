@@ -1,0 +1,466 @@
+{
+    "components": {
+        "pages": {
+            "PublicSwapPrimaryLanding": {
+                "meta": {
+                    "title": "Anında Kripto Takası En Düşük Ücretlerle - Rabbit Swap",
+                    "keywords": "kripto takas, kripto borsa, kripto para takası, kripto para borsası, en düşük ücretlerle kripto takası, coin değişimi, token değişimi, hızlı kripto değişimi, coin takası, düşük maliyetli takaslar, dijital varlık takası, hızlı coin takası",
+                    "description": "Rabbit Swap ile coin ve token'ları anında değiştirin, en iyi oranlarla eşsiz kripto borsası. Kayıt gerektirmez - sadece bir tıklama ile coin takası yapın!"
+                },
+                "hero": {
+                    "title": "Kripto Takası Kolaylaştırıldı",
+                    "content": "Bitcoin, Tether, Ethereum ve 3600'den fazla kripto parayı en düşük ücretlerle değiştirin — kayıt gerektirmez. Bir çift seçin ve başlayın!"
+                },
+                "how-to-swap": {
+                    "title": "Rabbit Swap ile kripto nasıl değiştirilir?",
+                    "content": "Rabbit Swap kullanımı kolay ve anlaşılır; aşağıda coinlerinizi değiştirmek için yapmanız gereken tüm adımları bulabilirsiniz:",
+                    "items": {
+                        "1": {
+                            "title": "Bir Takas Oluşturun",
+                            "content": "Yukarıdaki formda bir coin çifti seçin ve istediğiniz miktarı girin."
+                        },
+                        "2": {
+                            "title": "Adresinizi Sağlayın",
+                            "content": "Değiştirilen kriptoyu almak istediğiniz adresi girin."
+                        },
+                        "3": {
+                            "title": "Coin Gönderin",
+                            "content": "Detayları kontrol edin ve coinlerinizi oluşturulan adrese gönderin."
+                        },
+                        "4": {
+                            "title": "Coinlerinizi Alın",
+                            "content": "Değiştirilen kriptoyu birkaç dakika içinde alın!"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "En İyi Oranlar",
+                    "content": "Rabbit Swap, çeşitli likidite sağlayıcılarının oranlarını dinamik olarak karşılaştıran benzersiz bir algoritmaya sahiptir ve en düşük olanı seçerek değişimlerinizi her zaman en kârlı oranlarda gerçekleştirir."
+                },
+                "wide-limits": {
+                    "title": "En Düşük ve En Yüksek Limitler",
+                    "content": "Çeşitli likidite sağlayıcıları sayesinde Rabbit Swap, geniş bir limit aralığı sunar. Çok küçük miktarlardan neredeyse sonsuz büyüklükteki miktarlara kadar her şeyi değiştirebilirsiniz."
+                },
+                "features-grid": {
+                    "title": "Rabbit Swap'ı Farklı Kılan Nedir?",
+                    "content": "Rabbit Swap, kripto takas sürecini maliyet açısından etkin, güvenli, hızlı ve bir mesaj göndermek kadar kolay hale getirecek şekilde tasarlanmıştır.",
+                    "items": {
+                        "1": {
+                            "title": "Kayıt Gerekmez",
+                            "content": "Düşük ücretlerle ve neredeyse anında herhangi bir miktarda kripto değiştirin — kayıt gerektirmez. Sadece birkaç tıklama ile yapılabilir."
+                        },
+                        "2": {
+                            "title": "Geniş Desteklenen Varlık Yelpazesi",
+                            "content": "3600'den fazla değişim için mevcut coin ve token arasından seçim yapın."
+                        },
+                        "3": {
+                            "title": "Gizliliğe Saygı",
+                            "content": "Bir değişim gerçekleştirmek için yalnızca anonim bilgiler kullanılır. Rabbit Swap, coin almak için adresiniz dışında hiçbir bilgi talep etmez."
+                        },
+                        "4": {
+                            "title": "Jedi Seviyesinde Destek",
+                            "content": "Tüm değişimler tamamen otomatik olarak gerçekleştirilirken, bazen gerçek biriyle konuşmamız gerekebilir. Günün veya gecenin herhangi bir saatinde destekçilerimizden biriyle sohbet edin."
+                        }
+                    }
+                },
+                "recent-swaps": {
+                    "title": "Gerçek Zamanlı Son Değişimler"
+                }
+            },
+            "PublicSwapAssetLanding": {
+                "meta": {
+                    "title": "{{tickerWithProtocol}} Anında En Düşük Ücretlerle Değiştirin — Rabbit Swap",
+                    "keywords": "{{tickerWithProtocol}} değişimi, {{tickerWithProtocol}} borsası, {{assetName}} takası, {{assetName}} değişimi, {{tickerPrintable}} ticareti, kripto takas, kripto borsa, kripto para takası, kripto para borsası, en düşük ücretlerle kripto takası, coin değişimi, token değişimi, hızlı kripto değişimi, coin takası, düşük maliyetli takaslar, dijital varlık takası, hızlı coin takası",
+                    "description": "{{tickerAndBracedProtocol}} anında değiştirin Rabbit Swap ile — en iyi oranlarla eşsiz kripto borsası. Kayıt gerektirmez — sadece bir tıklama ile {{assetName}} değiştirin!"
+                },
+                "hero": {
+                    "title": "{{tickerPrintable}} Takas Kolaylaştırıldı",
+                    "content": "{{nameAndBracedProtocol}} en iyi oranlarla değiştirin. Anında. Kayıt gerektirmez. Hadi, sadece {{assetName}} değiştirmek istediğiniz coini seçin ve miktarı girin!"
+                },
+                "how-to-swap": {
+                    "title": "{{tickerPrintable}} nasıl değiştirilir?",
+                    "content": "Rabbit Swap, {{tickerPrintable}} takas sürecini maliyet açısından etkin, güvenli, hızlı ve bir mesaj göndermek kadar kolay hale getirecek şekilde tasarlanmıştır.",
+                    "items": {
+                        "1": {
+                            "title": "Bir Takas Oluşturun",
+                            "content": "{{tickerWithProtocol}} için bir coin çifti seçin ve yukarıdaki formda istediğiniz miktarı girin."
+                        },
+                        "2": {
+                            "title": "Adresinizi Sağlayın",
+                            "content": "Değiştirilen coinleri almak istediğiniz adresi girin."
+                        },
+                        "3": {
+                            "title": "Coin Gönderin",
+                            "content": "Detayları kontrol edin ve {{tickerWithProtocol}} coinlerinizi oluşturulan adrese gönderin."
+                        },
+                        "4": {
+                            "title": "Coinlerinizi Alın",
+                            "content": "Değiştirilen coinlerinizi birkaç dakika içinde alın!"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "En İyi Oranlar",
+                    "content": "{{nameAndBracedProtocol}} değiştirirken en iyi oranları aldığınızdan emin olun. Rabbit Swap, çeşitli likidite sağlayıcılarının oranlarını dinamik olarak karşılaştırır ve her değişim yaptığınızda en iyi oranı seçer."
+                },
+                "wide-limits": {
+                    "title": "En Düşük ve En Yüksek Limitler",
+                    "content": "Rabbit Swap, geniş bir likidite sağlayıcı yelpazesine sahip olduğundan, mümkün olan takas miktarları açısından esasen sınırsızdır. İster birkaç dolar ister milyarlarca dolar takas etmek isteyin, Rabbit Swap bunu gerçekleştirebilir."
+                },
+                "features-grid": {
+                    "title": "{{tickerWithProtocol}} Rabbit Swap ile neden değiştirilmeli?",
+                    "content": "Rabbit Swap, {{tickerPrintable}} takas sürecini maliyet açısından etkin, güvenli, hızlı ve bir mesaj göndermek kadar kolay hale getirecek şekilde tasarlanmıştır.",
+                    "items": {
+                        "1": {
+                            "title": "Kayıt Gerekmez",
+                            "content": "Düşük ücretlerle ve neredeyse anında herhangi bir miktarda {{nameAndBracedProtocol}} değiştirin — kayıt gerektirmez. Sadece birkaç tıklama ile yapılabilir."
+                        },
+                        "2": {
+                            "title": "Geniş Desteklenen Varlık Yelpazesi",
+                            "content": "{{nameAndBracedProtocol}} dışında, 3600'den fazla değişim için mevcut coin ve token arasından seçim yapabilirsiniz."
+                        },
+                        "3": {
+                            "title": "Gizliliğe Saygı",
+                            "content": "Değişim süreci tamamen anonim bilgilere dayanır. Rabbit Swap, coin almak için adresiniz dışında hiçbir bilgi talep etmez."
+                        },
+                        "4": {
+                            "title": "Jedi Seviyesinde Destek",
+                            "content": "Tüm değişimler tamamen otomatik olarak gerçekleştirilirken, bazen gerçek biriyle konuşmamız gerekebilir. Günün veya gecenin herhangi bir saatinde destekçilerimizden biriyle sohbet edin."
+                        }
+                    }
+                },
+                "recent-swaps": {
+                    "title": "Gerçek Zamanlı Son Değişimler"
+                }
+            },
+            "PublicSwapPairLanding": {
+                "meta": {
+                    "title": "{{fromTickerWithProtocol}} {{toTickerWithProtocol}} Anında En Düşük Ücretlerle Değiştirin — Rabbit Swap",
+                    "keywords": "{{fromTickerWithProtocol}} {{toTickerWithProtocol}} değişimi, {{fromTickerWithProtocol}} {{toTickerWithProtocol}} borsası, {{fromAssetName}} {{toAssetName}} takası, {{fromAssetName}} {{toAssetName}} değişimi, {{fromTickerPrintable}}/{{toTickerPrintable}} ticareti, {{fromTickerPrintable}} {{toTickerPrintable}} takası, {{fromTickerPrintable}} {{toTickerPrintable}} değişimi, kripto takas, kripto borsa, kripto para takası, kripto para borsası, en düşük ücretlerle kripto takası, coin değişimi, token değişimi, hızlı kripto değişimi, coin takası, düşük maliyetli takaslar, dijital varlık takası, hızlı coin takası",
+                    "description": "{{fromTickerAndBracedProtocol}} {{toTickerAndBracedProtocol}} anında değiştirin Rabbit Swap ile — en iyi oranlarla eşsiz kripto borsası. Kayıt gerektirmez — sadece bir tıklama ile {{fromAssetName}} {{toAssetName}} değiştirin!"
+                },
+                "hero": {
+                    "title": "{{fromTickerPrintable}} {{toTickerPrintable}} Takas Kolaylaştırıldı",
+                    "content": "{{fromNameAndBracedProtocol}} {{toNameAndBracedProtocol}} en iyi oranlarla değiştirin. Anında. Kayıt gerektirmez. Hadi, sadece miktarı girin!"
+                },
+                "how-to-swap": {
+                    "title": "{{fromTickerPrintable}} {{toTickerPrintable}} nasıl değiştirilir?",
+                    "content": "Rabbit Swap kullanımı kolay ve anlaşılır; aşağıda {{fromAssetName}} {{toAssetName}} değiştirmek için yapmanız gereken tüm adımları bulabilirsiniz:",
+                    "items": {
+                        "1": {
+                            "title": "Miktarı Girin",
+                            "content": "{{fromTickerWithProtocol}} miktarını yukarıdaki formda girin."
+                        },
+                        "2": {
+                            "title": "Adresinizi Sağlayın",
+                            "content": "{{toTickerWithProtocol}} almak istediğiniz adresi girin."
+                        },
+                        "3": {
+                            "title": "Coin Gönderin",
+                            "content": "Detayları kontrol edin ve {{fromTickerWithProtocol}} coinlerinizi oluşturulan adrese gönderin."
+                        },
+                        "4": {
+                            "title": "Coinlerinizi Alın",
+                            "content": "{{toTickerWithProtocol}} coinlerinizi birkaç dakika içinde alın!"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "En İyi Oranlar",
+                    "content": "{{fromNameAndBracedProtocol}} {{toNameAndBracedProtocol}} değiştirirken en iyi oranları aldığınızdan emin olun. Rabbit Swap, çeşitli likidite sağlayıcılarının oranlarını dinamik olarak karşılaştırır ve her değişim yaptığınızda en iyi oranı seçer."
+                },
+                "wide-limits": {
+                    "title": "En Düşük ve En Yüksek Limitler",
+                    "content": "Rabbit Swap, geniş bir likidite sağlayıcı yelpazesine sahip olduğundan, mümkün olan takas miktarları açısından esasen sınırsızdır. İster birkaç dolar ister milyarlarca dolar takas etmek isteyin, Rabbit Swap bunu gerçekleştirebilir."
+                },
+                "features-grid": {
+                    "title": "{{fromTickerPrintable}} {{toTickerPrintable}} Rabbit Swap ile neden değiştirilmeli?",
+                    "content": "Rabbit Swap, {{fromTickerWithProtocol}} {{toTickerWithProtocol}} takas sürecini maliyet açısından etkin, güvenli, hızlı ve bir mesaj göndermek kadar kolay hale getirecek şekilde tasarlanmıştır.",
+                    "items": {
+                        "1": {
+                            "title": "Kayıt Gerekmez",
+                            "content": "Düşük ücretlerle ve neredeyse anında herhangi bir miktarda {{fromNameAndBracedProtocol}} ve {{toNameAndBracedProtocol}} değiştirin — kayıt gerektirmez. Sadece birkaç tıklama ile yapılabilir."
+                        },
+                        "2": {
+                            "title": "Geniş Desteklenen Varlık Yelpazesi",
+                            "content": "{{fromNameAndBracedProtocol}} ve {{toNameAndBracedProtocol}} dışında, 3600'den fazla değişim için mevcut coin ve token arasından seçim yapabilirsiniz."
+                        },
+                        "3": {
+                            "title": "Gizliliğe Saygı",
+                            "content": "Değişim süreci tamamen anonim bilgilere dayanır. Rabbit Swap, {{toNameAndBracedProtocol}} coin almak için adresiniz dışında hiçbir bilgi talep etmez."
+                        },
+                        "4": {
+                            "title": "Jedi Seviyesinde Destek",
+                            "content": "Tüm değişimler tamamen otomatik olarak gerçekleştirilirken, bazen gerçek biriyle konuşmamız gerekebilir. Günün veya gecenin herhangi bir saatinde destekçilerimizden biriyle sohbet edin."
+                        }
+                    }
+                },
+                "recent-swaps": {
+                    "title": "Gerçek Zamanlı Son Değişimler"
+                }
+            },
+            "UnexpectedErrorPage": {
+                "title": "Bir sorun var gibi görünüyor",
+                "subtitle": "Bu oldukça utanç verici... uygulama beklenmeyen bir hata nedeniyle başarısız oldu. Lütfen sayfayı yeniden yükleyin veya bu hata tekrarlarsa support@rabbit.io adresinden bize ulaşın. Verdiğimiz rahatsızlıktan dolayı özür dileriz.",
+                "primary-button-content": "Sayfayı yeniden yükleyin",
+                "transparent-button-content": "Destek ile iletişime geçin",
+                "sign-in-button-content": "Ana Sayfa"
+            },
+            "PrivacyPolicy": {
+                "title": "SWAP.RABBIT.IO GİZLİLİK POLİTİKASI",
+                "meta": {
+                    "title": "Gizlilik Politikası – Rabbit Swap",
+                    "description": "Rabbit Swap'ın Gizlilik Politikasını inceleyerek kripto para borsa platformumuzda bilgilerinizi nasıl ele aldığımızı net bir şekilde anlayın. Deneyiminiz boyunca gizliliğinizin korunmasını sağlamak için şeffaflığa öncelik veriyoruz.",
+                    "keywords": "gizlilik politikası, kripto takas, kripto borsa, kripto para takası, kripto para borsası"
+                }
+            },
+            "TermsOfUse": {
+                "title": "SWAP.RABBIT.IO KULLANIM ŞARTLARI",
+                "meta": {
+                    "title": "Kullanım Şartları – Rabbit Swap",
+                    "description": "Rabbit Swap'ın Kullanım Şartlarını inceleyerek kripto para borsa platformumuzu kullanma konusunda net yönergeler edinin. Sorunsuz bir deneyim için haklarınızı ve sorumluluklarınızı anlayın.",
+                    "keywords": "kullanım şartları, kripto takas, kripto borsa, kripto para takası, kripto para borsası"
+                }
+            }
+        },
+        "organisms": {
+            "SwapFormWithCoinDropdowns": {
+                "errors": {
+                    "requests-limit-exceeded": "Üzgünüz, hizmetimiz yüksek talep nedeniyle geçici bir kesinti yaşıyor. Lütfen birkaç dakika sonra tekrar deneyin. Anlayışınız için teşekkür ederiz.",
+                    "default": "Üzgünüz, son işlemi gerçekleştiremedik, lütfen tekrar deneyin veya destek ile iletişime geçin."
+                }
+            },
+            "LandingFooter": {
+                "single-asset": {
+                    "title": "Değişim",
+                    "item-content": "{{ticker}} değişimi"
+                },
+                "pair": {
+                    "title": "Değişim çiftleri",
+                    "item-content": "{{tickerFrom}} {{tickerTo}}"
+                }
+            },
+            "AssetDropdown": {
+                "field-placeholder": "Ara..",
+                "text-loading": "Tüm coinler yükleniyor..",
+                "text-default": "Tüm mevcut varlıklar",
+                "text-search": "Arama sonuçları",
+                "text-search-fail": "Varlık bulunamadı",
+                "load-more-button": "Daha fazla yükle"
+            },
+            "RecentSwapsTable": {
+                "table-head-tiles": {
+                    "from": "Gönderen",
+                    "to": "Alıcı",
+                    "finished": "Tamamlandı"
+                }
+            },
+            "SwapForm": {
+                "swap-all-button-titles": {
+                    "enable": "Hepsini Takas Et",
+                    "cancel": "İptal"
+                },
+                "input": {
+                    "fiat-placeholder": "Fiat miktarını girin",
+                    "balance-loader-text": "Bakiye yükleniyor..."
+                },
+                "consents": {
+                    "consent-text": "\"Takas\" düğmesine tıklayarak Rabbit Swap'ın",
+                    "terms-of-use": "Kullanım Şartları",
+                    "and": "ve",
+                    "privacy-policy": "Gizlilik Politikası"
+                },
+                "information-block": {
+                    "minimum-amount": "Minimum miktar: ",
+                    "maximum-amount": "Maksimum miktar: ",
+                    "transaction-fee": "Ağ ücreti: ",
+                    "calculating-network-fee": "Ağ ücreti hesaplanıyor..",
+                    "loading-minimal-amount": "Minimum miktar yükleniyor..",
+                    "swap-rate": "Oran: ",
+                    "calculating-swap-rates": "Takas oranları hesaplanıyor..",
+                    "pair-not-available": "Çift şu anda mevcut değil. Lütfen daha sonra tekrar deneyin veya başka bir çift seçin."
+                },
+                "addresses": {
+                    "recepient-address-title": "{{receivingCoinName}} alıcı adresi",
+                    "refund-address-title": "{{sendingCoinName}} geri ödeme adresi",
+                    "receiving-address-extra-id": "Alıcı {{extraIdName}}",
+                    "refund-address-extra-id": "Geri ödeme {{extraIdName}}",
+                    "receiving-address-extra-id-notice": "Lütfen alıcı adresinizin bir 'Memo' veya 'Destination Tag' gerektirip gerektirmediğini kontrol edin - bazen etiket, kimlik, etiket veya not olarak adlandırılır. Borsalar bu kimliği para yatırma işlemi için talep edebilir. Bu kimliği gerektiğinde dahil etmek önemlidir, yanlış girmek veya eksik bırakmak varlık kaybına neden olabilir.",
+                    "refund-address-extra-id-notice": "Lütfen geri ödeme adresinizin bir 'Memo' veya 'Destination Tag' (etiket, kimlik, etiket veya not olarak da adlandırılır) gerektirip gerektirmediğini kontrol edin. Bu kimliği dahil etmek önemlidir, çünkü borsalar gelen işlemleri doğru bir şekilde işlemek için buna ihtiyaç duyabilir. Yanlış girmek veya eksik bırakmak fonlarınızın kaybına neden olabilir.",
+                    "optional-field-placeholder": "(isteğe bağlı)",
+                    "address-is-contract-validation-message": "Girdiğiniz adres {{ticker}} token sözleşme adresine aittir. Fon göndermek, paranızı geri dönüşü olmayacak şekilde kaybetmenize neden olacaktır."
+                },
+                "rateSelector": {
+                    "fixedRate": "Sabit oran",
+                    "floatingRate": "Değişken oran"
+                },
+                "confirm-button-text": "Takas Et",
+                "errors": {
+                    "amount-less-than-min-swappable": "Değiştirmek istediğiniz {{assetName}} miktarı kabul edilen minimum miktarın altında.",
+                    "amount-higher-than-max-swappable": "Değiştirmek istediğiniz {{assetName}} miktarı kabul edilen maksimum miktarın üzerinde.",
+                    "pair-not-supported": "Üzgünüz, seçilen çift şu anda mevcut değil. Lütfen daha sonra tekrar deneyin veya başka bir çift seçin."
+                }
+            },
+            "SwapFlow": {
+                "meta": {
+                    "step-titles": {
+                        "awaiting": "Ödeme Bekleniyor · {{amountFrom}} {{amountTo}} Takas - Rabbit Swap",
+                        "confirming": "Ödeme Onaylanıyor · {{amountFrom}} {{amountTo}} Takas - Rabbit Swap",
+                        "exchanging": "Coinleriniz Değiştiriliyor · {{amountFrom}} {{amountTo}} Takas - Rabbit Swap",
+                        "completed": "Başarıyla Takas Edildi! · {{amountFrom}} {{amountTo}} Takas - Rabbit Swap",
+                        "refunded": "Coinleriniz İade Edildi · {{amountFrom}} {{amountTo}} Takas - Rabbit Swap",
+                        "expired": "Süre Doldu · {{amountFrom}} {{amountTo}} Takas - Rabbit Swap",
+                        "failed": "Takas Başarısız Oldu · {{amountFrom}} {{amountTo}} Takas - Rabbit Swap",
+                        "cancellation": "Emin misiniz? · {{amountFrom}} {{amountTo}} Takas - Rabbit Swap",
+                        "error": "Bir Hata Oluştu · {{amountFrom}} {{amountTo}} Takas - Rabbit Swap"
+                    },
+                    "title": "{{fromTickerWithProtocol}} {{toTickerWithProtocol}} Takas İşlemi Devam Ediyor - Rabbit Swap",
+                    "description": "{{fromTickerWithProtocol}} {{toTickerWithProtocol}} Takas için Gereken Detayları Girin. Rabbit, en uygun oranı sağlamak için çeşitli likidite sağlayıcılarının oranlarını karşılaştırır.",
+                    "keywords": "{{fromTickerWithProtocol}} {{toTickerWithProtocol}} takas, {{fromTickerWithProtocol}} {{toTickerWithProtocol}} değişim, {{fromAssetName}} {{toAssetName}} takas, {{fromAssetName}} {{toAssetName}} değişim, {{fromTickerPrintable}}/{{toTickerPrintable}} ticaret, {{fromTickerPrintable}} {{toTickerPrintable}} takas, {{fromTickerPrintable}} {{toTickerPrintable}} değişim, kripto takas, kripto borsa, kripto para takası, kripto para borsası"
+                },
+                "support-welcome-message": "Bizimle sohbet edin",
+                "loader-title-details": "Takas detayları yükleniyor...",
+                "common": {
+                    "rate": "Oran"
+                },
+                "cancel-swap-confirmation-step": {
+                    "title": "Takas iptal edilsin mi?",
+                    "subtitle": "Bu işlemi kapatmak, mevcut takas oranını yeniden hesaplayacaktır ve bu, potansiyel olarak daha kötü veya daha iyi bir anlaşma ile sonuçlanabilir. Sadece bilginiz olsun.",
+                    "cancel-swap-button-title": "Yine de iptal et",
+                    "keep-swap-button-title": "Oranı koru"
+                },
+                "unexpected-error-step": {
+                    "title": "Bir şeyler ters gitti...",
+                    "subtitle": "Maalesef son işlemi gerçekleştiremedik. Lütfen sayfayı yenileyin ve tekrar deneyin. Bu hata tekrarlanırsa destek ile iletişime geçin. Verdiğimiz rahatsızlıktan dolayı özür dileriz.",
+                    "confirm-button-text": "Sayfayı yeniden yükleyin"
+                },
+                "rateModeDisclaimers": {
+                    "fixed": "Sabit oran ile, takas oluşturulduğunda döviz kuru kilitlenir. Bu, tam olarak ne kadar alacağınızı garanti eder ve piyasa dalgalanmalarına karşı koruma sağlar.",
+                    "floating": "Değişken oran ile, döviz kuru işlem tamamlanana kadar değişebilir. Bu, potansiyel piyasa avantajları sağlar ancak aynı zamanda oran değişiklikleri riskini de taşır."
+                },
+                "SwapFlowPaymentAwaiting": {
+                    "title": "Ödemeniz Bekleniyor",
+                    "subtitle": "Lütfen {{fromCoinName}} coinlerinizi aşağıdaki adrese gönderin. İşlem alındığında sayfa otomatik olarak güncellenecektir.",
+                    "back-button-text": "Bu Takası İptal Et",
+                    "extra-id-notice": "Fon gönderirken cüzdanınızda gerekli 'Memo' veya 'Destination Tag' bilgilerini girdiğinizden emin olun. Bu, işlemin doğru bir şekilde işlenmesi için önemlidir. Yanlış bilgi, fonların kaybına neden olabilir.",
+                    "block-titles": {
+                        "amount-send": "Tam olarak gönderin",
+                        "address": "Bu adrese",
+                        "amount-receive": "Alacağınız miktar",
+                        "timer": "Ödeme için kalan süre",
+                        "swap-id": "Takas ID",
+                        "extra-id": "Ve bu {{extraIdName}} belirtin"
+                    },
+                    "pushes": {
+                        "copy-amount-failed": {
+                            "title": "Kopyalama başarısız oldu",
+                            "text": "Üzgünüz, gönderim miktarını kopyalayamadık. Lütfen sayfayı yenileyin ve tekrar deneyin."
+                        },
+                        "copy-address-failed": {
+                            "title": "Kopyalama başarısız oldu",
+                            "text": "Üzgünüz, ödeme adresini kopyalayamadık. Lütfen sayfayı yenileyin ve tekrar deneyin."
+                        },
+                        "copy-swap-id-failed": {
+                            "title": "Kopyalama başarısız oldu",
+                            "text": "Üzgünüz, takas kimliğini kopyalayamadık. Lütfen sayfayı yenileyin ve tekrar deneyin."
+                        }
+                    }
+                },
+                "SwapFlowPaymentConfirming": {
+                    "title": "Onay Bekleniyor",
+                    "subtitle": "İşleminiz alındı. Lütfen işlemin onaylanması için bir an bekleyin. İşlem tamamlandığında sayfa otomatik olarak güncellenecektir.",
+                    "block-titles": {
+                        "amount-send": "Takas edilecek miktar",
+                        "amount-receive": "Alınacak miktar",
+                        "address": "Alıcı adresi",
+                        "swap-id": "Takas ID",
+                        "extra-id": "Alıcı {{extraIdName}}"
+                    }
+                },
+                "SwapFlowPaymentExchanging": {
+                    "title": "Coinleriniz Değiştiriliyor",
+                    "subtitle": "İşleminiz onaylandı ve takas şimdi devam ediyor. İşlemin tamamlanması için bir an bekleyin. İşlem tamamlandığında sayfa otomatik olarak güncellenecektir.",
+                    "block-titles": {
+                        "amount-send": "Takas edilecek miktar",
+                        "amount-receive": "Alınacak miktar",
+                        "address": "Alıcı adresi",
+                        "swap-id": "Takas ID",
+                        "extra-id": "Alıcı {{extraIdName}}"
+                    }
+                },
+                "SwapFlowPaymentCompleted": {
+                    "title": "Takas Tamamlandı!",
+                    "subtitle": "Takasınız tamamlandı ve coinler belirtilen adrese gönderildi. Rabbit Swap'ı kullandığınız için teşekkür ederiz.",
+                    "confirm-button-text": "Başka bir takas oluştur",
+                    "block-titles": {
+                        "amount-to-swap": "Takas edilecek miktar",
+                        "amount-sent": "Gönderilen miktar",
+                        "address": "Alıcı adresi",
+                        "swap-id": "Takas ID",
+                        "transaction-id": "Çıkış işlem ID'si ({{ticker}})",
+                        "extra-id": "Alıcı {{extraIdName}}"
+                    }
+                },
+                "SwapFlowPaymentRefunded": {
+                    "title": "Takas İade Edildi",
+                    "subtitle": "Maalesef takasınız tamamlanamadı ve bu nedenle iade edildi. Ne olduğunu kontrol edebilmemiz için lütfen destek ekibiyle iletişime geçin. Referans olarak Takas ID'sini kullanın: {{swapId}}.",
+                    "confirm-button-text": "Yeni takas oluştur"
+                },
+                "SwapFlowPaymentExpired": {
+                    "title": "Takas Süresi Doldu",
+                    "subtitle": "İşleminiz zamanında alınmadı ve takasın süresi doldu. Eğer herhangi bir şey göndermediyseniz, yeni bir takas oluşturabilirsiniz. Coinlerinizi zaten gönderdiyseniz, endişelenmeyin, oranı yeniden hesaplamak veya iade etmek için destek ile iletişime geçin. Referans olarak Takas ID'sini kullanın: {{swapId}}.",
+                    "confirm-button-text": "Yeni takas oluştur"
+                },
+                "pushes": {
+                    "swap-not-found": {
+                        "title": "Takas bulunamadı!",
+                        "text": "Üzgünüz, sağlanan id ile takas bulunamadı."
+                    },
+                    "swap-init-failed": {
+                        "title": "Takas yüklenemedi!",
+                        "text": "Takas detaylarını yüklerken bir hata ile karşılaştık. Lütfen sayfayı yenileyin ve tekrar deneyin."
+                    },
+                    "swap-details-loading-failed": {
+                        "title": "Takas yüklenemedi!",
+                        "text": "Takas detaylarını yüklerken bir hata ile karşılaştık. Lütfen sayfayı yenileyin ve tekrar deneyin."
+                    },
+                    "requests-limit-exceeded": {
+                        "title": "Takas hizmeti aşırı yüklendi!",
+                        "text": "Üzgünüz, hizmetimiz yüksek talep nedeniyle geçici bir kesinti yaşıyor. Lütfen birkaç dakika sonra tekrar deneyin. Anlayışınız için teşekkür ederiz."
+                    },
+                    "maximum-amount-exceeded": {
+                        "title": "Maksimum miktar aşıldı",
+                        "text": "Değiştirmek istediğiniz miktar kabul edilen maksimum miktarın üzerinde."
+                    },
+                    "minimum-amount-not-reached": {
+                        "title": "Minimum miktara ulaşılmadı",
+                        "text": "Değiştirmek istediğiniz miktar kabul edilen minimum miktarın altında."
+                    },
+                    "pair-not-supported": {
+                        "title": "Çift mevcut değil",
+                        "text": "Üzgünüz, seçilen çift şu anda mevcut değil. Lütfen daha sonra tekrar deneyin veya başka bir çift seçin."
+                    },
+                    "default-error": {
+                        "title": "Bir şeyler ters gitti...",
+                        "text": "Üzgünüz, son işlemi gerçekleştiremedik, lütfen tekrar deneyin veya destek ile iletişime geçin."
+                    }
+                }
+            }
+        }
+    },
+    "common": {
+        "independent-exchange": {
+            "title": "Bağımsız Takas",
+            "content": "Çoğu insan çeşitli ticaret platformları aracılığıyla kripto takas yaparken, varlıklarını bu platformlara emanet ederler, aslında bağımsız değişim hizmetlerini kullanmak çok daha güvenlidir. Rabbit Swap gibi bağımsız değişim hizmetlerini kullanarak, takaslarınızı gerçekleştirirken coinlerinizi güvenli, saklama dışı cüzdanlarda tutabilirsiniz. Bu yaklaşım, kimsenin hesabınızı yasaklamasını veya kısıtlamasını, coinlerinizi ele geçirmesini önler ve bir sonraki FTX tüm coinlerinizle kaçamayacağı gibi, SEC başka bir favori ticaret hizmetinizi yasaklarsa da etkilenmezsiniz."
+        },
+        "create-swap-cta-title": "Takas Başlat",
+        "page-titles": {
+            "terms-and-conditions": "Şartlar ve Koşullar",
+            "privacy-policy": "Gizlilik Politikası",
+            "try-wallet": "Rabbit Cüzdanı Deneyin"
+        },
+        "support-chat-message": "Bizimle sohbet edin",
+        "default-copy-button-title": "Kopyala",
+        "default-copy-button-tooltip": "Kopyalandı!"
+    }
+}

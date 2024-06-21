@@ -245,7 +245,8 @@
                 "text-default": "Tất cả tài sản khả dụng",
                 "text-search": "Kết quả tìm kiếm",
                 "text-search-fail": "Không tìm thấy tài sản",
-                "load-more-button": "Tải thêm"
+                "load-more-button": "Tải thêm",
+                "text-loading": "Đang tải tất cả các đồng xu.."
             },
             "RecentSwapsTable": {
                 "table-head-tiles": {
@@ -279,14 +280,40 @@
                     "calculating-swap-rates": "Đang tính tỷ giá hoán đổi..",
                     "pair-not-available": "Cặp coin hiện không khả dụng. Vui lòng thử lại sau hoặc chọn cặp khác."
                 },
+                "addresses": {
+                    "recepient-address-title": "Địa chỉ nhận {{receivingCoinName}}",
+                    "refund-address-title": "Địa chỉ hoàn trả {{sendingCoinName}}",
+                    "receiving-address-extra-id": "Người nhận {{extraIdName}}",
+                    "refund-address-extra-id": "Hoàn trả {{extraIdName}}",
+                    "receiving-address-extra-id-notice": "Vui lòng kiểm tra địa chỉ nhận của bạn có yêu cầu 'Memo Tag' hoặc 'Destination Tag' hay không - đôi khi được gọi là tag, ID, label (nhãn) hoặc note (ghi chú). Các sàn giao dịch có thể yêu cầu ID này để gửi tiền. Việc bao gồm ID này là rất quan trọng vì bỏ qua hoặc điền sai có thể dẫn đến bị mất tiền.",
+                    "refund-address-extra-id-notice": "Vui lòng kiểm tra địa chỉ hoàn trả của bạn có yêu cầu 'Memo Tag' hoặc 'Destination Tag' hay không, đôi khi chúng cũng được gọi là tag, ID, label (nhãn) hoặc note (ghi chú). Việc bao gồm ID này là rất quan trọng vì các sàn giao dịch có thể cần nó để xử lý các giao dịch gửi tiền. Bỏ qua hoặc điền sai thông tin này có thể dẫn đến bị mất tiền.",
+                    "optional-field-placeholder": "(tùy chọn)",
+                    "address-is-contract-validation-message": "Bạn đã nhập một địa chỉ hợp đồng token {{ticker}}. Gửi đến địa chỉ này sẽ dẫn đến mất tiền."
+                },
                 "rateSelector": {
                     "fixedRate": "Tỷ giá cố định",
                     "floatingRate": "Tỷ giá thả nổi"
                 },
-                "confirm-button-text": "Hoán Đổi"
+                "confirm-button-text": "Hoán Đổi",
+                "errors": {
+                    "amount-less-than-min-swappable": "Số tiền {{assetName}} bạn đang muốn đổi ít hơn số tiền tối thiểu cho phép.",
+                    "amount-higher-than-max-swappable": "Số tiền {{assetName}} bạn đang muốn đổi vượt quá số tiền tối đa cho phép.",
+                    "pair-not-supported": "Xin lỗi, cặp coin đã chọn hiện không khả dụng. Vui lòng thử lại sau hoặc chọn cặp coin khác."
+                }
             },
             "SwapFlow": {
                 "meta": {
+                    "step-titles": {
+                        "awaiting": "Đang chờ thanh toán · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
+                        "confirming": "Đang xác nhận thanh toán · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
+                        "exchanging": "Đang hoán đổi tiền của bạn · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
+                        "completed": "Hoán đổi thành công! · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
+                        "refunded": "Hoàn tiền của bạn · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
+                        "expired": "Đã hết hạn · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
+                        "failed": "Hoán đổi thất bại · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
+                        "cancellation": "Bạn có chắc không? · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
+                        "error": "Đã xảy ra sự cố · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap"
+                    },
                     "title": "Đang xử lý hoán đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}} - Rabbit Swap",
                     "description": "Vui lòng nhập các thông tin cần thiết để đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}}. Rabbit Swap so sánh tỷ giá từ các nhà cung cấp thanh khoản khác nhau để đảm bảo tỷ giá tốt nhất cho giao dịch của bạn.",
                     "keywords": "hoán đổi {{fromTickerWithProtocol}} thành {{toTickerWithProtocol}}, trao đổi {{fromTickerWithProtocol}} thành {{toTickerWithProtocol}}, hoán đổi {{fromAssetName}} thành {{toAssetName}}, trao đổi {{fromAssetName}} thành {{toAssetName}}, giao dịch {{fromTickerPrintable}}/{{toTickerPrintable}}, hoán đổi {{fromTickerPrintable}} thành {{toTickerPrintable}}, trao đổi {{fromTickerPrintable}} thành {{toTickerPrintable}}, hoán đổi tiền điện tử, sàn giao dịch tiền điện tử, hoán đổi tiền mã hóa, trao đổi tiền mã hóa"
@@ -305,40 +332,11 @@
                 "unexpected-error-step": {
                     "title": "Có lỗi xảy ra...",
                     "subtitle": "Rất tiếc, chúng tôi không thể hoàn thành tác vụ cuối cùng. Vui lòng làm mới trang và thử lại. Hoặc liên hệ với bộ phận hỗ trợ nếu lỗi này tiếp tục xảy ra. Chúng tôi xin lỗi vì sự bất tiện này.",
-                    "back-button-text": "Liên hệ với chúng tôi",
                     "confirm-button-text": "Tải lại trang"
                 },
                 "rateModeDisclaimers": {
                     "fixed": "Với tỷ giá cố định, tỷ giá hối đoái được khóa khi giao dịch được tạo. Điều này đảm bảo số tiền chính xác bạn sẽ nhận được, bảo vệ bạn khỏi biến động thị trường.",
                     "floating": "Với tỷ giá thả nổi, tỷ giá hối đoái có thể thay đổi cho đến khi giao dịch hoàn tất. Điều này cho phép lợi thế thị trường tiềm năng nhưng cũng mang rủi ro thay đổi tỷ giá."
-                },
-                "SwapFlowCreationAmounts": {
-                    "title": "Bắt đầu hoán đổi mới",
-                    "subtitle": "Chọn một cặp hoán đổi và nhập số tiền. Rabbit Swap sẽ so sánh và chọn tỷ giá tốt nhất từ nhiều nhà cung cấp thanh khoản dựa trên số tiền đã nhập.",
-                    "errors": {
-                        "amount-less-than-min-swappable": "Số tiền {{assetName}} bạn đang muốn đổi ít hơn số tiền tối thiểu cho phép.",
-                        "amount-higher-than-max-swappable": "Số tiền {{assetName}} bạn đang muốn đổi vượt quá số tiền tối đa cho phép.",
-                        "pair-not-supported": "Xin lỗi, cặp coin đã chọn hiện không khả dụng. Vui lòng thử lại sau hoặc chọn cặp coin khác."
-                    }
-                },
-                "SwapFlowCreationAddresses": {
-                    "title": "Địa chỉ nhận",
-                    "subtitle": "Vui lòng cung cấp địa chỉ mà bạn muốn nhận {{toCoinName}}. Trong trường hợp hoán đổi thất bại, số tiền sẽ được hoàn lại vào địa chỉ hoàn trả đã chỉ định của {{fromCoinName}}.",
-                    "confirm-button-text": "Tiếp theo",
-                    "recepient-address-title": "Địa chỉ nhận {{receivingCoinName}}",
-                    "refund-address-title": "Địa chỉ hoàn trả {{sendingCoinName}}",
-                    "receiving-address-extra-id": "Người nhận {{extraIdName}}",
-                    "refund-address-extra-id": "Hoàn trả {{extraIdName}}",
-                    "receiving-address-extra-id-notice": "Vui lòng kiểm tra địa chỉ nhận của bạn có yêu cầu 'Memo Tag' hoặc 'Destination Tag' hay không - đôi khi được gọi là tag, ID, label (nhãn) hoặc note (ghi chú). Các sàn giao dịch có thể yêu cầu ID này để gửi tiền. Việc bao gồm ID này là rất quan trọng vì bỏ qua hoặc điền sai có thể dẫn đến bị mất tiền.",
-                    "refund-address-extra-id-notice": "Vui lòng kiểm tra địa chỉ hoàn trả của bạn có yêu cầu 'Memo Tag' hoặc 'Destination Tag' hay không, đôi khi chúng cũng được gọi là tag, ID, label (nhãn) hoặc note (ghi chú). Việc bao gồm ID này là rất quan trọng vì các sàn giao dịch có thể cần nó để xử lý các giao dịch gửi tiền. Bỏ qua hoặc điền sai thông tin này có thể dẫn đến bị mất tiền.",
-                    "optional-field-placeholder": "(tùy chọn)",
-                    "address-is-contract-validation-message": "Bạn đã nhập một địa chỉ hợp đồng token {{ticker}}. Gửi đến địa chỉ này sẽ dẫn đến mất tiền.",
-                    "consents": {
-                        "consent-text": "Bằng cách nhấp vào \"Tiếp theo\", bạn đồng ý với",
-                        "terms-of-use": "Điều khoản sử dụng",
-                        "and": "và",
-                        "privacy-policy": "Chính sách bảo mật"
-                    }
                 },
                 "SwapFlowPaymentAwaiting": {
                     "title": "Đang chờ thanh toán",
@@ -394,7 +392,6 @@
                     "title": "Hoán đổi hoàn tất!",
                     "subtitle": "Hoán đổi của bạn đã được hoàn tất thành công và tiền điện tử đã được gửi đến địa chỉ chỉ định. Cảm ơn bạn đã sử dụng Rabbit Swap.",
                     "confirm-button-text": "Tạo hoán đổi mới",
-                    "back-button-text": "Liên hệ với chúng tôi",
                     "block-titles": {
                         "amount-to-swap": "Số tiền để hoán đổi",
                         "amount-sent": "Số tiền đã gửi",
@@ -407,8 +404,7 @@
                 "SwapFlowPaymentRefunded": {
                     "title": "Hoán đổi đã hoàn tiền",
                     "subtitle": "Rất tiếc, hoán đổi của bạn không thành công và đã được hoàn tiền. Vui lòng liên hệ với bộ phận hỗ trợ để chúng tôi có thể kiểm tra điều gì đã xảy ra. Sử dụng ID hoán đổi này để làm tham chiếu: {{swapId}}.",
-                    "confirm-button-text": "Tạo hoán đổi mới",
-                    "back-button-text": "Liên hệ với chúng tôi"
+                    "confirm-button-text": "Tạo hoán đổi mới"
                 },
                 "SwapFlowPaymentExpired": {
                     "title": "Hoán đổi hết hạn",

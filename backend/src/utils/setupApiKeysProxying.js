@@ -9,6 +9,7 @@ import {
     SWAPSPACE_API_KEY,
     TRONGRID_API_KEY,
     SWAPSPACE_API_KEY_FOR_RATES_API,
+    LETSEXCHANGE_API_KEY,
 } from "../properties.js";
 
 // TODO: [tests, critical] easier than to test it manually
@@ -56,6 +57,16 @@ export function setupApiKeysProxying(apiKeysProxyBasePath) {
                 pathRewrite: generatePreserveOriginalPathFunc("swapspaceForRatesApi"),
                 fqdn: `https://api.swapspace.co`,
                 customHeaders: [["Authorization", SWAPSPACE_API_KEY_FOR_RATES_API]],
+            },
+            LETSEXCHANGE: {
+                id: "letsexchange",
+                pathRewrite: generatePreserveOriginalPathFunc("letsexchange"),
+                fqdn: `https://api.letsexchange.io/api`,
+                customHeaders: [
+                    ["Authorization", `Bearer ${LETSEXCHANGE_API_KEY}`],
+                    ["Content-Type", "application/json"],
+                    ["Accept", "application/json"],
+                ],
             },
         };
         const buildProxyOptions = apiParams => ({

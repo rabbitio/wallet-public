@@ -14,6 +14,7 @@
         "server-prod": "npm run provide-prod-properties && NODE_ENV=production node ./src/index.js",
         "server-dev": "npm run provide-dev-properties && node ./src/index.js",
         "server-local": "npm run provide-local-properties && npm run build && PROP_ENV=local nodemon ./src/index.js",
+        "server-local-plus-unreleased-dev-ui-kit": "rm -rf .next ./node_modules/@rabbitio/ui-kit/src ./node_modules/@rabbitio/ui-kit/dist ./node_modules/@rabbitio/ui-kit/index.js && cp -r $UI_KIT_PATH/src $UI_KIT_PATH/dist $UI_KIT_PATH/index.js ./node_modules/@rabbitio/ui-kit/ && npm run provide-local-properties && npm run build && PROP_ENV=local nodemon ./src/index.js",
         "server-unit_tests": "npm run provide-unit_tests-properties && npm run build && node ./src/index.js",
         "server-integration_tests": "npm run provide-integration_tests-properties && node ./src/index.js"
     },
@@ -49,7 +50,7 @@
         "sinon": "7.5.0"
     },
     "dependencies": {
-        "@rabbitio/ui-kit": "1.0.0-beta.71",
+        "@rabbitio/ui-kit": "1.0.0-beta.77",
         "axios": "1.6.7",
         "body-parser": "1.20.2",
         "bottleneck": "2.19.5",

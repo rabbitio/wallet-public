@@ -242,6 +242,7 @@
             },
             "AssetDropdown": {
                 "field-placeholder": "Search..",
+                "text-loading": "Loading all coins..",
                 "text-default": "All available assets",
                 "text-search": "Search results",
                 "text-search-fail": "Asset not found",
@@ -279,14 +280,40 @@
                     "calculating-swap-rates": "Calculating swap rates..",
                     "pair-not-available": "Pair is not available now. Please, try again later or choose another pair."
                 },
+                "addresses": {
+                    "recepient-address-title": "{{receivingCoinName}} recipient address",
+                    "refund-address-title": "{{sendingCoinName}} refund address",
+                    "receiving-address-extra-id": "Recipient {{extraIdName}}",
+                    "refund-address-extra-id": "Refund {{extraIdName}}",
+                    "receiving-address-extra-id-notice": "Please check if your recipient address requires a 'Memo' or 'Destination Tag' - sometimes called a tag, ID, label, or a note. Exchanges may require such ID for the deposit. Including this identifier is crucial when required, as omitting or misentering it can result in lost assets.",
+                    "refund-address-extra-id-notice": "Please check whether your refund address requires a 'Memo' or 'Destination Tag' (also referred to as a tag, ID, label, or note). It's crucial to include this identifier, as exchanges may need it to process incoming transactions accurately. Omitting or misentering it could lead to the loss of your funds.",
+                    "optional-field-placeholder": "(optional)",
+                    "address-is-contract-validation-message": "The address you entered belongs to the {{ticker}} token contract address. Sending funds to it will result in losing your money irreversibly."
+                },
                 "rateSelector": {
                     "fixedRate": "Fixed rate",
                     "floatingRate": "Floating rate"
                 },
-                "confirm-button-text": "Swap"
+                "confirm-button-text": "Swap",
+                "errors": {
+                    "amount-less-than-min-swappable": "The amount of {{assetName}} you are trying to swap is below the accepted minimal amount.",
+                    "amount-higher-than-max-swappable": "The amount of {{assetName}} you are trying to swap is exceeding the accepted maximum amount.",
+                    "pair-not-supported": "Sorry, the selected pair is not available now. Please try again later or choose another pair."
+                }
             },
             "SwapFlow": {
                 "meta": {
+                    "step-titles": {
+                        "awaiting": "Awaiting payment · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
+                        "confirming": "Confirming payment · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
+                        "exchanging": "Swapping your coins · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
+                        "completed": "Successfully swapped! · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
+                        "refunded": "Refunded your coins · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
+                        "expired": "Expired · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
+                        "failed": "Failed to swap · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
+                        "cancellation": "Are you sure? · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
+                        "error": "Something went wrong · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap"
+                    },
                     "title": "Swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} in Progress - Rabbit Swap",
                     "description": "Please Enter the Required Details for {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} Swap. Rabbit compares rates from diverse liquidity providers to secure the most optimal rate for your exchange.",
                     "keywords": "swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, exchange {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, swap {{fromAssetName}} to {{toAssetName}}, exchange {{fromAssetName}} to {{toAssetName}}, trade {{fromTickerPrintable}}/{{toTickerPrintable}}, swap {{fromTickerPrintable}} to {{toTickerPrintable}}, exchange {{fromTickerPrintable}} to {{toTickerPrintable}}, swap crypto, crypto exchange, cryptocurrency swap, cryptocurrency exchange"
@@ -305,40 +332,11 @@
                 "unexpected-error-step": {
                     "title": "Something went wrong...",
                     "subtitle": "Unfortunately we failed to perform the last operation. Please refresh the page and try again. Or contact support if this error happens repeatedly. We apologize for the inconvenience.",
-                    "back-button-text": "Contact us",
                     "confirm-button-text": "Reload the page"
                 },
                 "rateModeDisclaimers": {
                     "fixed": "With a fixed rate, the exchange rate is locked in when the swap is created. This guarantees the exact amount you will receive, protecting against market fluctuations.",
                     "floating": "With a floating rate, the exchange rate may vary until the transaction is completed. This allows for potential market advantages but also carries the risk of rate changes."
-                },
-                "SwapFlowCreationAmounts": {
-                    "title": "Start a new swap",
-                    "subtitle": "Select a swap pair and enter an amount. Rabbit Swap will compare and pick the best rate among various liquidity providers based on the entered amount.",
-                    "errors": {
-                        "amount-less-than-min-swappable": "The amount of {{assetName}} you are trying to swap is below the accepted minimal amount.",
-                        "amount-higher-than-max-swappable": "The amount of {{assetName}} you are trying to swap is exceeding the accepted maximum amount.",
-                        "pair-not-supported": "Sorry, the selected pair is not available now. Please try again later or choose another pair."
-                    }
-                },
-                "SwapFlowCreationAddresses": {
-                    "title": "Recipient Address",
-                    "subtitle": "Please specify the address where you would like to receive the {{toCoinName}}. In the unlikely event that the swap fails, you will be refunded to the provided {{fromCoinName}} refund address.",
-                    "confirm-button-text": "Next",
-                    "recepient-address-title": "{{receivingCoinName}} recepient address",
-                    "refund-address-title": "{{sendingCoinName}} refund address",
-                    "receiving-address-extra-id": "Recipient {{extraIdName}}",
-                    "refund-address-extra-id": "Refund {{extraIdName}}",
-                    "receiving-address-extra-id-notice": "Please check if your recipient address requires a 'Memo' or 'Destination Tag' - sometimes called a tag, ID, label, or a note. Exchanges may require such ID for the deposit. Including this identifier is crucial when required, as omitting or misentering it can result in lost assets.",
-                    "refund-address-extra-id-notice": "Please check whether your refund address requires a 'Memo' or 'Destination Tag' (also referred to as a tag, ID, label, or note). It's crucial to include this identifier, as exchanges may need it to process incoming transactions accurately. Omitting or misentering it could lead to the loss of your funds.",
-                    "optional-field-placeholder": "(optional)",
-                    "address-is-contract-validation-message": "The address you entered belongs to the {{ticker}} token contract address. Sending funds to it will result in losing your money irreversibly.",
-                    "consents": {
-                        "consent-text": "By clicking \"Next\" you agree with Rabbit Swap's",
-                        "terms-of-use": "Terms of Use",
-                        "and": "and",
-                        "privacy-policy": "Privacy Policy"
-                    }
                 },
                 "SwapFlowPaymentAwaiting": {
                     "title": "Awaiting your payment",
@@ -394,7 +392,6 @@
                     "title": "Swap completed!",
                     "subtitle": "Your swap is now completed and the coins have been sent to the provided address. Thank you for using Rabbit Swap.",
                     "confirm-button-text": "Create another swap",
-                    "back-button-text": "Contact us",
                     "block-titles": {
                         "amount-to-swap": "Amount to swap",
                         "amount-sent": "Amount sent",
@@ -407,8 +404,7 @@
                 "SwapFlowPaymentRefunded": {
                     "title": "Swap refunded",
                     "subtitle": "We regret to inform you that your swap hasn't been completed and therefore refunded. Please contact the support team so we can check what happened. Use the Swap ID as a reference: {{swapId}}.",
-                    "confirm-button-text": "Create new swap",
-                    "back-button-text": "Contact us"
+                    "confirm-button-text": "Create new swap"
                 },
                 "SwapFlowPaymentExpired": {
                     "title": "Swap expired",

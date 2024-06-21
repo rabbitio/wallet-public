@@ -245,7 +245,8 @@
                 "text-default": "Todos los activos disponibles",
                 "text-search": "Resultados de búsqueda",
                 "text-search-fail": "Activo no encontrado",
-                "load-more-button": "Cargar más"
+                "load-more-button": "Cargar más",
+                "text-loading": "Cargando todas las monedas.."
             },
             "RecentSwapsTable": {
                 "table-head-tiles": {
@@ -279,14 +280,40 @@
                     "calculating-swap-rates": "Calculando tasas de intercambio...",
                     "pair-not-available": "El par no está disponible ahora. Por favor, inténtalo de nuevo más tarde o elige otro par."
                 },
+                "addresses": {
+                    "recepient-address-title": "Dirección del destinatario {{receivingCoinName}}",
+                    "refund-address-title": "Dirección de reembolso {{sendingCoinName}}",
+                    "receiving-address-extra-id": "Destinataria {{extraIdName}}",
+                    "refund-address-extra-id": "Reembolso {{extraIdName}}",
+                    "receiving-address-extra-id-notice": "Por favor, verifica si tu dirección de recepción requiere un 'Memo' o 'Destination Tag' - a veces llamado etiqueta, ID, marca o nota. Las casas de cambio pueden requerir tal identificador para el depósito. Incluir este identificador es crucial, ya que omitirlo o llenarlo incorrectamente puede resultar en la pérdida de fondos.",
+                    "refund-address-extra-id-notice": "Por favor, verifica si tu dirección de reembolso requiere un 'Memo' o 'Destination Tag' (también referido como etiqueta, ID, marca o nota). Incluir este identificador es crucial, ya que las casas de cambio pueden necesitarlo para procesar transacciones entrantes correctamente. Omitirlo o llenarlo incorrectamente podría resultar en la pérdida de sus fondos.",
+                    "optional-field-placeholder": "(opcional)",
+                    "address-is-contract-validation-message": "Has ingresado una dirección de contrato de token {{ticker}}. Enviar a esta dirección resultará en la pérdida de tus fondos."
+                },
                 "rateSelector": {
                     "fixedRate": "Tasa fija",
                     "floatingRate": "Tasa flotante"
                 },
-                "confirm-button-text": "Intercambiar"
+                "confirm-button-text": "Intercambiar",
+                "errors": {
+                    "amount-less-than-min-swappable": "La cantidad de {{assetName}} que intentas intercambiar es menor que la cantidad mínima permitida.",
+                    "amount-higher-than-max-swappable": "La cantidad de {{assetName}} que intentas intercambiar excede la cantidad máxima permitida.",
+                    "pair-not-supported": "Lo sentimos, el par seleccionado no está disponible en este momento. Por favor, inténtalo más tarde o elige otro par."
+                }
             },
             "SwapFlow": {
                 "meta": {
+                    "step-titles": {
+                        "awaiting": "Esperando pago · Cambiar {{amountFrom}} a {{amountTo}} - Rabbit Swap",
+                        "confirming": "Confirmando pago · Cambiar {{amountFrom}} a {{amountTo}} - Rabbit Swap",
+                        "exchanging": "Cambiando tus monedas · Cambiar {{amountFrom}} a {{amountTo}} - Rabbit Swap",
+                        "completed": "¡Cambio exitoso! · Cambiar {{amountFrom}} a {{amountTo}} - Rabbit Swap",
+                        "refunded": "Monedas reembolsadas · Cambiar {{amountFrom}} a {{amountTo}} - Rabbit Swap",
+                        "expired": "Expirado · Cambiar {{amountFrom}} a {{amountTo}} - Rabbit Swap",
+                        "failed": "Error al cambiar · Cambiar {{amountFrom}} a {{amountTo}} - Rabbit Swap",
+                        "cancellation": "¿Estás seguro? · Cambiar {{amountFrom}} a {{amountTo}} - Rabbit Swap",
+                        "error": "Algo salió mal · Cambiar {{amountFrom}} a {{amountTo}} - Rabbit Swap"
+                    },
                     "title": "Intercambia {{fromTickerWithProtocol}} por {{toTickerWithProtocol}} en proceso - Rabbit Swap",
                     "description": "Por favor, ingresa los datos necesarios para intercambiar {{fromTickerWithProtocol}} por {{toTickerWithProtocol}}. Rabbit Swap compara tasas de diferentes proveedores de liquidez para asegurar el tipo de cambio óptimo para tu transacción.",
                     "keywords": "intercambiar {{fromTickerWithProtocol}} a {{toTickerWithProtocol}}, cambiar {{fromTickerWithProtocol}} a {{toTickerWithProtocol}}, intercambiar {{fromAssetName}} a {{toAssetName}}, cambiar {{fromAssetName}} a {{toAssetName}}, comerciar {{fromTickerPrintable}}/{{toTickerPrintable}}, intercambiar {{fromTickerPrintable}} a {{toTickerPrintable}}, cambiar {{fromTickerPrintable}} a {{toTickerPrintable}}, intercambiar cripto, intercambio de cripto, intercambio de criptomonedas, intercambio de criptomonedas"
@@ -305,40 +332,11 @@
                 "unexpected-error-step": {
                     "title": "Algo salió mal...",
                     "subtitle": "Desafortunadamente, no pudimos completar la última operación. Por favor, actualiza la página y prueba de nuevo. O contacta al soporte si este error se repite. Pedimos disculpas por las molestias.",
-                    "back-button-text": "Contactar con nosotros",
                     "confirm-button-text": "Recargar la página"
                 },
                 "rateModeDisclaimers": {
                     "fixed": "Con una tasa fija, el tipo de cambio se fija cuando se crea el intercambio. Esto garantiza la cantidad exacta que recibirás, protegiéndote de las fluctuaciones del mercado.",
                     "floating": "Con una tasa flotante, el tipo de cambio puede variar hasta que se complete la transacción. Esto permite potenciales ventajas del mercado, pero también conlleva el riesgo de cambios en la tasa."
-                },
-                "SwapFlowCreationAmounts": {
-                    "title": "Iniciar un nuevo intercambio",
-                    "subtitle": "Elige un par de intercambio e introduce una cantidad. Rabbit Swap comparará y seleccionará la mejor tasa de cambio de varios proveedores de liquidez basándose en la cantidad introducida.",
-                    "errors": {
-                        "amount-less-than-min-swappable": "La cantidad de {{assetName}} que intentas intercambiar es menor que la cantidad mínima permitida.",
-                        "amount-higher-than-max-swappable": "La cantidad de {{assetName}} que intentas intercambiar excede la cantidad máxima permitida.",
-                        "pair-not-supported": "Lo sentimos, el par seleccionado no está disponible en este momento. Por favor, inténtalo más tarde o elige otro par."
-                    }
-                },
-                "SwapFlowCreationAddresses": {
-                    "title": "Dirección del destinatario",
-                    "subtitle": "Por favor, proporciona la dirección a la que te gustaría recibir {{toCoinName}}. En caso de un intercambio fallido, se te devolverá la cantidad a la dirección de reembolso especificada de {{fromCoinName}}.",
-                    "confirm-button-text": "Siguiente",
-                    "recepient-address-title": "Dirección del destinatario {{receivingCoinName}}",
-                    "refund-address-title": "Dirección de reembolso {{sendingCoinName}}",
-                    "receiving-address-extra-id": "Destinataria {{extraIdName}}",
-                    "refund-address-extra-id": "Reembolso {{extraIdName}}",
-                    "receiving-address-extra-id-notice": "Por favor, verifica si tu dirección de recepción requiere un 'Memo' o 'Destination Tag' - a veces llamado etiqueta, ID, marca o nota. Las casas de cambio pueden requerir tal identificador para el depósito. Incluir este identificador es crucial, ya que omitirlo o llenarlo incorrectamente puede resultar en la pérdida de fondos.",
-                    "refund-address-extra-id-notice": "Por favor, verifica si tu dirección de reembolso requiere un 'Memo' o 'Destination Tag' (también referido como etiqueta, ID, marca o nota). Incluir este identificador es crucial, ya que las casas de cambio pueden necesitarlo para procesar transacciones entrantes correctamente. Omitirlo o llenarlo incorrectamente podría resultar en la pérdida de sus fondos.",
-                    "optional-field-placeholder": "(opcional)",
-                    "address-is-contract-validation-message": "Has ingresado una dirección de contrato de token {{ticker}}. Enviar a esta dirección resultará en la pérdida de tus fondos.",
-                    "consents": {
-                        "consent-text": "Al hacer clic en \"Siguiente\", aceptas los",
-                        "terms-of-use": "Términos de Uso",
-                        "and": "y la",
-                        "privacy-policy": "Política de Privacidad"
-                    }
                 },
                 "SwapFlowPaymentAwaiting": {
                     "title": "Esperando tu pago",
@@ -394,7 +392,6 @@
                     "title": "¡Intercambio completado!",
                     "subtitle": "Tu intercambio ha sido completado exitosamente y las monedas han sido enviadas a la dirección indicada. Gracias por usar Rabbit Swap.",
                     "confirm-button-text": "Crear un nuevo intercambio",
-                    "back-button-text": "Contactar con nosotros",
                     "block-titles": {
                         "amount-to-swap": "Cantidad para intercambiar",
                         "amount-sent": "Cantidad enviada",
@@ -407,8 +404,7 @@
                 "SwapFlowPaymentRefunded": {
                     "title": "Intercambio devuelto",
                     "subtitle": "Desafortunadamente, tu intercambio no se completó y ha sido devuelto. Por favor, contacta a nuestro servicio de soporte para que podamos investigar qué ocurrió. Usa el ID del intercambio como referencia: {{swapId}}.",
-                    "confirm-button-text": "Empezar de nuevo",
-                    "back-button-text": "Escribirnos"
+                    "confirm-button-text": "Empezar de nuevo"
                 },
                 "SwapFlowPaymentExpired": {
                     "title": "Intercambio expirado",

@@ -245,7 +245,8 @@
                 "text-default": "所有可用资产",
                 "text-search": "搜索结果",
                 "text-search-fail": "未找到资产",
-                "load-more-button": "加载更多"
+                "load-more-button": "加载更多",
+                "text-loading": "正在加载所有硬币.."
             },
             "RecentSwapsTable": {
                 "table-head-tiles": {
@@ -264,7 +265,7 @@
                     "balance-loader-text": "正在加载余额..."
                 },
                 "consents": {
-                    "consent-text": "点击“兑换”即表示您同意 Rabbit Swap 的",
+                    "consent-text": "点击“交易”即表示您同意 Rabbit Swap 的",
                     "terms-of-use": "使用条款",
                     "and": "和",
                     "privacy-policy": "隐私政策"
@@ -279,14 +280,40 @@
                     "calculating-swap-rates": "正在计算交换率..",
                     "pair-not-available": "交易对当前不可用。请稍后再试或选择其他交易对。"
                 },
+                "addresses": {
+                    "recepient-address-title": "接收地址 {{receivingCoinName}}",
+                    "refund-address-title": "退款地址 {{sendingCoinName}}",
+                    "receiving-address-extra-id": "接收 {{extraIdName}}",
+                    "refund-address-extra-id": "退款 {{extraIdName}}",
+                    "receiving-address-extra-id-notice": "请检查您的接收地址是否需要“Memo”或“Destination Tag” - 有时称为标签、ID、标记或注释。交易所可能需要此标识符进行存款。包含此标识符非常重要，因为省略或错误填写可能导致资金丢失。",
+                    "refund-address-extra-id-notice": "请检查您的退款地址是否需要“Memo”或“Destination Tag”（也称为标签、ID、标记或注释）。包含此标识符非常重要，因为交易所可能需要它来正确处理传入交易。省略或错误填写可能导致资金丢失。",
+                    "optional-field-placeholder": "（可选）",
+                    "address-is-contract-validation-message": "您输入了一个 {{ticker}} 代币合约地址。发送到此地址将导致资金丢失。"
+                },
                 "rateSelector": {
                     "fixedRate": "固定汇率",
                     "floatingRate": "浮动汇率"
                 },
-                "confirm-button-text": "交易"
+                "confirm-button-text": "交易",
+                "errors": {
+                    "amount-less-than-min-swappable": "您尝试兑换的 {{assetName}} 数量低于允许的最低数量。",
+                    "amount-higher-than-max-swappable": "您尝试兑换的 {{assetName}} 数量超过允许的最大数量。",
+                    "pair-not-supported": "对不起，所选对目前不可用。请稍后重试或选择其他对。"
+                }
             },
             "SwapFlow": {
                 "meta": {
+                    "step-titles": {
+                        "awaiting": "等待付款 · 交换 {{amountFrom}} 到 {{amountTo}} - Rabbit Swap",
+                        "confirming": "确认付款 · 交换 {{amountFrom}} 到 {{amountTo}} - Rabbit Swap",
+                        "exchanging": "正在交换你的硬币 · 交换 {{amountFrom}} 到 {{amountTo}} - Rabbit Swap",
+                        "completed": "成功交换！ · 交换 {{amountFrom}} 到 {{amountTo}} - Rabbit Swap",
+                        "refunded": "退款 · 交换 {{amountFrom}} 到 {{amountTo}} - Rabbit Swap",
+                        "expired": "已过期 · 交换 {{amountFrom}} 到 {{amountTo}} - Rabbit Swap",
+                        "failed": "交换失败 · 交换 {{amountFrom}} 到 {{amountTo}} - Rabbit Swap",
+                        "cancellation": "你确定吗？ · 交换 {{amountFrom}} 到 {{amountTo}} - Rabbit Swap",
+                        "error": "出现问题 · 交换 {{amountFrom}} 到 {{amountTo}} - Rabbit Swap"
+                    },
                     "title": "将 {{fromTickerWithProtocol}} 兑换成 {{toTickerWithProtocol}} 处理中 - Rabbit Swap",
                     "description": "请提供将 {{fromTickerWithProtocol}} 兑换成 {{toTickerWithProtocol}} 所需的数据。Rabbit Swap 比较不同流动性提供商的费率，以确保为您的交易提供最佳汇率。",
                     "keywords": "交换 {{fromTickerWithProtocol}} 到 {{toTickerWithProtocol}}, 兑换 {{fromTickerWithProtocol}} 到 {{toTickerWithProtocol}}, 交换 {{fromAssetName}} 到 {{toAssetName}}, 兑换 {{fromAssetName}} 到 {{toAssetName}}, 交易 {{fromTickerPrintable}}/{{toTickerPrintable}}, 交换 {{fromTickerPrintable}} 到 {{toTickerPrintable}}, 兑换 {{fromTickerPrintable}} 到 {{toTickerPrintable}}, 加密货币交换, 加密货币交易所, 加密货币兑换, 加密货币交换"
@@ -305,40 +332,11 @@
                 "unexpected-error-step": {
                     "title": "出现错误...",
                     "subtitle": "非常抱歉，我们无法完成上一次操作。请刷新页面并重试。如果此错误再次发生，请联系支持团队。我们对造成的不便深表歉意。",
-                    "back-button-text": "联系我们",
                     "confirm-button-text": "刷新页面"
                 },
                 "rateModeDisclaimers": {
                     "fixed": "使用固定汇率，汇率在创建交换时锁定。这保证了您将收到的确切金额，保护您免受市场波动的影响。",
                     "floating": "使用浮动汇率，汇率可能会在交易完成前变化。这允许潜在的市场优势，但也带来汇率变化的风险。"
-                },
-                "SwapFlowCreationAmounts": {
-                    "title": "开始新兑换",
-                    "subtitle": "选择兑换对并输入金额。Rabbit Swap 将基于输入的金额比较和选择来自多个流动性提供商的最佳汇率。",
-                    "errors": {
-                        "amount-less-than-min-swappable": "您尝试兑换的 {{assetName}} 数量低于允许的最低数量。",
-                        "amount-higher-than-max-swappable": "您尝试兑换的 {{assetName}} 数量超过允许的最大数量。",
-                        "pair-not-supported": "对不起，所选对目前不可用。请稍后重试或选择其他对。"
-                    }
-                },
-                "SwapFlowCreationAddresses": {
-                    "title": "接收地址",
-                    "subtitle": "请提供您希望接收 {{toCoinName}} 的地址。如果交换失败，您的金额将退还到指定的 {{fromCoinName}} 退款地址。",
-                    "confirm-button-text": "下一步",
-                    "recepient-address-title": "接收地址 {{receivingCoinName}}",
-                    "refund-address-title": "退款地址 {{sendingCoinName}}",
-                    "receiving-address-extra-id": "接收 {{extraIdName}}",
-                    "refund-address-extra-id": "退款 {{extraIdName}}",
-                    "receiving-address-extra-id-notice": "请检查您的接收地址是否需要“Memo”或“Destination Tag” - 有时称为标签、ID、标记或注释。交易所可能需要此标识符进行存款。包含此标识符非常重要，因为省略或错误填写可能导致资金丢失。",
-                    "refund-address-extra-id-notice": "请检查您的退款地址是否需要“Memo”或“Destination Tag”（也称为标签、ID、标记或注释）。包含此标识符非常重要，因为交易所可能需要它来正确处理传入交易。省略或错误填写可能导致资金丢失。",
-                    "optional-field-placeholder": "（可选）",
-                    "address-is-contract-validation-message": "您输入了一个 {{ticker}} 代币合约地址。发送到此地址将导致资金丢失。",
-                    "consents": {
-                        "consent-text": "点击“下一步”即表示您同意",
-                        "terms-of-use": "使用条款",
-                        "and": "和",
-                        "privacy-policy": "隐私政策"
-                    }
                 },
                 "SwapFlowPaymentAwaiting": {
                     "title": "等待您的付款",
@@ -394,7 +392,6 @@
                     "title": "兑换完成!",
                     "subtitle": "您的交易已成功完成，货币已发送至您提供的地址。感谢您使用 Rabbit Swap。",
                     "confirm-button-text": "创建新交易",
-                    "back-button-text": "联系我们",
                     "block-titles": {
                         "amount-to-swap": "兑换金额",
                         "amount-sent": "发送金额",
@@ -407,8 +404,7 @@
                 "SwapFlowPaymentRefunded": {
                     "title": "交易退款",
                     "subtitle": "我们很遗憾地通知您，您的兑换尚未完成，因此已退款。请联系支持团队，以便我们我们调查。请使用兑换ID 作为参考：{{swapId}}。",
-                    "confirm-button-text": "创建新交易",
-                    "back-button-text": "联系我们"
+                    "confirm-button-text": "创建新交易"
                 },
                 "SwapFlowPaymentExpired": {
                     "title": "交易已过期",

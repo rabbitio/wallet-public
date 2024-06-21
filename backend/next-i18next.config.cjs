@@ -3,6 +3,6 @@ module.exports = {
     i18n: {
         defaultLocale: "en",
         // https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
-        locales: ["en", "ru", "es", "hi", "zh", "vi"],
+        locales: ["en", "ru", "es", "hi", "zh", "vi", "tr"],
     },
 };
