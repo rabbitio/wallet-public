@@ -50,7 +50,7 @@
         "sinon": "7.5.0"
     },
     "dependencies": {
-        "@rabbitio/ui-kit": "1.0.0-beta.77",
+        "@rabbitio/ui-kit": "1.0.0-beta.79",
         "axios": "1.6.7",
         "body-parser": "1.20.2",
         "bottleneck": "2.19.5",
