@@ -8,8 +8,8 @@ import {
     ALCHEMY_API_KEY_ETH_MAINNET,
     SWAPSPACE_API_KEY,
     TRONGRID_API_KEY,
-    SWAPSPACE_API_KEY_FOR_RATES_API,
     LETSEXCHANGE_API_KEY,
+    ETHERSCAN_API_KEY,
 } from "../properties.js";
 
 // TODO: [tests, critical] easier than to test it manually
@@ -22,7 +22,20 @@ export function setupApiKeysProxying(apiKeysProxyBasePath) {
         const logger = log4js.getLogger("apiKeysProxy");
         logger.level = "debug";
         const basePath = `^${apiKeysProxyBasePath}`;
-        const generatePreserveOriginalPathFunc = id => path => path.replace(`${apiKeysProxyBasePath}/${id}`, "");
+        const generatePreserveOriginalPathFunc = (id, extraQuery = []) => {
+            return path => {
+                let rewritten = path.replace(`${apiKeysProxyBasePath}/${id}`, "");
+                if (extraQuery.length) {
+                    rewritten +=
+                        (rewritten.includes("?") ? "&" : "?") +
+                        extraQuery
+                            .map(item => `${encodeURIComponent(item[0])}=${encodeURIComponent(item[1])}`)
+                            .join("&");
+                }
+                return rewritten;
+            };
+        };
+
         const apisParams = {
             ALCHEMY_MAINNET: {
                 id: "alchemy-mainnet",
@@ -33,6 +46,22 @@ export function setupApiKeysProxying(apiKeysProxyBasePath) {
                 id: "alchemy-goerli",
                 fqdn: `https://eth-goerli.g.alchemy.com`,
                 newPath: `/v2/${ALCHEMY_API_KEY_ETH_TESTNET}`,
+            },
+            ETHERSCAN_MAINNET: {
+                id: "etherscan-mainnet",
+                fqdn: `https://api.etherscan.io/v2/api`,
+                pathRewrite: generatePreserveOriginalPathFunc("etherscan-mainnet", [
+                    ["apikey", ETHERSCAN_API_KEY],
+                    ["chainid", 1],
+                ]),
+            },
+            ETHERSCAN_TESTNET: {
+                id: "etherscan-goerli",
+                fqdn: `https://api.etherscan.io/v2/api`,
+                pathRewrite: generatePreserveOriginalPathFunc("etherscan-goerli", [
+                    ["apikey", ETHERSCAN_API_KEY],
+                    ["chainid", 11155111], // TODO: [feature, low] Actually, this is Sepoila testnet ID. Goerly is removed from etherscan. Testnets were not tested for a long time in Rabbit Wallet. task_id=4c3fa8bd6a6444819909bf6c384f1f7c
+                ]),
             },
             TRONGRID_MAINNET: {
                 id: "trongrid-mainnet",
@@ -51,12 +80,6 @@ export function setupApiKeysProxying(apiKeysProxyBasePath) {
                 pathRewrite: generatePreserveOriginalPathFunc("swapspace"),
                 fqdn: `https://api.swapspace.co`,
                 customHeaders: [["Authorization", SWAPSPACE_API_KEY]],
-            },
-            SWAPSPACE_FOR_RATES_API: {
-                id: "swapspaceForRatesApi",
-                pathRewrite: generatePreserveOriginalPathFunc("swapspaceForRatesApi"),
-                fqdn: `https://api.swapspace.co`,
-                customHeaders: [["Authorization", SWAPSPACE_API_KEY_FOR_RATES_API]],
             },
             LETSEXCHANGE: {
                 id: "letsexchange",

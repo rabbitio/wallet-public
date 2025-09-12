@@ -8,6 +8,8 @@ import { bip44Scheme } from "../btc/lib/addresses-schemes.js";
 import { Network } from "../common/models/networks.js";
 import { ETHEREUM_BLOCKCHAIN } from "./ethereumBlockchain.js";
 
+export const gweiDecimalPlaces = 9; // 1 Gwei = 1e-9 ETH
+
 class Ethereum extends Coin {
     constructor() {
         super(

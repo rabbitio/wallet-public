@@ -29,6 +29,7 @@ import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 import { ERC20 } from "../../erc20token/erc20Protocol.js";
 import { TRC20 } from "../../trc20token/trc20Protocol.js";
 import { TickersAdapter } from "../external-apis/utils/tickersAdapter.js";
+import { SWAPS_FACADE_URL } from "../../../../properties.js";
 
 export class SwapService {
     static SWAPS_COMMON_ERRORS = {
@@ -700,7 +701,7 @@ export class SwapService {
 
             Logger.log(`To address: ${toAddress}, refund address: ${refundAddress}`, loggerSource);
 
-            const clientIp = await IpAddressProvider.getClientIpAddress();
+            const clientIp = await new IpAddressProvider(SWAPS_FACADE_URL).getClientIpAddress();
 
             const result = await this._swapProvider.createSwap(
                 fromCoin,

@@ -13,6 +13,7 @@ import {
 } from "../../common/utils/cacheActualizationUtils.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
 import { cache } from "../../../common/utils/cache.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 
 class EtherscanErc20SingleBalanceProvider extends ExternalApiProvider {
     constructor() {
@@ -21,12 +22,9 @@ class EtherscanErc20SingleBalanceProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const networkPrefix =
-                Storage.getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet ? "" : "-goerli";
             const address = params[0];
             const tokenAddress = params[1];
-            // NOTE: add api key if you decide to use paid API '&apikey=YourApiKeyToken'
-            return `https://api${networkPrefix}.etherscan.io/api?module=account&action=tokenbalance&contractaddress=${tokenAddress}&address=${address}&tag=latest`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.ETH)?.key)}?module=account&action=tokenbalance&contractaddress=${tokenAddress}&address=${address}&tag=latest`;
         } catch (e) {
             improveAndRethrow(e, "EtherscanErc20SingleBalanceProvider.composeQueryString");
         }

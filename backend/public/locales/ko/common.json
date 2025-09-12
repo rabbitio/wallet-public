@@ -1,0 +1,650 @@
+{
+    "components": {
+        "pages": {
+            "PublicSwapPrimaryLanding": {
+                "meta": {
+                    "title": "암호화폐 거래소 - 어떤 암호화폐라도 최저 수수료로 교환하세요",
+                    "keywords": "암호화폐 거래소, 암호화폐 교환, 암호화폐 스왑, 암호화폐 거래, 최저 수수료로 암호화폐 교환, 코인 교환, 토큰 스왑, 알트코인 교환, 알트코인 스왑, 빠른 암호화폐 거래소, 코인 스왑, 저비용 스왑, 디지털 자산 스왑, 신속한 코인 스왑, KYC 없음, 암호화폐 거래",
+                    "description": "Rabbit Swap에서 암호화폐를 신속하고 안전하게 교환하세요 - 최고의 거래소에서 최고의 요율로. {{assetCount}} 개의 디지털 자산. 가입 불필요. 제한 없음."
+                },
+                "wallet-moved-notice-text": "Rabbit 지갑을 찾고 계신가요? 이쪽으로 옮겼습니다!",
+                "hero": {
+                    "title": "암호화폐 교환 이보다 더 쉬울 수 없습니다",
+                    "content": "안녕하세요, 저는 Rabbit 🐰이에요. 단 한 번의 클릭만으로 {{assetCount}} 개의 암호화폐를 최고의 요율에 스왑하세요. 가입 불필요. 제한 없음. 군더더기 없음."
+                },
+                "how-to-swap": {
+                    "title": "Rabbit Swap으로 암호화폐를 어떻게 교환하나요?",
+                    "content": "Rabbit Swapdms 사용이 매우 간단하고 직관적입니다. 아래는 코인을 교환하기 위해 필요한 스텝입니다:",
+                    "items": {
+                        "1": {
+                            "title": "교환 생성",
+                            "content": "코인 페어를 선택하고 위의 양식에 원하는 금액을 입력하세요."
+                        },
+                        "2": {
+                            "title": "주소 제공",
+                            "content": "교환된 암호화폐를 수신할 주소를 입력하세요."
+                        },
+                        "3": {
+                            "title": "코인 전송",
+                            "content": "세부 정보를 확인하고 생성된 주소로 코인을 전송하세요."
+                        },
+                        "4": {
+                            "title": "코인 받기",
+                            "content": "몇 분 후에 교환된 암호화폐를 받으세요!"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "최고의 비율",
+                    "content": "Rabbit Swap은 다양한 유동성 공급자의 요율을 실시간으로 비교하고 가장 낮은 것을 선택하는 독특한 알고리즘을 사용합니다. 이렇게 하면 항상 가장 유리한 요율로 암호화폐 교환이 가능할 수 있게 됩니다. 다른 곳에서 이보다 더 좋은 요율을 찾을 수는 없을 것입니다. 만약 찾으신다면, 알려주세요."
+                },
+                "wide-limits": {
+                    "title": "무제한 스왑",
+                    "content": "다양한 유동성 공급자로 Rabbit Swap은 넓은 범위의 스왑을 가능하게 합니다. 아주 소량부터 무제한에 가까운 대량 물량까지 교환 가능합니다. 이는 저유동성 자산을 대량 교환할 때 가격 하락을 방지할 수 있게 합니다. 저는 항상 여러 유동성 소스에 스왑을 분배하여 항상 가능한 최고의 가격에 거래할 수 있도록 하겠습니다."
+                },
+                "features-grid": {
+                    "title": "그렇다면 Rabbit의 차별점은 무엇인가요?",
+                    "content": "Rabbit Swap은 암호화폐 교환 과정을 비용 효율적이고, 안전하며, 빠르고 간편하게 만듭니다.",
+                    "items": {
+                        "1": {
+                            "title": "가입 불필요",
+                            "content": "가입 없이 단 몇 번의 클릭만으로 원하는 양의 암호화폐를 최저 수수료에, 그리고 거의 즉각적으로 교환하실 수 있습니다. Rabbit은 복잡한 프로세스 없이 초간단한 작동방식을 특징으로 합니다."
+                        },
+                        "2": {
+                            "title": "다양한 디지털 자산",
+                            "content": "{{assetCount}} 개의 암호화폐 중 하나를 선택하여 교환하세요. 네, 이렇게 많은 종류를 교환하실 수 있을 뿐만 아니라 앞으로는 더 늘어날 겁니다. 어쩌면 여러분과 코인 개발자 외에는 아직 아무도 모르는 코인까지도 교환할 수 있어요."
+                        },
+                        "3": {
+                            "title": "개인 정보 보호",
+                            "content": "교환을 수행하는 데는 익명화된 정보만 사용됩니다. Rabbit Swap은 수령할 주소 외에 그 어떤 것도 요청하지 않습니다. 대부분의 경우 KYC가 필요 없습니다."
+                        },
+                        "4": {
+                            "title": "최고 수준의 지원",
+                            "content": "모든 교환은 완전히 자동으로 수행되지만 때때로 실제 사람과 대화가 필요할 수 있습니다. 언제든지 저희 지원 팀과 채팅하세요."
+                        }
+                    }
+                },
+                "recent-swaps": {
+                    "title": "실시간 최신 교환",
+                    "content": "매일 수백 명이 이미 Rabbit Swap을 선택하여 코인을 교환하고 있습니다."
+                },
+                "review-showcase": {
+                    "title": "다른 사람들은 Rabbit을에 대해 뭐라고 말하고 있나요?",
+                    "content": "아직 출시한 지 얼마 안 됐고 마케팅이 아닌 개발에 오랜 시간을 쏟아왔기 때문에 리뷰가 많다고는 할 수 없습니다. 하지만 이제까지 모든 분들이 긍정적인 반응을 보여주셨고, 이는 자랑스러운 일이라고 생각합니다. 여러분들도 리뷰를 남겨주세요. 하나하나가 정말 큰 도움이 됩니다."
+                },
+                "rabbit-stats": {
+                    "title": "내자랑스러운 저희의 몇 가지 통계는 다음과 같습니다.",
+                    "content": "2025년 말까지 이 숫자를 10배로 만들고 싶습니다. 결과를 기대해주세요!"
+                },
+                "articles": {
+                    "title": "Rabbit의 인사이트와 최신 암호화폐 뉴스",
+                    "content": "저는 매일 암호화폐와 함께 하고 있고, 이미 여러분과 공유할 만한 가치있고 흥미로운 인사이트를 많이 가지고 있습니다."
+                }
+            },
+            "PublicSwapAssetLanding": {
+                "meta": {
+                    "title": "{{tickerWithProtocol}} 거래소: {{nameAndBracedProtocol}}을/를 즉시 최고의 요율로 스왑하세요",
+                    "keywords": "exchange {{tickerWithProtocol}}, swap {{tickerWithProtocol}}, exchange {{nameAndProtocol}}, swap {{nameAndProtocol}}, convert {{tickerWithProtocol}}, convert {{nameAndProtocol}}, trade {{tickerWithProtocol}}, 암호화폐 거래소, 암호화폐 교환, 암호화폐 스왑, 암호화폐 거래, 코인 교환, 토큰 스왑, 디지털 자산 스왑, {{tickerWithProtocol}} 가격, {{tickerWithProtocol}} 시장 데이터, {{nameAndProtocol}} 가격, {{nameAndProtocol}} 시장 데이터, kyc 없음, {{tickerWithProtocol}} 익명 교환, {{tickerWithProtocol}} 익명 스왑, {{nameAndProtocol}}(이)란 무엇인가",
+                    "description": "{{tickerWithProtocol}} ({{assetName}})을/를 최고의 요율에 {{assetCount}} 개의 암호화폐 중 하나로 교환하세요. 가입 불필요, 제한 없음, 군더더기 없음 - 빠르고 안전한 암호화폐 스왑."
+                },
+                "hero": {
+                    "title": "{{tickerWithProtocol}} ({{assetName}})을/를 최고의 요율로 교환하세요",
+                    "content": "안녕하세요, 저는 Rabbit 🐰입니다. {{nameAndProtocol}}을/를 {{assetCount}}개의 디지털 자산 중 하나로 즉시 교환하세요. 한 번의 클릭으로 스왑을 시작할 수 있습니다. 24/7 지원 가능. 가입 불필요, 제한 없음, 쓸데없는 기능 없음."
+                },
+                "how-to-swap": {
+                    "title": "Rabbit에서 {{tickerWithProtocol}}을/를 교환하려면 어떻게 해야 하나요?",
+                    "content": "Rabbit Swap은 사용이 쉽고 직관적입니다. 아래에서 {{nameAndProtocol}}을/를 스왑하기 위해 필요한 모든 단계를 확인하세요.",
+                    "items": {
+                        "1": {
+                            "title": "교환 생성",
+                            "content": "{{tickerWithProtocol}} 페어를 선택하고 위의 양식에 원하는 금액을 입력해 보세요."
+                        },
+                        "2": {
+                            "title": "주소 제공",
+                            "content": "교환한 코인을 받을 주소를 입력하세요."
+                        },
+                        "3": {
+                            "title": "코인 전송",
+                            "content": "세부 정보를 확인하고 {{tickerWithProtocol}}을 생성된 주소로 전송하세요."
+                        },
+                        "4": {
+                            "title": "코인 받기",
+                            "content": "몇 분 만에 교환된 코인을 받으세요!"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "{{tickerWithProtocol}}을/를 손실 없이 스왑하세요",
+                    "content": "Rabbit Swap과 함께라면 항상 {{nameAndBracedProtocol}}에 대해 더 많은 가치를 누리실 수 있습니다. 알고리즘은 다양한 유동성 소스에서 {{tickerWithProtocol}} 가격을 지속적으로 분석하고, 교환하려는 금액과 선택한 페어에 따라 가장 수익성 높은 경로를 구축합니다. 이말인즉슨, 매번 최고의 {{tickerWithProtocol}} 금액에 거래가 가능합니다. 대형 거래소에 직접 페어가 없는 코인이라도 {{tickerWithProtocol}}을/를 바꾸는 방법에 대해 걱정하실 필요가 없습니다. Rabbit Swap으로 {{nameAndBracedProtocol}}을/를 {{assetCount}}개의 코인 중 어떤 것으로도 바로 교환 가능합니다."
+                },
+                "wide-limits": {
+                    "title": "{{tickerWithProtocol}}을/를 제한 없이 교환할 수 있습니다",
+                    "content": "Rabbit Swap은 원하는 만큼 {{tickerWithProtocol}}를 교환할 수 있게 해줍니다. 어떤 제한도 없이요 저는 광범위한 유동성 공급자 네트워크에 연결되어 있어, 저유동성 자산을 대량 교환할 때조차 가격 하락을 막을 수 있습니다. 고급 알고리즘을 사용하여 {{nameAndProtocol}} 교환을 여러 소스에 고르게 분배해 항상 가능한 최고의 요율을 보장합니다. 작은 양의 {{tickerWithProtocol}}만 스왑하고 싶다면 어떻게 하냐구요? 문제 없습니다 - Rabbit Swap으로 그 어느 때보다 쉽게 스왑이 가능합니다."
+                },
+                "features-grid": {
+                    "title": "Rabbit Swap으로 {{tickerWithProtocol}}를 교환하는 이유는 무엇인가요?",
+                    "content": "Rabbit Swap은 경제적이고 안전하며, 빠르고 문자 보내기처럼 쉽게 {{tickerWithProtocol}} 교환을 할 수 있게 하기 위해 설계되었습니다.",
+                    "items": {
+                        "1": {
+                            "title": "그냥 스왑만 하시라고요...",
+                            "content": "단지 {{tickerWithProtocol}}을/를 스왑하고 싶을 뿐이시라면 - 가입 불필요, 인증 불필요, 셀카 불필요, 거창한 로열티 프로그램 없음. 그저 {{nameAndProtocol}}에 대한 페어를 찾아 스왑하고 싶을 뿐이시라면... 이해합니다. 사실 작동은 굉장히 간단합니다. 복잡하게 생각할 것 없이 그냥 스왑하세요."
+                        },
+                        "2": {
+                            "title": "{{assetCount}}개의 {{nameAndProtocol}} 교환 옵션",
+                            "content": "{{nameAndProtocol}}을/를 {{assetCount}}개의 이용 가능한 암호화폐 중 하나로 교환하실 수 있습니다. 아시겠지만 수천 개의 직접 페어라는 것은... 전통적인 거래 플랫폼에서는 찾기 어려운 기능이랍니다."
+                        },
+                        "3": {
+                            "title": "{{tickerWithProtocol}}을/를 익명으로 교환하세요",
+                            "content": "{{tickerWithProtocol}}를 다른 디지털 자산으로 교환하는 과정은 오직 익명화된 정보에 기반합니다. Rabbit Swap은 코인을 받을 주소 외에 다른 어떤 정보도 요청하지 않습니다. 대부분의 교환에는 KYC가 필요 없습니다."
+                        },
+                        "4": {
+                            "title": "최고 수준의 지원",
+                            "content": "{{tickerWithProtocol}} 교환은 완전 자동화되어 있지만, 때로는 실제 사람과 대화를 하는 게 훨씬 낫다는 걸 저도 잘 알고 있습니다. 낮이든 밤이든 언제든 필요하시거나 심심하실 때 Rabbit과 채팅하세요. 진담으로요."
+                        },
+                        "5": {
+                            "title": "이익을 낼 수 있어요!",
+                            "content": "Rabbit Swap은 여러 유동성 소스 중 가장 수익성 높은 경로를 자동으로 찾아 {{tickerWithProtocol}} 교환 가치를 극대화해줍니다. 단순하고, 매끄럽고 언제나 최적화된 경로를 찾아드립니다."
+                        },
+                        "6": {
+                            "title": "최대 매력은 어떤 한계도 없다는 점!",
+                            "content": "{{tickerWithProtocol}}를 어떤 양이든 제한 없이 교환하세요. 광범위한 유동성 네트워크와 고급 알고리즘을 통해 대규모든 소규모든 부드럽고 최적화된 교환을 보장합니다."
+                        }
+                    }
+                },
+                "available-pairs-table": {
+                    "title": "아래는 {{tickerWithProtocol}}을/를 교환할 수 있는 모든 코인 목록입니다",
+                    "show-more-button-title": "{{tickerWithProtocol}} 페어 더 보기"
+                },
+                "asset-description": {
+                    "title": "{{assetName}}(이)란 무엇인가요?"
+                },
+                "asset-market-data": {
+                    "title": "{{nameAndBracedTicker}} 시장 데이터",
+                    "subtitle": "아래는 {{tickerAndBracedProtocol}}의 주요 시장 데이터이며, 10분마다 업데이트됩니다."
+                },
+                "articles": {
+                    "title": "{{tickerPrintable}} 뉴스",
+                    "content": "Rabbit의 {{nameAndBracedProtocol}}에 대한 몇 가지 인사이트와 인터넷 전역의 다른 매체 소스에서 제가 흥미롭게 생각하는 선택들을 모아봤습니다."
+                },
+                "random-coins": {
+                    "title": "교환할 수 있는 더 많은 암호화폐"
+                }
+            },
+            "PublicSwapPairLanding": {
+                "meta": {
+                    "title": "{{fromTickerWithProtocol}}을/를 {{toTickerWithProtocol}}로 즉시 최고의 요율로 교환하세요",
+                    "keywords": "exchange {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, exchange {{fromNameAndProtocol}} to {{toNameAndProtocol}}, swap {{fromNameAndProtocol}} to {{toNameAndProtocol}}, convert {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, convert {{fromNameAndProtocol}} to {{toNameAndProtocol}}, trade {{fromTickerWithProtocol}}/{{toTickerWithProtocol}}, 암호화폐 교환, 암호화폐 스왑, 암호화폐 거래, 코인 교환, 토큰 스왑, 디지털 자산 스왑, {{fromTickerWithProtocol}} 가격, {{toTickerWithProtocol}} 가격, {{fromTickerWithProtocol}} 시장 데이터, {{toTickerWithProtocol}} 시장 데이터, {{fromNameAndProtocol}} 가격, {{toNameAndProtocol}} 가격, {{fromNameAndProtocol}} 시장 데이터, {{toNameAndProtocol}} 시장 데이터, kyc 없음, {{fromTickerWithProtocol}}를 {{toTickerWithProtocol}}로 익명 교환, {{fromTickerWithProtocol}}를 {{toTickerWithProtocol}}로 익명 스왑",
+                    "description": "Rabbit Swap과 함께 {{fromTickerWithProtocol}}를 {{toTickerWithProtocol}}로 최고의 요율로 교환하세요. 가입 없음, 제한 없음, 쓸데없는 것 없음 - 빠르고 안전한 암호화폐 스왑."
+                },
+                "hero": {
+                    "title": "{{fromTickerWithProtocol}}를 {{toTickerWithProtocol}}로 교환하는 것이 쉬워졌습니다",
+                    "content": "안녕하세요, 저는 Rabbit 🐰입니다. 최고의 요율로 {{fromNameAndProtocol}}에서 {{toNameAndProtocol}}(으)로 즉시 교환하세요. 한 번의 클릭으로 시작하세요. 24/7 지원. 가입 불필요, 제한 없음, 쓸데없는 것 없음."
+                },
+                "how-to-swap": {
+                    "title": "{{fromTickerWithProtocol}}을/를 {{toTickerWithProtocol}}로 교환하려면 어떻게 해야 하나요?",
+                    "content": "Rabbit Swap 사용은 쉽고 직관적입니다. 아래에서 {{fromNameAndProtocol}}에서 {{toNameAndProtocol}}(으)로 스왑하는 데 필요한 모든 단계를 찾을 수 있습니다.",
+                    "items": {
+                        "1": {
+                            "title": "금액 입력",
+                            "content": "위 양식에 교환하려는 {{fromTickerWithProtocol}}의 금액을 입력하세요."
+                        },
+                        "2": {
+                            "title": "주소 제공",
+                            "content": "{{toTickerWithProtocol}}을 수신할 주소를 입력해 보세요."
+                        },
+                        "3": {
+                            "title": "코인 전송",
+                            "content": "세부 정보를 확인하고 {{fromTickerWithProtocol}}을 생성된 주소로 전송해 보세요."
+                        },
+                        "4": {
+                            "title": "코인 받기",
+                            "content": "몇 분 안에 {{toTickerWithProtocol}}을 받아보세요!"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "{{fromNameAndProtocol}}를 {{toNameAndProtocol}}로 최고의 요율로 교환하세요",
+                    "content": "{{fromNameAndProtocol}}에서 {{toNameAndProtocol}}(으)로 교환할 때 가능한 최고의 요율을 확보하세요. Rabbit Swap은 다양한 유동성 공급자의 요율을 동적으로 비교하는 독특한 알고리즘을 사용하여, 특히 여러분의 거래량에 맞춰 가장 낮은 요율을 선택합니다. {{fromTickerWithProtocol}}/{{toTickerWithProtocol}} 보다 나은 요율을 찾으실 수 없을 거라고 자부합니다. 만약 찾으신다면 저한테 알려주세요."
+                },
+                "wide-limits": {
+                    "title": "{{fromTickerWithProtocol}}와 {{toTickerWithProtocol}} 교환에는 제한이 없습니다",
+                    "content": "다수의 유동성 공급자에 접근 가능하므로 Rabbit Swap은 광범위한 교환 한도를 제공합니다. {{fromTickerWithProtocol}} 및 {{toTickerWithProtocol}}의 극히 적은 양부터 사실상 무제한에 가까운 거래까지 교환할 수 있습니다. 이러한 접근 방식은 저유동성 자산의 대량 교환 시 가격 하락을 방지하는 데도 도움이 됩니다. 저는 귀하의 {{fromNameAndProtocol}}에서 {{toNameAndProtocol}}로의 교환이 항상 가능한 최고의 가격을 받을 수 있도록 다양한 유동성 소스에 분배되도록 하겠습니다."
+                },
+                "features-grid": {
+                    "title": "왜 Rabbit Swap에서 {{fromTickerWithProtocol}}을/를 {{toTickerWithProtocol}}(으)로 교환해야 하나요?",
+                    "content": "Rabbit Swap은 {{fromTickerWithProtocol}}에서 {{toTickerWithProtocol}}(으)로의 교환 과정을 경제적이고, 안전하고, 빠르며, 마치 문자 보내는 것처럼 쉽게 하기 위해 설계되었습니다.",
+                    "items": {
+                        "1": {
+                            "title": "그냥 스왑만 하시라고요...",
+                            "content": "가입, 인증, 셀카, 거창한 로열티 프로그램 같은 것 없이 {{fromNameAndProtocol}}을/를 {{toNameAndProtocol}}로 교환하고 싶으시다면, 깔끔하게 암호화폐만 교환하고 싶으시다면...  사실 작동은 굉장히 간단해요! 복잡하게 생각할 것 없이 그냥 스왑하시면 됩니다."
+                        },
+                        "2": {
+                            "title": "{{fromNameAndProtocol}} 그리고 {{toNameAndProtocol}} 외에도요...",
+                            "content": "{{fromNameAndProtocol}}와 {{toNameAndProtocol}} 외에도, {{assetCount}}개 중 어떤 암호화폐든 선택할 수 있습니다. Rabbit Swap에서는 수백만 개의 가능한 페어에 접근할 수 있으며, 아시겠지만 전통적 거래소에서는 불가능한 기능입니다."
+                        },
+                        "3": {
+                            "title": "{{fromNameAndProtocol}}을/를 {{toNameAndProtocol}}로 익명으로 교환하세요",
+                            "content": "교환 과정은 익명화된 정보에만 의존합니다. Rabbit Swap은 {{toNameAndProtocol}}를 받을 주소 외에 어떤 개인 정보도 요청하지 않습니다. 대부분의 교환에 KYC가 필요 없습니다."
+                        },
+                        "4": {
+                            "title": "최고 수준의 지원",
+                            "content": "{{fromTickerWithProtocol}}를 {{toTickerWithProtocol}}교환은 완전 자동화되어 있지만, 때로는 실제 사람과 대화를 하는 게 훨씬 낫다는 걸 저도 잘 알고 있습니다. 낮이든 밤이든 언제든 필요하시거나 심심하실 때 Rabbit과 채팅하세요. 진담으로요."
+                        },
+                        "5": {
+                            "title": "이익을 낼 수 있어요!",
+                            "content": "Rabbit Swap은 여러 유동성 소스를 통해 가장 수익성 높은 경로를 자동으로 찾아 {{fromTickerWithProtocol}}에서 {{toTickerWithProtocol}}로의 교환 비율을 최적화해줍니다. 단순하고 매끄럽게, 언제나 최적화된 경로를 제공합니다."
+                        },
+                        "6": {
+                            "title": "어떤 제한도 넘을 수 있습니다",
+                            "content": "{{fromTickerWithProtocol}}에서 {{toTickerWithProtocol}}(으)로 어떤 양이든 한계 없이 교환하세요. 광범위한 유동성 네트워크와 고급 알고리즘을 통해 대량이든 소액이든 언제나 부드럽고 최적화된 교환을 보장합니다."
+                        }
+                    }
+                },
+                "available-pairs-table": {
+                    "title-from": "여러분의 {{coinTicker}}을/를 다른 코인으로 교환할 수 있는 목록들입니다",
+                    "title-to": "{{coinTicker}}으로 교환할 수 있는 다른 코인들",
+                    "show-more-button-title": "{{coinTicker}} 페어 더 보기"
+                },
+                "asset-market-data": {
+                    "title": "{{nameAndBracedTicker}} 시장 데이터",
+                    "subtitle": "아래는 {{tickerAndBracedProtocol}}의 주요 시장 데이터이며, 10분마다 업데이트됩니다."
+                },
+                "articles": {
+                    "title": "{{fromTickerPrintable}}/{{toTickerPrintable}} 뉴스",
+                    "content": "Rabbit의 {{fromNameAndBracedProtocol}} 및 {{toNameAndBracedProtocol}}에 대한 몇 가지 인사이트와, 인터넷 상에서 제가 흥미롭게 생각한 다른 매체 소스들을 모았습니다."
+                },
+                "random-coins": {
+                    "title": "더 많은 교환가능한 암호화폐들"
+                }
+            },
+            "UnexpectedErrorPage": {
+                "title": "문제가 발생했습니다",
+                "subtitle": "이것은 꽤 당황스럽습니다... 예상치 못한 오류로 인해 애플리케이션이 실패했습니다. 페이지를 다시 로딩하거나 이 오류가 반복되는 경우 support@rabbit.io로 문의하세요. 불편을 끼쳐드려 죄송합니다.",
+                "primary-button-content": "페이지 다시 로딩하기",
+                "transparent-button-content": "지원팀에 연락하기",
+                "sign-in-button-content": "홈"
+            },
+            "PrivacyPolicy": {
+                "title": "RABBIT.IO 개인정보 보호 정책",
+                "meta": {
+                    "title": "개인정보 보호 정책 – Rabbit Swap",
+                    "description": "Rabbit Swap의 개인정보 보호 정책을 검토하여 암호화폐 교환 플랫폼에서 정보를 어떻게 처리하는지 명확히 이해해 보세요. 당사는 투명성을 우선시하여 귀하의 개인정보 보호를 보장합니다.",
+                    "keywords": "개인정보 보호 정책, 암호화폐 교환, 암호화폐 거래소, 암호화폐 교환, 암호화폐 교환"
+                }
+            },
+            "TermsOfUse": {
+                "title": "RABBIT.IO 이용약관",
+                "meta": {
+                    "title": "이용약관 – Rabbit Swap",
+                    "description": "암호화폐 교환 플랫폼을 사용하는 데 대한 명확한 지침을 위해 Rabbit Swap의 이용약관을 검토해 보세요. 원활한 경험을 위해 귀하의 권리와 책임을 이해해 보세요.",
+                    "keywords": "이용약관, 암호화폐 교환, 암호화폐 거래소, 암호화폐 교환, 암호화폐 교환"
+                }
+            },
+            "ExchangePairs": {
+                "title": "{{assetName}}을/를 교환할 수 있는 코인",
+                "subtitle": "현재 {{assetName}}을/를 아래 나열된 {{assetCount}} 코인 중 어떤 코인으로라도 교환 가능합니다.",
+                "link-title": "{{assetNameFrom}}을/를 {{assetNameTo}}로 교환하세요",
+                "meta": {
+                    "title": "Rabbit Swap에서 {{assetName}}을/를 다른 암호화폐로 스왑하세요",
+                    "keywords": "exchange {{tickerWithProtocol}} to other crypto, exchange {{nameWithProtocol}} to other crypto, swap {{tickerWithProtocol}} for other crypto, swap {{nameWithProtocol}} for other crypto, 어떤 암호화폐로 {{tickerWithProtocol}}를 교환할까, {{tickerWithProtocol}} 페어, {{tickerWithProtocol}} 티커, {{tickerWithProtocol}}로 교환 가능한 코인",
+                    "description": "지금 Rabbit Swap에서 {{assetName}}을/를 교환할 수 있는 {{assetCount}}개의 자산 전체 목록입니다."
+                }
+            },
+            "AllCurrenciesList": {
+                "title": "교환 가능한 전체 자산 목록",
+                "subtitle": "현재 Rabbit Swap에서는 {{assetCount}} 개의 암호화폐를 교환할 수 있습니다. 이 목록은 동적이며 다양한 요인에 따라 코인이 매일 추가 또는 제거됩니다.",
+                "asset-link-title": "{{nameAndProtocol}} ({{tickerPretty}})",
+                "pairs-link-title": "{{nameAndProtocol}} ({{tickerPretty}})를 다른 암호화폐로 교환",
+                "meta": {
+                    "title": "Rabbit에서 교환 가능한 전체 자산 목록",
+                    "keywords": "전체 암호화폐 자산 목록, 암호화폐 목록, 교환 가능한 코인, 스왑 가능한 암호화폐, 지원되는 코인, 이용 가능한 토큰, 디지털 자산 목록, rabbit swap 코인, 전체 암호화폐 거래 리스트, 교환 가능한 모든 암호화폐, 거래 가능한 자산 목록, 크립토 거래 리스트, 스왑 가능한 디지털 자산",
+                    "description": "Rabbit Swap에서 교환할 수 있는 모든 코인의 완전한 목록을 확인하세요. {{assetCount}}개 이상의 암호화폐 중에서 선택 - 교환하고 싶은 거의 모든 코인이 여기에 있습니다."
+                }
+            },
+            "Blog": {
+                "title": "암호화폐의 모든 것에 대한 블로그",
+                "subtitle": "사토시 나카모토가 비트코인 코드를 처음 공개한 날 인생이 바뀐 분들을 위해서 여기서 저는 크립토 트렌드에 대한 인사이트, 최신 뉴스에 대한 의견, 그리고 모든 크립토 애호가를 위한 팁을 공유할 것입니다.",
+                "meta": {
+                    "title": "크립토 애호가를 위한 최신 뉴스, 인사이트 및 팁",
+                    "keywords": "크립토 뉴스, 크립토 블로그, 크립토 인사이트, 크립토 거래 팁, 암호화폐 뉴스, 암호화폐 블로그, 비트코인 뉴스, 암호화폐 인사이트, 암호화폐 거래 팁, 블록체인 뉴스, 암호화폐 시장 분석, dex, nft, 크립토 트렌드, 암호화폐 트렌드, 암호화폐 규제, nft 트렌드, 크립토 세금 팁, 웹3 기술, 암호화폐 미래, 크립토 보안 팁, 암호화폐 안전 보관 방법, 최신 블록체인 혁신, 스테이킹, 암호화폐로 수동 소득, 크립토 초심자 가이드, 크립토 시장 동향, 탈중앙화 거래소",
+                    "description": "전체 암호화폐 분야에 대한 인사이트, 시장 업데이트 및 전문가 팁을 발견하세요. Rabbit의 독립적인 시각으로 매일의 크립토 뉴스를 살펴보세요."
+                }
+            },
+            "Article": {
+                "title-addition": "Rabbit의 블로그",
+                "source-link-en": "영어에서 번역됨"
+            }
+        },
+        "organisms": {
+            "SwapFormWithCoinDropdowns": {
+                "errors": {
+                    "requests-limit-exceeded": "죄송합니다. 높은 수요로 인해 서비스가 일시적으로 중단되었습니다. 몇 분 후 다시 시도해 주세요. 양해해 주셔서 감사합니다.",
+                    "default": "죄송합니다. 마지막 작업을 수행하지 못했습니다. 다시 시도하거나 지원팀에 문의하세요."
+                }
+            },
+            "LandingFooter": {
+                "single-asset": {
+                    "title": "교환",
+                    "item-content": "{{ticker}} 교환",
+                    "view-more": "더 많은 암호화폐 보기"
+                },
+                "pair": {
+                    "title": "페어 교환",
+                    "item-content": "{{tickerFrom}}에서 {{tickerTo}}로"
+                },
+                "support-message": "환전 서비스는 완전 자동화되어 연중무휴 24시간 운영됩니다. 지원팀과의 온라인 채팅은 24/7 이용 가능(응답 시간: 5분). 또한 support@rabbit.io로도 연락하실 수 있습니다(응답 시간: 48시간)."
+            },
+            "AssetDropdown": {
+                "field-placeholder": "검색하기...",
+                "text-default": "모든 사용 가능한 자산",
+                "text-search": "검색 결과",
+                "text-search-fail": "자산을 찾을 수 없습니다",
+                "load-more-button": "더 많이 로딩하기",
+                "text-loading": "모든 코인 로딩 중..."
+            },
+            "RecentSwapsTable": {
+                "table-head-tiles": {
+                    "from": "출발지",
+                    "to": "목적지",
+                    "finished": "완료됨"
+                },
+                "time-ago": {
+                    "seconds": "{{timeAmount}}초 전",
+                    "minutes": "{{timeAmount}}분 전",
+                    "hours": "{{timeAmount}}시간 전"
+                }
+            },
+            "SwapForm": {
+                "swap-all-button-titles": {
+                    "enable": "모두 교환",
+                    "cancel": "취소"
+                },
+                "input": {
+                    "fiat-placeholder": "법정 화폐 금액 입력",
+                    "balance-loader-text": "잔액 로딩 중..."
+                },
+                "consents": {
+                    "consent-text": "\"교환\"을 클릭함으로써 Rabbit Swap의",
+                    "terms-of-use": "이용약관",
+                    "and": "및",
+                    "privacy-policy": "개인정보 보호 정책"
+                },
+                "information-block": {
+                    "enter-amount": "교환할 금액을 입력하세요",
+                    "minimum-amount": "최소 금액: ",
+                    "maximum-amount": "최대 금액: ",
+                    "transaction-fee": "네트워크 수수료: ",
+                    "calculating-network-fee": "네트워크 수수료 계산 중...",
+                    "loading-minimal-amount": "최소 금액 로딩 중...",
+                    "swap-rate": "비율: ",
+                    "calculating-swap-rates": "교환 비율 계산 중...",
+                    "pair-not-available": "현재 페어를 사용할 수 없습니다. 나중에 다시 시도하거나 다른 페어를 선택해 보세요."
+                },
+                "addresses": {
+                    "recepient-address-title": "{{receivingCoinName}} 수신자 주소",
+                    "refund-address-title": "{{sendingCoinName}} 환불 주소",
+                    "receiving-address-extra-id": "수신자 {{extraIdName}}",
+                    "refund-address-extra-id": "환불 {{extraIdName}}",
+                    "receiving-address-extra-id-notice": "수신자 주소에 '메모' 또는 '목적지 태그'가 필요한지 확인해 보세요. 때로는 태그, ID, 라벨, 또는 노트라고도 불립니다. 거래소는 예치금 처리를 위해 이와 같은 ID를 요구할 수 있습니다. 이 식별자를 포함하는 것은 필수이며, 누락하거나 잘못 입력할 경우 자산 손실이 발생할 수 있습니다.",
+                    "refund-address-extra-id-notice": "환불 주소에 '메모' 또는 '목적지 태그'(태그, ID, 라벨, 또는 노트라고도 함)가 필요한지 확인해 보세요. 이러한 식별자를 포함하는 것이 필수적이며, 환불을 정확하게 처리하려면 교환소에서 이를 필요로 할 수 있습니다. 누락하거나 잘못 입력할 경우 자산 손실이 발생할 수 있습니다.",
+                    "optional-field-placeholder": "(선택 사항)",
+                    "address-is-contract-validation-message": "입력한 주소는 {{ticker}} 토큰 계약 주소입니다. 이 주소로 자금을 송금하면 자금이 돌이킬 수 없이 손실됩니다."
+                },
+                "rateSelector": {
+                    "fixedRate": "고정 비율",
+                    "floatingRate": "변동 비율"
+                },
+                "confirm-button-text": "교환",
+                "errors": {
+                    "amount-less-than-min-swappable": "교환하려는 {{assetName}}의 금액이 최소 허용 금액 이하입니다.",
+                    "amount-higher-than-max-swappable": "교환하려는 {{assetName}}의 금액이 최대 허용 금액을 초과합니다.",
+                    "pair-not-supported": "죄송합니다. 선택한 페어를 현재 사용할 수 없습니다. 나중에 다시 시도하거나 다른 페어를 선택해 보세요."
+                }
+            },
+            "SwapFlow": {
+                "meta": {
+                    "step-titles": {
+                        "awaiting": "결제 대기 중 · {{amountFrom}}을(를) {{amountTo}}로 교환 - Rabbit Swap",
+                        "confirming": "결제 확인 중 · {{amountFrom}}을(를) {{amountTo}}로 교환 - Rabbit Swap",
+                        "verifying": "결제 확인 중 · {{amountFrom}}을(를) {{amountTo}}로 교환 - Rabbit Swap",
+                        "exchanging": "코인 교환 중 · {{amountFrom}}을(를) {{amountTo}}로 교환 - Rabbit Swap",
+                        "completed": "성공적으로 교환 완료! · {{amountFrom}}을(를) {{amountTo}}로 교환 - Rabbit Swap",
+                        "refunded": "코인 환불됨 · {{amountFrom}}을(를) {{amountTo}}로 교환 - Rabbit Swap",
+                        "expired": "만료됨 · {{amountFrom}}을(를) {{amountTo}}로 교환 - Rabbit Swap",
+                        "failed": "교환 실패 · {{amountFrom}}을(를) {{amountTo}}로 교환 - Rabbit Swap",
+                        "error": "문제가 발생했습니다 · {{amountFrom}}을(를) {{amountTo}}로 교환 - Rabbit Swap"
+                    },
+                    "title": "{{fromTickerWithProtocol}}을(를) {{toTickerWithProtocol}}로 교환 진행 중 - Rabbit Swap",
+                    "description": "{{fromTickerWithProtocol}}에서 {{toTickerWithProtocol}}로 교환하기 위한 필요한 세부 정보를 입력하세요. Rabbit은 다양한 유동성 공급자의 비율을 비교하여 교환에 가장 최적의 비율을 확보합니다.",
+                    "keywords": "{{fromTickerWithProtocol}}에서 {{toTickerWithProtocol}}로 교환, {{fromTickerWithProtocol}}에서 {{toTickerWithProtocol}}로 교환, {{fromAssetName}}에서 {{toAssetName}}로 교환, {{fromAssetName}}에서 {{toAssetName}}로 교환, {{fromTickerPrintable}}/{{toTickerPrintable}} 거래, {{fromTickerPrintable}}에서 {{toTickerPrintable}}로 교환, {{fromTickerPrintable}}에서 {{toTickerPrintable}}로 교환, 암호화폐 교환, 암호화폐 거래소, 암호화폐 교환, 암호화폐 교환"
+                },
+                "loader-title": "스왑 세부 정보 로딩 중...",
+                "loader-error": "현재 스왑 세부 정보를 로딩할 수 없습니다. 이는 일시적인 문제일 수 있습니다. 잠시 후 페이지를 새로고침해 주세요. 문제가 지속되면 라이브 채팅을 통해 지원팀에 문의해 주시면 도움을 드리겠습니다.",
+                "update-error": "현재 스왑 세부 정보를 업데이트할 수 없습니다. 이는 일시적인 문제일 수 있습니다. 잠시 후 페이지를 새로고침해 주세요. 문제가 지속되면 라이브 채팅을 통해 지원팀에 문의해 주시면 도움을 드리겠습니다.",
+                "swap-id": {
+                    "title": "스왑 ID",
+                    "copied-tooltip": "스왑 ID가 복사되었습니다!"
+                },
+                "status": {
+                    "title": "상태"
+                },
+                "extended-information": {
+                    "section-title": "추가 정보",
+                    "general-swap-details": {
+                        "title": "스왑 세부 정보",
+                        "deposit-amount": "교환할 금액",
+                        "withdrawal-amount": "받을 금액",
+                        "exchange-rate": "교환 비율",
+                        "rate-mode": {
+                            "title": "비율 모드",
+                            "fixed-notice": "고정 비율에서는 스왑이 생성될 때 교환 비율이 고정됩니다. 이는 정확하게 받을 금액을 보장하여 시장 변동으로부터 유저를 보호합니다.",
+                            "floating-notice": "변동 비율에서는 거래가 완료될 때까지 교환 비율이 변동될 수 있습니다. 이는 잠재적인 시장 이점을 허용하지만 비율 변화의 위험도 수반합니다."
+                        },
+                        "fixed-rate": "고정",
+                        "floating-rate": "변동",
+                        "refund-address": "환불 주소",
+                        "refund-extra-id": "환불 {{extraIdName}}",
+                        "created-at": "생성 시간"
+                    },
+                    "deposit-transaction": {
+                        "title": "입금 거래",
+                        "asset": "전송할 자산",
+                        "address": "받는 주소",
+                        "contract-address": "계약 주소",
+                        "transaction-id": "거래 ID"
+                    },
+                    "withdrawal-transaction": {
+                        "title": "출금 거래",
+                        "asset": "받을 자산",
+                        "address": "받는 주소",
+                        "contract-address": "계약 주소",
+                        "transaction-id": "거래 ID"
+                    }
+                },
+                "ton-swap-notice": "여러분의 지갑이 거래와 함께 Jetton 알림을 보내지 않았다면 거래에 수동 처리가 필요할 수 있습니다. Tonkeeper와 Tonhub 같은 인기 지갑들은 이를 지원하지만, 상대적으로  덜 사용되는 지갑을 사용하거나 확신이 서지 않는다면 라이브 채팅을 통해 저희에게 연락해 주시면 도움을 드리겠습니다!",
+                "SwapFlowInformation": {
+                    "create-new-swap-button": "새로운 스왑 생성",
+                    "awaiting": {
+                        "title": "아래 주소로 자금을 전송하세요",
+                        "amount-title": "정확하게 입력하여 전송하세요",
+                        "amount-tooltip": "금액이 복사되었습니다!",
+                        "address-title": "받는 주소",
+                        "address-tooltip": "주소가 복사되었습니다!",
+                        "extra-id-title": "그리고 이 {{extraIdName}}을/를 지정하세요",
+                        "extra-id-tooltip": "{{extraIdName}}이/가 복사되었습니다!",
+                        "extra-id-notice": "자금을 전송할 때 지갑에서 필요한 '메모' 또는 '목적지 태그'를 입력했는지 확인하세요. 이는 올바른 거래 처리를 위해 중요한 과정입니다. 잘못된 정보는 자금 손실을 초래할 수 있습니다.",
+                        "amount-qr": {
+                            "title": "전송할 금액",
+                            "subtitle": "이 QR 코드를 스캔하여 스왑 거래에 필요한 전송 금액을 확인하세요"
+                        },
+                        "address-qr": {
+                            "title": "입금 주소",
+                            "subtitle": "이 QR 코드를 스캔하여 스왑 거래에 필요한 입금 주소를 확인하세요"
+                        },
+                        "destination-tag-qr": {
+                            "subtitle": "이 QR 코드를 스캔하여 스왑 거래에 필요한 {{extraIdName}}을/를 확인하세요"
+                        }
+                    },
+                    "completed": {
+                        "title": "스왑이 완료되었습니다!",
+                        "subtitle": "스왑이 완료되어 코인이 제공된 주소로 전송되었습니다. Rabbit Swap을 이용해 주셔서 감사합니다.",
+                        "tiles": {
+                            "speedup": {
+                                "text": "스왑이 예상보다 {{speedupMinutes}}분 빨리 완료되었습니다!"
+                            },
+                            "bonus": {
+                                "text": "원래 예상보다 {{bonusPercentage}}% 더 많이 받았습니다!"
+                            },
+                            "review": {
+                                "text": "Rabbit에 대한 리뷰를 남겨주시면 정말 감사할 것 같아요!",
+                                "button": "리뷰 남기기"
+                            },
+                            "new-exchange": {
+                                "text": "또 다른 스왑이 필요하신가요? 바로 진행하세요!",
+                                "button": "새로운 스왑"
+                            }
+                        }
+                    },
+                    "confirming": {
+                        "title": "확인 대기 중",
+                        "subtitle": "거래가 수신되었습니다. 블록체인에서 거래가 확인될 때까지 잠시 기다려 주세요. 완료되면 페이지가 자동으로 업데이트됩니다."
+                    },
+                    "verifying": {
+                        "title": "신원 확인 필요",
+                        "subtitle": "거래가 성공적으로 수신되었습니다. 하지만 규정에 따라 AML 검사를 통과하지 못한 특정 거래에 대해 신원 확인을 수행해야 합니다. 저희도 여러분만큼 이 과정을 피하고 싶고 최소화하기 위해 최선을 다하고는 있지만, 안타깝게도 완전히 피하는 것은 불가능합니다. 라이브 채팅을 통해 지원팀에 연락해 주시면 빠르게 인증 과정을 안내해 드리겠습니다. 불편을 끼쳐드려 죄송합니다."
+                    },
+                    "exchanging": {
+                        "title": "코인을 교환하고 있습니다",
+                        "subtitle": "거래가 확인되었고 스왑이 진행 중입니다. 완료될 때까지 잠시 기다려 주세요. 완료되면 페이지가 자동으로 업데이트됩니다."
+                    },
+                    "refunded": {
+                        "title": "스왑이 환불되었습니다",
+                        "subtitle": "스왑이 완료되지 않아 환불되었음을 알려드립니다. 무슨 일이 있었는지 확인하시려면 지원팀에 문의해 주세요. 참조용으로 스왑 ID를 사용하세요: #{{swapId}}."
+                    },
+                    "expired": {
+                        "title": "스왑이 만료되었습니다",
+                        "subtitle": "거래가 제시간에 수신되지 않아 스왑이 만료되었습니다. 아무것도 전송하지 않으셨다면 새로운 스왑을 생성하시면 됩니다. 이미 코인을 전송하셨다면 걱정하지 마세요. 지원팀에 문의하시면 스왑 비율을 재계산하거나 환불을 받으실 수 있습니다. 참조용으로 스왑 ID를 사용하세요: #{{swapId}}."
+                    },
+                    "failed": {
+                        "title": "스왑이 실패했습니다",
+                        "subtitle": "죄송하지만 예상치 못한 문제로 인해 교환이 완료되지 못했습니다. 하지만 걱정하지 마세요! 라이브 채팅을 통해 지원팀에 문의해 주시면 무슨 일이 있었는지 조사해 드리겠습니다. 문의 시 스왑 ID: #{{swapId}}를 언급해 주세요."
+                    }
+                }
+            },
+            "SwapStatus": {
+                "awaiting": "결제 대기",
+                "exchanging": "코인 교환",
+                "refunded": "스왑 환불",
+                "confirming": "거래 확인",
+                "verifying": "신원 확인",
+                "completed": "교환된 코인 전송",
+                "expired": "스왑 만료",
+                "failed": "스왑 실패",
+                "created": "스왑 생성됨",
+                "payment-tooltip": "입금 주소로 결제를 완료하기까지 남은 시간",
+                "duration-minutes-title-shortened": "분"
+            },
+            "WaitlistSubscription": {
+                "colored-notice": {
+                    "button-title": "업데이트 구독하기",
+                    "text": "{{coinLatinName}} ({{coinTicker}})에 대한 스왑은 아직 사용할 수 없습니다. 거래가 허용되는 즉시 자동으로 스왑을 활성화하겠습니다. 언제 발생하는지 가장 먼저 알고 싶으신가요? 알림을 받기 위해 구독하세요!"
+                },
+                "sign-up-step": {
+                    "action-button-title": "구독하기",
+                    "error": "문제가 발생했습니다. 나중에 다시 시도해 주세요.",
+                    "input-title": "이메일 주소:",
+                    "subtitle": "{{coinLatinName}}이(가) 스왑 가능해지면 즉시 알림을 받으려면 이메일 주소를 제공해 주세요. 상장되면 한 번의 알림을 보내드립니다.",
+                    "title": "{{coinLatinName}} ({{coinTicker}}) 상장 알림"
+                },
+                "success-step": {
+                    "action-button-title": "닫기",
+                    "subtitle": "{{coinLatinName}}이(가) 스왑 가능해지면 알려드리겠습니다. 업데이트를 받기 위해 받은 편지함을 확인해 주세요.",
+                    "title": "구독 성공!"
+                }
+            },
+            "PartnersLandingSection": {
+                "content": "원활하고 신뢰할 수 있는 스왑 서비스를 제공하는 데 도움을 주는 신뢰할 수 있는 거래소와 유동성 공급자를 만나보세요.",
+                "title": "신뢰할 수 있는 스왑을 위한 협력"
+            },
+            "RabbitStats": {
+                "launched-in": "런칭 연도",
+                "support-response-time": "지원 평균 응답 시간",
+                "support-response-time-content": "{{amountSingular}} 분",
+                "turnover": "거래액",
+                "assets-available": "지원 코인 수",
+                "swap-time": "평균 스왑 시간",
+                "swap-time-content": "{{amountPlural}} 분",
+                "profit": "평균 수익",
+                "profit-tooltip": "다수의 잘 알려진 스왑 서비스와 비교"
+            },
+            "RandomCoinsCloud": {
+                "link-title": "{{assetName}} 교환"
+            },
+            "SwapCurrenciesTable": {
+                "empty-search": "'{{query}}'에 대한 결과가 없습니다",
+                "column-titles": {
+                    "coin": "코인",
+                    "ticker": "티커",
+                    "swap": "교환"
+                },
+                "swap-link-single-asset-title": "{{assetName}} 교환",
+                "swap-link-pair-title": "{{assetNameFrom}}를 {{assetNameTo}}로 교환"
+            },
+            "QrCodeModal": {
+                "close-button-title": "닫기",
+                "copy-button-title": "복사",
+                "copy-tooltip": "클립보드에 복사됨!"
+            }
+        },
+        "molecules": {
+            "MarketData": {
+                "last-updated": "{{date}}에 마지막 업데이트",
+                "volume": "{{ticker}} 24시간 거래량",
+                "min-max-price": "24시간 최소 & 최대 가격",
+                "price": "{{ticker}} 가격 및 24시간 변동",
+                "rank": "코인 순위",
+                "supply": "유통 공급량",
+                "market-cap": "{{ticker}} 시가 총액"
+            },
+            "ReviewShowcase": {
+                "trustpilot-link-title": "Trustpilot에서 더 읽기"
+            }
+        },
+        "atoms": {
+            "PageTree": {
+                "landingPrimary": "홈",
+                "landingSingleAsset": "{{ticker}} 스왑",
+                "landingTwoAssets": "{{tickerFrom}}를 {{tickerTo}}로 스왑",
+                "allCurrencies": "모든 코인",
+                "exchangePairs": "{{ticker}}을/를 다른 암호화폐로 교환하기",
+                "blog": "블로그",
+                "termsOfUse": "이용약관",
+                "privacyPolicy": "개인정보처리방침"
+            },
+            "MarketChangeNotice": {
+                "text-gain-gain": "{{date}} 기준 시장 데이터 분석에 따르면, {{assetName}}은/는 지난 달 상승 추세에 있으며 {{percentageMonth}} 증가했습니다. 최근 24시간 동안 가치가 {{percentageDay}} 상승했습니다. 위는 10분마다 업데이트되는 {{assetTicker}}의 주요 시장 데이터입니다.",
+                "text-gain-loss": "{{date}} 기준 시장 데이터 분석에 따르면, {{assetName}}은/는 지난 달 상승 추세에 있으며 {{percentageMonth}} 증가했습니다. 지난 24시간 동안 {{percentageDay}} 하락했습니다. 위는 10분마다 업데이트되는 {{assetTicker}}의 주요 시장 데이터입니다.",
+                "text-loss-gain": "{{date}} 기준 시장 데이터 분석에 따르면, {{assetName}}은/는 지난 달 하락 추세에 있으며 가치가 {{percentageMonth}} 감소했습니다. 지난 24시간 동안 {{percentageDay}} 상승했습니다. 위는 10분마다 업데이트되는 {{assetTicker}}의 주요 시장 데이터입니다.",
+                "text-loss-loss": "{{date}} 기준 시장 데이터 분석에 따르면, {{assetName}}는 지난 달 하락 추세로 {{percentageMonth}} 가치 하락을 보였습니다. 지난 24시간 동안 {{percentageDay}} 하락했습니다. 위는 10분마다 업데이트되는 {{assetTicker}}의 주요 시장 데이터입니다."
+            }
+        }
+    },
+    "common": {
+        "independent-exchange": {
+            "title": "독립적으로 교환하세요",
+            "content": "대부분의 사람들은 다양한 거래 플랫폼을 통해 암호화폐를 교환하여 자산을 이러한 플랫폼에 맡깁니다. 그러나 독립적인 교환 서비스를 사용하는 것이 실제로 훨씬 안전합니다. 이렇게 진행하면 여전히 보관되지 않은 안전한 지갑에 코인을 보관하면서 교환을 수행할 수 있습니다. 이 접근 방식은 누군가가 귀하의 계정을 차단하거나 자금을 통제하는 것을 방지하고, 다음 FTX가 귀하의 모든 코인을 빼앗거나 SEC가 귀하가 좋아하는 또 다른 거래 서비스를 금지하는 영향을 받지 않도록 보장합니다."
+        },
+        "create-swap-cta-title": "교환 시작",
+        "page-titles": {
+            "terms-and-conditions": "이용 약관",
+            "privacy-policy": "개인정보 보호 정책",
+            "try-wallet": "Rabbit Wallet 시도",
+            "blog": "블로그",
+            "affiliate-program": "제휴 프로그램"
+        },
+        "support-chat-message": "저희와 채팅하세요",
+        "default-copy-button-title": "복사",
+        "default-copy-button-tooltip": "복사됨!",
+        "view-more-button": "더 보기"
+    }
+}

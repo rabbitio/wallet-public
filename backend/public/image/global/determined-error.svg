@@ -1,0 +1,28 @@
+<svg id="Group_5" data-name="Group 5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="173" height="173" viewBox="0 0 173 173">
+  <defs>
+    <clipPath id="clip-path">
+      <circle id="Oval" cx="86.5" cy="86.5" r="86.5" fill="#ffa799"/>
+    </clipPath>
+  </defs>
+  <g id="Group_2" data-name="Group 2">
+    <circle id="Oval-2" data-name="Oval" cx="86.5" cy="86.5" r="86.5" fill="#ffa799"/>
+    <g id="Group_2-2" data-name="Group 2" clip-path="url(#clip-path)">
+      <g id="Group_232" data-name="Group 232" transform="translate(-5 -4)">
+        <rect id="Rectangle" width="30" height="172" transform="translate(122.205 0.582) rotate(45)" fill="#fff" opacity="0.3"/>
+        <rect id="Rectangle-2" data-name="Rectangle" width="30" height="172" transform="translate(161.205 36.582) rotate(45)" fill="#fff" opacity="0.3"/>
+        <path id="Rectangle-3" data-name="Rectangle" d="M12,0H146a0,0,0,0,1,0,0V128a0,0,0,0,1,0,0H0a0,0,0,0,1,0,0V12A12,12,0,0,1,12,0Z" transform="translate(34 53)" fill="#f18573"/>
+        <path id="Rectangle-4" data-name="Rectangle" d="M4,0H97a4,4,0,0,1,4,4V92a0,0,0,0,1,0,0H0a0,0,0,0,1,0,0V4A4,4,0,0,1,4,0Z" transform="translate(43 91)" fill="#e95d44" opacity="0.5"/>
+        <path id="Rectangle-5" data-name="Rectangle" d="M12,0H146a0,0,0,0,1,0,0V28a0,0,0,0,1,0,0H0a0,0,0,0,1,0,0V12A12,12,0,0,1,12,0Z" transform="translate(34 53)" fill="#eb5e49"/>
+        <circle id="Oval-3" data-name="Oval" cx="4" cy="4" r="4" transform="translate(44 63)" fill="#ffa191"/>
+        <circle id="Oval-4" data-name="Oval" cx="4" cy="4" r="4" transform="translate(57 63)" fill="#ffa191"/>
+        <circle id="Oval-5" data-name="Oval" cx="4" cy="4" r="4" transform="translate(70 63)" fill="#ffa191"/>
+      </g>
+    </g>
+  </g>
+  <g id="Group_3" data-name="Group 3" transform="translate(63 105)">
+    <g id="Group_4" data-name="Group 4">
+      <path id="Path" d="M24.75,0A24.745,24.745,0,1,0,39.078,4.567" fill="none" stroke="#fff" stroke-linecap="round" stroke-miterlimit="10" stroke-width="3.6"/>
+      <text id="_" data-name="!" transform="translate(25.2 38.8)" fill="#fff" font-size="34.2" font-family="SegoeUI, Segoe UI" letter-spacing="0.023em"><tspan x="-4.859" y="0">!</tspan></text>
+    </g>
+  </g>
+</svg>

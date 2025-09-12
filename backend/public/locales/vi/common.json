@@ -3,17 +3,18 @@
         "pages": {
             "PublicSwapPrimaryLanding": {
                 "meta": {
-                    "title": "Hoán Đổi Crypto Ngay Lập Tức với Mức Phí Thấp Nhất - Rabbit Swap",
-                    "keywords": "hoán đổi crypto, trao đổi crypto, hoán đổi tiền mã hóa, trao đổi tiền mã hóa, chuyển đổi crypto với mức phí thấp nhất, trao đổi coin, đổi token, hoán đổi nhanh, đổi coin, hoán đổi chi phí thấp, đổi tài sản kỹ thuật số, đổi coin nhanh chóng",
-                    "description": "Hoán đổi coin và token ngay lập tức với Rabbit Swap, hoán đổi crypto với tỉ giá tốt nhất. Không cần đăng ký - hoán đổi coin chỉ với một cú click!"
+                    "title": "Sàn giao dịch tiền điện tử - Hoán đổi mọi loại tiền điện tử với mức phí thấp nhất",
+                    "keywords": "sàn giao dịch crypto, hoán đổi crypto, hoán đổi tiền điện tử, sàn giao dịch tiền điện tử, hoán đổi tiền điện tử với phí thấp, trao đổi coin, hoán đổi token, trao đổi altcoin, hoán đổi altcoin, trao đổi crypto nhanh, hoán đổi coin, hoán đổi chi phí thấp, hoán đổi tài sản số, trao đổi coin nhanh, không KYC, giao dịch crypto",
+                    "description": "Hoán đổi tiền điện tử nhanh chóng và an toàn với Rabbit Swap - sàn giao dịch tiền điện tử hàng đầu với tỷ giá tốt nhất. {{assetCount}} loại tài sản số. Không cần đăng ký. Giao dịch Không giới hạn."
                 },
+                "wallet-moved-notice-text": "Bạn đang tìm Rabbit Wallet? Chúng tôi đã chuyển Rabbit Wallet đến",
                 "hero": {
-                    "title": "Hoán Đổi Crypto Dễ Dàng",
-                    "content": "Hoán Đổi Bitcoin, Tether, Ethereum, và hơn 3600 loại tiền mã hóa khác với mức phí thấp nhất — không cần đăng ký. Chọn một cặp coin và bắt đầu!"
+                    "title": "Giao Dịch Tiền Điện Tử Dễ Dàng",
+                    "content": "Xin chào, tôi là Rabbit 🐰, tôi có thể hoán đổi {{assetCount}} loại tiền điện tử chỉ với một cú click chuột với tỷ giá tốt nhất. Không cần đăng ký. Giao dịch không giới hạn. Không hề phức tạp."
                 },
                 "how-to-swap": {
                     "title": "Cách hoán đổi crypto trên Rabbit Swap",
-                    "content": "Sử dụng Rabbit Swap dễ dàng và đơn giản; dưới đây là các bước bạn cần thực hiện để hoán đổi coin của mình:",
+                    "content": "Sử dụng Rabbit Swap rất đơn giản và nhanh chóng; dưới đây là các bước bạn cần thực hiện để hoán đổi coin:",
                     "items": {
                         "1": {
                             "title": "Tạo Hoán Đổi",
@@ -35,27 +36,27 @@
                 },
                 "best-rates": {
                     "title": "Tỷ Giá Tốt Nhất",
-                    "content": "Rabbit Swap có một thuật toán đặc biệt so sánh tỷ giá từ các nhà cung cấp thanh khoản khác nhau, và chọn ra tỷ giá tốt nhất để đảm bảo các giao dịch của bạn luôn nhận được giá trị lớn nhất."
+                    "content": "Rabbit Swap sử dụng một thuật toán đặc biệt để liên tục so sánh tỷ giá từ nhiều nhà cung cấp thanh khoản khác nhau, và chọn ra mức tốt nhất để đảm bảo giao dịch hoán đổi tiền mã hoá của bạn luôn được tối ưu. Hãy cho tôi biết nếu bạn tìm thấy ở nơi nào khác có tỷ giá tốt hơn."
                 },
                 "wide-limits": {
-                    "title": "Giới Hạn Tối Thiểu và Tối Đa",
-                    "content": "Có nhiều nhà cung cấp thanh khoản cho phép Rabbit Swap đưa ra nhiều mức giới hạn khác nhau. Bạn có thể hoán đổi coin với số lượng rất nhỏ cũng như số lượng gần như vô hạn."
+                    "title": "Không Giới Hạn",
+                    "content": "Với nhiều nhà cung cấp thanh khoản cho phép Rabbit Swap cung cấp đa dạng sự lựa chọn. Bạn có thể hoán đổi số lượng coin từ rất nhỏ cho đến số lượng cực kỳ lớn. Điều ấn tượng nhất là hệ thống giúp ngăn chặn tình trạng sụt giá khi hoán đổi số lượng lớn tài sản thanh khoản thấp. Rabbit Swap sẽ phân phối giao dịch của bạn qua các nguồn thanh khoản khác nhau để bạn luôn nhận được mức giá tốt nhất."
                 },
                 "features-grid": {
-                    "title": "Điều Gì Làm cho Rabbit Swap trở nên Khác Biệt?",
+                    "title": "Vậy Điều Gì Làm Rabbit Trở Nên Khác Biệt?",
                     "content": "Rabbit Swap được thiết kế để giúp quá trình hoán đổi crypto trở nên an toàn, nhanh chóng, tiết kiệm chi phí và dễ dàng như gửi một tin nhắn vậy.",
                     "items": {
                         "1": {
                             "title": "Không Cần Đăng Ký",
-                            "content": "Hoán đổi bất kỳ số lượng crypto nào với mức phí thấp nhất và tốc độ gần như ngay lập tức — không cần đăng ký. Có thể hoàn tất chỉ với vài cú nhấp chuột."
+                            "content": "Hoán đổi bất kỳ lượng crypto nào với mức phí thấp nhất và tốc độ gần như ngay lập tức - không cần đăng ký. Chỉ vài cú click chuột. Rabbit giúp bạn giao dịch đơn giản, nhanh chóng."
                         },
                         "2": {
-                            "title": "Hỗ Trợ Nhiều Loại Tài Sản",
-                            "content": "Lựa chọn từ hơn 3600 đồng coin và token để hoán đổi."
+                            "title": "Đa Dạng Các Loại Tài Sản Số",
+                            "content": "Bạn có thể chọn từ {{assetCount}} loại tiền điện tử khác nhau để hoán đổi. Đúng vậy, rất nhiều loại coin và sẽ còn được cập nhật thêm nữa. Thậm chí bạn có thể hoán đổi loại coin mà chẳng ai biết ngoài bạn và người tạo ra nó."
                         },
                         "3": {
                             "title": "Tôn Trọng Quyền Riêng Tư",
-                            "content": "Chỉ sử dụng thông tin ẩn danh để thực hiện giao dịch hoán đổi. Rabbit Swap sẽ không bao giờ yêu cầu thêm bất kỳ thông tin nào khác ngoại trừ địa chỉ ví để nhận coin của bạn."
+                            "content": "Chỉ sử dụng thông tin ẩn danh để thực hiện hoán đổi. Rabbit Swap không yêu cầu gì thêm ngoài địa chỉ nhận coin của bạn. Trong hầu hết các trường hợp, không yêu cầu KYC."
                         },
                         "4": {
                             "title": "Hỗ Trợ Chuyên Nghiệp",
@@ -64,22 +65,35 @@
                     }
                 },
                 "recent-swaps": {
-                    "title": "Giao Dịch Gần Đây Theo Thời Gian Thực"
+                    "title": "Các Giao Dịch Gần Đây Theo Thời Gian Thực",
+                    "content": "Mỗi ngày, có hàng trăm người hoán đổi coin trên Rabbit Swap."
+                },
+                "review-showcase": {
+                    "title": "Mọi Người Nói Gì Về Rabbit?",
+                    "content": "Đúng là Rabbit chưa nhận được nhiều đánh giá, có lẽ bởi vì Rabbit Swap mới được ra mắt chưa lâu, và dành phần lớn thời gian cho việc phát triển, chưa chú tâm lắm cho hoạt động marketing. Nhưng này, Rabbit rất tự hào vì tất cả đánh giá đều tích cực! Nếu muốn, bạn cũng có thể để lại đánh giá - Rabbit sẽ rất cảm kích vì điều đó."
+                },
+                "rabbit-stats": {
+                    "title": "Những Con Số Biết Nói",
+                    "content": "Hy vọng Rabbit sẽ cải thiện được các con số này gấp 10 lần trước khi kết thúc năm 2025. Hãy cùng chờ xem nhé!"
+                },
+                "articles": {
+                    "title": "Những Nhận Định Của Rabbit Và Tin Tức Mới Nhất Về Crypto",
+                    "content": "Rabbit làm việc với crypto mỗi ngày và có rất nhiều thông tin hữu ích, thú vị muốn chia sẻ với bạn."
                 }
             },
             "PublicSwapAssetLanding": {
                 "meta": {
-                    "title": "Hoán Đổi {{tickerWithProtocol}} Ngay Lập Tức với Mức Phí Thấp Nhất — Rabbit Swap",
-                    "keywords": "hoán đổi {{tickerWithProtocol}}, chuyển đổi {{tickerWithProtocol}}, đổi {{assetName}}, hoán đổi {{assetName}}, giao dịch {{tickerPrintable}}, đổi crypto, chuyển đổi crypto, đổi tiền mã hóa, chuyển đổi tiền mã hóa, đổi crypto với mức phí thấp nhất, trao đổi coin, đổi token, hoán đổi nhanh, đổi coin, chuyển đổi với mức phí thấp, hoán đổi tài sản kỹ thuật số, đổi coin nhanh",
-                    "description": "Hoán đổi {{tickerAndBracedProtocol}} ngay lập tức với Rabbit Swap — Chuyển đổi crypto với tỷ giá tốt nhất. Không cần đăng ký — hoán đổi {{assetName}} chỉ với một cú nhấp chuột!"
+                    "title": "Sàn {{tickerWithProtocol}}: Hoán đổi {{nameAndBracedProtocol}} Ngay Lập Tức với Tỷ giá Tốt Nhất",
+                    "keywords": "giao dịch {{tickerWithProtocol}}, hoán đổi {{tickerWithProtocol}}, giao dịch {{nameAndProtocol}}, hoán đổi {{nameAndProtocol}}, chuyển đổi {{tickerWithProtocol}}, chuyển đổi {{nameAndProtocol}}, giao dịch {{tickerWithProtocol}}, hoán đổi crypto, sàn giao dịch tiền điện tử, hoán đổi tiền mã hoá, hoán đổi tiền điện tử, hoán đổi coin, hoán đổi token, hoán đổi tài sản số, giá {{tickerWithProtocol}}, dữ liệu thị trường {{tickerWithProtocol}}, giá {{nameAndProtocol}}, dữ liệu thị trường {{nameAndProtocol}}, không yêu cầu kyc, giao dịch ẩn danh {{tickerWithProtocol}}, hoán đổi ẩn danh {{tickerWithProtocol}}, {{nameAndProtocol}} là gì",
+                    "description": "Hoán đổi {{tickerWithProtocol}} ({{assetName}}) lấy bất kỳ loại nào trong số {{assetCount}} loại tiền điện tử với tỷ giá tốt nhất. Không cần đăng ký, giao dịch không giới hạn, cực kỳ đơn giản - hoán đổi crypto nhanh chóng và an toàn."
                 },
                 "hero": {
-                    "title": "{{tickerPrintable}} Hoán Đổi Dễ Dàng",
-                    "content": "Hoán Đổi {{nameAndBracedProtocol}} với tỷ giá tốt nhất. Ngay lập tức. Không cần đăng ký. Hãy tiếp tục, chỉ cần chọn đồng coin mà bạn muốn đổi {{assetName}} thành, và nhập số lượng!"
+                    "title": "Hoán Đổi {{tickerWithProtocol}} ({{assetName}}) với Tỷ Giá Tốt Nhất",
+                    "content": "Xin chào, tôi là Rabbit 🐰, tôi có thể hoán đổi ngay {{nameAndProtocol}} lấy bất kỳ loại nào trong số {{assetCount}} loại tài sản số. Bắt đầu hoán đổi với một cú click chuột. Hỗ trợ 24/7. Không cần đăng ký, hoán đổi không giới hạn, cực kỳ nhanh chóng."
                 },
                 "how-to-swap": {
-                    "title": "Cách hoán đổi {{tickerPrintable}}?",
-                    "content": "Rabbit Swap được thiết kế để giúp quá trình hoán đổi {{tickerPrintable}} trở nên an toàn, nhanh chóng, tiết kiệm chi phí và dễ dàng như gửi một tin nhắn vậy.",
+                    "title": "Làm Thế Nào Để Hoán Đổi {{tickerWithProtocol}} Trên Rabbit?",
+                    "content": "Sử dụng Rabbit Swap rất dễ dàng. Dưới đây là các bước bạn cần để hoán đổi {{nameAndProtocol}}.",
                     "items": {
                         "1": {
                             "title": "Tạo Hoán Đổi",
@@ -87,7 +101,7 @@
                         },
                         "2": {
                             "title": "Cung cấp Địa chỉ của Bạn",
-                            "content": "Nhập địa chỉ ví nơi bạn muốn nhận coin sau khi đổi."
+                            "content": "Nhập địa chỉ nơi bạn muốn nhận coin sau hoán đổi."
                         },
                         "3": {
                             "title": "Gửi Coin",
@@ -95,57 +109,80 @@
                         },
                         "4": {
                             "title": "Nhận Coin của Bạn",
-                            "content": "Nhận coin đã đổi ngay sau đó!"
+                            "content": "Nhận coin đã hoán đổi trong giây lát!"
                         }
                     }
                 },
                 "best-rates": {
-                    "title": "Tỷ Giá Tốt Nhất",
-                    "content": "Đảm bảo rằng bạn nhận được tỷ giá tốt nhất khi đổi {{nameAndBracedProtocol}} của mình. Rabbit Swap so sánh tỷ giá từ các nhà cung cấp thanh khoản khác nhau theo thời gian thực và chọn ra tỷ giá tốt nhất mỗi khi bạn thực hiện một giao dịch."
+                    "title": "Hoán Đổi {{tickerWithProtocol}} Mà Không Sợ Bị Sụt Giảm Giá Trị Tài Sản",
+                    "content": "Với Rabbit Swap, bạn luôn nhận được nhiều hơn cho {{nameAndBracedProtocol}} của mình. Thuật toán không ngừng phân tích giá {{tickerWithProtocol}} từ nhiều nguồn thanh khoản khác nhau, tùy thuộc vào số lượng coin bạn hoán đổi và cặp coin bạn chọn, để từ đó tạo ra lộ trình hoán đổi có lợi nhất. Bạn sẽ nhận được mức giá tốt nhất cho {{tickerWithProtocol}} trong mỗi lần hoàn đổi. Bạn không cần lo lắng về cách hoán đổi {{tickerWithProtocol}} sang một loại coin khác không có cặp trực tiếp trên các sàn lớn. Với Rabbit Swap, bạn có thể hoán đổi {{nameAndBracedProtocol}} trực tiếp sang bất kỳ loại nào trong số {{assetCount}} loại coin khác nhau."
                 },
                 "wide-limits": {
-                    "title": "Giới Hạn Tối Thiểu và Tối Đa",
-                    "content": "Vì có một loạt các nhà cung cấp thanh khoản đa dạng, Rabbit Swap về cơ bản không giới hạn số lượng tiền có thể đổi. Dù bạn muốn đổi vài đô la hay hàng tỷ đô la, Rabbit Swap đều có thể xử lý cho bạn."
+                    "title": "Hoán Đổi {{tickerWithProtocol}} Không Giới Hạn",
+                    "content": "Rabbit Swap cho phép bạn hoán đổi {{tickerWithProtocol}} không giới hạn. Rabbit được kết nối với mạng lưới rộng lớn các nhà cung cấp thanh khoản, giúp ngăn ngừa tình trạng sụt giá, ngay cả với các giao dịch tài sản lớn có thanh khoản thấp. Sử dụng thuật toán tiên tiến, Rabbit sẽ đảm bảo rằng, việc hoán đổi {{nameAndProtocol}} của bạn được phân phối trơn tru qua các nguồn thanh khoản, giúp bạn luôn nhận được mức giá tốt nhất, bất kể số lượng coin bạn hoán đổi. Và nếu bạn chỉ muốn hoán đổi một lượng nhỏ {{tickerWithProtocol}}, cũng không vấn đề gì - hoán đổi coin với Rabbit Swap thật dễ dàng."
                 },
                 "features-grid": {
                     "title": "Tại sao nên đổi {{tickerWithProtocol}} trên Rabbit Swap?",
-                    "content": "Rabbit Swap được thiết kế để giúp quá trình hoán đổi {{tickerPrintable}} trở nên an toàn, nhanh chóng, tiết kiệm chi phí và dễ dàng như gửi một tin nhắn vậy.",
+                    "content": "Rabbit Swap được thiết kế để làm cho việc hoán đổi {{tickerWithProtocol}} trở nên tiết kiệm, an toàn, nhanh chóng và dễ như gửi tin nhắn vậy.",
                     "items": {
                         "1": {
-                            "title": "Không Cần Đăng Ký",
-                            "content": "Đổi bất kỳ số lượng {{nameAndBracedProtocol}} nào với mức phí thấp nhất và tốc độ gần như ngay lập tức — không cần đăng ký. Có thể hoàn tất chỉ với vài cú nhấp chuột."
+                            "title": "Chỉ Hoán Đổi Thôi",
+                            "content": "Bạn chỉ muốn hoán đổi {{tickerWithProtocol}} của mình thôi - không cần đăng ký, không cần xác minh, không selfie, và không có các chương trình khách hàng trung thành rườm rà. Bạn chỉ cần chọn một cặp coin cho {{nameAndProtocol}} và hoán đổi. Rabbit hiểu điều đó. Ở đây, Rabbit chỉ đơn giản là giúp bạn hoán đổi thôi."
                         },
                         "2": {
-                            "title": "Hỗ trợ nhiều Loại Tài Sản",
-                            "content": "Ngoài {{nameAndBracedProtocol}}, bạn có thể chọn từ hơn 3600 đồng coin và token để hoán đổi."
+                            "title": "{{assetCount}} Tùy Chọn Hoán Đổi Cho {{nameAndProtocol}}",
+                            "content": "Bạn có thể hoán đổi {{nameAndProtocol}} của mình lấy bất kỳ trong số {{assetCount}} loại tiền điện tử được hỗ trợ. Hàng ngàn cặp coin trực tiếp - một tính năng mà bạn chắc chắn sẽ không tìm thấy ở các sàn giao dịch truyền thống."
                         },
                         "3": {
-                            "title": "Tôn Trọng Quyền Riêng Tư",
-                            "content": "Quá trình hoán đổi chỉ dựa trên thông tin ẩn danh. Rabbit Swap sẽ không bao giờ yêu cầu thêm bất kỳ thông tin nào khác ngoại trừ địa chỉ ví để nhận coin của bạn."
+                            "title": "Hoán Đổi {{tickerWithProtocol}} Ẩn Danh",
+                            "content": "Hoán đổi {{tickerWithProtocol}} sang bất kỳ loại tài sản số khác chỉ dựa trên thông tin ẩn danh. Rabbit Swap không yêu cầu gì thêm ngoài địa chỉ nhận coin của bạn. Phần lớn giao dịch không yêu cầu xác thực KYC."
                         },
                         "4": {
                             "title": "Hỗ Trợ Chuyên Nghiệp",
-                            "content": "Mặc dù tất cả các giao dịch hoán đổi đều được thực hiện hoàn toàn tự động, nhưng đôi khi bạn cần yêu cầu thông tin hỗ trợ từ một ai đó. Chat với nhân viên hỗ trợ của chúng tôi bất cứ lúc nào, 24/7."
+                            "content": "Mặc dù việc hoán đổi {{tickerWithProtocol}} diễn ra hoàn toàn tự động, và chỉ đôi khi bạn mới cần nói chuyện với nhân viên hỗ trợ. Hãy trò chuyện với Rabbit bất cứ lúc nào, dù ngày hay đêm, thậm chí là trò chuyện chỉ để giải khuây."
+                        },
+                        "5": {
+                            "title": "Mang Lại Lợi Nhuận",
+                            "content": "Rabbit Swap đảm bảo bạn nhận được giá trị trao đổi tốt nhất cho {{tickerWithProtocol}}, tự động tìm ra lộ trình có lợi nhất qua nhiều nguồn thanh khoản. Đơn giản, mượt mà và luôn được tối ưu."
+                        },
+                        "6": {
+                            "title": "Vượt Qua Mọi Giới Hạn",
+                            "content": "Hoán đổi không giới hạn bất kỳ số lượng {{tickerWithProtocol}} nào. Với mạng lưới thanh khoản rộng và thuật toán tiên tiến, Rabbit đảm bảo mang lại trải nghiệm hoán đổi suôn sẻ và tối ưu, dù đó là số tiền lớn hay chỉ vài đô la."
                         }
                     }
                 },
-                "recent-swaps": {
-                    "title": "Giao Dịch Gần Đây Theo Thời Gian Thực"
+                "available-pairs-table": {
+                    "title": "Danh sách tất cả các đồng coin bạn có thể hoán đổi {{tickerWithProtocol}}",
+                    "show-more-button-title": "Xem thêm cặp {{tickerWithProtocol}}"
+                },
+                "asset-description": {
+                    "title": "{{assetName}} là gì?"
+                },
+                "asset-market-data": {
+                    "title": "Dữ Liệu Thị Trường {{nameAndBracedTicker}}",
+                    "subtitle": "Dưới đây là dữ liệu thị trường quan trọng cho {{tickerAndBracedProtocol}}, cập nhật mỗi 10 phút."
+                },
+                "articles": {
+                    "title": "Tin Tức Về {{tickerPrintable}}",
+                    "content": "Một số góc nhìn của Rabbit về {{nameAndBracedProtocol}}, cùng với những lựa chọn thú vị từ các nguồn tin uy tín khác trên internet."
+                },
+                "random-coins": {
+                    "title": "Đa Dạng Các Đồng Tiền Điện Tử Khác Để Hoán Đổi"
                 }
             },
             "PublicSwapPairLanding": {
                 "meta": {
-                    "title": "Hoán Đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}} Ngay Lập Tức với Mức Phí Thấp Nhất — Rabbit Swap",
-                    "keywords": "đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}}, hoán đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}}, chuyển đổi {{fromAssetName}} sang {{toAssetName}}, trao đổi {{fromAssetName}} sang {{toAssetName}}, giao dịch {{fromTickerPrintable}}/{{toTickerPrintable}}, đổi {{fromTickerPrintable}} sang {{toTickerPrintable}}, hoán đổi {{fromTickerPrintable}} sang {{toTickerPrintable}}, đổi crypto, hoán đổi crypto, đổi tiền mã hóa, hoán đổi tiền mã hóa, đổi crypto với mức phí thấp nhất, trao đổi coin, đổi token, hoán đổi nhanh, đổi coin, chuyển đổi với mức phí thấp, đổi tài sản kỹ thuật số, đổi coin nhanh",
-                    "description": "Đổi {{fromTickerAndBracedProtocol}} sang {{toTickerAndBracedProtocol}} ngay lập tức với Rabbit Swap — Hoán đổi tiền điện tử với tỷ giá tốt nhất. Không cần đăng ký — đổi {{fromAssetName}} sang {{toAssetName}} chỉ với một cú nhấp chuột!"
+                    "title": "Hoán Đổi {{fromTickerWithProtocol}} Sang {{toTickerWithProtocol}} Ngay Lập Tức Với Tỷ Giá Tốt Nhất",
+                    "keywords": "đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}}, hoán đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}}, đổi {{fromNameAndProtocol}} sang {{toNameAndProtocol}}, hoán đổi {{fromNameAndProtocol}} sang {{toNameAndProtocol}}, chuyển đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}}, chuyển đổi {{fromNameAndProtocol}} sang {{toNameAndProtocol}}, giao dịch {{fromTickerWithProtocol}}/{{toTickerWithProtocol}}, trao đổi crypto, trao đổi tiền điện tử, hoán đổi tiền mã hoá, hoán đổi tiền điện tử, trao đổi coin, hoán đổi token, hoán đổi tài sản số, giá {{fromTickerWithProtocol}}, giá {{toTickerWithProtocol}}, dữ liệu thị trường {{fromTickerWithProtocol}}, dữ liệu thị trường {{toTickerWithProtocol}}, giá {{fromNameAndProtocol}}, giá {{toNameAndProtocol}}, dữ liệu thị trường {{fromNameAndProtocol}}, dữ liệu thị trường {{toNameAndProtocol}}, không yêu cầu kyc, đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}} ẩn danh, hoán đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}} ẩn danh",
+                    "description": "Hoán đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}} trên Rabbit Swap với tỷ giá tốt nhất. Không cần đăng ký, hoán đổi không giới hạn, cực kỳ dễ dàng - Hoán đổi crypto nhanh chóng và an toàn."
                 },
                 "hero": {
-                    "title": "{{fromTickerPrintable}} sang {{toTickerPrintable}} Hoán Đổi Dễ Dàng",
-                    "content": "Đổi {{fromNameAndBracedProtocol}} sang {{toNameAndBracedProtocol}} với tỷ giá tốt nhất. Ngay lập tức. Không cần đăng ký. Hãy tiếp tục, chỉ cần nhập số lượng!"
+                    "title": "Hoán Đổi {{fromTickerWithProtocol}} Sang {{toTickerWithProtocol}} Dễ Dàng",
+                    "content": "Xin chào, tôi là Rabbit 🐰, tôi có thể hoán đổ {{fromNameAndProtocol}} sang {{toNameAndProtocol}} ngay lập tức với tỷ giá tốt nhất. Bắt đầu chỉ với một cú click chuột. Hỗ trợ 24/7. Không cần đăng ký, hoán đổi không giới hạn, cực kỳ dễ dàng."
                 },
                 "how-to-swap": {
-                    "title": "Cách hoán đổi {{fromTickerPrintable}} sang {{toTickerPrintable}}?",
-                    "content": "Sử dụng Rabbit Swap thật dễ dàng và đơn giản; dưới đây là các bước bạn cần thực hiện để đổi {{fromAssetName}} của mình sang {{toAssetName}}:",
+                    "title": "Làm thế nào để hoán đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}}?",
+                    "content": "Sử dụng Rabbit Swap rất dễ dàng. Dưới đây là các bước để hoán đổi {{fromNameAndProtocol}} sang {{toNameAndProtocol}}.",
                     "items": {
                         "1": {
                             "title": "Nhập Số Lượng",
@@ -166,37 +203,58 @@
                     }
                 },
                 "best-rates": {
-                    "title": "Tỷ Giá Tốt Nhất",
-                    "content": "Đảm bảo rằng bạn nhận được tỷ giá tốt nhất khi hoán đổi {{fromNameAndBracedProtocol}} sang {{toNameAndBracedProtocol}}. Rabbit Swap so sánh tỷ giá từ các nhà cung cấp thanh khoản khác nhau theo thời gian thực và chọn ra tỷ giá tốt nhất mỗi khi bạn thực hiện một giao dịch."
+                    "title": "Hoán Đổi {{fromNameAndProtocol}} Sang {{toNameAndProtocol}} Với Tỷ Giá Tốt Nhất",
+                    "content": "Đảm bảo bạn nhận được tỷ giá tốt nhất khi hoán đổi {{fromNameAndProtocol}} sang {{toNameAndProtocol}}. Rabbit Swap sử dụng một thuật toán đặc biệt để so sánh linh hoạt tỷ giá từ nhiều nhà cung cấp thanh khoản, và chọn ra mức thấp nhất theo số lượng bạn hoán đổi để đảm bảo mang lại giao dịch có lợi nhất. Hãy cho tôi biết nếu bạn tìm được nơi nào khác có tỷ giá hoán đổi {{fromTickerWithProtocol}}/{{toTickerWithProtocol}} tốt hơn."
                 },
                 "wide-limits": {
-                    "title": "Giới Hạn Tối Thiểu và Tối Đa",
-                    "content": "Vì có một loạt các nhà cung cấp thanh khoản đa dạng, Rabbit Swap về cơ bản không giới hạn về số lượng tiền có thể đổi. Dù bạn muốn đổi vài đô la hay hàng tỷ đô la, Rabbit Swap đều có thể xử lý cho bạn."
+                    "title": "Hoán Đổi {{fromTickerWithProtocol}} và {{toTickerWithProtocol}} không giới hạn",
+                    "content": "Với khả năng truy cập nhiều nhà cung cấp thanh khoản khác nhau, Rabbit Swap mang đến đa dạng giới hạn giao dịch. Bạn có thể hoán đổi từ số lượng rất nhỏ của {{fromTickerWithProtocol}} và {{toTickerWithProtocol}} cho đến các giao dịch có giá trị gần như vô hạn. Phương pháp này cũng giúp ngăn chặn hiện tượng sụt giá khi hoán đổi số lượng lớn tài sản có thanh khoản thấp. Tôi sẽ đảm bảo việc hoán đổi {{fromNameAndProtocol}} sang {{toNameAndProtocol}} của bạn được phân phối qua nhiều nguồn thanh khoản khác nhau, để bạn luôn nhận được mức giá tốt nhất."
                 },
                 "features-grid": {
-                    "title": "Tại sao nên đổi {{fromTickerPrintable}} sang {{toTickerPrintable}} trên Rabbit Swap?",
-                    "content": "Rabbit Swap được thiết kế để giúp quá trình hoán đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}} trở nên an toàn, nhanh chóng, tiết kiệm chi phí và dễ dàng như gửi một tin nhắn vậy.",
+                    "title": "Tại Sao Nên Hoán Đổi {{fromTickerWithProtocol}} Sang {{toTickerWithProtocol}} Trên Rabbit Swap?",
+                    "content": "Rabbit Swap được thiết kế để giúp cho quá trình hoán đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}} trở nên tiết kiệm, an toàn, nhanh chóng và dễ dàng như gửi tin nhắn vậy.",
                     "items": {
                         "1": {
-                            "title": "Không Cần Đăng Ký",
-                            "content": "Hoán đổi bất kỳ số lượng {{fromNameAndBracedProtocol}} và {{toNameAndBracedProtocol}} nào với mức phí thấp nhất và tốc độ gần như ngay lập tức — không cần đăng ký. Có thể hoàn tất chỉ với vài cú nhấp chuột."
+                            "title": "Chỉ Hoán Đổi Thôi",
+                            "content": "Bạn chỉ muốn đổi {{fromNameAndProtocol}} sang {{toNameAndProtocol}} thôi - không cần đăng ký, không xác minh, không selfie, và không chương trình khách hàng trung thành rườm rà. Bạn chỉ muốn hoán đổi crypto. Rabbit hiểu điều đó. Đó chính xác là mục đích của Rabbit. Không phức tạp, chỉ thực hiện nhiệm vụ hoán đổi."
                         },
                         "2": {
-                            "title": "Hỗ Trợ Nhiều Loại Tài Sản",
-                            "content": "Ngoài {{fromNameAndBracedProtocol}} và {{toNameAndBracedProtocol}}, bạn có thể chọn từ hơn 3600 đồng coin và token để hoán đổi."
+                            "title": "Không Chỉ {{fromNameAndProtocol}} và {{toNameAndProtocol}}",
+                            "content": "Ngoài {{fromNameAndProtocol}} và {{toNameAndProtocol}}, bạn có thể chọn bất kỳ trong số {{assetCount}} loại tiền điện tử để hoán đổi. Điều này có nghĩa là bạn có thể truy cập hàng triệu cặp giao dịch trên Rabbit Swap - điều mà bạn không thể tìm thấy ở các sàn giao dịch truyền thống."
                         },
                         "3": {
-                            "title": "Tôn Trọng Quyền Riêng Tư",
-                            "content": "Quá trình giao dịch hoán đổi chỉ dựa trên thông tin ẩn danh. Rabbit Swap sẽ không bao giờ yêu cầu thêm bất kỳ thông tin nào khác ngoại trừ địa chỉ {{toNameAndBracedProtocol}} để nhận coin của bạn."
+                            "title": "Hoán Đổi {{fromNameAndProtocol}} Sang {{toNameAndProtocol}} Ẩn Danh",
+                            "content": "Quá trình hoán đổi chỉ dựa trên thông tin ẩn danh. Rabbit Swap không yêu cầu thêm bất kỳ thông tin cá nhân nào khác ngoài địa chỉ {{toNameAndProtocol}} của bạn để nhận coin. Đa số giao dịch không yêu cầu xác minh KYC."
                         },
                         "4": {
                             "title": "Hỗ Trợ Chuyên Nghiệp",
-                            "content": "Mặc dù tất cả các giao dịch hoán đổi đều được thực hiện hoàn toàn tự động, nhưng đôi khi bạn cần yêu cầu thông tin hỗ trợ từ một ai đó. Chat với nhân viên hỗ trợ của chúng tôi bất cứ lúc nào, 24/7."
+                            "content": "Mặc dù chuyển đổi từ {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}} hoàn toàn tự động, chỉ đôi khi bạn mới cần nói chuyện với một người thật. Trò chuyện với Rabbit bất kỳ lúc nào, dù ngày hay đêm, thậm chí chỉ trò chuyện để giải khuây."
+                        },
+                        "5": {
+                            "title": "Mang Lại Lợi Nhuận",
+                            "content": "Rabbit Swap đảm bảo bạn nhận được tỷ giá trao đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}} tốt nhất bằng cách tự động tìm ra lộ trình có lợi nhất từ nhiều nguồn thanh khoản đa dạng. Đơn giản, nhanh chóng và luôn tối ưu."
+                        },
+                        "6": {
+                            "title": "Vượt Qua Mọi Giới Hạn",
+                            "content": "Hoán đổi không giới hạn bất kỳ số lượng {{fromTickerWithProtocol}} nào sang {{toTickerWithProtocol}}. Với mạng lưới thanh khoản rộng lớn và thuật toán tiên tiến, Rabbit đảm bảo hoán đổi nhanh chóng, tối ưu, dù đó là số tiền lớn hay chỉ vài đô la."
                         }
                     }
                 },
-                "recent-swaps": {
-                    "title": "Giao Dịch Gần Đây Theo Thời Gian Thực"
+                "available-pairs-table": {
+                    "title-from": "Dưới đây là một số coin khác bạn có thể hoán đổi từ {{coinTicker}}",
+                    "title-to": "Và các đồng coin khác bạn có thể đổi {{coinTicker}} để lấy",
+                    "show-more-button-title": "Xem thêm cặp {{coinTicker}}"
+                },
+                "asset-market-data": {
+                    "title": "Dữ Liệu Thị Trường {{nameAndBracedTicker}}",
+                    "subtitle": "Dưới đây là dữ liệu thị trường quan trọng cho {{tickerAndBracedProtocol}}, cập nhật mỗi 10 phút."
+                },
+                "articles": {
+                    "title": "Tin Tức Về {{fromTickerPrintable}}/{{toTickerPrintable}}",
+                    "content": "Một số hiểu biết của Rabbit về {{fromNameAndBracedProtocol}} và {{toNameAndBracedProtocol}}, cùng với các lựa chọn thú vị từ những nguồn tin uy tín khác trên internet."
+                },
+                "random-coins": {
+                    "title": "Đa Dạng Các Đồng Tiền Điện Tử Khác Để Hoán Đổi"
                 }
             },
             "UnexpectedErrorPage": {
@@ -207,7 +265,7 @@
                 "sign-in-button-content": "Trang chủ"
             },
             "PrivacyPolicy": {
-                "title": "CHÍNH SÁCH BẢO MẬT SWAP.RABBIT.IO",
+                "title": "CHÍNH SÁCH BẢO MẬT RABBIT.IO",
                 "meta": {
                     "title": "Chính Sách Bảo Mật – Rabbit Swap",
                     "description": "Tham khảo Chính Sách Bảo Mật của Rabbit Swap để hiểu rõ cách chúng tôi xử lý thông tin của bạn trên nền tảng giao dịch tiền mã hóa của chúng tôi. Chúng tôi ưu tiên sự minh bạch để đảm bảo quyền riêng tư của bạn được bảo vệ trong suốt quá trình sử dụng dịch vụ.",
@@ -215,12 +273,46 @@
                 }
             },
             "TermsOfUse": {
-                "title": "ĐIỀU KHOẢN SỬ DỤNG SWAP.RABBIT.IO",
+                "title": "ĐIỀU KHOẢN SỬ DỤNG RABBIT.IO",
                 "meta": {
                     "title": "Điều Khoản Sử Dụng – Rabbit Swap",
                     "description": "Tham khảo Điều khoản Sử dụng của Rabbit Swap để nắm rõ các quy định khi sử dụng nền tảng giao dịch tiền điện tử của chúng tôi. Hiểu rõ quyền và trách nhiệm của bạn sẽ giúp bạn có trải nghiệm giao dịch suôn sẻ.",
                     "keywords": "điều khoản sử dụng, hoán đổi crypto, đổi crypto, đổi tiền mã hóa, hoán đổi tiền mã hóa"
                 }
+            },
+            "ExchangePairs": {
+                "title": "Các Đồng Coin Có Thể Hoán Đổi Với {{assetName}}",
+                "subtitle": "Ngay lúc này, bạn có thể hoán đổi {{assetName}} sang bất kỳ trong số {{assetCount}} loại coin được liệt kê dưới đây.",
+                "link-title": "Hoán đổi {{assetNameFrom}} sang {{assetNameTo}}",
+                "meta": {
+                    "title": "Hoán đổi {{assetName}} sang Các Đồng Tiền Điện Tử Khác Trên Rabbit Swap",
+                    "keywords": "đổi {{tickerWithProtocol}} sang crypto khác, đổi {{nameWithProtocol}} sang crypto khác, hoán đổi {{tickerWithProtocol}} sang crypto khác, hoán đổi {{nameWithProtocol}} sang crypto khác, đổi {{tickerWithProtocol}} sang crypto nào, cặp {{tickerWithProtocol}}, mã {{tickerWithProtocol}}, coin để hoán đổi với {{tickerWithProtocol}}",
+                    "description": "Dưới đây là danh sách đầy đủ {{assetCount}} tài sản bạn có thể hoán đổi {{assetName}} ngay trên Rabbit Swap."
+                }
+            },
+            "AllCurrenciesList": {
+                "title": "Danh Sách Đầy Đủ Các Tài Sản Có Thể Hoán Đổi",
+                "subtitle": "Hiện đang có {{assetCount}} loại tiền điện tử bạn có thể hoán đổi trên Rabbit Swap. Danh sách các tài sản luôn được cập nhật, các đồng coin có thể được thêm vào hoặc xóa đi hàng ngày tùy thuộc vào nhiều yếu tố.",
+                "asset-link-title": "{{nameAndProtocol}} ({{tickerPretty}})",
+                "pairs-link-title": "Hoán đổi {{nameAndProtocol}} ({{tickerPretty}}) sang crypto khác",
+                "meta": {
+                    "title": "Danh Sách Đầy đủ Các Loại Tài Sản Có Thể Hoán Đổi Trên Rabbit",
+                    "keywords": "danh sách đầy đủ các tài sản crypto, danh sách tiền điện tử, coin khả dụng để hoán đổi, tiền điện tử có thể hoán đổi, tài sản để hoán đổi, coin được hỗ trợ, token khả dụng, danh sách tài sản số, coin trên rabbit swap, danh sách đầy đủ crypto để hoán đổi, tất cả các loại tiền điện tử để hoán đổi, danh sách tài sản có thể giao dịch, danh sách hoán đổi crypto, tài sản số để hoán đổi",
+                    "description": "Rabbit Swap'ta takas edilebilen tüm coinlerin tam listesine göz atın. {{assetCount}}'den fazla kripto para arasından seçim yapın - neredeyse istediğiniz her coin burada."
+                }
+            },
+            "Blog": {
+                "title": "Blog Về Crypto",
+                "subtitle": "Dành cho những người mà cuộc sống đã thay đổi kể từ ngày Satoshi Nakamoto công bố mã Bitcoin đầu tiên. Tại đây, Rabbit sẽ chia sẻ nhận định về xu hướng tiền điện tử, tin tức mới nhất và lời khuyên dành cho các tín đồ tiền điện tử.",
+                "meta": {
+                    "title": "Tin Tức, Nhận Định Và Lời Khuyên Mới Nhất Cho Những Người Yêu Crypto",
+                    "keywords": "tin tức crypto, blog tiền mã hoá, nhận định tiền điện tử, mẹo giao dịch tiền điện tử, tin tức tiền điện tử, blog tiền điện tử, tin tức bitcoin, nhận định tiền điện tử, mẹo giao dịch tiền mã hoá, tin tức blockchain, phân tích thị trường tiền điện tử, dex, nft, xu hướng crypto, xu hướng tiền điện tử, quy định tiền điện tử, xu hướng nft, lời khuyên thuế crypto, công nghệ web3, tương lai tiền điện tử, mẹo bảo mật crypto, cách lưu trữ crypto an toàn, đổi mới blockchain mới nhất, staking tiền điện tử, thu nhập thụ động với crypto, crypto cho người mới bắt đầu, xu hướng thị trường crypto, sàn giao dịch phi tập trung",
+                    "description": "Phân tích, cập nhật thị trường và lời khuyên từ chuyên gia về tiền điện tử. Nhận định về tin tức tiền điện tử hàng ngày từ Rabbit."
+                }
+            },
+            "Article": {
+                "title-addition": "Blog của Rabbit",
+                "source-link-en": "Được dịch từ tiếng Anh"
             }
         },
         "organisms": {
@@ -233,12 +325,14 @@
             "LandingFooter": {
                 "single-asset": {
                     "title": "Hoán Đổi",
-                    "item-content": "Hoán Đổi {{ticker}}"
+                    "item-content": "Hoán Đổi {{ticker}}",
+                    "view-more": "Thêm tiền điện tử"
                 },
                 "pair": {
                     "title": "Hoán Đổi Cặp Coin",
                     "item-content": "{{tickerFrom}} sang {{tickerTo}}"
-                }
+                },
+                "support-message": "Dịch vụ trao đổi được tự động hoàn toàn và hoạt động suốt ngày đêm. Trò chuyện trực tuyến với bộ phận hỗ trợ có sẵn 24/7 (thời gian phản hồi: 5 phút). Bạn cũng có thể liên hệ với chúng tôi tại support@rabbit.io (thời gian phản hồi: 48 giờ)."
             },
             "AssetDropdown": {
                 "field-placeholder": "Tìm kiếm..",
@@ -253,6 +347,11 @@
                     "from": "Từ",
                     "to": "Sang",
                     "finished": "Hoàn thành"
+                },
+                "time-ago": {
+                    "seconds": "{{timeAmount}} giây trước",
+                    "minutes": "{{timeAmount}} phút trước",
+                    "hours": "{{timeAmount}} giờ trước"
                 }
             },
             "SwapForm": {
@@ -271,6 +370,7 @@
                     "privacy-policy": "Chính Sách Bảo Mật của Rabbit Swap"
                 },
                 "information-block": {
+                    "enter-amount": "Nhập số tiền để đổi",
                     "minimum-amount": "Số lượng tối thiểu: ",
                     "maximum-amount": "Số lượng tối đa: ",
                     "transaction-fee": "Phí mạng: ",
@@ -306,145 +406,226 @@
                     "step-titles": {
                         "awaiting": "Đang chờ thanh toán · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
                         "confirming": "Đang xác nhận thanh toán · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
+                        "verifying": "Xác minh danh tính · Hoán đổi {{amountFrom}} thành {{amountTo}} - Hoán đổi thỏ",
                         "exchanging": "Đang hoán đổi tiền của bạn · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
                         "completed": "Hoán đổi thành công! · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
                         "refunded": "Hoàn tiền của bạn · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
                         "expired": "Đã hết hạn · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
                         "failed": "Hoán đổi thất bại · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
-                        "cancellation": "Bạn có chắc không? · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap",
                         "error": "Đã xảy ra sự cố · Hoán đổi {{amountFrom}} sang {{amountTo}} - Rabbit Swap"
                     },
                     "title": "Đang xử lý hoán đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}} - Rabbit Swap",
                     "description": "Vui lòng nhập các thông tin cần thiết để đổi {{fromTickerWithProtocol}} sang {{toTickerWithProtocol}}. Rabbit Swap so sánh tỷ giá từ các nhà cung cấp thanh khoản khác nhau để đảm bảo tỷ giá tốt nhất cho giao dịch của bạn.",
                     "keywords": "hoán đổi {{fromTickerWithProtocol}} thành {{toTickerWithProtocol}}, trao đổi {{fromTickerWithProtocol}} thành {{toTickerWithProtocol}}, hoán đổi {{fromAssetName}} thành {{toAssetName}}, trao đổi {{fromAssetName}} thành {{toAssetName}}, giao dịch {{fromTickerPrintable}}/{{toTickerPrintable}}, hoán đổi {{fromTickerPrintable}} thành {{toTickerPrintable}}, trao đổi {{fromTickerPrintable}} thành {{toTickerPrintable}}, hoán đổi tiền điện tử, sàn giao dịch tiền điện tử, hoán đổi tiền mã hóa, trao đổi tiền mã hóa"
                 },
-                "support-welcome-message": "Chat với chúng tôi",
-                "loader-title-details": "Đang tải thông tin hoán đổi...",
-                "common": {
-                    "rate": "Tỷ giá"
+                "loader-title": "Đang tải thông tin giao dịch hoán đổi...",
+                "loader-error": "Hiện tại chúng tôi không thể tải thông tin giao dịch hoán đổi. Đây có thể là sự cố tạm thời - vui lòng thử tải lại trang sau ít phút. Nếu vấn đề vẫn tiếp diễn, vui lòng liên hệ bộ phận hỗ trợ qua trò chuyện trực tuyến để được giúp đỡ.",
+                "update-error": "Hiện tại chúng tôi không thể cập nhật thông tin giao dịch hoán đổi. Đây có thể là sự cố tạm thời - vui lòng thử tải lại trang sau ít phút. Nếu vấn đề vẫn tiếp diễn, vui lòng liên hệ bộ phận hỗ trợ qua trò chuyện trực tuyến để được giúp đỡ.",
+                "swap-id": {
+                    "title": "ID Giao Dịch Hoán Đổi",
+                    "copied-tooltip": "Đã sao chép ID giao dịch hoán đổi!"
                 },
-                "cancel-swap-confirmation-step": {
-                    "title": "Hủy hoán đổi?",
-                    "subtitle": "Đóng cửa sổ này sẽ dẫn đến việc tính lại tỷ giá hiện tại, điều này có thể dẫn đến một giao dịch tốt hơn hoặc xấu hơn. Vui lòng lưu ý điều này.",
-                    "cancel-swap-button-title": "Vẫn hủy",
-                    "keep-swap-button-title": "Giữ tỷ giá"
+                "status": {
+                    "title": "Trạng Thái"
                 },
-                "unexpected-error-step": {
-                    "title": "Có lỗi xảy ra...",
-                    "subtitle": "Rất tiếc, chúng tôi không thể hoàn thành tác vụ cuối cùng. Vui lòng làm mới trang và thử lại. Hoặc liên hệ với bộ phận hỗ trợ nếu lỗi này tiếp tục xảy ra. Chúng tôi xin lỗi vì sự bất tiện này.",
-                    "confirm-button-text": "Tải lại trang"
-                },
-                "rateModeDisclaimers": {
-                    "fixed": "Với tỷ giá cố định, tỷ giá hối đoái được khóa khi giao dịch được tạo. Điều này đảm bảo số tiền chính xác bạn sẽ nhận được, bảo vệ bạn khỏi biến động thị trường.",
-                    "floating": "Với tỷ giá thả nổi, tỷ giá hối đoái có thể thay đổi cho đến khi giao dịch hoàn tất. Điều này cho phép lợi thế thị trường tiềm năng nhưng cũng mang rủi ro thay đổi tỷ giá."
-                },
-                "SwapFlowPaymentAwaiting": {
-                    "title": "Đang chờ thanh toán",
-                    "subtitle": "Vui lòng gửi {{fromCoinName}} đến địa chỉ bên dưới. Trang sẽ tự động cập nhật ngay khi giao dịch được nhận.",
-                    "back-button-text": "Hủy hoán đổi này",
-                    "extra-id-notice": "Đảm bảo rằng bạn nhập thẻ Tag yêu cầu 'Memo' hoặc 'Destination' trong ví của mình khi gửi tiền. Điều này là cần thiết để quá trình xử lý giao dịch diễn ra đúng cách. Thông tin sai có thể dẫn đến bị mất tiền.",
-                    "block-titles": {
-                        "amount-send": "Gửi chính xác",
-                        "address": "Đến địa chỉ này",
-                        "amount-receive": "Bạn sẽ nhận được",
-                        "timer": "Thời gian thanh toán còn lại",
-                        "swap-id": "ID hoán đổi",
-                        "extra-id": "Và {{extraIdName}} chỉ định này"
+                "extended-information": {
+                    "section-title": "Thông tin chi tiết mở rộng",
+                    "general-swap-details": {
+                        "title": "Chi Tiết Giao dịch Hoán Đổi",
+                        "deposit-amount": "Số lượng cần hoán đổi",
+                        "withdrawal-amount": "Số lượng sẽ nhận",
+                        "exchange-rate": "Tỷ giá hoán đổi",
+                        "rate-mode": {
+                            "title": "Chế độ tỷ giá",
+                            "fixed-notice": "Với tỷ giá cố định, tỷ giá hoán đổi sẽ được khóa lại ngay khi tạo giao dịch hoán đổi. Điều này đảm bảo số lượng coin chính xác bạn sẽ nhận, tránh rủi ro biến động thị trường.",
+                            "floating-notice": "Với tỷ giá thả nổi, tỷ giá hoán đổi có thể thay đổi trong quá trình giao dịch. Điều này có thể mang lại lợi thế thị trường nhưng cũng tiềm ẩn rủi ro biến động giá."
+                        },
+                        "fixed-rate": "Cố định",
+                        "floating-rate": "Thả nổi",
+                        "refund-address": "Địa chỉ hoàn tiền",
+                        "refund-extra-id": "Hoàn tiền {{extraIdName}}",
+                        "created-at": "Tạo lúc"
                     },
-                    "pushes": {
-                        "copy-amount-failed": {
-                            "title": "Không thể sao chép",
-                            "text": "Rất tiếc, chúng tôi không thể sao chép số tiền để gửi. Vui lòng làm mới trang và thử lại."
+                    "deposit-transaction": {
+                        "title": "Giao Dịch Nạp",
+                        "asset": "Tài sản cần gửi",
+                        "address": "Địa chỉ nhận",
+                        "contract-address": "Địa chỉ hợp đồng",
+                        "transaction-id": "Mã ID Giao Dịch"
+                    },
+                    "withdrawal-transaction": {
+                        "title": "Giao Dịch Rút",
+                        "asset": "Tài sản sẽ nhận",
+                        "address": "Địa chỉ nhận",
+                        "contract-address": "Địa chỉ hợp đồng",
+                        "transaction-id": "Mã ID Giao Dịch"
+                    }
+                },
+                "ton-swap-notice": "Nếu ví của bạn không gửi kèm thông báo jetton cùng với giao dịch, giao dịch của bạn có thể cần xử lý thủ công. Hầu hết các ví phổ biến như Tonkeeper và Tonhub đều hỗ trợ, nhưng nếu bạn đang sử dụng ví ít phổ biến hơn hoặc không chắc chắn - hãy liên hệ với chúng tôi qua trò chuyện trực tuyến (live chat) để được hỗ trợ!",
+                "SwapFlowInformation": {
+                    "create-new-swap-button": "Tạo giao dịch hoán đổi khác",
+                    "awaiting": {
+                        "title": "Gửi tiền đến địa chỉ dưới đây",
+                        "amount-title": "Gửi chính xác số tiền",
+                        "amount-tooltip": "Đã sao chép số tiền!",
+                        "address-title": "Địa chỉ nhận",
+                        "address-tooltip": "Đã sao chép địa chỉ!",
+                        "extra-id-title": "Và nhập {{extraIdName}} này",
+                        "extra-id-tooltip": "Đã sao chép {{extraIdName}}!",
+                        "extra-id-notice": "Đảm bảo bạn nhập đúng 'Memo' hoặc 'Destination Tag' trong ví khi gửi tiền. Đây là thông tin rất quan trọng để xử lý giao dịch chính xác. Thông tin không chính xác có thể dẫn đến mất tiền.",
+                        "amount-qr": {
+                            "title": "Số Tiền Cần Gửi",
+                            "subtitle": "Quét mã QR này để nhận thông tin số tiền cần gửi cho giao dịch hoán đổi"
                         },
-                        "copy-address-failed": {
-                            "title": "Không thể sao chép",
-                            "text": "Rất tiếc, chúng tôi không thể sao chép địa chỉ thanh toán. Vui lòng làm mới trang và thử lại."
+                        "address-qr": {
+                            "title": "Địa Chỉ Nạp Tiền",
+                            "subtitle": "Quét mã QR này để nhận địa chỉ nạp tiền cho giao dịch hoán đổi"
                         },
-                        "copy-swap-id-failed": {
-                            "title": "Không thể sao chép",
-                            "text": "Rất tiếc, chúng tôi không thể sao chép ID hoán đổi. Vui lòng làm mới trang và thử lại."
+                        "destination-tag-qr": {
+                            "subtitle": "Quét mã QR này để nhận {{extraIdName}} cho giao dịch hoán đổi"
                         }
-                    }
-                },
-                "SwapFlowPaymentConfirming": {
-                    "title": "Đang chờ xác nhận",
-                    "subtitle": "Giao dịch của bạn đã được nhận. Vui lòng chờ trong khi giao dịch được xác nhận bởi blockchain. Sau đó, trang sẽ tự động cập nhật.",
-                    "block-titles": {
-                        "amount-send": "Số tiền để hoán đổi",
-                        "amount-receive": "Số tiền nhận được",
-                        "address": "Địa chỉ nhận",
-                        "swap-id": "ID hoán đổi",
-                        "extra-id": "Người nhận {{extraIdName}}"
-                    }
-                },
-                "SwapFlowPaymentExchanging": {
-                    "title": "Đang hoán đổi coin của bạn",
-                    "subtitle": "Giao dịch hoán đổi của bạn đã được xác nhận và đang được xử lý. Vui lòng chờ trong khi hoàn tất. Sau đó, trang sẽ tự động cập nhật.",
-                    "block-titles": {
-                        "amount-send": "Số tiền để hoán đổi",
-                        "amount-receive": "Số tiền nhận được",
-                        "address": "Địa chỉ nhận",
-                        "swap-id": "ID hoán đổi",
-                        "extra-id": "Người nhận {{extraIdName}}"
-                    }
-                },
-                "SwapFlowPaymentCompleted": {
-                    "title": "Hoán đổi hoàn tất!",
-                    "subtitle": "Hoán đổi của bạn đã được hoàn tất thành công và tiền điện tử đã được gửi đến địa chỉ chỉ định. Cảm ơn bạn đã sử dụng Rabbit Swap.",
-                    "confirm-button-text": "Tạo hoán đổi mới",
-                    "block-titles": {
-                        "amount-to-swap": "Số tiền để hoán đổi",
-                        "amount-sent": "Số tiền đã gửi",
-                        "address": "Địa chỉ nhận",
-                        "swap-id": "ID hoán đổi",
-                        "transaction-id": "ID giao dịch đã gửi ({{ticker}})",
-                        "extra-id": "Người nhận {{extraIdName}}"
-                    }
-                },
-                "SwapFlowPaymentRefunded": {
-                    "title": "Hoán đổi đã hoàn tiền",
-                    "subtitle": "Rất tiếc, hoán đổi của bạn không thành công và đã được hoàn tiền. Vui lòng liên hệ với bộ phận hỗ trợ để chúng tôi có thể kiểm tra điều gì đã xảy ra. Sử dụng ID hoán đổi này để làm tham chiếu: {{swapId}}.",
-                    "confirm-button-text": "Tạo hoán đổi mới"
-                },
-                "SwapFlowPaymentExpired": {
-                    "title": "Hoán đổi hết hạn",
-                    "subtitle": "Giao dịch của bạn không được nhận kịp thời và thời gian xử lý hoán đổi đã hết hạn. Nếu bạn chưa gửi coin của mình, chỉ cần tạo một hoán đổi mới. Nếu bạn đã gửi coin của mình, đừng lo lắng, chỉ cần liên hệ với bộ phận hỗ trợ để chúng tôi có thể tính toán lại hoặc hoàn lại tiền mã hoá cho bạn. Vui lòng sử dụng ID hoán đổi này để làm tham chiếu: {{swapId}}.",
-                    "confirm-button-text": "Tạo hoán đổi mới"
-                },
-                "pushes": {
-                    "swap-not-found": {
-                        "title": "Không tìm thấy hoán đổi!",
-                        "text": "Xin lỗi, không tìm thấy hoán đổi với mã ID được cung cấp."
                     },
-                    "swap-init-failed": {
-                        "title": "Lỗi khi tải hoán đổi!",
-                        "text": "Chúng tôi đã gặp lỗi khi tải thông tin chi tiết hoán đổi. Vui lòng làm mới trang và thử lại."
+                    "completed": {
+                        "title": "Giao dịch hoán đổi đã hoàn tất!",
+                        "subtitle": "Giao dịch hoán đổi của bạn đã hoàn tất và tiền đã được gửi đến địa chỉ bạn cung cấp. Cảm ơn bạn đã sử dụng Rabbit Swap.",
+                        "tiles": {
+                            "speedup": {
+                                "text": "Giao dịch hoán đổi hoàn tất nhanh hơn {{speedupMinutes}} phút so với dự kiến!"
+                            },
+                            "bonus": {
+                                "text": "Nhận được nhiều hơn {{bonusPercentage}}% so với dự kiến ban đầu!"
+                            },
+                            "review": {
+                                "text": "Chúng tôi sẽ rất cảm kích nếu bạn có thể để lại đánh giá về Rabbit!",
+                                "button": "Để lại đánh giá"
+                            },
+                            "new-exchange": {
+                                "text": "Bạn muốn thực hiện giao dịch hoán đổi khác? Hãy tiếp tục!",
+                                "button": "Hoán đổi mới"
+                            }
+                        }
                     },
-                    "swap-details-loading-failed": {
-                        "title": "Lỗi khi tải thông tin hoán đổi!",
-                        "text": "Chúng tôi đã gặp lỗi khi tải thông tin chi tiết hoán đổi. Vui lòng làm mới trang và thử lại."
+                    "confirming": {
+                        "title": "Đang chờ xác nhận",
+                        "subtitle": "Giao dịch của bạn đã được nhận. Vui lòng chờ trong giây lát để giao dịch được xác nhận trên blockchain. Khi hoàn tất, trang web sẽ tự động cập nhật."
                     },
-                    "requests-limit-exceeded": {
-                        "title": "Dịch vụ hoán đổi quá tải!",
-                        "text": "Xin lỗi, hệ thống của chúng tôi tạm thời quá tải do nhu cầu sử dụng cao. Vui lòng thử lại sau ít phút. Cảm ơn sự thông cảm của bạn."
+                    "verifying": {
+                        "title": "Yêu cầu xác minh",
+                        "subtitle": "Giao dịch của bạn đã được nhận thành công. Tuy nhiên, theo quy định, chúng tôi phải thực hiện kiểm tra danh tính đối với một số giao dịch không vượt qua kiểm tra AML. Chúng tôi cũng không thích việc này, và ccố gắng hết sức để hạn chế phiền toái cho bạn, nhưng đây là điều chúng tôi không thể tránh hoàn toàn. Hãy liên hệ với bộ phận hỗ trợ của chúng tôi qua trò chuyện trực tuyến - live chat, và chúng tôi sẽ hướng dẫn bạn qua quy trình xác minh nhanh chóng. Xin lỗi vì sự bất tiện này."
                     },
-                    "maximum-amount-exceeded": {
-                        "title": "Vượt quá Số lượng tối đa",
-                        "text": "Số lượng bạn muốn đổi đã vượt quá số lượng tối đa cho phép."
+                    "exchanging": {
+                        "title": "Đang hoán đổi coin của bạn",
+                        "subtitle": "Giao dịch của bạn đã được xác nhận và quá trình hoán đổi đang diễn ra. Vui lòng chờ trong giây lát để giao dịch hoàn tất. Khi hoàn tất, trang wbe sẽ tự động cập nhật."
                     },
-                    "minimum-amount-not-reached": {
-                        "title": "Ít hơn số lượng tối thiểu",
-                        "text": "Số lượng bạn muốn đổi ít hơn số lượng tối thiểu cho phép."
+                    "refunded": {
+                        "title": "Giao dịch hoán đổi đã được hoàn tiền",
+                        "subtitle": "Rất tiếc, giao dịch hoán đổi của bạn không thể hoàn tất và đã được hoàn tiền. Vui lòng liên hệ với bộ phận hỗ trợ để chúng tôi kiểm tra nguyên nhân. Hãy cung cấp mã ID giao dịch hoán đổi: #{{swapId}}."
                     },
-                    "pair-not-supported": {
-                        "title": "Cặp coin không khả dụng",
-                        "text": "Xin lỗi, cặp coin đã chọn hiện không khả dụng. Vui lòng thử lại sau hoặc chọn cặp coin khác."
+                    "expired": {
+                        "title": "Giao dịch hoán đổi đã hết hạn",
+                        "subtitle": "Giao dịch của bạn không được nhận kịp thời, và đã hết hạn. Nếu bạn chưa gửi tiền, bạn có thể tạo giao dịch hoán đổi mới. Nếu bạn đã gửi tiền, đừng lo, hãy liên hệ với bộ phận hỗ trợ để tỷ giá hoán đổi được tính lại hoặc nhận hoàn tiền. Vui lòng cung cấp mã ID giao dịch hoán đổi: #{{swapId}}."
                     },
-                    "default-error": {
-                        "title": "Có lỗi xảy ra...",
-                        "text": "Xin lỗi, chúng tôi không thể hoàn thành tác vụ cuối cùng. Vui lòng thử lại hoặc liên hệ với bộ phận hỗ trợ."
+                    "failed": {
+                        "title": "Hoán đổi thất bại",
+                        "subtitle": "Rất tiếc, giao dịch hoán đổi của bạn không thể hoàn tất do sự cố bất ngờ. Đừng lo – hãy liên hệ với bộ phận hỗ trợ qua trò chuyện trực tuyến (live chat) để chúng tôi điều tra nguyên nhân. Vui lòng cung cấp mã ID giao dịch hoán đổi: #{{swapId}}."
                     }
                 }
+            },
+            "SwapStatus": {
+                "awaiting": "Chờ nhận thanh toán",
+                "exchanging": "Đang hoán đổi coin",
+                "refunded": "Đã hoàn tiền giao dịch",
+                "confirming": "Đang xác nhận giao dịch",
+                "verifying": "Đang xác minh danh tính",
+                "completed": "Gửi coin đã hoán đổi",
+                "expired": "Giao dịch hết hạn",
+                "failed": "Giao dịch thất bại",
+                "created": "Giao dịch đã tạo",
+                "payment-tooltip": "Thời gian còn lại để hoàn tất thanh toán vào địa chỉ nạp tiền",
+                "duration-minutes-title-shortened": "phút"
+            },
+            "WaitlistSubscription": {
+                "colored-notice": {
+                    "button-title": "Đăng ký để cập nhật",
+                    "text": "Các giao dịch hoán đổi cho {{coinLatinName}} ({{coinTicker}}) hiện chưa khả dụng. Ngay khi giao dịch được phép, chúng tôi sẽ tự động kích hoạt hoán đổi. Bạn muốn là người đầu tiên biết khi nào điều đó xảy ra không? Đăng ký để nhận thông báo!"
+                },
+                "sign-up-step": {
+                    "action-button-title": "Đăng ký",
+                    "error": "Đã xảy ra lỗi. Vui lòng thử lại sau.",
+                    "input-title": "Địa chỉ email của bạn:",
+                    "subtitle": "Để được thông báo ngay khi {{coinLatinName}} có sẵn để hoán đổi, vui lòng cung cấp địa chỉ email của bạn. Chúng tôi sẽ gửi cho bạn một thông báo khi nó được liệt kê.",
+                    "title": "Thông báo danh sách {{coinLatinName}} ({{coinTicker}})"
+                },
+                "success-step": {
+                    "action-button-title": "Đóng",
+                    "subtitle": "Chúng tôi sẽ thông báo cho bạn ngay khi {{coinLatinName}} có sẵn để hoán đổi. Hãy để mắt đến hộp thư đến của bạn để cập nhật.",
+                    "title": "Đăng ký thành công!"
+                }
+            },
+            "PartnersLandingSection": {
+                "content": "Gặp gỡ các sàn giao dịch và nhà cung cấp thanh khoản đáng tin cậy, những người giúp chúng tôi cung cấp dịch vụ hoán đổi liền mạch và đáng tin cậy ở phía sau.",
+                "title": "Hợp Tác Để Đảm Bảo Giao Dịch Tin Cậy"
+            },
+            "RabbitStats": {
+                "launched-in": "Được ra mắt vào",
+                "support-response-time": "Thời gian phản hồi hỗ trợ trung bình",
+                "support-response-time-content": "{{amountSingular}} phút",
+                "turnover": "Khối lượng",
+                "assets-available": "Số coin khả dụng",
+                "swap-time": "Thời gian hoán đổi trung bình",
+                "swap-time-content": "{{amountPlural}} phút",
+                "profit": "Lợi nhuận trung bình",
+                "profit-tooltip": "So với nhiều dịch vụ hoán đổi nổi tiếng"
+            },
+            "RandomCoinsCloud": {
+                "link-title": "Hoán đổi {{assetName}}"
+            },
+            "SwapCurrenciesTable": {
+                "empty-search": "Không có kết quả cho '{{query}}'",
+                "column-titles": {
+                    "coin": "Coin",
+                    "ticker": "Mã",
+                    "swap": "Hoán Đổi"
+                },
+                "swap-link-single-asset-title": "Hoán đổi {{assetName}}",
+                "swap-link-pair-title": "Hoán đổi {{assetNameFrom}} sang {{assetNameTo}}"
+            },
+            "QrCodeModal": {
+                "close-button-title": "Đóng",
+                "copy-button-title": "Sao chép",
+                "copy-tooltip": "Đã sao chép vào bộ nhớ tạm!"
+            }
+        },
+        "molecules": {
+            "MarketData": {
+                "last-updated": "Cập nhật lần cuối vào {{date}}",
+                "volume": "Khối lượng {{ticker}} trong 24 giờ",
+                "min-max-price": "Giá thấp & cao 24h",
+                "price": "Giá và thay đổi của {{ticker}} trong 24 giờ",
+                "rank": "Xếp hạng Coin",
+                "supply": "Nguồn cung lưu hành",
+                "market-cap": "Vốn hóa thị trường {{ticker}}"
+            },
+            "ReviewShowcase": {
+                "trustpilot-link-title": "Xem thêm trên Trustpilot"
+            }
+        },
+        "atoms": {
+            "PageTree": {
+                "landingPrimary": "Trang Chủ",
+                "landingSingleAsset": "Hoán đổi {{ticker}}",
+                "landingTwoAssets": "Hoán đổi {{tickerFrom}} sang {{tickerTo}}",
+                "allCurrencies": "Tất Cả Các Loại Tiền Tệ",
+                "exchangePairs": "Đổi {{ticker}} sang tiền điện tử khác",
+                "blog": "Blog",
+                "termsOfUse": "Điều Khoản Sử Dụng",
+                "privacyPolicy": "Chính Sách Bảo Mật"
+            },
+            "MarketChangeNotice": {
+                "text-gain-gain": "Dựa trên phân tích dữ liệu thị trường vào {{date}}, {{assetName}} có xu hướng tăng trong tháng qua, tăng {{percentageMonth}}. Trong 24 giờ qua, nó tăng thêm {{percentageDay}}. Ở trên đây là dữ liệu thị trường chính cho {{assetTicker}}, cập nhật mỗi 10 phút.",
+                "text-gain-loss": "Dựa trên phân tích dữ liệu thị trường vào {{date}}, {{assetName}} có xu hướng tăng trong tháng qua, tăng {{percentageMonth}}. Trong 24 giờ qua, nó giảm {{percentageDay}}. Ở trên đây là dữ liệu thị trường chính cho {{assetTicker}}, cập nhật mỗi 10 phút.",
+                "text-loss-gain": "Dựa trên phân tích dữ liệu thị trường vào {{date}}, {{assetName}} có xu hướng giảm trong tháng qua, giảm {{percentageMonth}} giá trị. Trong 24 giờ qua, nó tăng {{percentageDay}}. Ở trên đây là dữ liệu thị trường chính cho {{assetTicker}}, cập nhật mỗi 10 phút.",
+                "text-loss-loss": "Dựa trên phân tích dữ liệu thị trường vào {{date}}, {{assetName}} có xu hướng giảm trong tháng qua, giảm {{percentageMonth}} giá trị. Trong 24 giờ qua, nó giảm {{percentageDay}}. Ở trên đây là dữ liệu thị trường chính cho {{assetTicker}}, cập nhật mỗi 10 phút."
             }
         }
     },
@@ -457,10 +638,13 @@
         "page-titles": {
             "terms-and-conditions": "Điều Khoản & Điều Kiện",
             "privacy-policy": "Chính Sách Bảo Mật",
-            "try-wallet": "Thử Rabbit Wallet"
+            "try-wallet": "Thử Rabbit Wallet",
+            "blog": "Blog",
+            "affiliate-program": "Chương trình liên kết"
         },
         "support-chat-message": "Chat với chúng tôi",
         "default-copy-button-title": "Sao chép",
-        "default-copy-button-tooltip": "Đã sao chép!"
+        "default-copy-button-tooltip": "Đã sao chép!",
+        "view-more-button": "Xem thêm"
     }
 }

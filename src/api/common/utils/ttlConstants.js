@@ -29,7 +29,7 @@ export const PERMANENT_TTL_FOR_RARE_CHANGING_DATA_MS = 600_000_000;
  * This TTL constant is useful for frequently changing data like fee rates and other payment-related data
  * @type {number}
  */
-export const SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS = 30_000;
+export const SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS = 10_000;
 
 /**
  * This TTL constant is useful for really rarely changing data like tron network constants

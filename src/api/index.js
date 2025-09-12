@@ -21,7 +21,7 @@ export function setupAppAndInitializeBackgroundTasks(
     handleDiscoveredAuthentication,
     dontCheckSession
 ) {
-    const isSwapsMode = dontCheckSession; // TODO: [refactoring, moderate] remove this after separating swap product from wallet. task_id=c218508bccce42c4b45067e78fd2e202
+    const isSwapsMode = dontCheckSession; // TODO: [refactoring, moderate] remove this after separating swap product from wallet. task_id=e6d3936d350a4d8fb596d09763f817db
     const initializers = [
         IS_TESTING ? [] : ClientIpHashService.provideIpHashStoredAndItsUpdate,
         () =>

@@ -34,7 +34,9 @@ export class EthereumTransactionsHistoryService {
                 try {
                     const onlyEth = ethereumBlockchainTransactions.filter(tx => tx.ticker === Coins.COINS.ETH.ticker);
                     EthTransactionsProvider.actualizeCacheWithTransactionsReturnedByAnotherProvider(address, onlyEth);
-                    const onlyErc20 = ethereumBlockchainTransactions.filter(t => t.protocol === ERC20);
+                    const onlyErc20 = ethereumBlockchainTransactions.filter(
+                        t => Coins.getCoinByTickerIfPresent(t.ticker)?.protocol?.protocol === ERC20.protocol
+                    );
                     Erc20TransactionsProvider.actualizeCacheWithTransactionsReturnedByAnotherProvider(
                         address,
                         onlyErc20

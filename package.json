@@ -18,19 +18,21 @@
         "run-integration-tests-except-the-slowest": "cross-env-shell DONT_RUN_THE_SLOWEST=1 \"./test/integration/execute.sh\"",
         "run-local-mongo": "node ci-cd-scripts/in-memory-mongo-runner.js",
         "start": "npm run generate-static-html-pages-and-sitemap && npm run provide-local-properties && react-app-rewired start",
+        "start-plus-unreleased-dev-ui-kit": "rm -rf ./build ./node_modules/@rabbitio/ui-kit/src ./node_modules/@rabbitio/ui-kit/dist ./node_modules/@rabbitio/ui-kit/index.js && cp -r $UI_KIT_PATH/src $UI_KIT_PATH/dist $UI_KIT_PATH/index.js ./node_modules/@rabbitio/ui-kit/ && npm run generate-static-html-pages-and-sitemap && npm run provide-local-properties && react-app-rewired start",
         "build-local": "npm run generate-static-html-pages-and-sitemap && npm run provide-local-properties && react-app-rewired build",
         "build-dev": "npm run generate-static-html-pages-and-sitemap && npm run provide-dev-properties && react-app-rewired build",
         "build-prod": "npm run generate-static-html-pages-and-sitemap && npm run provide-prod-properties && react-app-rewired build && node ./properties/povideTrackersCode.js",
         "eject": "react-app-rewired eject",
         "lint": "eslint .",
-        "lint:fix": "eslint --fix ."
+        "lint:fix": "eslint --fix .",
+        "validate-translations": "node ./scripts/validate-translations.mjs"
     },
     "proxy": "http://localhost:3002",
     "browserslist": {
         "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
         ],
         "development": [
             "last 1 chrome version",
@@ -53,7 +55,7 @@
     "bugs": {
         "url": "https://gitlab.com/rabbitio/wallet/issues"
     },
-    "homepage": "https://rabbit.io",
+    "homepage": "https://wallet.rabbit.io",
     "devDependencies": {
         "@babel/plugin-proposal-private-property-in-object": "7.18.6",
         "@babel/register": "7.13.16",
@@ -62,6 +64,7 @@
         "babel-plugin-dynamic-import-node": "2.3.3",
         "babel-polyfill": "6.26.0",
         "buffer": "6.0.3",
+        "chalk": "^5.5.0",
         "cheerio": "1.0.0-rc.12",
         "concurrently": "3.6.1",
         "copy": "0.3.2",
@@ -91,7 +94,7 @@
         "stream-browserify": "3.0.0"
     },
     "dependencies": {
-        "@rabbitio/ui-kit": "1.0.0-beta.79",
+        "@rabbitio/ui-kit": "1.0.0-beta.88.4",
         "@ramp-network/ramp-instant-sdk": "3.0.0",
         "@redux-devtools/extension": "3.3.0",
         "@use-gesture/react": "10.3.0",

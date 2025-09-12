@@ -15,7 +15,6 @@ import FiatPaymentsRoutes from "../routes/fiatPaymentsRoutes.js";
 import EncryptedWalletPaymentIdsRoutes from "../routes/encryptedWalletPaymentIdsRoutes.js";
 import WebhookRoutes from "../routes/webhookRoutes.js";
 import ClientLogsRoutes from "../routes/clentLogsRoutes.js";
-import RecentSwapsRoutes from "../routes/recentSwapsRoutes.js";
 import { SERVER_PORT } from "../properties.js";
 import { setupApiKeysProxying } from "./setupApiKeysProxying.js";
 import { apiVersionPrefix, onlyIfDoesntStartWith } from "../controllers/controllerUtils.js";
@@ -56,7 +55,6 @@ export function configureAndStartServer() {
         app.use(EncryptedWalletPaymentIdsRoutes);
         app.use(WebhookRoutes);
         app.use(ClientLogsRoutes);
-        app.use(RecentSwapsRoutes);
 
         setupApiKeysProxying(apiKeysProxyBasePath).map(i => app.use(i.path, i.middleware));
 

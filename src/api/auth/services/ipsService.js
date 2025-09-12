@@ -9,6 +9,7 @@ import {
     saveEncryptedIpAddress,
 } from "../backend-api/encryptedIpsApi.js";
 import { IpsServiceInternal } from "./internal/ipsServiceInternal.js";
+import { SWAPS_FACADE_URL } from "../../../properties.js";
 
 export class IPsService {
     /**
@@ -135,6 +136,6 @@ export class IPsService {
      * @return {Promise<string>} resolves to IP address string
      */
     static async getClientIpAddress() {
-        return await IpAddressProvider.getClientIpAddress();
+        return await new IpAddressProvider(SWAPS_FACADE_URL).getClientIpAddress();
     }
 }

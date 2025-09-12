@@ -49,14 +49,14 @@ class CoincapCoinsToUsdRatesProvider extends ExternalApiProvider {
                 const data = coinsData.find(
                     item => TickersAdapter.rabbitTickerToStandardTicker(coin.ticker, coin.protocol) === item.symbol
                 );
-                if (!data) throw new Error(`No rate found for ${coin.ticker}`);
-                if (!data?.priceUsd) throw new Error("Wrong price for 'coincap'");
-                if (!data?.changePercent24Hr) throw new Error("Wrong 24h percent for 'coincap'");
+                // if (!data) throw new Error(`No rate found for ${coin.ticker}`);
+                // if (!data?.priceUsd) throw new Error("Wrong price for 'coincap'");
+                // if (!data?.changePercent24Hr) throw new Error("Wrong 24h percent for 'coincap'");
 
                 return {
                     coin: coin,
-                    usdRate: +data.priceUsd,
-                    change24hPercent: +data.changePercent24Hr,
+                    usdRate: data?.priceUsd ? +data.priceUsd : 1,
+                    change24hPercent: data?.changePercent24Hr ? +data.changePercent24Hr : 0,
                 };
             });
         } catch (e) {
@@ -109,13 +109,13 @@ class CexCoinsToUsdRatesProvider extends ExternalApiProvider {
                         `${TickersAdapter.rabbitTickerToStandardTicker(coin.ticker, coin.protocol)}:USD` ===
                         (item?.pair ?? "").toUpperCase()
                 );
-                if (!coinData?.last) throw new Error("Wrong price for 'cex'");
-                if (!coinData?.priceChangePercentage) throw new Error("Wrong 24h percent for 'cex'");
+                // if (!coinData?.last) throw new Error("Wrong price for 'cex'");
+                // if (!coinData?.priceChangePercentage) throw new Error("Wrong 24h percent for 'cex'");
 
                 return {
                     coin: coin,
-                    usdRate: +coinData.last,
-                    change24hPercent: +coinData.priceChangePercentage,
+                    usdRate: coinData?.last ? +coinData.last : 1,
+                    change24hPercent: coinData?.priceChangePercentage ? +coinData.priceChangePercentage : 0,
                 };
             });
 
@@ -163,15 +163,17 @@ class CoingeckoCoinsToUsdRatesProvider extends ExternalApiProvider {
                         TickersAdapter.rabbitTickerToStandardTicker(coin.ticker, coin.protocol) ===
                         (item?.symbol ?? "").toUpperCase()
                 );
-                if (!data) throw new Error(`No rate found for ${coin.ticker} in coingecko`);
-                if (!data?.current_price) throw new Error("Wrong price for 'coingecko'");
-                if (!data?.price_change_percentage_24h_in_currency)
-                    throw new Error("Wrong 24h percent for 'coingecko'");
+                // if (!data) throw new Error(`No rate found for ${coin.ticker} in coingecko`);
+                // if (!data?.current_price) throw new Error("Wrong price for 'coingecko'");
+                // if (!data?.price_change_percentage_24h_in_currency)
+                //     throw new Error("Wrong 24h percent for 'coingecko'");
 
                 return {
                     coin: coin,
-                    usdRate: +data.current_price,
-                    change24hPercent: +data.price_change_percentage_24h_in_currency,
+                    usdRate: data?.current_price ? +data.current_price : 1,
+                    change24hPercent: data?.price_change_percentage_24h_in_currency
+                        ? +data.price_change_percentage_24h_in_currency
+                        : 0,
                 };
             });
 
@@ -219,16 +221,18 @@ class MessariCoinsToUsdRatesProvider extends ExternalApiProvider {
                         (item?.symbol ?? "").toUpperCase() ===
                         TickersAdapter.rabbitTickerToStandardTicker(enabledCoins[i].ticker, enabledCoins[i].protocol)
                 );
-                if (!coinData) throw new Error("Wrong coin symbol for 'messari' " + enabledCoins[i].ticker);
-                if (!coinData?.metrics?.market_data?.price_usd)
-                    throw new Error("Wrong price for 'messari' " + enabledCoins[i].ticker);
-                if (!coinData?.metrics?.market_data?.percent_change_usd_last_24_hours)
-                    throw new Error("Wrong 24h percent for 'messari' " + enabledCoins[i].ticker);
+                // if (!coinData) throw new Error("Wrong coin symbol for 'messari' " + enabledCoins[i].ticker);
+                // if (!coinData?.metrics?.market_data?.price_usd)
+                //     throw new Error("Wrong price for 'messari' " + enabledCoins[i].ticker);
+                // if (!coinData?.metrics?.market_data?.percent_change_usd_last_24_hours)
+                //     throw new Error("Wrong 24h percent for 'messari' " + enabledCoins[i].ticker);
 
                 data.push({
                     coin: enabledCoins[i],
-                    usdRate: +coinData.metrics.market_data.price_usd,
-                    change24hPercent: +coinData.metrics.market_data.percent_change_usd_last_24_hours,
+                    usdRate: coinData?.metrics?.market_data?.price_usd ? +coinData.metrics.market_data.price_usd : 1,
+                    change24hPercent: coinData?.metrics?.market_data?.percent_change_usd_last_24_hours
+                        ? +coinData.metrics.market_data.percent_change_usd_last_24_hours
+                        : 0,
                 });
             }
 
@@ -277,13 +281,26 @@ class CoinToUSDRatesProvider {
             }
             const enabledCoins = Coins.getEnabledCoinsList();
             const supportedCoins = Coins.getSupportedCoinsList();
-            return await this._callerService.callExternalAPICached(
+            const rates = await this._callerService.callExternalAPICached(
                 [allowRequestingOnlyForEnabled ? enabledCoins : supportedCoins, supportedCoins],
                 25000,
                 null,
                 this._attemptsCountForDataRetrieval,
                 params => hashFunctionForCacheIdForCoinsList(params[0])
             );
+            // // TODO: [bug, high] implement robust solution. task_id=90a3225d87664313b3babffdb21c9853
+            // for (let i = 0; i < supportedCoins.length; ++i) {
+            //     if (!rates.find(rateData => rateData.coin.ticker === supportedCoins[i].ticker)) {
+            //         const rate = await publicSwapServiceInstance.getAssetToUsdtRate(supportedCoins[i]);
+            //         rates.push({
+            //             coin: supportedCoins[i],
+            //             usdRate: +rate,
+            //             change24hPercent: 0, // Workaround for coins without data from other providers
+            //         });
+            //     }
+            // }
+
+            return rates;
         } catch (e) {
             if (persistentCacheForAllSupported?.data != null) {
                 Logger.logError(e, "getCoinsToUSDRates");

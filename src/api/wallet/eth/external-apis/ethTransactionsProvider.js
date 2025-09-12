@@ -20,6 +20,7 @@ import {
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
 import { cache } from "../../../common/utils/cache.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 
 class EtherscanEthTransactionsProvider extends ExternalApiProvider {
     constructor() {
@@ -44,14 +45,11 @@ class EtherscanEthTransactionsProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const networkPrefix =
-                Storage.getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet ? "" : "-goerli";
             const address = params[0];
             const page = params[1] ?? 1;
             const offset = this.maxPageLength * (page - 1);
             const moduleForSubRequest = subRequestIndex === 0 ? "txlist" : "txlistinternal";
-            // NOTE: add api key if you decide to use paid API '&apikey=YourApiKeyToken'
-            return `https://api${networkPrefix}.etherscan.io/api?module=account&action=${moduleForSubRequest}&address=${address}&page=${page}&offset=${offset}&sort=asc`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.ETH)?.key)}?module=account&action=${moduleForSubRequest}&address=${address}&page=${page}&offset=${offset}&sort=asc`;
         } catch (e) {
             improveAndRethrow(e, "etherscanTransactionsProvider.composeQueryString");
         }

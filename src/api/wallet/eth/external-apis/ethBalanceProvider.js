@@ -62,11 +62,8 @@ class EtherscanEthBalanceProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const networkPrefix =
-                Storage.getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet ? "" : "-goerli";
             const address = params[0];
-            // NOTE: add api key if you decide to use paid API '&apikey=YourApiKeyToken'
-            return `https://api${networkPrefix}.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.ETH)?.key)}?module=account&action=balance&address=${address}&tag=latest`;
         } catch (e) {
             improveAndRethrow(e, "EtherscanEthBalanceProvider.composeQueryString");
         }

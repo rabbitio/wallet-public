@@ -16,7 +16,8 @@
         "server-local": "npm run provide-local-properties && npm run build && PROP_ENV=local nodemon ./src/index.js",
         "server-local-plus-unreleased-dev-ui-kit": "rm -rf .next ./node_modules/@rabbitio/ui-kit/src ./node_modules/@rabbitio/ui-kit/dist ./node_modules/@rabbitio/ui-kit/index.js && cp -r $UI_KIT_PATH/src $UI_KIT_PATH/dist $UI_KIT_PATH/index.js ./node_modules/@rabbitio/ui-kit/ && npm run provide-local-properties && npm run build && PROP_ENV=local nodemon ./src/index.js",
         "server-unit_tests": "npm run provide-unit_tests-properties && npm run build && node ./src/index.js",
-        "server-integration_tests": "npm run provide-integration_tests-properties && node ./src/index.js"
+        "server-integration_tests": "npm run provide-integration_tests-properties && node ./src/index.js",
+        "validate-translations": "node ../scripts/validate-translations.mjs"
     },
     "browserslist": [],
     "repository": {
@@ -40,6 +41,7 @@
         "babel-loader": "8.2.3",
         "babel-polyfill": "6.26.0",
         "babel-preset-env": "1.7.0",
+        "chalk": "^5.5.0",
         "copy": "0.0.1",
         "cross-env": "7.0.3",
         "fs-extra": "8.1.0",
@@ -50,7 +52,13 @@
         "sinon": "7.5.0"
     },
     "dependencies": {
-        "@rabbitio/ui-kit": "1.0.0-beta.79",
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.0",
+        "@mui/icons-material": "^7.0.2",
+        "@mui/joy": "^5.0.0-beta.52",
+        "@mui/material": "^7.0.2",
+        "@mui/x-data-grid": "^7.28.3",
+        "@rabbitio/ui-kit": "1.0.0-beta.113",
         "axios": "1.6.7",
         "body-parser": "1.20.2",
         "bottleneck": "2.19.5",
@@ -58,6 +66,7 @@
         "express": "4.18.2",
         "fast-json-stable-stringify": "2.1.0",
         "fs": "0.0.1-security",
+        "html-to-text": "9.0.5",
         "http-proxy-middleware": "2.0.6",
         "joi": "17.12.1",
         "jshashes": "1.0.8",

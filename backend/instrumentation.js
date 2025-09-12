@@ -1,3 +1,3 @@
 export async function register() {
-    await import("./src/next/services/swapRatesList.js");
+    // You can add here global app initializers that nextjs will run before startup
 }

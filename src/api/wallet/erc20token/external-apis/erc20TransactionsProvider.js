@@ -19,6 +19,7 @@ import { Storage } from "../../../common/services/internal/storage.js";
 import { provideFirstSeenTime } from "../../common/external-apis/utils/firstSeenTimeHolder.js";
 import { STANDARD_TTL_FOR_TRANSACTIONS_OR_BALANCES_MS } from "../../../common/utils/ttlConstants.js";
 import { cache } from "../../../common/utils/cache.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
 
 /**
  * Currently we use free version of this provider. But we have API key with 100k requests free per month.
@@ -30,7 +31,7 @@ import { cache } from "../../../common/utils/cache.js";
  */
 class EtherScanErc20TransactionsProvider extends ExternalApiProvider {
     constructor() {
-        super("https://api.etherscan.io/api", "get", 20000, ApiGroups.ETHERSCAN, {}, 100);
+        super("", "get", 20000, ApiGroups.ETHERSCAN, {}, 100);
     }
 
     composeQueryString(params, subRequestIndex = 0) {
@@ -39,7 +40,7 @@ class EtherScanErc20TransactionsProvider extends ExternalApiProvider {
                 throw new Error("Etherscan doesn't support testnet for ethereum blockchain");
             }
             const pageNumber = params[1] ?? 1;
-            return `?module=account&action=tokentx&address=${params[0]}&page=${pageNumber}&offset=${this.maxPageLength}`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.ETH)?.key)}?module=account&action=tokentx&address=${params[0]}&page=${pageNumber}&offset=${this.maxPageLength}`;
         } catch (e) {
             improveAndRethrow(e, "etherScanErc20TransactionsProvider.composeQueryString");
         }

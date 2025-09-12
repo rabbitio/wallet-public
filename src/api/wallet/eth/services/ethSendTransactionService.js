@@ -14,6 +14,7 @@ import { EthereumPushTransactionProvider } from "../external-apis/ethereumPushTr
 import { EthereumTransactionsCountProvider } from "../external-apis/ethereumTransactionsCountProvider.js";
 import { EthAddressesService } from "./ethAddressesService.js";
 import { EthereumBlockchainFeeDataProvider } from "../external-apis/ethereumBlockchainFeeDataProvider.js";
+import { gweiDecimalPlaces } from "../ethereum.js";
 
 export class EthSendTransactionService {
     static GAS_LIMIT_FOR_ETHER_TRANSFER = "21000";
@@ -83,7 +84,7 @@ export class EthSendTransactionService {
             } else {
                 const data = optsForSeveralRates(
                     optionsForMaxPriorityFeePerGas,
-                    AmountUtils.toIntegerString(baseFeePerGas),
+                    AmountUtils.trim(baseFeePerGas, gweiDecimalPlaces),
                     gasLimit,
                     coinAmount,
                     isSendAll,
@@ -129,12 +130,33 @@ export class EthSendTransactionService {
             const wallet = new ethers.Wallet(privateKey);
             const myAddress = EthAddressesService.getCurrentEthAddress();
             const txsCount = await EthereumTransactionsCountProvider.getEthereumTransactionsCount(myAddress);
+            const maxFeeSafetyFraction = 0.1; // 10% to cover possible fee fluctuation as it is pretty dynamic
+            Logger.log(`Building eth transaction based on tx data: ${safeStringify(txData)}`, loggerSource);
+            const maxFeePerGasWei = BigNumber(txData.feeRate.baseFeePerGasInWei)
+                .plus(txData.feeRate.maxPriorityFeePerGasWei)
+                .times(1 + maxFeeSafetyFraction)
+                .toFixed(0);
+            /**
+             * Ethereum EIP-1559 transaction object.
+             * This transaction uses the EIP-1559 fee mechanism where fees are split into:
+             * - maxFeePerGas: The maximum fee you're willing to pay per unit of gas. This value serves
+             *   as an upper cap covering both the dynamic base fee (network-determined) and the tip.
+             * - maxPriorityFeePerGas: The tip (or priority fee) offered to miners to incentivize timely inclusion.
+             *
+             * The gasLimit defines the maximum amount of computational work (gas units) the transaction is allowed
+             * to use during execution, protecting you from unexpected high consumption. Additional fields include:
+             * - from: Sender's Ethereum address.
+             * - to: Recipient's address (using a token address if the transaction is for a token transfer).
+             * - value: The transaction value in wei (non-zero only if transferring ETH).
+             * - nonce: The transaction count for the sender, ensuring transaction ordering.
+             * - chainId: The identifier of the network the transaction is sent on.
+             */
             const tx = {
                 type: 0x02, // EIP-1559 - transactions supporting new fee calculation
                 from: myAddress,
                 to: coin === Coins.COINS.ETH ? txData.address : coin.tokenAddress,
                 value: coin === Coins.COINS.ETH ? ethers.BigNumber.from(txData.amount) : ethers.BigNumber.from("0"),
-                maxFeePerGas: ethers.BigNumber.from(txData.feeRate.rate),
+                maxFeePerGas: ethers.BigNumber.from(maxFeePerGasWei),
                 maxPriorityFeePerGas: txData.feeRate.maxPriorityFeePerGasWei,
                 gasLimit: txData.feeRate.gasLimit,
                 nonce: txsCount,
@@ -230,17 +252,25 @@ async function optsForOneRate(
 ) {
     // Fallback logic to return 4 identical fee options calculated by single option Alchemy data if major rates retrieval fails
     const { maxFeePerGas, maxPriorityFeePerGas } = await EthereumBlockchainFeeDataProvider.getEthereumFeeData();
-    const feeAtoms = AmountUtils.toIntegerString(BigNumber(maxFeePerGas).times(gasLimit));
+    const maxFeePerGasAtomsString = ethers.utils
+        .parseUnits(AmountUtils.trim(BigNumber(maxFeePerGas), gweiDecimalPlaces), gweiDecimalPlaces)
+        .toString();
+    const maxPriorityFeePerGasAtomsString = ethers.utils
+        .parseUnits(AmountUtils.trim(BigNumber(maxPriorityFeePerGas), gweiDecimalPlaces), gweiDecimalPlaces)
+        .toString();
+    const feeAtoms = AmountUtils.toIntegerString(BigNumber(maxFeePerGasAtomsString).times(gasLimit));
     const correctAtomsAmount = chooseAmount(coin, coinsAmount, isSendAll, feeAtoms, sendBalanceAtoms, feeBalanceAtoms);
-
     return {
         result: {
             result: true,
             txsDataArray: new Array(4).fill(
                 new TxData(correctAtomsAmount, address, null, feeAtoms, null, null, network, {
-                    rate: maxFeePerGas,
-                    maxPriorityFeePerGasWei: maxPriorityFeePerGas,
+                    rate: maxFeePerGasAtomsString,
+                    maxPriorityFeePerGasWei: maxPriorityFeePerGasAtomsString,
                     gasLimit: gasLimit,
+                    baseFeePerGasInWei: BigNumber(maxFeePerGasAtomsString)
+                        .minus(maxPriorityFeePerGasAtomsString)
+                        .toFixed(0),
                 })
             ),
         },
@@ -252,7 +282,7 @@ async function optsForOneRate(
 
 /**
  * @param ratesGWei {number[]}
- * @param baseFeePerGas {string}
+ * @param baseFeePerGasGwei {string}
  * @param gasLimit {string}
  * @param coinsAmount {string}
  * @param isSendAll {boolean}
@@ -265,7 +295,7 @@ async function optsForOneRate(
  */
 function optsForSeveralRates(
     ratesGWei,
-    baseFeePerGas,
+    baseFeePerGasGwei,
     gasLimit,
     coinsAmount,
     isSendAll,
@@ -275,17 +305,20 @@ function optsForSeveralRates(
     address,
     network
 ) {
-    const feeData = ratesGWei.map(maxPriorityFeePerGasOption => {
-        const gweiDecimalPlaces = 9; // 1 Gwei = 1e-9 ETH
+    const feeData = ratesGWei.map(maxPriorityFeePerGasOptionGwei => {
         const fee = ethers.utils
             .parseUnits(
-                AmountUtils.trim(BigNumber(baseFeePerGas).plus(maxPriorityFeePerGasOption), gweiDecimalPlaces),
+                AmountUtils.trim(BigNumber(baseFeePerGasGwei).plus(maxPriorityFeePerGasOptionGwei), gweiDecimalPlaces),
                 "gwei"
             )
             .mul(gasLimit)
             .toString();
+        Logger.log(
+            `ETH fee option ${fee}, base gwei: ${baseFeePerGasGwei}, pr: ${maxPriorityFeePerGasOptionGwei}, lim: ${gasLimit}`,
+            "optsForSeveralRates"
+        );
         return {
-            maxPriorityFeePerGasOption: maxPriorityFeePerGasOption,
+            maxPriorityFeePerGasOptionGwei: maxPriorityFeePerGasOptionGwei,
             feeWeiString: fee,
             correctedAtomsAmount: chooseAmount(coin, coinsAmount, isSendAll, fee, sendBalanceAtoms, feeBalanceAtoms),
         };
@@ -310,20 +343,27 @@ function optsForSeveralRates(
                 };
             }
 
-            /**
-             * ETH fee rate is a sum of ongoing block's baseFeePerGas and current maxPriorityFeePerGas.
-             * These values are circulating in gWei, so we multiply the sum with 100 to take into account
-             * the digits after dot. Then we parse this multiplied sum using "7" as units number
-             * (gWei is 10^-9, so 10^-9 * 100 = 10^-7).
-             */
-            const rate = BigNumber(baseFeePerGas ?? "0").plus(d.maxPriorityFeePerGasOption ?? "0");
-            const hundredfoldRate = AmountUtils.toIntegerString(rate.times("100"));
-            const gweiTimes100DecimalPlaces = 7;
-            const rateAtoms = ethers.utils.parseUnits(hundredfoldRate, gweiTimes100DecimalPlaces).toString();
+            const rateAtoms = ethers.utils
+                .parseUnits(
+                    AmountUtils.trim(
+                        BigNumber(baseFeePerGasGwei ?? "0").plus(d.maxPriorityFeePerGasOptionGwei ?? "0"),
+                        gweiDecimalPlaces
+                    ),
+                    gweiDecimalPlaces
+                )
+                .toString();
             return new TxData(d.correctedAtomsAmount, address, null, d.feeWeiString, null, null, network, {
                 rate: rateAtoms,
-                maxPriorityFeePerGasWei: ethers.utils.parseUnits("" + d.maxPriorityFeePerGasOption, "gwei"),
+                maxPriorityFeePerGasWei: ethers.utils
+                    .parseUnits(
+                        AmountUtils.trim(BigNumber(d.maxPriorityFeePerGasOptionGwei), gweiDecimalPlaces),
+                        "gwei"
+                    )
+                    .toString(),
                 gasLimit: gasLimit,
+                baseFeePerGasInWei: ethers.utils
+                    .parseUnits(AmountUtils.trim(BigNumber(baseFeePerGasGwei), gweiDecimalPlaces), "gwei")
+                    .toString(),
             });
         }),
     };

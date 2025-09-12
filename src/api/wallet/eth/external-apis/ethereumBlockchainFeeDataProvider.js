@@ -13,6 +13,7 @@ import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlCo
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
 import { cache } from "../../../common/utils/cache.js";
+import { gweiDecimalPlaces } from "../ethereum.js";
 
 class AlchemyEthereumBlockchainFeeDataProvider extends ExternalApiProvider {
     constructor() {
@@ -56,9 +57,9 @@ class AlchemyEthereumBlockchainFeeDataProvider extends ExternalApiProvider {
         try {
             const data = response?.data?.result;
             if (subRequestIndex === 0) {
-                return AmountUtils.toIntegerString(BigNumber(data));
+                return AmountUtils.trim(BigNumber(data).div(10 ** 9), gweiDecimalPlaces); // Max priority fee per gas hex in wei converted to GWEI
             } else if (subRequestIndex === 1) {
-                return AmountUtils.toIntegerString(BigNumber(data?.baseFeePerGas));
+                return AmountUtils.trim(BigNumber(data?.baseFeePerGas).div(10 ** 9), gweiDecimalPlaces); // Base block fee per gas hex in wei converted to GWEI
             }
         } catch (e) {
             improveAndRethrow(e, "AlchemyEthereumBlockchainFeeDataProvider.getDataByResponse");
@@ -77,14 +78,19 @@ export class EthereumBlockchainFeeDataProvider {
     );
 
     /**
-     * @return {Promise<{ maxFeePerGas: string, maxPriorityFeePerGas: string }>}
+     * Retrieves max priority fee and base fee per gas for the last block.
+     *
+     * @return {Promise<{ maxFeePerGas: number, maxPriorityFeePerGas: number }>} values are GWEI-denominated numbers
      */
     static async getEthereumFeeData() {
         try {
             const result = await this._provider.callExternalAPICached([], 15000, null, 1, hashFunctionForParams);
             const maxPriorityFeePerGas = result[0];
             const baseFeePerGas = result[1];
-            const maxFeePerGas = AmountUtils.toIntegerString(BigNumber(baseFeePerGas).plus(maxPriorityFeePerGas));
+            const maxFeePerGas = AmountUtils.trim(
+                BigNumber(baseFeePerGas).plus(maxPriorityFeePerGas),
+                gweiDecimalPlaces
+            );
             return { maxFeePerGas: maxFeePerGas, maxPriorityFeePerGas: maxPriorityFeePerGas };
         } catch (e) {
             improveAndRethrow(e, "getEthereumFeeData");

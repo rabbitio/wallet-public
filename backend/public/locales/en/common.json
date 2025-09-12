@@ -3,17 +3,18 @@
         "pages": {
             "PublicSwapPrimaryLanding": {
                 "meta": {
-                    "title": "Swap Crypto Instantly with the Lowest Fees - Rabbit Swap",
-                    "keywords": "swap crypto, crypto exchange, cryptocurrency swap, cryptocurrency exchange, swap crypto with lowest fees, exchange coins, swap tokens, fast crypto exchange, swap coins, low-cost swaps, digital asset swap, quick coin swaps",
-                    "description": "Exchange coins and tokens instantly with Rabbit Swap, the unique crypto exchange with the best rates. No sign-up required - swap coins with just one click!"
+                    "title": "Cryptocurrency Exchange - Swap any Crypto with Lowest Fees",
+                    "keywords": "crypto exchange, swap crypto, cryptocurrency swap, cryptocurrency exchange, swap crypto with lowest fees, exchange coins, swap tokens, exchange altcoins, swap altcoins, fast crypto exchange, swap coins, low-cost swaps, digital asset swap, quick coin swaps, no kyc, trade crypto",
+                    "description": "Exchange cryptocurrency quickly and securely with Rabbit Swap - the best crypto exchange with the best rates. {{assetCount}} digital assets. No sign-up required. No limits."
                 },
+                "wallet-moved-notice-text": "Looking for Rabbit Wallet? We've moved it to",
                 "hero": {
-                    "title": "Crypto Swap Made Easy",
-                    "content": "Exchange Bitcoin, Tether, Ethereum, and more than 3600 other cryptocurrencies with the lowest fees — no sign-up required. Choose a pair and get started!"
+                    "title": "Cryptocurrency Exchange Made Easy",
+                    "content": "Hi, it’s Rabbit 🐰 Swap {{assetCount}} cryptocurrencies in one click with the best rates. No sign-up. No limits. No bullshit."
                 },
                 "how-to-swap": {
                     "title": "How to exchange crypto with Rabbit Swap?",
-                    "content": "Using Rabbit Swap is easy and straightforward; below, you can find all the steps you need to take to swap your coins:",
+                    "content": "Using Rabbit Swap crypto exchange is easy and straightforward. Below, you can find all the steps you need to take to swap your coins.",
                     "items": {
                         "1": {
                             "title": "Create a Swap",
@@ -35,27 +36,27 @@
                 },
                 "best-rates": {
                     "title": "Best Rates Possible",
-                    "content": "Rabbit Swap has a unique algorithm that dynamically compares rates from various liquidity providers, selecting the lowest one to ensure your exchanges always happen at the most profitable rates."
+                    "content": "Rabbit Swap uses a unique algorithm that dynamically compares rates from various liquidity providers, selecting the lowest one to ensure your cryptocurrency swap always happens at the most profitable rates. Let me know if you find better rates elsewhere."
                 },
                 "wide-limits": {
-                    "title": "Lowest and Highest Limits",
-                    "content": "Having various liquidity providers also enables Rabbit Swap to offer a wide range of limits. You can exchange very small amounts as well as almost infinitely large ones."
+                    "title": "There are No Limits",
+                    "content": "Having various liquidity providers also enables Rabbit Swap to offer a wide range of limits. You can exchange very small amounts as well as almost infinitely large ones. The best part is that it also prevents price drops when exchanging large amounts of low-liquidity assets. I’ll make sure to distribute the swap through different liquidity sources so you can still get the best possible price."
                 },
                 "features-grid": {
-                    "title": "What Sets Rabbit Swap Apart?",
+                    "title": "So, What Makes Rabbit Different?",
                     "content": "Rabbit Swap is designed to make the crypto swap process cost-effective, secure, fast, and as easy as sending a text message.",
                     "items": {
                         "1": {
                             "title": "No Sign-Up Required",
-                            "content": "Exchange any amount of crypto with the lowest fees and almost instant speed — no sign-up required. It can be done in just a few clicks."
+                            "content": "Exchange any amount of crypto with the lowest fees and almost instant speed - no sign-up required. It can be done in just a few clicks. Rabbit keeps it simple, no complications."
                         },
                         "2": {
-                            "title": "Wide Range of Supported Assets",
-                            "content": "Choose from more than 3600 coins and tokens available for swapping."
+                            "title": "Wide Range of Digital Assets",
+                            "content": "Pick from {{assetCount}} cryptocurrencies to exchange. Yup, this many, and there will be more. Sometimes, you can even swap that coin nobody knows about except you and its creator."
                         },
                         "3": {
                             "title": "Respect for Privacy",
-                            "content": "Only anonymized information is used to perform an exchange. Rabbit Swap will never request any information except your address for receiving coins."
+                            "content": "Only anonymized information is used to perform an exchange. Rabbit Swap will never request anything beyond your address for receiving coins. In most cases, no KYC is required."
                         },
                         "4": {
                             "title": "Jedi-Level Support",
@@ -64,22 +65,35 @@
                     }
                 },
                 "recent-swaps": {
-                    "title": "Recent Swaps in Real Time"
+                    "title": "Recent Swaps in Real Time",
+                    "content": "Every day, hundreds of people are already choosing to exchange coins with Rabbit Swap."
+                },
+                "review-showcase": {
+                    "title": "What Are People Saying About Rabbit?",
+                    "content": "Yup, there aren’t a ton of reviews yet, probably because I launched not too long ago and spent most of my time on development, not marketing. But hey, I’m proud to say they’re all good ones! Feel free to drop a review too - it’d mean a lot."
+                },
+                "rabbit-stats": {
+                    "title": "Here Are Some Stats I’m Proud Of",
+                    "content": "Hoping to make these numbers 10x better by the end of 2025. We’ll see!"
+                },
+                "articles": {
+                    "title": "Rabbit’s Insights and the Latest in Crypto News",
+                    "content": "I work with crypto every day, and I've got plenty of valuable and interesting insights to share with you."
                 }
             },
             "PublicSwapAssetLanding": {
                 "meta": {
-                    "title": "Swap {{tickerWithProtocol}} Instantly with the Lowest Fees — Rabbit Swap",
-                    "keywords": "swap {{tickerWithProtocol}}, exchange {{tickerWithProtocol}}, swap {{assetName}}, exchange {{assetName}}, trade {{tickerPrintable}}, swap crypto, crypto exchange, cryptocurrency swap, cryptocurrency exchange, swap crypto with lowest fees, exchange coins, swap tokens, fast crypto exchange, swap coins, low-cost swaps, digital asset swap, quick coin swaps",
-                    "description": "Exchange {{tickerAndBracedProtocol}} instantly with Rabbit Swap — the unique crypto exchange with the best rates. No sign-up required — swap {{assetName}} with just one click!"
+                    "title": "{{tickerWithProtocol}} Exchange: Swap {{nameAndBracedProtocol}} Instantly at the Best Rate",
+                    "keywords": "exchange {{tickerWithProtocol}}, swap {{tickerWithProtocol}}, exchange {{nameAndProtocol}}, swap {{nameAndProtocol}}, convert {{tickerWithProtocol}}, convert {{nameAndProtocol}}, trade {{tickerWithProtocol}}, exchange crypto, exchange cryptocurrency, swap crypto, swap cryptocurrency, exchange coins, swap tokens, digital asset swap, {{tickerWithProtocol}} price, {{tickerWithProtocol}} market data, {{nameAndProtocol}} price, {{nameAndProtocol}} market data, no kyc, exchange {{tickerWithProtocol}} anonymously, swap {{tickerWithProtocol}} anonymously, what is {{nameAndProtocol}}",
+                    "description": "Exchange {{tickerWithProtocol}} ({{assetName}}) for any of {{assetCount}} cryptocurrencies at the best rate. No sign-up, no limits, no bullshit - just fast, secure crypto swaps."
                 },
                 "hero": {
-                    "title": "{{tickerPrintable}} Swap Made Easy",
-                    "content": "Exchange {{nameAndBracedProtocol}} at the best rate. Instantly. No sign-up required. Go ahead, just pick the coin you'd like to swap your {{assetName}} to, and enter the amount!"
+                    "title": "Exchange {{tickerWithProtocol}} ({{assetName}}) at the Best Rate",
+                    "content": "Hi, it’s Rabbit 🐰 Instantly exchange {{nameAndProtocol}} for any of {{assetCount}} digital assets. Start your swap with one click. Support is available 24/7. No sign-up, no limits, no bullshit."
                 },
                 "how-to-swap": {
-                    "title": "How to exchange {{tickerPrintable}}?",
-                    "content": "Rabbit Swap is designed to make the {{tickerPrintable}} swap process cost-effective, secure, fast, and as easy as sending a text message.",
+                    "title": "How to exchange {{tickerWithProtocol}} on Rabbit?",
+                    "content": "Using Rabbit Swap is easy and straightforward. Below, you’ll find all the steps you need to swap your {{nameAndProtocol}}.",
                     "items": {
                         "1": {
                             "title": "Create a Swap",
@@ -87,7 +101,7 @@
                         },
                         "2": {
                             "title": "Provide Your Address",
-                            "content": "Enter the address where you would like to receive swapped coins."
+                            "content": "Enter the address where you’d like to receive your exchanged coins."
                         },
                         "3": {
                             "title": "Send Coins",
@@ -95,57 +109,80 @@
                         },
                         "4": {
                             "title": "Get Your Coins",
-                            "content": "Receive your swapped coins in just a few moments!"
+                            "content": "Receive your exchanged coins in just moments!"
                         }
                     }
                 },
                 "best-rates": {
-                    "title": "Best Rates Possible",
-                    "content": "Ensure that you get the best possible rates when exchanging your {{nameAndBracedProtocol}}. Rabbit Swap dynamically compares rates from various liquidity providers and selects the best rate each time you perform an exchange."
+                    "title": "Swap {{tickerWithProtocol}} Without Losing",
+                    "content": "With Rabbit Swap, you always get more for your {{nameAndBracedProtocol}}. The algorithm constantly analyzes {{tickerWithProtocol}} prices from various liquidity sources based on the amount you’re exchanging and the pair you select, creating the most profitable exchange path behind the scenes. You simply get the best {{tickerWithProtocol}} price every time. You don’t need to worry about how to exchange {{tickerWithProtocol}} to another coin that doesn’t have a direct pair on major exchanges. With Rabbit Swap, you can exchange your {{nameAndBracedProtocol}} directly for any of {{assetCount}} coins."
                 },
                 "wide-limits": {
-                    "title": "Lowest and Highest Limits",
-                    "content": "By having a diverse range of liquidity providers under the hood, Rabbit Swap is essentially limitless in terms of possible swap amounts. Whether you want to exchange a few dollars or billions of dollars, Rabbit Swap can handle it."
+                    "title": "Exchange {{tickerWithProtocol}} Without Limits",
+                    "content": "Rabbit Swap lets you exchange as little or as much {{tickerWithProtocol}} as you’d like - no limits at all. I’m connected to a broad network of liquidity providers, helping prevent price drops, even on large swaps with low-liquidity assets. Using advanced algorithms, I’ll make sure your {{nameAndProtocol}} swap is smoothly distributed across different sources, so you always get the best possible rate, no matter the amount you’re exchanging. And if you just want to swap a tiny amount of {{tickerWithProtocol}}, no problem - it’s easier than ever with Rabbit Swap."
                 },
                 "features-grid": {
                     "title": "Why exchange {{tickerWithProtocol}} with Rabbit Swap?",
-                    "content": "Rabbit Swap is designed to make the {{tickerPrintable}} swap process cost-effective, secure, fast, and as easy as sending a text message.",
+                    "content": "Rabbit Swap is designed to make {{tickerWithProtocol}} swap cost-effective, secure, fast, and as easy as sending a text.",
                     "items": {
                         "1": {
-                            "title": "No Sign-Up Required",
-                            "content": "Exchange any amount of {{nameAndBracedProtocol}} with the lowest fees and almost instant speed — no sign-up required. It can be done in just a few clicks."
+                            "title": "Just a Swap",
+                            "content": "You just want to swap your {{tickerWithProtocol}} - no sign-up, no verification, no selfies, and no sensational loyalty programs. You just want to choose a pair for your {{nameAndProtocol}} and swap it. I get it. That’s exactly how it works here. No complications, just a swap."
                         },
                         "2": {
-                            "title": "Wide Range of Supported Assets",
-                            "content": "Besides of {{nameAndBracedProtocol}}, you can choose from more than 3600 coins and tokens available for swapping.."
+                            "title": "{{assetCount}} Swap Options for {{nameAndProtocol}}",
+                            "content": "You can exchange your {{nameAndProtocol}} for any of {{assetCount}} available cryptocurrencies. Thousands of direct pairs - a feature you definitely won’t get on traditional exchange platforms."
                         },
                         "3": {
-                            "title": "Respect for Privacy",
-                            "content": "The exchange process relies solely on anonymized information. Rabbit Swap will never request any details other than your address for receiving coins."
+                            "title": "Exchange {{tickerWithProtocol}} Anonymously",
+                            "content": "Exchanging {{tickerWithProtocol}} for any other digital asset relies solely on anonymized information. Rabbit Swap will never ask for any details beyond your address for receiving coins. No KYC is required for the vast majority of exchanges."
                         },
                         "4": {
                             "title": "Jedi-Level Support",
-                            "content": "While all swaps are performed completely automatically, sometimes we need to talk to someone real. Chat with one of our supporters at any time of the day or night."
+                            "content": "While {{tickerWithProtocol}} swaps are fully automated, sometimes you just need to talk to someone real. Chat with Rabbit anytime, day or night, even if it’s just for fun."
+                        },
+                        "5": {
+                            "title": "It’s Profitable",
+                            "content": "Rabbit Swap ensures you get the best exchange value for your {{tickerWithProtocol}}, automatically finding the most profitable path across multiple liquidity sources. Simple, seamless, and always optimized."
+                        },
+                        "6": {
+                            "title": "Beyond Any Limits",
+                            "content": "Exchange any amount of {{tickerWithProtocol}} without limitations. With a wide network of liquidity providers and advanced algorithms, I ensure smooth, optimized swaps, whether it’s a large amount or just a couple of dollars."
                         }
                     }
                 },
-                "recent-swaps": {
-                    "title": "Recent Swaps in Real Time"
+                "available-pairs-table": {
+                    "title": "Here is a list of all coins you can swap {{tickerWithProtocol}} to",
+                    "show-more-button-title": "View More {{tickerWithProtocol}} Pairs"
+                },
+                "asset-description": {
+                    "title": "What is {{assetName}}?"
+                },
+                "asset-market-data": {
+                    "title": "{{nameAndBracedTicker}} Market Data",
+                    "subtitle": "Below is the key market data for {{tickerAndBracedProtocol}}, updated every 10 minutes."
+                },
+                "articles": {
+                    "title": "{{tickerPrintable}} News",
+                    "content": "Some of Rabbit's insights on {{nameAndBracedProtocol}}, along with picks I find interesting from other media sources across the internet."
+                },
+                "random-coins": {
+                    "title": "More Cryptocurrencies to Exchange"
                 }
             },
             "PublicSwapPairLanding": {
                 "meta": {
-                    "title": "Swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} Instantly with the Lowest Fees — Rabbit Swap",
-                    "keywords": "swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, exchange {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, swap {{fromAssetName}} to {{toAssetName}}, exchange {{fromAssetName}} to {{toAssetName}}, trade {{fromTickerPrintable}}/{{toTickerPrintable}}, swap {{fromTickerPrintable}} to {{toTickerPrintable}}, exchange {{fromTickerPrintable}} to {{toTickerPrintable}}, swap crypto, crypto exchange, cryptocurrency swap, cryptocurrency exchange, swap crypto with lowest fees, exchange coins, swap tokens, fast crypto exchange, swap coins, low-cost swaps, digital asset swap, quick coin swaps",
-                    "description": "Exchange {{fromTickerAndBracedProtocol}} to {{toTickerAndBracedProtocol}} instantly with Rabbit Swap — the unique crypto exchange with the best rates. No sign-up required — swap {{fromAssetName}} to {{toAssetName}} with just one click!"
+                    "title": "Exchange {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} Instantly at the Best Rate",
+                    "keywords": "exchange {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, exchange {{fromNameAndProtocol}} to {{toNameAndProtocol}}, swap {{fromNameAndProtocol}} to {{toNameAndProtocol}}, convert {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, convert {{fromNameAndProtocol}} to {{toNameAndProtocol}}, trade {{fromTickerWithProtocol}}/{{toTickerWithProtocol}}, exchange crypto, exchange cryptocurrency, swap crypto, swap cryptocurrency, exchange coins, swap tokens, digital asset swap, {{fromTickerWithProtocol}} price, {{toTickerWithProtocol}} price, {{fromTickerWithProtocol}} market data, {{toTickerWithProtocol}} market data, {{fromNameAndProtocol}} price, {{toNameAndProtocol}} price, {{fromNameAndProtocol}} market data, {{toNameAndProtocol}} market data, no kyc, exchange {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} anonymously, swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} anonymously",
+                    "description": "Exchange {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} with Rabbit Swap at the best rate. No sign-up, no limits, no bullshit - just fast, secure crypto swaps."
                 },
                 "hero": {
-                    "title": "{{fromTickerPrintable}} to {{toTickerPrintable}} Swap Made Easy",
-                    "content": "Exchange {{fromNameAndBracedProtocol}} to {{toNameAndBracedProtocol}} at the best rate. Instantly. No sign-up required. Go ahead, just enter the amount!"
+                    "title": "Swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} Made Easy",
+                    "content": "Hi, it’s Rabbit 🐰 Instantly exchange {{fromNameAndProtocol}} to {{toNameAndProtocol}} at the best rate. Start your swap with one click. Support is available 24/7. No sign-up, no limits, no bullshit."
                 },
                 "how-to-swap": {
-                    "title": "How to exchange {{fromTickerPrintable}} to {{toTickerPrintable}}?",
-                    "content": "Using Rabbit Swap is easy and straightforward; below, you can find all the steps you need to take to swap your {{fromAssetName}} to {{toAssetName}}:",
+                    "title": "How to exchange {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}?",
+                    "content": "Using Rabbit Swap is easy and straightforward. Below, you’ll find all the steps you need to swap your {{fromNameAndProtocol}} for {{toNameAndProtocol}}.",
                     "items": {
                         "1": {
                             "title": "Enter the Amount",
@@ -166,37 +203,58 @@
                     }
                 },
                 "best-rates": {
-                    "title": "Best Rates Possible",
-                    "content": "Ensure that you get the best possible rates when exchanging your {{fromNameAndBracedProtocol}} to {{toNameAndBracedProtocol}}. Rabbit Swap dynamically compares rates from various liquidity providers and selects the best rate each time you perform an exchange."
+                    "title": "Swap {{fromNameAndProtocol}} to {{toNameAndProtocol}} at the Best Rate",
+                    "content": "Ensure you get the best possible rates when exchanging {{fromNameAndProtocol}} to {{toNameAndProtocol}}. Rabbit Swap uses a unique algorithm that dynamically compares rates across various liquidity providers, selecting the lowest one specifically for your amount to ensure your swap happens at the most profitable rate. Seriously, let me know if you find a better {{fromTickerWithProtocol}}/{{toTickerWithProtocol}} rate anywhere else."
                 },
                 "wide-limits": {
-                    "title": "Lowest and Highest Limits",
-                    "content": "By having a diverse range of liquidity providers under the hood, Rabbit Swap is essentially limitless in terms of possible swap amounts. Whether you want to exchange a few dollars or billions of dollars, Rabbit Swap can handle it."
+                    "title": "No Limits for Exchanging {{fromTickerWithProtocol}} and {{toTickerWithProtocol}}",
+                    "content": "With access to multiple liquidity providers, Rabbit Swap offers a wide range of exchange limits. You can swap anything from tiny amounts of {{fromTickerWithProtocol}} and {{toTickerWithProtocol}} to almost infinitely large transactions. This approach also helps prevent price drops when exchanging large amounts of low-liquidity assets. I’ll make sure your {{fromNameAndProtocol}} to {{toNameAndProtocol}} swap is distributed across different liquidity sources, so you always get the best possible price."
                 },
                 "features-grid": {
-                    "title": "Why exchange {{fromTickerPrintable}} to {{toTickerPrintable}} with Rabbit Swap?",
-                    "content": "Rabbit Swap is designed to make the {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} swap process cost-effective, secure, fast, and as easy as sending a text message.",
+                    "title": "Why exchange {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} with Rabbit Swap?",
+                    "content": "Rabbit Swap is designed to make {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} swap process cost-effective, secure, fast, and as easy as sending a text.",
                     "items": {
                         "1": {
-                            "title": "No Sign-Up Required",
-                            "content": "Exchange any amount of {{fromNameAndBracedProtocol}} and {{toNameAndBracedProtocol}} with the lowest fees and almost instant speed — no sign-up required. It can be done in just a few clicks."
+                            "title": "Just a Swap",
+                            "content": "You just want to exchange your {{fromNameAndProtocol}} to {{toNameAndProtocol}} - no sign-up, no verification, no selfies, and no sensational loyalty programs. You just want to swap your cryptocurrency. I get it. That’s exactly how it works here. No complications, just a swap."
                         },
                         "2": {
-                            "title": "Wide Range of Supported Assets",
-                            "content": "Besides of {{fromNameAndBracedProtocol}} and {{toNameAndBracedProtocol}}, you can choose from more than 3600 coins and tokens available for swapping."
+                            "title": "Not only {{fromNameAndProtocol}} and {{toNameAndProtocol}}",
+                            "content": "Besides {{fromNameAndProtocol}} and {{toNameAndProtocol}}, you can choose from any of {{assetCount}} cryptocurrencies available for exchange. This means you have access to millions of possible pairs to swap on Rabbit Swap - something you won’t find on traditional exchange platforms."
                         },
                         "3": {
-                            "title": "Respect for Privacy",
-                            "content": "The exchange process relies solely on anonymized information. Rabbit Swap will never request any details other than your {{toNameAndBracedProtocol}} address for receiving coins."
+                            "title": "Exchange {{fromNameAndProtocol}} to {{toNameAndProtocol}} anonymously",
+                            "content": "The exchange process relies solely on anonymized information. Rabbit Swap will never request any personal information other than your {{toNameAndProtocol}} address for receiving coins. No KYC is required for the vast majority of exchanges."
                         },
                         "4": {
                             "title": "Jedi-Level Support",
-                            "content": "While all swaps are performed completely automatically, sometimes we need to talk to someone real. Chat with one of our supporters at any time of the day or night."
+                            "content": "While {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} swaps are fully automated, sometimes you just need to talk to someone real. Chat with Rabbit anytime, day or night, even if it’s just for fun."
+                        },
+                        "5": {
+                            "title": "It’s Profitable",
+                            "content": "Rabbit Swap ensures you get the best {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} exchange rate by automatically finding the most profitable path across multiple liquidity sources. Simple, seamless, and always optimized."
+                        },
+                        "6": {
+                            "title": "Beyond Any Limits",
+                            "content": "Exchange any amount of {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} without limitations. With a wide network of liquidity providers and advanced algorithms, I ensure smooth, optimized swaps, whether it’s a large amount or just a couple of dollars."
                         }
                     }
                 },
-                "recent-swaps": {
-                    "title": "Recent Swaps in Real Time"
+                "available-pairs-table": {
+                    "title-from": "Here are some other coins you can swap your {{coinTicker}} to",
+                    "title-to": "And some other coins you can swap {{coinTicker}} to",
+                    "show-more-button-title": "View More {{coinTicker}} Pairs"
+                },
+                "asset-market-data": {
+                    "title": "{{nameAndBracedTicker}} Market Data",
+                    "subtitle": "Below is the key market data for {{tickerAndBracedProtocol}}, updated every 10 minutes."
+                },
+                "articles": {
+                    "title": "{{fromTickerPrintable}}/{{toTickerPrintable}} News",
+                    "content": "Some of Rabbit's insights on {{fromNameAndBracedProtocol}} and {{toNameAndBracedProtocol}}, along with picks I find interesting from other media sources across the internet."
+                },
+                "random-coins": {
+                    "title": "More Cryptocurrencies to Exchange"
                 }
             },
             "UnexpectedErrorPage": {
@@ -207,7 +265,7 @@
                 "sign-in-button-content": "Home"
             },
             "PrivacyPolicy": {
-                "title": "SWAP.RABBIT.IO PRIVACY POLICY",
+                "title": "RABBIT.IO PRIVACY POLICY",
                 "meta": {
                     "title": "Privacy Policy – Rabbit Swap",
                     "description": "Review Rabbit Swap's Privacy Policy for a clear understanding of how we handle your information on our cryptocurrency exchange platform. We prioritize transparency to ensure your privacy is protected throughout your experience.",
@@ -215,12 +273,46 @@
                 }
             },
             "TermsOfUse": {
-                "title": "SWAP.RABBIT.IO TERMS OF USE",
+                "title": "RABBIT.IO TERMS OF USE",
                 "meta": {
                     "title": "Terms of Use – Rabbit Swap",
                     "description": "Review Rabbit Swap's Terms of Use for clear guidelines on using our cryptocurrency exchange platform. Understand your rights and responsibilities to ensure a smooth experience.",
                     "keywords": "terms of use, swap crypto, crypto exchange, cryptocurrency swap, cryptocurrency exchange"
                 }
+            },
+            "ExchangePairs": {
+                "title": "Coins to Swap {{assetName}} for",
+                "subtitle": "At this very moment, you can swap {{assetName}} for any of the {{assetCount}} coins listed below.",
+                "link-title": "Exchange {{assetNameFrom}} to {{assetNameTo}}",
+                "meta": {
+                    "title": "{{assetName}} to Other Cryptocurrencies on Rabbit Swap",
+                    "keywords": "exchange {{tickerWithProtocol}} to other crypto, exchange {{nameWithProtocol}} to other crypto, swap {{tickerWithProtocol}} for other crypto, swap {{nameWithProtocol}} for other crypto, what crypto to exchange {{tickerWithProtocol}} for, {{tickerWithProtocol}} pairs, {{tickerWithProtocol}} tickers, coins to swap for {{tickerWithProtocol}}",
+                    "description": "Here’s a complete list of {{assetCount}} assets you can swap {{assetName}} to right now on Rabbit Swap."
+                }
+            },
+            "AllCurrenciesList": {
+                "title": "Full List of Assets Available for Exchange",
+                "subtitle": "Right now, there are {{assetCount}} cryptocurrencies you can exchange on Rabbit Swap. This is a dynamic list, with coins being added or removed daily based on various factors.",
+                "asset-link-title": "{{nameAndProtocol}} ({{tickerPretty}})",
+                "pairs-link-title": "Swap {{nameAndProtocol}} ({{tickerPretty}}) to other crypto",
+                "meta": {
+                    "title": "The Complete List of Assets Available for Exchange on Rabbit",
+                    "keywords": "full list of crypto assets, list of cryptocurrencies, available coins for exchange, exchangeable cryptocurrencies, crypto swap assets, supported coins, available tokens, digital assets list, rabbit swap coins, full crypto exchange list, all cryptocurrencies for swap, list of tradable assets, crypto exchange list, digital assets for swap",
+                    "description": "Discover the full list of coins available for exchange on Rabbit Swap. Choose from over {{assetCount}} cryptocurrencies - almost every coin you could ever want to exchange is here."
+                }
+            },
+            "Blog": {
+                "title": "It’s All About Crypto Blog",
+                "subtitle": "For those whose lives were changed the day Satoshi Nakamoto published the first Bitcoin code. Here, I’ll share insights on crypto trends, opinions on the latest news, and tips for all you crypto enthusiasts.",
+                "meta": {
+                    "title": "Latest News, Insights, and Tips for Crypto Enthusiasts",
+                    "keywords": "crypto news, crypto blog, crypto insights, crypto trading tips, cryptocurrency news, cryptocurrency blog, bitcoin news, cryptocurrency insights, cryptocurrency trading tips, blockchain news, cryptocurrency market analysis, dex, nft, crypto trends, cryptocurrency trends, cryptocurrency regulations, nft trends, crypto tax tips, web3 technology, future of cryptocurrency, crypto security tips, how to store crypto safely, latest blockchain innovations, staking cryptocurrency, passive income with crypto, crypto for beginners, crypto market trends, decentralized exchanges",
+                    "description": "Discover insights, market updates, and expert tips on the entire cryptocurrency space. Get an independent perspective on daily crypto news from Rabbit."
+                }
+            },
+            "Article": {
+                "title-addition": "Rabbit's Blog",
+                "source-link-en": "Translated from English"
             }
         },
         "organisms": {
@@ -233,26 +325,33 @@
             "LandingFooter": {
                 "single-asset": {
                     "title": "Exchange",
-                    "item-content": "Exchange {{ticker}}"
+                    "item-content": "Exchange {{ticker}}",
+                    "view-more": "More Cryptocurrencies"
                 },
                 "pair": {
                     "title": "Exchange pairs",
                     "item-content": "{{tickerFrom}} to {{tickerTo}}"
-                }
+                },
+                "support-message": "The exchange service is fully automated and operates around the clock. Online chat with support is available 24/7 (response time: 5 minutes). You can also reach us at support@rabbit.io (response time: 48 hours)."
             },
             "AssetDropdown": {
                 "field-placeholder": "Search..",
-                "text-loading": "Loading all coins..",
                 "text-default": "All available assets",
                 "text-search": "Search results",
                 "text-search-fail": "Asset not found",
-                "load-more-button": "Load more"
+                "load-more-button": "Load more",
+                "text-loading": "Loading all coins.."
             },
             "RecentSwapsTable": {
                 "table-head-tiles": {
                     "from": "From",
                     "to": "To",
                     "finished": "Finished"
+                },
+                "time-ago": {
+                    "seconds": "{{timeAmount}} seconds ago",
+                    "minutes": "{{timeAmount}} minutes ago",
+                    "hours": "{{timeAmount}} hours ago"
                 }
             },
             "SwapForm": {
@@ -271,6 +370,7 @@
                     "privacy-policy": "Privacy Policy"
                 },
                 "information-block": {
+                    "enter-amount": "Enter the amount to swap",
                     "minimum-amount": "Minimal amount: ",
                     "maximum-amount": "Maximum amount: ",
                     "transaction-fee": "Network fee: ",
@@ -306,145 +406,226 @@
                     "step-titles": {
                         "awaiting": "Awaiting payment · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
                         "confirming": "Confirming payment · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
+                        "verifying": "Verification required · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
                         "exchanging": "Swapping your coins · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
                         "completed": "Successfully swapped! · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
                         "refunded": "Refunded your coins · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
                         "expired": "Expired · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
                         "failed": "Failed to swap · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
-                        "cancellation": "Are you sure? · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap",
                         "error": "Something went wrong · Swap {{amountFrom}} to {{amountTo}} - Rabbit Swap"
                     },
                     "title": "Swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} in Progress - Rabbit Swap",
                     "description": "Please Enter the Required Details for {{fromTickerWithProtocol}} to {{toTickerWithProtocol}} Swap. Rabbit compares rates from diverse liquidity providers to secure the most optimal rate for your exchange.",
                     "keywords": "swap {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, exchange {{fromTickerWithProtocol}} to {{toTickerWithProtocol}}, swap {{fromAssetName}} to {{toAssetName}}, exchange {{fromAssetName}} to {{toAssetName}}, trade {{fromTickerPrintable}}/{{toTickerPrintable}}, swap {{fromTickerPrintable}} to {{toTickerPrintable}}, exchange {{fromTickerPrintable}} to {{toTickerPrintable}}, swap crypto, crypto exchange, cryptocurrency swap, cryptocurrency exchange"
                 },
-                "support-welcome-message": "Chat with us",
-                "loader-title-details": "Loading the swap details...",
-                "common": {
-                    "rate": "Rate"
+                "loader-title": "Loading the swap details...",
+                "loader-error": "We couldn't load the swap details at this time. This might be a temporary issue - please try refreshing the page in a moment. If the problem persists, please contact our support through the live chat and we'll help you out.",
+                "update-error": "We couldn't update the swap details at this time. This might be a temporary issue - please try refreshing the page in a moment. If the problem persists, please contact our support through the live chat and we'll help you out.",
+                "swap-id": {
+                    "title": "Swap ID",
+                    "copied-tooltip": "Swap ID copied!"
                 },
-                "cancel-swap-confirmation-step": {
-                    "title": "Cancel the swap?",
-                    "subtitle": "Closing this will recalculate the current swap rate, potentially resulting in a worse or better deal. Just so you're aware.",
-                    "cancel-swap-button-title": "Cancel anyway",
-                    "keep-swap-button-title": "Keep the rate"
+                "status": {
+                    "title": "Status"
                 },
-                "unexpected-error-step": {
-                    "title": "Something went wrong...",
-                    "subtitle": "Unfortunately we failed to perform the last operation. Please refresh the page and try again. Or contact support if this error happens repeatedly. We apologize for the inconvenience.",
-                    "confirm-button-text": "Reload the page"
-                },
-                "rateModeDisclaimers": {
-                    "fixed": "With a fixed rate, the exchange rate is locked in when the swap is created. This guarantees the exact amount you will receive, protecting against market fluctuations.",
-                    "floating": "With a floating rate, the exchange rate may vary until the transaction is completed. This allows for potential market advantages but also carries the risk of rate changes."
-                },
-                "SwapFlowPaymentAwaiting": {
-                    "title": "Awaiting your payment",
-                    "subtitle": "Please send the {{fromCoinName}} to the address below. The page will be updated automatically once the transaction is received.",
-                    "back-button-text": "Cancel this Swap",
-                    "extra-id-notice": "Ensure you enter the required 'Memo' or 'Destination Tag' in your wallet when sending funds. This is crucial for correct transaction processing. Incorrect information may result in lost funds.",
-                    "block-titles": {
-                        "amount-send": "Send exactly",
-                        "address": "To this address",
-                        "amount-receive": "You will receive",
-                        "timer": "Time left for payment",
-                        "swap-id": "Swap ID",
-                        "extra-id": "And specify this {{extraIdName}}"
+                "extended-information": {
+                    "section-title": "Extended information",
+                    "general-swap-details": {
+                        "title": "Swap Details",
+                        "deposit-amount": "Amount to swap",
+                        "withdrawal-amount": "Amount to receive",
+                        "exchange-rate": "Exchange rate",
+                        "rate-mode": {
+                            "title": "Rate mode",
+                            "fixed-notice": "With a fixed rate, the exchange rate is locked in when the swap is created. This guarantees the exact amount you will receive, protecting against market fluctuations.",
+                            "floating-notice": "With a floating rate, the exchange rate may vary until the transaction is completed. This allows for potential market advantages but also carries the risk of rate changes."
+                        },
+                        "fixed-rate": "Fixed",
+                        "floating-rate": "Floating",
+                        "refund-address": "Refund address",
+                        "refund-extra-id": "Refund {{extraIdName}}",
+                        "created-at": "Created at"
                     },
-                    "pushes": {
-                        "copy-amount-failed": {
-                            "title": "Copying failed",
-                            "text": "Sorry, we couldn't copy the send amount. Please refresh the page and try again."
+                    "deposit-transaction": {
+                        "title": "Inbound Transaction",
+                        "asset": "Asset to send",
+                        "address": "To address",
+                        "contract-address": "Contract address",
+                        "transaction-id": "Transaction ID"
+                    },
+                    "withdrawal-transaction": {
+                        "title": "Outbound Transaction",
+                        "asset": "Asset to receive",
+                        "address": "To address",
+                        "contract-address": "Contract address",
+                        "transaction-id": "Transaction ID"
+                    }
+                },
+                "ton-swap-notice": "If your wallet doesn't send a jetton notification along with your transaction, your transaction might require manual handling. Most popular wallets like Tonkeeper and Tonhub support it, but if you are using less popular wallet or just not quite sure - just contact us through the live chat and we will help you!",
+                "SwapFlowInformation": {
+                    "create-new-swap-button": "Create another swap",
+                    "awaiting": {
+                        "title": "Send funds to the address below",
+                        "amount-title": "Send exactly",
+                        "amount-tooltip": "Amount copied!",
+                        "address-title": "To address",
+                        "address-tooltip": "Address copied!",
+                        "extra-id-title": "And specify this {{extraIdName}}",
+                        "extra-id-tooltip": "{{extraIdName}} copied!",
+                        "extra-id-notice": "Ensure you enter the required 'Memo' or 'Destination Tag' in your wallet when sending funds. This is crucial for correct transaction processing. Incorrect information may result in lost funds.",
+                        "amount-qr": {
+                            "title": "Amount to Send",
+                            "subtitle": "Scan this QR code to get the amount to send for your swap transaction"
                         },
-                        "copy-address-failed": {
-                            "title": "Copying failed",
-                            "text": "Sorry, we couldn't copy the payment address. Please refresh the page and try again."
+                        "address-qr": {
+                            "title": "Deposit Address",
+                            "subtitle": "Scan this QR code to get the deposit address for your swap transaction"
                         },
-                        "copy-swap-id-failed": {
-                            "title": "Copying failed",
-                            "text": "Sorry, we couldn't copy the swap ID. Please refresh the page and try again."
+                        "destination-tag-qr": {
+                            "subtitle": "Scan this QR code to get the {{extraIdName}} for your swap transaction"
                         }
-                    }
-                },
-                "SwapFlowPaymentConfirming": {
-                    "title": "Waiting for confirmation",
-                    "subtitle": "Your transaction has been received. Please wait a moment for the transaction to be confirmed with blockchain. Once it's done the page will be updated automatically.",
-                    "block-titles": {
-                        "amount-send": "Amount to swap",
-                        "amount-receive": "Amount to receive",
-                        "address": "Recipient address",
-                        "swap-id": "Swap ID",
-                        "extra-id": "Recipient {{extraIdName}}"
-                    }
-                },
-                "SwapFlowPaymentExchanging": {
-                    "title": "Swapping your coins",
-                    "subtitle": "Your transaction has been confirmed and the swap now is in progress. Please wait a moment for it to finish. Once it's done the page will be updated automatically.",
-                    "block-titles": {
-                        "amount-send": "Amount to swap",
-                        "amount-receive": "Amount to receive",
-                        "address": "Recepient address",
-                        "swap-id": "Swap ID",
-                        "extra-id": "Recipient {{extraIdName}}"
-                    }
-                },
-                "SwapFlowPaymentCompleted": {
-                    "title": "Swap completed!",
-                    "subtitle": "Your swap is now completed and the coins have been sent to the provided address. Thank you for using Rabbit Swap.",
-                    "confirm-button-text": "Create another swap",
-                    "block-titles": {
-                        "amount-to-swap": "Amount to swap",
-                        "amount-sent": "Amount sent",
-                        "address": "Recepient address",
-                        "swap-id": "Swap ID",
-                        "transaction-id": "Output transaction ID ({{ticker}})",
-                        "extra-id": "Recipient {{extraIdName}}"
-                    }
-                },
-                "SwapFlowPaymentRefunded": {
-                    "title": "Swap refunded",
-                    "subtitle": "We regret to inform you that your swap hasn't been completed and therefore refunded. Please contact the support team so we can check what happened. Use the Swap ID as a reference: {{swapId}}.",
-                    "confirm-button-text": "Create new swap"
-                },
-                "SwapFlowPaymentExpired": {
-                    "title": "Swap expired",
-                    "subtitle": "Your transaction hasn't been received in time, and the swap is now expired. If you haven't sent anything, you can just create a new swap. If you already sent your coins, don't worry, just contact support so we can either recalculate the rate or send you a refund. Please use the Swap ID as a reference: {{swapId}}.",
-                    "confirm-button-text": "Create new swap"
-                },
-                "pushes": {
-                    "swap-not-found": {
-                        "title": "Swap was not found!",
-                        "text": "Sorry, swap with the provided id was not found."
                     },
-                    "swap-init-failed": {
-                        "title": "Swap loading failed!",
-                        "text": "We've encountered an error while loading the swap details. Please reload the page and try again."
+                    "completed": {
+                        "title": "Swap completed!",
+                        "subtitle": "Your swap is now completed and the coins have been sent to the provided address. Thank you for using Rabbit Swap.",
+                        "tiles": {
+                            "speedup": {
+                                "text": "The swap was completed {{speedupMinutes}} minutes faster than expected!"
+                            },
+                            "bonus": {
+                                "text": "Received {{bonusPercentage}}% more than originally expected!"
+                            },
+                            "review": {
+                                "text": "We would really appreciate it if you left a review about Rabbit!",
+                                "button": "Leave a review"
+                            },
+                            "new-exchange": {
+                                "text": "Have another swap to do? Go ahead!",
+                                "button": "New swap"
+                            }
+                        }
                     },
-                    "swap-details-loading-failed": {
-                        "title": "Swap loading failed!",
-                        "text": "We've encountered an error while loading the swap details. Please reload the page and try again."
+                    "confirming": {
+                        "title": "Waiting for confirmation",
+                        "subtitle": "Your transaction has been received. Please wait a moment for the transaction to be confirmed with blockchain. Once it's done the page will be updated automatically."
                     },
-                    "requests-limit-exceeded": {
-                        "title": "Swap service is overloaded!",
-                        "text": "Sorry, our service is experiencing a temporary interruption due to high demand. Please try again in a few minutes. We appreciate your understanding."
+                    "verifying": {
+                        "title": "Verification required",
+                        "subtitle": "Your transaction has been successfully received. However, we're required by regulations to conduct an identity check for certain transactions that didn't pass AML checks. We hate this as much as you do and do our best to minimize it, but it's something we can't completely avoid. Just reach out to our support team via live chat, and we'll guide you through the quick verification process. Sorry for the hassle."
                     },
-                    "maximum-amount-exceeded": {
-                        "title": "Maximum amount exceeded",
-                        "text": "The amount you are trying to swap is exceeding the accepted maximum amount."
+                    "exchanging": {
+                        "title": "Swapping your coins",
+                        "subtitle": "Your transaction has been confirmed and the swap now is in progress. Please wait a moment for it to finish. Once it's done the page will be updated automatically."
                     },
-                    "minimum-amount-not-reached": {
-                        "title": "Minimal amount not reached",
-                        "text": "The amount you are trying to swap is below the accepted minimal amount."
+                    "refunded": {
+                        "title": "Swap refunded",
+                        "subtitle": "I regret to inform you that your swap hasn't been completed and therefore refunded. Please contact the support team so we can check what happened. Use the Swap ID as a reference: #{{swapId}}."
                     },
-                    "pair-not-supported": {
-                        "title": "Pair not available",
-                        "text": "Sorry, the selected pair is not available now. Please try again later or choose another pair."
+                    "expired": {
+                        "title": "Swap expired",
+                        "subtitle": "Your transaction hasn't been received in time, and the swap is now expired. If you haven't sent anything, you can just create a new swap. If you already sent your coins, don't worry, just contact support so your swap rate will either be recalculated or your will receive a refund. Please use the Swap ID as a reference: #{{swapId}}."
                     },
-                    "default-error": {
-                        "title": "Something went wrong...",
-                        "text": "Sorry, we failed to perform the last operation, please try again or contact support."
+                    "failed": {
+                        "title": "Swap failed",
+                        "subtitle": "We're sorry, but your exchange couldn't be completed due to an unexpected issue. Don't worry - please reach out to our support team through the live chat so we can investigate what happened. Make sure to mention your Swap ID: #{{swapId}} when contacting us."
                     }
                 }
+            },
+            "SwapStatus": {
+                "awaiting": "Receive payment",
+                "exchanging": "Exchange the coins",
+                "refunded": "Refund the swap",
+                "confirming": "Confirm the transaction",
+                "verifying": "Verify your identity",
+                "completed": "Send exchanged coins",
+                "expired": "Swap expired",
+                "failed": "Swap failed",
+                "created": "Swap created",
+                "payment-tooltip": "Time remaining to complete your payment to the deposit address",
+                "duration-minutes-title-shortened": "min"
+            },
+            "WaitlistSubscription": {
+                "colored-notice": {
+                    "button-title": "Subscribe for updates",
+                    "text": "Swaps for {{coinLatinName}} ({{coinTicker}}) are not available yet. As soon as exchanges are allowed, we'll automatically enable swapping. Want to be the first to know when it happens? Subscribe for a notification!"
+                },
+                "sign-up-step": {
+                    "action-button-title": "Subscribe",
+                    "error": "Something went wrong. Please try again later.",
+                    "input-title": "Your email address:",
+                    "subtitle": "To be notified as soon as {{coinLatinName}} becomes available for swaps, please provide your email address. We’ll send you a single notification when it’s listed.",
+                    "title": "{{coinLatinName}} ({{coinTicker}}) listing notification"
+                },
+                "success-step": {
+                    "action-button-title": "Close",
+                    "subtitle": "We’ll notify you as soon as {{coinLatinName}} becomes available for swaps. Keep an eye on your inbox for the update.",
+                    "title": "Subscribed successfully!"
+                }
+            },
+            "PartnersLandingSection": {
+                "content": "Meet the trusted exchanges and liquidity providers that help us deliver seamless and reliable swap services behind the scenes.",
+                "title": "Collaborating for Reliable Swaps"
+            },
+            "RabbitStats": {
+                "launched-in": "Launched in",
+                "support-response-time": "Average support response time",
+                "support-response-time-content": "{{amountSingular}} minute",
+                "turnover": "Turnover",
+                "assets-available": "Coins available",
+                "swap-time": "Average swap time",
+                "swap-time-content": "{{amountPlural}} minutes",
+                "profit": "Average profit",
+                "profit-tooltip": "Compared to a variety of well-known swap services"
+            },
+            "RandomCoinsCloud": {
+                "link-title": "Exchange {{assetName}}"
+            },
+            "SwapCurrenciesTable": {
+                "empty-search": "No search results for '{{query}}'",
+                "column-titles": {
+                    "coin": "Coin",
+                    "ticker": "Ticker",
+                    "swap": "Swap"
+                },
+                "swap-link-single-asset-title": "Swap {{assetName}}",
+                "swap-link-pair-title": "Swap {{assetNameFrom}} to {{assetNameTo}}"
+            },
+            "QrCodeModal": {
+                "close-button-title": "Close",
+                "copy-button-title": "Copy",
+                "copy-tooltip": "Copied to clipboard!"
+            }
+        },
+        "molecules": {
+            "MarketData": {
+                "last-updated": "Last updated at {{date}}",
+                "volume": "{{ticker}} Volume in 24h",
+                "min-max-price": "Minimum & Maximum Price in 24h",
+                "price": "{{ticker}} Price & Change in 24h",
+                "rank": "Coin Rank",
+                "supply": "Circulating Supply",
+                "market-cap": "{{ticker}} Market Cap"
+            },
+            "ReviewShowcase": {
+                "trustpilot-link-title": "Read more on Trustpilot"
+            }
+        },
+        "atoms": {
+            "PageTree": {
+                "landingPrimary": "Home",
+                "landingSingleAsset": "Swap {{ticker}}",
+                "landingTwoAssets": "Exchange {{tickerFrom}} to {{tickerTo}}",
+                "allCurrencies": "All Cryptocurrencies",
+                "exchangePairs": "Swap {{ticker}} to other crypto",
+                "blog": "Blog",
+                "termsOfUse": "Terms of Use",
+                "privacyPolicy": "Privacy Policy"
+            },
+            "MarketChangeNotice": {
+                "text-gain-gain": "Based on market data analysis as of {{date}}, {{assetName}} has been in an uptrend over the past month, growing by {{percentageMonth}}. In the last 24 hours it had {{percentageDay}} gain in value. Above is the key market data for {{assetTicker}}, updated every 10 minutes.",
+                "text-gain-loss": "Based on market data analysis as of {{date}}, {{assetName}} has been in an uptrend over the past month, growing by {{percentageMonth}}. In the last 24 hours it had {{percentageDay}} loss in value. Above is the key market data for {{assetTicker}}, updated every 10 minutes.",
+                "text-loss-gain": "Based on market data analysis as of {{date}}, {{assetName}} has been in a downtrend over the past month, losing its value by {{percentageMonth}}. In the last 24 hours it had {{percentageDay}} gain in value. Above is the key market data for {{assetTicker}}, updated every 10 minutes.",
+                "text-loss-loss": "Based on market data analysis as of {{date}}, {{assetName}} has been in a downtrend over the past month, losing its value by {{percentageMonth}}. In the last 24 hours it had {{percentageDay}} loss in value. Above is the key market data for {{assetTicker}}, updated every 10 minutes."
             }
         }
     },
@@ -457,10 +638,13 @@
         "page-titles": {
             "terms-and-conditions": "Terms & Conditions",
             "privacy-policy": "Privacy Policy",
-            "try-wallet": "Try Rabbit Wallet"
+            "try-wallet": "Try Rabbit Wallet",
+            "blog": "Blog",
+            "affiliate-program": "Affiliate Program"
         },
         "support-chat-message": "Chat with us",
         "default-copy-button-title": "Copy",
-        "default-copy-button-tooltip": "Copied!"
+        "default-copy-button-tooltip": "Copied!",
+        "view-more-button": "View More"
     }
 }

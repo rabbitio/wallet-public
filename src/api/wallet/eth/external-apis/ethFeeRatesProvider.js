@@ -4,12 +4,15 @@ import {
     CachedRobustExternalApiCallerService,
     ExternalApiProvider,
     ApiGroups,
+    Logger,
 } from "@rabbitio/ui-kit";
 
 import { Storage } from "../../../common/services/internal/storage.js";
 import { Coins } from "../../coins.js";
 import { SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS } from "../../../common/utils/ttlConstants.js";
 import { cache } from "../../../common/utils/cache.js";
+import { API_KEYS_PROXY_URL } from "../../../common/backend-api/utils.js";
+import { gweiDecimalPlaces } from "../ethereum.js";
 
 class EthFeeRatesBlockNativeProvider extends ExternalApiProvider {
     constructor() {
@@ -18,6 +21,10 @@ class EthFeeRatesBlockNativeProvider extends ExternalApiProvider {
 
     getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
         try {
+            Logger.log(
+                "ETH fee rates raw blocknative:" + safeStringify(response?.data),
+                "blocknative.feerates.getDataByResponse"
+            );
             if (
                 response.data?.blockPrices[0]?.estimatedPrices == null ||
                 response.data?.blockPrices[0]?.baseFeePerGas == null
@@ -43,42 +50,6 @@ class EthFeeRatesBlockNativeProvider extends ExternalApiProvider {
     }
 }
 
-class EthFeeRatesEthGasStationProvider extends ExternalApiProvider {
-    constructor() {
-        super("https://api.ethgasstation.info/api/fee-estimate", "get", 7000, ApiGroups.ETHGASSTATION);
-    }
-
-    getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
-        try {
-            if (
-                response.data?.priorityFee?.fast == null ||
-                response.data?.priorityFee?.instant == null ||
-                response.data?.priorityFee?.standard == null ||
-                response.data?.nextBaseFee == null
-            ) {
-                throw new Error("Wrong format of price returned by eth gas station: " + safeStringify(response?.data));
-            }
-            const baseFeePerGas = response.data?.nextBaseFee;
-            const midOption = Math.ceil(
-                (+response.data?.priorityFee?.fast + +response.data?.priorityFee?.standard) / 2
-            );
-            const optionsForMaxPriorityFeePerGas = [
-                +response.data?.priorityFee?.instant,
-                +response.data?.priorityFee?.fast,
-                +midOption,
-                +response.data?.priorityFee?.standard,
-            ];
-
-            return {
-                baseFeePerGas: +baseFeePerGas,
-                optionsForMaxPriorityFeePerGas: optionsForMaxPriorityFeePerGas,
-            };
-        } catch (e) {
-            improveAndRethrow(e, "ethFeeRatesEthGasStationProvider.getDataByResponse");
-        }
-    }
-}
-
 class EtherscanEthFeeRatesProvider extends ExternalApiProvider {
     constructor() {
         super("", "get", 15000, ApiGroups.ETHERSCAN);
@@ -86,10 +57,7 @@ class EtherscanEthFeeRatesProvider extends ExternalApiProvider {
 
     composeQueryString(params, subRequestIndex = 0) {
         try {
-            const networkPrefix =
-                Storage.getCurrentNetwork(Coins.COINS.ETH) === Coins.COINS.ETH.mainnet ? "" : "-goerli";
-            // NOTE: add api key if you decide to use paid API '&apikey=YourApiKeyToken'
-            return `https://api${networkPrefix}.etherscan.io/api?module=gastracker&action=gasoracle`;
+            return `${API_KEYS_PROXY_URL}/${this.apiGroup.backendProxyIdGenerator(Storage.getCurrentNetwork(Coins.COINS.ETH)?.key)}?module=gastracker&action=gasoracle`;
         } catch (e) {
             improveAndRethrow(e, "EtherscanEthFeeRatesProvider.composeQueryString");
         }
@@ -98,6 +66,8 @@ class EtherscanEthFeeRatesProvider extends ExternalApiProvider {
     getDataByResponse(response, params = [], subRequestIndex = 0, iterationsData = []) {
         try {
             const data = response?.data?.result;
+            Logger.log("ETH fee rates raw etherscan:" + safeStringify(data), "etherscan.feerates.getDataByResponse");
+
             if (
                 data?.SafeGasPrice == null ||
                 data?.ProposeGasPrice == null ||
@@ -107,7 +77,7 @@ class EtherscanEthFeeRatesProvider extends ExternalApiProvider {
                 throw new Error("Wrong format of gas price returned by etherscan: " + safeStringify(data));
             }
             const baseFeePerGas = data?.suggestBaseFee;
-            const midOption = Math.ceil((+data.SafeGasPrice + +data.ProposeGasPrice) / 2);
+            const midOption = ((+data.SafeGasPrice + +data.ProposeGasPrice) / 2).toFixed(gweiDecimalPlaces);
             const optionsForMaxPriorityFeePerGas = [
                 +data.FastGasPrice,
                 +data.ProposeGasPrice,
@@ -131,11 +101,7 @@ export class EthFeeRatesProvider {
         this._provider = new CachedRobustExternalApiCallerService(
             this.bio,
             cache,
-            [
-                new EthFeeRatesBlockNativeProvider(),
-                new EthFeeRatesEthGasStationProvider(),
-                new EtherscanEthFeeRatesProvider(),
-            ],
+            [new EthFeeRatesBlockNativeProvider(), new EtherscanEthFeeRatesProvider()],
             SMALL_TTL_FOR_FREQ_CHANGING_DATA_MS,
             false
         );
@@ -147,11 +113,13 @@ export class EthFeeRatesProvider {
      * Options are priorityFeePerGas sorted by highest rate (and speed) descending.
      * All values are GWei numbers.
      *
-     * @return {Promise<{ baseFeePerGas: number, optionsForMaxPriorityFeePerGas: number[]}>}
+     * @return {Promise<{ baseFeePerGas: number, optionsForMaxPriorityFeePerGas: number}[]>}
      */
     async retrieveEthFeeRates() {
         try {
-            return await this._provider.callExternalAPICached([], 10000);
+            const rates = await this._provider.callExternalAPICached([], 10000);
+            Logger.log("ETH fee rates, " + safeStringify(rates), "retrieveEthFeeRates");
+            return rates;
         } catch (e) {
             improveAndRethrow(e, this.bio);
         }

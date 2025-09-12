@@ -1,277 +1,277 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://rabbit.io</loc>
+        <loc>https://wallet.rabbit.io</loc>
         <changefreq>always</changefreq>
         <priority>1</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/signin</loc>
+        <loc>https://wallet.rabbit.io/signin</loc>
         <changefreq>always</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins</loc>
+        <loc>https://wallet.rabbit.io/coins</loc>
         <changefreq>always</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/signup</loc>
+        <loc>https://wallet.rabbit.io/signup</loc>
         <changefreq>always</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/import</loc>
+        <loc>https://wallet.rabbit.io/import</loc>
         <changefreq>always</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/docs/legal/terms-of-use.html</loc>
+        <loc>https://wallet.rabbit.io/docs/legal/terms-of-use.html</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/docs/legal/privacy-policy.html</loc>
+        <loc>https://wallet.rabbit.io/docs/legal/privacy-policy.html</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/support</loc>
+        <loc>https://wallet.rabbit.io/support</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/BTC</loc>
+        <loc>https://wallet.rabbit.io/coins/BTC</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/ETH</loc>
+        <loc>https://wallet.rabbit.io/coins/ETH</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/TRX</loc>
+        <loc>https://wallet.rabbit.io/coins/TRX</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/USDT</loc>
+        <loc>https://wallet.rabbit.io/coins/USDT</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/USDC</loc>
+        <loc>https://wallet.rabbit.io/coins/USDC</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/SHIB</loc>
+        <loc>https://wallet.rabbit.io/coins/SHIB</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/BUSD</loc>
+        <loc>https://wallet.rabbit.io/coins/BUSD</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/FTM</loc>
+        <loc>https://wallet.rabbit.io/coins/FTM</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/MATIC</loc>
+        <loc>https://wallet.rabbit.io/coins/MATIC</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/GALA</loc>
+        <loc>https://wallet.rabbit.io/coins/GALA</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/LINK</loc>
+        <loc>https://wallet.rabbit.io/coins/LINK</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/AGIX</loc>
+        <loc>https://wallet.rabbit.io/coins/AGIX</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/DAI</loc>
+        <loc>https://wallet.rabbit.io/coins/DAI</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/SAND</loc>
+        <loc>https://wallet.rabbit.io/coins/SAND</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/WBTC</loc>
+        <loc>https://wallet.rabbit.io/coins/WBTC</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/BLUR</loc>
+        <loc>https://wallet.rabbit.io/coins/BLUR</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/GRT</loc>
+        <loc>https://wallet.rabbit.io/coins/GRT</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/MASK</loc>
+        <loc>https://wallet.rabbit.io/coins/MASK</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/TUSD</loc>
+        <loc>https://wallet.rabbit.io/coins/TUSD</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/1INCH</loc>
+        <loc>https://wallet.rabbit.io/coins/1INCH</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/QNT</loc>
+        <loc>https://wallet.rabbit.io/coins/QNT</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/FLOKI</loc>
+        <loc>https://wallet.rabbit.io/coins/FLOKI</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/HEX</loc>
+        <loc>https://wallet.rabbit.io/coins/HEX</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/UNI</loc>
+        <loc>https://wallet.rabbit.io/coins/UNI</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/FET</loc>
+        <loc>https://wallet.rabbit.io/coins/FET</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/SNX</loc>
+        <loc>https://wallet.rabbit.io/coins/SNX</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/SUSHI</loc>
+        <loc>https://wallet.rabbit.io/coins/SUSHI</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/LDO</loc>
+        <loc>https://wallet.rabbit.io/coins/LDO</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/APE</loc>
+        <loc>https://wallet.rabbit.io/coins/APE</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/IMX</loc>
+        <loc>https://wallet.rabbit.io/coins/IMX</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/RNDR</loc>
+        <loc>https://wallet.rabbit.io/coins/RNDR</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/JST</loc>
+        <loc>https://wallet.rabbit.io/coins/JST</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/YFI</loc>
+        <loc>https://wallet.rabbit.io/coins/YFI</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/SUN</loc>
+        <loc>https://wallet.rabbit.io/coins/SUN</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/BTT</loc>
+        <loc>https://wallet.rabbit.io/coins/BTT</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/USDD</loc>
+        <loc>https://wallet.rabbit.io/coins/USDD</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/CVX</loc>
+        <loc>https://wallet.rabbit.io/coins/CVX</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/STETH</loc>
+        <loc>https://wallet.rabbit.io/coins/STETH</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/PAXG</loc>
+        <loc>https://wallet.rabbit.io/coins/PAXG</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/SYN</loc>
+        <loc>https://wallet.rabbit.io/coins/SYN</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/FXS</loc>
+        <loc>https://wallet.rabbit.io/coins/FXS</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/LPT</loc>
+        <loc>https://wallet.rabbit.io/coins/LPT</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/BAL</loc>
+        <loc>https://wallet.rabbit.io/coins/BAL</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/VRA</loc>
+        <loc>https://wallet.rabbit.io/coins/VRA</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/WTRX</loc>
+        <loc>https://wallet.rabbit.io/coins/WTRX</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/STG</loc>
+        <loc>https://wallet.rabbit.io/coins/STG</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rabbit.io/coins/LRC</loc>
+        <loc>https://wallet.rabbit.io/coins/LRC</loc>
         <changefreq>always</changefreq>
         <priority>0.5</priority>
     </url>

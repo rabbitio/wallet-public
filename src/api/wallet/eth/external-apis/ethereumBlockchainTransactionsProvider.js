@@ -81,13 +81,19 @@ class AlchemyEthereumBlockchainTransactionsProvider extends ExternalApiProvider 
             }
             return transfers
                 .map(transfer => {
+                    const assetTickerUppercase = transfer.asset?.toUpperCase();
                     const coin =
-                        transfer.asset === Coins.COINS.ETH.ticker
+                        assetTickerUppercase === Coins.COINS.ETH.ticker
                             ? Coins.COINS.ETH
                             : Coins.getSupportedCoinsList().find(
                                   c =>
-                                      (c.ticker === transfer.asset || c.tickerPrintable === transfer.asset) &&
-                                      c.protocol === ERC20
+                                      ((c.tokenAddress &&
+                                          transfer?.rawContract?.address &&
+                                          c.tokenAddress.toLowerCase() ===
+                                              transfer.rawContract.address.toLowerCase()) ||
+                                          c.ticker === assetTickerUppercase ||
+                                          c.tickerPrintable === assetTickerUppercase) &&
+                                      c.protocol.protocol === ERC20.protocol
                               );
                     if (!coin) {
                         // Means coin is not supported

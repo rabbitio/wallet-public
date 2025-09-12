@@ -112,11 +112,12 @@ export class CoinsListService {
                     coinToFiatRate: balanceItem.coinToFiatRate
                         ? AmountUtils.trim(balanceItem.coinToFiatRate, balanceItem.fiatCurrencyDecimals)
                         : null,
-                    coinFiatRateChange24hPercent: balanceItem.change24hPercent
-                        ? isBalanceZero
-                            ? 0
-                            : +balanceItem.change24hPercent
-                        : null,
+                    coinFiatRateChange24hPercent:
+                        balanceItem.change24hPercent != null
+                            ? isBalanceZero
+                                ? 0
+                                : +balanceItem.change24hPercent
+                            : null,
                     balance: balanceNotTrimmed,
                     balanceFiat: balanceFiat == null ? null : "" + balanceFiat,
                 };

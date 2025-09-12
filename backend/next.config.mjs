@@ -26,6 +26,15 @@ const nextConfig = {
      * So we created it and just put its content here.
      */
     ...i18NextConfig,
+    /*
+     * Controlling dev mode pages reloading - https://github.com/vercel/next.js/issues/29184
+     */
+    onDemandEntries: {
+        // period (in ms) where the server will keep pages in the buffer
+        maxInactiveAge: 60 * 60 * 1000,
+        // number of pages that should be kept simultaneously without being disposed
+        pagesBufferLength: 100,
+    },
 };
 
 export default nextConfig;

@@ -1,0 +1,650 @@
+{
+    "components": {
+        "pages": {
+            "PublicSwapPrimaryLanding": {
+                "meta": {
+                    "title": "Troca de Criptomoedas - Troque Qualquer Cripto com as Menores Taxas",
+                    "keywords": "exchange cripto, trocar cripto, troca de criptomoedas, exchange de criptomoedas, trocar cripto com taxas baixas, trocar moedas, trocar tokens, trocar altcoins, exchange de altcoins, exchange cripto rápida, trocar coins, trocas de baixo custo, troca de ativos digitais, troca de moedas rápida, sem kyc, negociar cripto",
+                    "description": "Troque criptomoedas de forma rápida e segura com a Rabbit Swap - a melhor troca de cripto com as melhores taxas. {{assetCount}} ativos digitais. Sem cadastro. Sem limites."
+                },
+                "wallet-moved-notice-text": "Procurando pela Carteira Rabbit? Movemos ela para",
+                "hero": {
+                    "title": "Troca de Criptomoedas Ficou Fácil",
+                    "content": "Oi, eu sou o Rabbit 🐰 Troque {{assetCount}} criptomoedas com um clique, com as melhores taxas. Sem cadastro. Sem limites. Sem enrolação."
+                },
+                "how-to-swap": {
+                    "title": "Como trocar criptomoedas com Rabbit Swap?",
+                    "content": "Usar a Rabbit Swap é fácil e simples; abaixo estão todos os passos necessários para trocar suas moedas:",
+                    "items": {
+                        "1": {
+                            "title": "Crie uma Troca",
+                            "content": "Escolha um par de moedas e insira o valor desejado no formulário acima."
+                        },
+                        "2": {
+                            "title": "Forneça seu Endereço",
+                            "content": "Insira o endereço onde você deseja receber a criptomoeda trocada."
+                        },
+                        "3": {
+                            "title": "Envie Moedas",
+                            "content": "Verifique os detalhes e envie suas moedas para o endereço gerado."
+                        },
+                        "4": {
+                            "title": "Receba Suas Moedas",
+                            "content": "Receba a criptomoeda trocada em alguns instantes!"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "Melhores Taxas Possíveis",
+                    "content": "A Rabbit Swap utiliza um algoritmo único que compara dinamicamente as taxas de vários provedores de liquidez, selecionando a mais baixa para garantir que sua troca de criptomoedas seja sempre realizada nas taxas mais lucrativas. Me avise se encontrar taxas melhores em outro lugar."
+                },
+                "wide-limits": {
+                    "title": "Não Existem Limites",
+                    "content": "Ter diversos provedores de liquidez também permite que a Rabbit Swap ofereça uma ampla faixa de limites. Você pode trocar quantias muito pequenas ou quase ilimitadamente grandes. A melhor parte é que isso também evita quedas de preço ao trocar grandes quantidades de ativos de baixa liquidez. Vou distribuir sua troca em diferentes fontes de liquidez para que você obtenha sempre o melhor preço possível."
+                },
+                "features-grid": {
+                    "title": "Então, o Que Torna a Rabbit Diferente?",
+                    "content": "Rabbit Swap foi projetado para tornar o processo de troca de criptomoedas econômico, seguro, rápido e tão fácil quanto enviar uma mensagem de texto.",
+                    "items": {
+                        "1": {
+                            "title": "Não é Necessário Cadastro",
+                            "content": "Troque qualquer quantia de cripto com as menores taxas e velocidade quase instantânea - sem precisar se cadastrar. Pode ser feito em apenas alguns cliques. A Rabbit mantém tudo simples, sem complicações."
+                        },
+                        "2": {
+                            "title": "Ampla Gama de Ativos Digitais",
+                            "content": "Escolha entre {{assetCount}} criptomoedas para trocar. Sim, são muitas, e virão mais. Às vezes, você pode até trocar aquela moeda que ninguém conhece além de você e do criador."
+                        },
+                        "3": {
+                            "title": "Respeito à Privacidade",
+                            "content": "Apenas informações anonimizadas são usadas para executar a troca. A Rabbit Swap nunca solicitará nada além do seu endereço para receber as moedas. Na maioria dos casos, não é necessário KYC."
+                        },
+                        "4": {
+                            "title": "Suporte de Nível Jedi",
+                            "content": "Embora todas as trocas sejam realizadas completamente de forma automática, às vezes precisamos conversar com alguém de verdade. Converse com um de nossos atendentes a qualquer hora do dia ou da noite."
+                        }
+                    }
+                },
+                "recent-swaps": {
+                    "title": "Trocas Recentes em Tempo Real",
+                    "content": "Todos os dias, centenas de pessoas já escolhem trocar moedas com a Rabbit Swap."
+                },
+                "review-showcase": {
+                    "title": "O que as Pessoas Estão Dizendo Sobre a Rabbit?",
+                    "content": "Sim, ainda não há muitas avaliações, provavelmente porque lancei há pouco tempo e foquei mais em desenvolvimento do que em marketing. Mas, ei, tenho orgulho de dizer que todas são boas! Sinta-se à vontade para deixar sua avaliação também - significaria muito."
+                },
+                "rabbit-stats": {
+                    "title": "Algumas Estatísticas das Quais Me Orgulho",
+                    "content": "Espero melhorar esses números em 10x até o final de 2025. Veremos!"
+                },
+                "articles": {
+                    "title": "Insights da Rabbit e as Últimas Notícias de Cripto",
+                    "content": "Trabalho com cripto todos os dias e tenho muitos insights valiosos e interessantes para compartilhar com você."
+                }
+            },
+            "PublicSwapAssetLanding": {
+                "meta": {
+                    "title": "{{tickerWithProtocol}} Trocas: Troque {{nameAndBracedProtocol}} Instantaneamente na Melhor Taxa",
+                    "keywords": "troca {{tickerWithProtocol}}, troque {{tickerWithProtocol}}, troca {{nameAndProtocol}}, troque {{nameAndProtocol}}, converter {{tickerWithProtocol}}, converter {{nameAndProtocol}}, negociar {{tickerWithProtocol}}, troque cripto, troca de criptomoedas, trocar cripto, trocar criptomoeda, troca de moedas, trocar tokens, troca de ativos digitais, preço {{tickerWithProtocol}}, dados de mercado {{tickerWithProtocol}}, preço {{nameAndProtocol}}, dados de mercado {{nameAndProtocol}}, sem kyc, trocar {{tickerWithProtocol}} anonimamente, swap {{tickerWithProtocol}} anonimamente, o que é {{nameAndProtocol}}",
+                    "description": "Troque {{tickerWithProtocol}} ({{assetName}}) por qualquer uma das {{assetCount}} criptomoedas na melhor taxa. Sem cadastro, sem limites, sem enrolação - apenas trocas de cripto rápidas e seguras."
+                },
+                "hero": {
+                    "title": "Troque {{tickerWithProtocol}} ({{assetName}}) na Melhor Taxa",
+                    "content": "Oi, eu sou o Rabbit 🐰 Troque instantaneamente {{nameAndProtocol}} por qualquer um dos {{assetCount}} ativos digitais. Comece sua troca com um clique. Suporte 24/7. Sem cadastro, sem limites, sem enrolação."
+                },
+                "how-to-swap": {
+                    "title": "Como trocar {{tickerWithProtocol}} na Rabbit?",
+                    "content": "Usar a Rabbit Swap é fácil e simples. Abaixo, você encontrará todos os passos necessários para as trocas {{nameAndProtocol}}.",
+                    "items": {
+                        "1": {
+                            "title": "Crie uma Troca",
+                            "content": "Escolha um par de moedas para {{tickerWithProtocol}} e insira o valor desejado no formulário acima."
+                        },
+                        "2": {
+                            "title": "Forneça seu Endereço",
+                            "content": "Digite o endereço onde você deseja receber as moedas trocadas."
+                        },
+                        "3": {
+                            "title": "Envie Moedas",
+                            "content": "Verifique os detalhes e envie seu {{tickerWithProtocol}} para o endereço gerado."
+                        },
+                        "4": {
+                            "title": "Receba Suas Moedas",
+                            "content": "Receba suas moedas trocadas dentro de poucos minutos!"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "Troque {{tickerWithProtocol}} Sem Perder",
+                    "content": "Com a Rabbit Swap, você sempre obtém mais pelos seus {{nameAndBracedProtocol}}. O algoritmo analisa constantemente os preços de {{tickerWithProtocol}} de várias fontes de liquidez com base na quantidade que você está trocando e no par escolhido, criando o caminho de troca mais lucrativo nos bastidores. Você simplesmente obtém o melhor preço para {{tickerWithProtocol}} toda vez. Não precisa se preocupar em como trocar {{tickerWithProtocol}} por outra moeda sem par direto nas grandes exchanges. Com a Rabbit Swap, você pode trocar {{nameAndBracedProtocol}} diretamente por qualquer uma das {{assetCount}} moedas."
+                },
+                "wide-limits": {
+                    "title": "Troque {{tickerWithProtocol}} Sem Limites",
+                    "content": "A Rabbit Swap permite que você troque a quantidade de {{tickerWithProtocol}} que quiser - sem quaisquer limites. Estou conectada a uma ampla rede de provedores de liquidez, ajudando a prevenir quedas de preço, mesmo em trocas grandes de ativos de baixa liquidez. Usando algoritmos avançados, vou garantir que sua troca de {{nameAndProtocol}} seja distribuída sem problemas entre diferentes fontes, para que você sempre obtenha a melhor taxa possível, não importa o valor que você está trocando. E se você só quer trocar uma pequena quantia de {{tickerWithProtocol}}, sem problema - é mais fácil do que nunca com a Rabbit Swap."
+                },
+                "features-grid": {
+                    "title": "Por que trocar {{tickerWithProtocol}} com Rabbit Swap?",
+                    "content": "A Rabbit Swap foi projetada para tornar a troca de {{tickerWithProtocol}} econômica, segura, rápida e tão fácil quanto enviar uma mensagem.",
+                    "items": {
+                        "1": {
+                            "title": "Apenas Uma Troca",
+                            "content": "Você só quer trocar seus {{tickerWithProtocol}} - sem cadastro, sem verificação, sem selfies e sem programas de fidelidade sensacionalistas. Você só quer escolher um par para seus {{nameAndProtocol}} e trocá-los. Entendi. É exatamente assim que funciona aqui. Sem complicações, apenas uma troca."
+                        },
+                        "2": {
+                            "title": "{{assetCount}} Opções de Troca para {{nameAndProtocol}}",
+                            "content": "Você pode trocar seus {{nameAndProtocol}} por qualquer uma das {{assetCount}} criptomoedas disponíveis. Milhares de pares diretos - um recurso que você definitivamente não encontra em plataformas de exchange tradicionais."
+                        },
+                        "3": {
+                            "title": "Troque {{tickerWithProtocol}} Anonimamente",
+                            "content": "A troca de {{tickerWithProtocol}} por qualquer outro ativo digital baseia-se apenas em informações anonimizadas. A Rabbit Swap nunca pedirá mais do que o seu endereço para receber as moedas. Na maioria dos casos, não é necessário KYC."
+                        },
+                        "4": {
+                            "title": "Suporte de Nível Jedi",
+                            "content": "Embora as trocas de {{tickerWithProtocol}} sejam totalmente automatizadas, às vezes você só precisa falar com uma pessoa real. Converse com a Rabbit a qualquer hora do dia ou da noite, mesmo que seja apenas por diversão."
+                        },
+                        "5": {
+                            "title": "É Lucrativo",
+                            "content": "A Rabbit Swap garante que você obtenha o melhor valor de troca para seus {{tickerWithProtocol}}, encontrando automaticamente o caminho mais lucrativo por meio de várias fontes de liquidez. Simples, tranquilo e sempre otimizado."
+                        },
+                        "6": {
+                            "title": "Além de Qualquer Limite",
+                            "content": "Troque qualquer quantidade de {{tickerWithProtocol}} sem limitações. Com uma ampla rede de provedores de liquidez e algoritmos avançados, garanto trocas tranquilas e otimizadas, seja uma quantia grande ou apenas alguns dólares."
+                        }
+                    }
+                },
+                "available-pairs-table": {
+                    "title": "Aqui está uma lista de todas as moedas para as quais você pode trocar {{tickerWithProtocol}}",
+                    "show-more-button-title": "Ver mais pares de {{tickerWithProtocol}}"
+                },
+                "asset-description": {
+                    "title": "O que é {{assetName}}?"
+                },
+                "asset-market-data": {
+                    "title": "Dados de Mercado de {{nameAndBracedTicker}}",
+                    "subtitle": "Abaixo estão os principais dados do mercado para {{tickerAndBracedProtocol}}, atualizados a cada 10 minutos."
+                },
+                "articles": {
+                    "title": "Notícias sobre {{tickerPrintable}}",
+                    "content": "Alguns insights da Rabbit sobre {{nameAndBracedProtocol}}, junto com materiais interessantes que encontrei de outras fontes pela internet."
+                },
+                "random-coins": {
+                    "title": "Mais Criptomoedas para Trocar"
+                }
+            },
+            "PublicSwapPairLanding": {
+                "meta": {
+                    "title": "Troque {{fromTickerWithProtocol}} por {{toTickerWithProtocol}} Instantaneamente na Melhor Taxa",
+                    "keywords": "trocar {{fromTickerWithProtocol}} por {{toTickerWithProtocol}}, swap {{fromTickerWithProtocol}} por {{toTickerWithProtocol}}, trocar {{fromNameAndProtocol}} por {{toNameAndProtocol}}, swap {{fromNameAndProtocol}} por {{toNameAndProtocol}}, converter {{fromTickerWithProtocol}} em {{toTickerWithProtocol}}, converter {{fromNameAndProtocol}} em {{toNameAndProtocol}}, negociar {{fromTickerWithProtocol}}/{{toTickerWithProtocol}}, trocar cripto, troca de criptomoedas, swap cripto, swap criptomoeda, troca de moedas, troca de tokens, ativos digitais, preço {{fromTickerWithProtocol}}, preço {{toTickerWithProtocol}}, dados de mercado {{fromTickerWithProtocol}}, dados de mercado {{toTickerWithProtocol}}, preço {{fromNameAndProtocol}}, preço {{toNameAndProtocol}}, dados de mercado {{fromNameAndProtocol}}, dados de mercado {{toNameAndProtocol}}, sem kyc, trocar {{fromTickerWithProtocol}} por {{toTickerWithProtocol}} anonimamente, swap {{fromTickerWithProtocol}} por {{toTickerWithProtocol}} anonimamente",
+                    "description": "Troque {{fromTickerWithProtocol}} por {{toTickerWithProtocol}} com a Rabbit Swap na melhor taxa. Sem cadastro, sem limites, sem enrolação - apenas trocas de cripto rápidas e seguras."
+                },
+                "hero": {
+                    "title": "Trocar {{fromTickerWithProtocol}} por {{toTickerWithProtocol}} Ficou Fácil",
+                    "content": "Oi, eu sou o Rabbit 🐰 Troque instantaneamente {{fromNameAndProtocol}} por {{toNameAndProtocol}} na melhor taxa. Comece sua troca com um clique. Suporte 24/7. Sem cadastro, sem limites, sem enrolação."
+                },
+                "how-to-swap": {
+                    "title": "Como trocar {{fromTickerWithProtocol}} por {{toTickerWithProtocol}}?",
+                    "content": "Usar a Rabbit Swap é fácil e simples. Abaixo você encontrará todos os passos necessários para trocar seus {{fromNameAndProtocol}} por {{toNameAndProtocol}}.",
+                    "items": {
+                        "1": {
+                            "title": "Insira o Valor",
+                            "content": "Insira o valor desejado de {{fromTickerWithProtocol}} que você gostaria de trocar no formulário acima."
+                        },
+                        "2": {
+                            "title": "Forneça seu Endereço",
+                            "content": "Insira o endereço onde você deseja receber o {{toTickerWithProtocol}}."
+                        },
+                        "3": {
+                            "title": "Envie Moedas",
+                            "content": "Verifique os detalhes e envie seu {{fromTickerWithProtocol}} para o endereço gerado."
+                        },
+                        "4": {
+                            "title": "Receba Suas Moedas",
+                            "content": "Receba seu {{toTickerWithProtocol}} em apenas alguns instantes!"
+                        }
+                    }
+                },
+                "best-rates": {
+                    "title": "Troque {{fromNameAndProtocol}} por {{toNameAndProtocol}} na Melhor Taxa",
+                    "content": "Garanta sempre as melhores taxas ao trocar {{fromNameAndProtocol}} por {{toNameAndProtocol}}. A Rabbit Swap utiliza um algoritmo único que compara dinamicamente as taxas entre vários provedores de liquidez, selecionando a mais baixa para sua quantidade específica, garantindo que sua troca seja feita na taxa mais lucrativa. Sério, me avise se você encontrar uma taxa melhor para {{fromTickerWithProtocol}}/{{toTickerWithProtocol}} em outro lugar."
+                },
+                "wide-limits": {
+                    "title": "Sem Limites para Trocar {{fromTickerWithProtocol}} e {{toTickerWithProtocol}}",
+                    "content": "Com acesso a vários provedores de liquidez, a Rabbit Swap oferece uma ampla faixa de limites de troca. Você pode trocar desde quantias mínimas de {{fromTickerWithProtocol}} e {{toTickerWithProtocol}} até transações quase infinitamente grandes. Isso também ajuda a evitar quedas de preço ao trocar grandes quantidades de ativos de baixa liquidez. Vou garantir que sua troca de {{fromNameAndProtocol}} por {{toNameAndProtocol}} seja distribuída entre diferentes fontes de liquidez, para que você sempre obtenha o melhor preço possível."
+                },
+                "features-grid": {
+                    "title": "Por que trocar {{fromTickerWithProtocol}} por {{toTickerWithProtocol}} com a Rabbit Swap?",
+                    "content": "A Rabbit Swap foi projetada para tornar o processo de troca de {{fromTickerWithProtocol}} para {{toTickerWithProtocol}} econômico, seguro, rápido e tão simples quanto enviar uma mensagem.",
+                    "items": {
+                        "1": {
+                            "title": "Apenas uma Troca",
+                            "content": "Você só quer trocar {{fromNameAndProtocol}} por {{toNameAndProtocol}} - sem cadastro, sem verificação, sem selfies e sem programas de fidelidade sensacionais. Você só quer trocar sua criptomoeda. Entendi. É exatamente assim que funciona aqui. Sem complicações, apenas uma troca."
+                        },
+                        "2": {
+                            "title": "Não só {{fromNameAndProtocol}} e {{toNameAndProtocol}}",
+                            "content": "Além de {{fromNameAndProtocol}} e {{toNameAndProtocol}}, você pode escolher entre qualquer uma das {{assetCount}} criptomoedas disponíveis para troca. Isso significa acesso a milhões de pares possíveis na Rabbit Swap - algo que você não encontrará em plataformas de troca tradicionais."
+                        },
+                        "3": {
+                            "title": "Troque {{fromNameAndProtocol}} por {{toNameAndProtocol}} anonimamente",
+                            "content": "O processo de troca baseia-se apenas em informações anonimizadas. A Rabbit Swap nunca solicitará informações pessoais além do endereço {{toNameAndProtocol}} para receber moedas. Na grande maioria das trocas, não é necessário KYC."
+                        },
+                        "4": {
+                            "title": "Suporte de Nível Jedi",
+                            "content": "Embora as trocas de {{fromTickerWithProtocol}} para {{toTickerWithProtocol}} sejam totalmente automatizadas, às vezes você precisa falar com alguém real. Converse com a Rabbit a qualquer momento, dia ou noite, mesmo que seja só por diversão."
+                        },
+                        "5": {
+                            "title": "É Lucrativo",
+                            "content": "A Rabbit Swap garante que você obtenha a melhor taxa de troca {{fromTickerWithProtocol}} para {{toTickerWithProtocol}} encontrando automaticamente o caminho mais lucrativo entre múltiplas fontes de liquidez. Simples, fluido e sempre otimizado."
+                        },
+                        "6": {
+                            "title": "Além de Qualquer Limite",
+                            "content": "Troque qualquer quantidade de {{fromTickerWithProtocol}} por {{toTickerWithProtocol}} sem limitações. Com uma ampla rede de provedores de liquidez e algoritmos avançados, garanto trocas tranquilas e otimizadas, seja uma quantia grande ou apenas alguns dólares."
+                        }
+                    }
+                },
+                "available-pairs-table": {
+                    "title-from": "Aqui estão algumas outras moedas para as quais você pode trocar seus {{coinTicker}}",
+                    "title-to": "E outras moedas que você pode trocar {{coinTicker}} por",
+                    "show-more-button-title": "Ver mais pares de {{coinTicker}}"
+                },
+                "asset-market-data": {
+                    "title": "Dados de Mercado de {{nameAndBracedTicker}}",
+                    "subtitle": "Abaixo estão os principais dados do mercado para {{tickerAndBracedProtocol}}, atualizados a cada 10 minutos."
+                },
+                "articles": {
+                    "title": "Notícias de {{fromTickerPrintable}}/{{toTickerPrintable}}",
+                    "content": "Alguns insights da Rabbit sobre {{fromNameAndBracedProtocol}} e {{toNameAndBracedProtocol}}, juntamente com seleções interessantes de outras fontes da internet."
+                },
+                "random-coins": {
+                    "title": "Mais Criptomoedas para Trocar"
+                }
+            },
+            "UnexpectedErrorPage": {
+                "title": "Parece que houve um problema",
+                "subtitle": "Isso é lamentável... o aplicativo falhou devido a um erro inesperado. Recarregue a página ou entre em contato conosco em support@rabbit.io se este erro acontecer repetidamente. Pedimos desculpas pelo inconveniente.",
+                "primary-button-content": "Recarregar a página",
+                "transparent-button-content": "Entre em contato com o suporte",
+                "sign-in-button-content": "Início"
+            },
+            "PrivacyPolicy": {
+                "title": "POLÍTICA DE PRIVACIDADE DO RABBIT.IO",
+                "meta": {
+                    "title": "Política de Privacidade – Rabbit Swap",
+                    "description": "Revise a Política de Privacidade da Rabbit Swap para entender claramente como lidamos com suas informações em nossa plataforma de troca de criptomoedas. Priorizamos a transparência para garantir que sua privacidade seja protegida durante toda a sua experiência.",
+                    "keywords": "política de privacidade, troca de criptomoedas, câmbio de criptomoedas, troca de criptomoedas, câmbio de criptomoedas"
+                }
+            },
+            "TermsOfUse": {
+                "title": "TERMOS DE USO DO RABBIT.IO",
+                "meta": {
+                    "title": "Termos de Uso – Rabbit Swap",
+                    "description": "Revise os Termos de Uso da Rabbit Swap para obter diretrizes claras sobre o uso de nossa plataforma de troca de criptomoedas. Entenda seus direitos e responsabilidades para garantir uma experiência tranquila.",
+                    "keywords": "termos de uso, troca de criptomoedas, câmbio de criptomoedas, troca de criptomoedas, câmbio de criptomoedas"
+                }
+            },
+            "ExchangePairs": {
+                "title": "Moedas para Trocar {{assetName}}",
+                "subtitle": "Neste exato momento, você pode trocar {{assetName}} por qualquer uma das {{assetCount}} moedas listadas abaixo.",
+                "link-title": "Trocar {{assetNameFrom}} por {{assetNameTo}}",
+                "meta": {
+                    "title": "{{assetName}} para Outras Criptomoedas na Rabbit Swap",
+                    "keywords": "trocar {{tickerWithProtocol}} por outras cripto, trocar {{nameWithProtocol}} por outras cripto, trocar {{tickerWithProtocol}} para outras cripto, trocar {{nameWithProtocol}} para outras cripto, em qual cripto trocar {{tickerWithProtocol}}, pares {{tickerWithProtocol}}, tickers {{tickerWithProtocol}}, moedas para trocar por {{tickerWithProtocol}}",
+                    "description": "Aqui está a lista completa de {{assetCount}} ativos para os quais você pode trocar {{assetName}} agora mesmo na Rabbit Swap."
+                }
+            },
+            "AllCurrenciesList": {
+                "title": "Lista Completa de Ativos Disponíveis para Troca",
+                "subtitle": "Atualmente, há {{assetCount}} criptomoedas que você pode trocar na Rabbit Swap. Esta é uma lista dinâmica, com moedas sendo adicionadas ou removidas diariamente com base em vários fatores.",
+                "asset-link-title": "{{nameAndProtocol}} ({{tickerPretty}})",
+                "pairs-link-title": "Trocar {{nameAndProtocol}} ({{tickerPretty}}) por outras cripto",
+                "meta": {
+                    "title": "A Lista Completa de Ativos Disponíveis para Troca na Rabbit",
+                    "keywords": "lista completa de ativos cripto, lista de criptomoedas, moedas disponíveis para troca, criptos intercambiáveis, ativos para troca, moedas suportadas, tokens disponíveis, lista de ativos digitais, trocar moedas rabbit, lista completa de trocas em cripto, todas as criptomoedas para troca, lista de ativos negociáveis, lista de troca de cripto, ativos digitais para troca",
+                    "description": "Descubra a lista completa de moedas disponíveis para troca na Rabbit Swap. Escolha entre mais de {{assetCount}} criptomoedas - quase todas as que você pode querer trocar estão aqui."
+                }
+            },
+            "Blog": {
+                "title": "Tudo Sobre Cripto Blog",
+                "subtitle": "Para aqueles cujas vidas mudaram no dia em que Satoshi Nakamoto publicou o primeiro código do Bitcoin. Aqui, compartilharei insights sobre tendências de cripto, opiniões sobre as últimas notícias e dicas para todos os entusiastas de cripto.",
+                "meta": {
+                    "title": "Últimas Notícias, Insights e Dicas para Entusiastas de Cripto",
+                    "keywords": "notícias de cripto, blog de cripto, insights cripto, dicas de trading cripto, notícias de criptomoeda, blog de criptomoeda, notícias de bitcoin, insights de criptomoeda, dicas de trading de criptomoeda, notícias de blockchain, análise de mercado de criptomoedas, dex, nft, tendências cripto, tendências de criptomoedas, regulamentação de criptomoedas, tendências nft, dicas fiscais cripto, tecnologia web3, futuro das criptomoedas, dicas de segurança cripto, como armazenar cripto com segurança, últimas inovações em blockchain, staking de criptomoedas, renda passiva com cripto, cripto para iniciantes, tendências do mercado cripto, exchanges descentralizadas",
+                    "description": "Descubra insights, atualizações de mercado e dicas de especialistas sobre todo o espaço das criptomoedas. Obtenha uma perspectiva independente sobre as notícias diárias de cripto da Rabbit."
+                }
+            },
+            "Article": {
+                "title-addition": "O blog do Rabbit",
+                "source-link-en": "Traduzido do inglês"
+            }
+        },
+        "organisms": {
+            "SwapFormWithCoinDropdowns": {
+                "errors": {
+                    "requests-limit-exceeded": "Desculpe, nosso serviço está passando por uma interrupção temporária devido à alta demanda. Por favor, tente novamente em alguns minutos. Agradecemos sua compreensão!",
+                    "default": "Desculpe, não conseguimos realizar a última operação, por favor, tente novamente ou entre em contato com o suporte."
+                }
+            },
+            "LandingFooter": {
+                "single-asset": {
+                    "title": "Trocar",
+                    "item-content": "Trocar {{ticker}}",
+                    "view-more": "Mais Criptomoedas"
+                },
+                "pair": {
+                    "title": "Pares de Troca",
+                    "item-content": "{{tickerFrom}} para {{tickerTo}}"
+                },
+                "support-message": "O serviço de câmbio é totalmente automatizado e opera 24 horas por dia. O chat online com suporte está disponível 24/7 (tempo de resposta: 5 minutos). Você também pode nos contatar em support@rabbit.io (tempo de resposta: 48 horas)."
+            },
+            "AssetDropdown": {
+                "field-placeholder": "Pesquisar...",
+                "text-default": "Todos os ativos disponíveis",
+                "text-search": "Resultados da pesquisa",
+                "text-search-fail": "Ativo não encontrado",
+                "load-more-button": "Carregar mais",
+                "text-loading": "Carregando todas as moedas..."
+            },
+            "RecentSwapsTable": {
+                "table-head-tiles": {
+                    "from": "De",
+                    "to": "Para",
+                    "finished": "Concluído"
+                },
+                "time-ago": {
+                    "seconds": "Há {{timeAmount}} segundos",
+                    "minutes": "Há {{timeAmount}} minutos",
+                    "hours": "Há {{timeAmount}} horas"
+                }
+            },
+            "SwapForm": {
+                "swap-all-button-titles": {
+                    "enable": "Trocar tudo",
+                    "cancel": "Cancelar"
+                },
+                "input": {
+                    "fiat-placeholder": "Digite o valor em moeda fiduciária",
+                    "balance-loader-text": "Carregando saldo..."
+                },
+                "consents": {
+                    "consent-text": "Ao clicar em \"Trocar\" você concorda com os",
+                    "terms-of-use": "Termos de Uso",
+                    "and": "e com a",
+                    "privacy-policy": "Política de Privacidade"
+                },
+                "information-block": {
+                    "enter-amount": "Digite o valor para trocar",
+                    "minimum-amount": "Quantia mínima: ",
+                    "maximum-amount": "Quantia máxima: ",
+                    "transaction-fee": "Taxa de rede: ",
+                    "calculating-network-fee": "Calculando taxa de rede...",
+                    "loading-minimal-amount": "Carregando quantia mínima...",
+                    "swap-rate": "Taxa: ",
+                    "calculating-swap-rates": "Calculando taxas de troca...",
+                    "pair-not-available": "O par não está disponível no momento. Por favor, tente novamente mais tarde ou escolha outro par."
+                },
+                "addresses": {
+                    "recepient-address-title": "Endereço do destinatário de {{receivingCoinName}}",
+                    "refund-address-title": "Endereço de reembolso de {{sendingCoinName}}",
+                    "receiving-address-extra-id": "Identificador adicional do destinatário {{extraIdName}}",
+                    "refund-address-extra-id": "Identificador adicional de reembolso {{extraIdName}}",
+                    "receiving-address-extra-id-notice": "Verifique se o endereço do destinatário requer uma 'Memo' ou 'Destination Tag' - às vezes chamado de etiqueta, ID, rótulo ou nota. As trocas podem exigir esse ID para o depósito. Incluir este identificador é crucial quando necessário, pois omiti-lo ou digitá-lo incorretamente pode resultar em perda de ativos.",
+                    "refund-address-extra-id-notice": "Verifique se o endereço de reembolso requer uma 'Memo' ou 'Destination Tag' (também conhecido como etiqueta, ID, rótulo ou nota). É crucial incluir este identificador, pois as trocas podem precisar dele para processar transações de entrada com precisão. Omitir ou digitá-lo incorretamente pode resultar na perda de seus fundos.",
+                    "optional-field-placeholder": "(opcional)",
+                    "address-is-contract-validation-message": "O endereço inserido pertence ao contrato do token {{ticker}}. Enviar fundos para ele resultará na perda irreversível de seu dinheiro."
+                },
+                "rateSelector": {
+                    "fixedRate": "Taxa fixa",
+                    "floatingRate": "Taxa flutuante"
+                },
+                "confirm-button-text": "Trocar",
+                "errors": {
+                    "amount-less-than-min-swappable": "O valor de {{assetName}} que você está tentando trocar está abaixo do valor mínimo aceito.",
+                    "amount-higher-than-max-swappable": "O valor de {{assetName}} que você está tentando trocar excede o valor máximo aceito.",
+                    "pair-not-supported": "Desculpe, o par selecionado não está disponível no momento. Por favor, tente novamente mais tarde ou escolha outro par."
+                }
+            },
+            "SwapFlow": {
+                "meta": {
+                    "step-titles": {
+                        "awaiting": "Aguardando pagamento · Trocar {{amountFrom}} por {{amountTo}} - Rabbit Swap",
+                        "confirming": "Confirmando pagamento · Trocar {{amountFrom}} por {{amountTo}} - Rabbit Swap",
+                        "verifying": "Confirmando pagamento · Trocar {{amountFrom}} por {{amountTo}} - Rabbit Swap",
+                        "exchanging": "Trocando suas moedas · Trocar {{amountFrom}} por {{amountTo}} - Rabbit Swap",
+                        "completed": "Troca bem-sucedida! · Trocar {{amountFrom}} por {{amountTo}} - Rabbit Swap",
+                        "refunded": "Troca reembolsada · Trocar {{amountFrom}} por {{amountTo}} - Rabbit Swap",
+                        "expired": "Expirado · Trocar {{amountFrom}} por {{amountTo}} - Rabbit Swap",
+                        "failed": "Falha na troca · Trocar {{amountFrom}} por {{amountTo}} - Rabbit Swap",
+                        "error": "Algo deu errado · Trocar {{amountFrom}} por {{amountTo}} - Rabbit Swap"
+                    },
+                    "title": "Troca de {{fromTickerWithProtocol}} por {{toTickerWithProtocol}} em Andamento - Rabbit Swap",
+                    "description": "Por favor, insira os detalhes necessários para a troca de {{fromTickerWithProtocol}} por {{toTickerWithProtocol}}. Rabbit compara taxas de diversos provedores de liquidez para garantir a taxa mais otimizada para sua troca.",
+                    "keywords": "troca {{fromTickerWithProtocol}} por {{toTickerWithProtocol}}, câmbio {{fromTickerWithProtocol}} por {{toTickerWithProtocol}}, troca {{fromAssetName}} por {{toAssetName}}, câmbio {{fromAssetName}} por {{toAssetName}}, negociação {{fromTickerPrintable}}/{{toTickerPrintable}}, troca {{fromTickerPrintable}} por {{toTickerPrintable}}, câmbio {{fromTickerPrintable}} por {{toTickerPrintable}}, troca de criptomoedas, câmbio de criptomoedas, troca de criptomoedas, troca de criptomoedas"
+                },
+                "loader-title": "Carregando os detalhes da troca...",
+                "loader-error": "Não conseguimos carregar os detalhes da troca neste momento. Isso pode ser um problema temporário - por favor, tente atualizar a página em alguns instantes. Se o problema persistir, entre em contato com nosso suporte através do chat ao vivo e nós ajudaremos você.",
+                "update-error": "Não conseguimos atualizar os detalhes da troca neste momento. Isso pode ser um problema temporário - por favor, tente atualizar a página em alguns instantes. Se o problema persistir, entre em contato com nosso suporte através do chat ao vivo e nós ajudaremos você.",
+                "swap-id": {
+                    "title": "ID da Troca",
+                    "copied-tooltip": "ID da troca copiado!"
+                },
+                "status": {
+                    "title": "Status"
+                },
+                "extended-information": {
+                    "section-title": "Informações estendidas",
+                    "general-swap-details": {
+                        "title": "Detalhes da Troca",
+                        "deposit-amount": "Valor para trocar",
+                        "withdrawal-amount": "Valor a receber",
+                        "exchange-rate": "Taxa de câmbio",
+                        "rate-mode": {
+                            "title": "Modo de taxa",
+                            "fixed-notice": "Com uma taxa fixa, a taxa de câmbio é bloqueada quando a troca é criada. Isso garante o valor exato que você receberá, protegendo contra flutuações de mercado.",
+                            "floating-notice": "Com uma taxa flutuante, a taxa de câmbio pode variar até que a transação seja concluída. Isso permite vantagens potenciais de mercado, mas também carrega o risco de mudanças na taxa."
+                        },
+                        "fixed-rate": "Fixa",
+                        "floating-rate": "Flutuante",
+                        "refund-address": "Endereço de reembolso",
+                        "refund-extra-id": "Reembolso {{extraIdName}}",
+                        "created-at": "Criado em"
+                    },
+                    "deposit-transaction": {
+                        "title": "Transação de Entrada",
+                        "asset": "Ativo para enviar",
+                        "address": "Para endereço",
+                        "contract-address": "Endereço do contrato",
+                        "transaction-id": "ID da transação"
+                    },
+                    "withdrawal-transaction": {
+                        "title": "Transação de Saída",
+                        "asset": "Ativo para receber",
+                        "address": "Para endereço",
+                        "contract-address": "Endereço do contrato",
+                        "transaction-id": "ID da transação"
+                    }
+                },
+                "ton-swap-notice": "Se sua carteira não enviar uma notificação de jetton junto com sua transação, sua transação pode precisar de processamento manual. A maioria das carteiras populares como Tonkeeper e Tonhub suportam isso, mas se você estiver usando uma carteira menos popular ou não tiver certeza - apenas entre em contato conosco através do chat ao vivo e nós ajudaremos você!",
+                "SwapFlowInformation": {
+                    "create-new-swap-button": "Criar outra troca",
+                    "awaiting": {
+                        "title": "Envie fundos para o endereço abaixo",
+                        "amount-title": "Envie exatamente",
+                        "amount-tooltip": "Valor copiado!",
+                        "address-title": "Para endereço",
+                        "address-tooltip": "Endereço copiado!",
+                        "extra-id-title": "E especifique este {{extraIdName}}",
+                        "extra-id-tooltip": "{{extraIdName}} copiado!",
+                        "extra-id-notice": "Certifique-se de inserir o 'Memo' ou 'Destination Tag' necessário em sua carteira ao enviar fundos. Isso é crucial para o processamento correto da transação. Informações incorretas podem resultar em perda de fundos.",
+                        "amount-qr": {
+                            "title": "Valor para Enviar",
+                            "subtitle": "Escaneie este código QR para obter o valor a enviar para sua transação de troca"
+                        },
+                        "address-qr": {
+                            "title": "Endereço de Depósito",
+                            "subtitle": "Escaneie este código QR para obter o endereço de depósito para sua transação de troca"
+                        },
+                        "destination-tag-qr": {
+                            "subtitle": "Escaneie este código QR para obter o {{extraIdName}} para sua transação de troca"
+                        }
+                    },
+                    "completed": {
+                        "title": "Troca concluída!",
+                        "subtitle": "Sua troca foi concluída e as moedas foram enviadas para o endereço fornecido. Obrigado por usar a Rabbit Swap.",
+                        "tiles": {
+                            "speedup": {
+                                "text": "A troca foi concluída {{speedupMinutes}} minutos mais rápido que o esperado!"
+                            },
+                            "bonus": {
+                                "text": "Recebeu {{bonusPercentage}}% a mais que o originalmente esperado!"
+                            },
+                            "review": {
+                                "text": "Nós ficaríamos muito felizes se você deixasse uma avaliação sobre a Rabbit!",
+                                "button": "Deixar avaliação"
+                            },
+                            "new-exchange": {
+                                "text": "Tem outra troca para fazer? Vamos lá!",
+                                "button": "Nova troca"
+                            }
+                        }
+                    },
+                    "confirming": {
+                        "title": "Aguardando confirmação",
+                        "subtitle": "Sua transação foi recebida. Por favor, aguarde um momento para que a transação seja confirmada na blockchain. Quando estiver concluída, a página será atualizada automaticamente."
+                    },
+                    "verifying": {
+                        "title": "Verificação necessária",
+                        "subtitle": "Sua transação foi recebida com sucesso. No entanto, somos obrigados por regulamentações a conduzir uma verificação de identidade para certas transações que não passaram nas verificações AML. Nós detestamos isso tanto quanto você e fazemos o possível para minimizá-lo, mas é algo que não podemos evitar completamente. Entre em contato com nossa equipe de suporte via chat ao vivo, e nós te guiaremos pelo processo rápido de verificação. Desculpe pelo incômodo."
+                    },
+                    "exchanging": {
+                        "title": "Trocando suas moedas",
+                        "subtitle": "Sua transação foi confirmada e a troca agora está em andamento. Por favor, aguarde um momento para que seja concluída. Quando estiver concluída, a página será atualizada automaticamente."
+                    },
+                    "refunded": {
+                        "title": "Troca reembolsada",
+                        "subtitle": "Lamentamos informar que sua troca não foi concluída e, portanto, foi reembolsada. Por favor, entre em contato com a equipe de suporte para que possamos verificar o que aconteceu. Use o ID da Troca como referência: #{{swapId}}."
+                    },
+                    "expired": {
+                        "title": "Troca expirada",
+                        "subtitle": "Sua transação não foi recebida a tempo, e a troca agora expirou. Se você não enviou nada, pode simplesmente criar uma nova troca. Se você já enviou suas moedas, não se preocupe, apenas entre em contato com o suporte para que sua taxa de troca seja recalculada ou para receber um reembolso. Por favor, use o ID da Troca como referência: #{{swapId}}."
+                    },
+                    "failed": {
+                        "title": "Troca falhou",
+                        "subtitle": "Sentimos muito, mas sua troca não pôde ser concluída devido a um problema inesperado. Não se preocupe - entre em contato com nossa equipe de suporte através do chat ao vivo para que possamos investigar o que aconteceu. Certifique-se de mencionar seu ID da Troca: #{{swapId}} ao entrar em contato conosco."
+                    }
+                }
+            },
+            "SwapStatus": {
+                "awaiting": "Receber pagamento",
+                "exchanging": "Trocar as moedas",
+                "refunded": "Reembolsar a troca",
+                "confirming": "Confirmar a transação",
+                "verifying": "Verificar sua identidade",
+                "completed": "Enviar moedas trocadas",
+                "expired": "Troca expirada",
+                "failed": "Troca falhou",
+                "created": "Troca criada",
+                "payment-tooltip": "Tempo restante para completar seu pagamento para o endereço de depósito",
+                "duration-minutes-title-shortened": "min"
+            },
+            "WaitlistSubscription": {
+                "colored-notice": {
+                    "button-title": "Inscreva-se para atualizações",
+                    "text": "As trocas para {{coinLatinName}} ({{coinTicker}}) ainda não estão disponíveis. Assim que as trocas forem permitidas, ativaremos automaticamente a troca. Quer ser o primeiro a saber quando isso acontecer? Inscreva-se para ser notificado!"
+                },
+                "sign-up-step": {
+                    "action-button-title": "Inscrever-se",
+                    "error": "Algo deu errado. Por favor, tente novamente mais tarde.",
+                    "input-title": "Seu endereço de e-mail:",
+                    "subtitle": "Para ser notificado assim que {{coinLatinName}} estiver disponível para trocas, forneça seu endereço de e-mail. Enviaremos uma única notificação quando estiver listada.",
+                    "title": "Notificação de listagem de {{coinLatinName}} ({{coinTicker}})"
+                },
+                "success-step": {
+                    "action-button-title": "Fechar",
+                    "subtitle": "Nós notificaremos você assim que {{coinLatinName}} estiver disponível para trocas. Fique de olho em sua caixa de entrada para a atualização.",
+                    "title": "Inscrição bem-sucedida!"
+                }
+            },
+            "PartnersLandingSection": {
+                "content": "Conheça as exchanges e provedores de liquidez confiáveis que nos ajudam a oferecer serviços de troca contínuos e confiáveis nos bastidores.",
+                "title": "Colaborando para Trocas Confiáveis"
+            },
+            "RabbitStats": {
+                "launched-in": "Lançado em",
+                "support-response-time": "Tempo médio de resposta do suporte",
+                "support-response-time-content": "{{amountSingular}} minuto",
+                "turnover": "Volume de Negócios",
+                "assets-available": "Moedas disponíveis",
+                "swap-time": "Tempo médio de troca",
+                "swap-time-content": "{{amountPlural}} minutos",
+                "profit": "Lucro médio",
+                "profit-tooltip": "Comparado a vários serviços de troca conhecidos"
+            },
+            "RandomCoinsCloud": {
+                "link-title": "Trocar {{assetName}}"
+            },
+            "SwapCurrenciesTable": {
+                "empty-search": "Nenhum resultado para '{{query}}'",
+                "column-titles": {
+                    "coin": "Moeda",
+                    "ticker": "Ticker",
+                    "swap": "Trocar"
+                },
+                "swap-link-single-asset-title": "Trocar {{assetName}}",
+                "swap-link-pair-title": "Trocar {{assetNameFrom}} por {{assetNameTo}}"
+            },
+            "QrCodeModal": {
+                "close-button-title": "Fechar",
+                "copy-button-title": "Copiar",
+                "copy-tooltip": "Copiado para a área de transferência!"
+            }
+        },
+        "molecules": {
+            "MarketData": {
+                "last-updated": "Última atualização em {{date}}",
+                "volume": "Volume de {{ticker}} nas últimas 24h",
+                "min-max-price": "Preço Mínimo & Máximo em 24h",
+                "price": "Preço e Variação de {{ticker}} nas últimas 24h",
+                "rank": "Rank da Moeda",
+                "supply": "Oferta em Circulação",
+                "market-cap": "Capitalização de Mercado de {{ticker}}"
+            },
+            "ReviewShowcase": {
+                "trustpilot-link-title": "Leia mais no Trustpilot"
+            }
+        },
+        "atoms": {
+            "PageTree": {
+                "landingPrimary": "Início",
+                "landingSingleAsset": "Trocar {{ticker}}",
+                "landingTwoAssets": "Trocar {{tickerFrom}} por {{tickerTo}}",
+                "allCurrencies": "Todas as Moedas",
+                "exchangePairs": "Trocar {{ticker}} por outras criptos",
+                "blog": "Blog",
+                "termsOfUse": "Termos de Uso",
+                "privacyPolicy": "Política de Privacidade"
+            },
+            "MarketChangeNotice": {
+                "text-gain-gain": "Com base na análise dos dados de mercado em {{date}}, {{assetName}} está em tendência de alta no último mês, crescendo {{percentageMonth}}. Nas últimas 24 horas teve um ganho de {{percentageDay}} no valor. Acima estão os principais dados de mercado para {{assetTicker}}, atualizados a cada 10 minutos.",
+                "text-gain-loss": "Com base na análise dos dados de mercado em {{date}}, {{assetName}} está em tendência de alta no último mês, crescendo {{percentageMonth}}. Nas últimas 24 horas teve uma perda de {{percentageDay}} no valor. Acima estão os principais dados de mercado para {{assetTicker}}, atualizados a cada 10 minutos.",
+                "text-loss-gain": "Com base na análise dos dados de mercado em {{date}}, {{assetName}} está em tendência de baixa no último mês, perdendo {{percentageMonth}} de valor. Nas últimas 24 horas teve um ganho de {{percentageDay}}. Acima estão os principais dados de mercado para {{assetTicker}}, atualizados a cada 10 minutos.",
+                "text-loss-loss": "Com base na análise dos dados de mercado em {{date}}, {{assetName}} está em tendência de baixa no último mês, perdendo {{percentageMonth}} de valor. Nas últimas 24 horas teve uma perda de {{percentageDay}} no valor. Acima estão os principais dados de mercado para {{assetTicker}}, atualizados a cada 10 minutos."
+            }
+        }
+    },
+    "common": {
+        "independent-exchange": {
+            "title": "Troque de Forma Independente",
+            "content": "Embora a maioria das pessoas realize trocas de criptomoedas por meio de várias plataformas de negociação, confiando assim seus ativos a essas plataformas, na verdade é muito mais seguro usar serviços de troca independentes como Rabbit Swap. Ao fazer isso, você ainda pode armazenar suas moedas em carteiras seguras e não custodiais enquanto realiza suas trocas. Essa abordagem garante que ninguém possa banir ou restringir sua conta, tomar o controle de suas moedas e garante que o próximo FTX não vá embora com todas as suas moedas, nem será afetado se a SEC banir outro de seus serviços de negociação favoritos."
+        },
+        "create-swap-cta-title": "Iniciar Troca",
+        "page-titles": {
+            "terms-and-conditions": "Termos e Condições",
+            "privacy-policy": "Política de Privacidade",
+            "try-wallet": "Experimente a Carteira Rabbit",
+            "blog": "Blog",
+            "affiliate-program": "Programa de afiliados"
+        },
+        "support-chat-message": "Converse conosco",
+        "default-copy-button-title": "Copiar",
+        "default-copy-button-tooltip": "Copiado!",
+        "view-more-button": "Ver mais"
+    }
+}

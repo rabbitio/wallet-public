@@ -4,6 +4,7 @@ import { getSaltedHash } from "../../../common/adapters/crypto-utils.js";
 import { Storage } from "../../../common/services/internal/storage.js";
 import { CLIENT_IP_HASH_LIFETIME } from "../../../../properties.js";
 import { IpsServiceInternal } from "./ipsServiceInternal.js";
+import { SWAPS_FACADE_URL } from "./../../../../properties.js";
 
 export default class ClientIpHashService {
     /**
@@ -48,7 +49,7 @@ export default class ClientIpHashService {
      */
     static async calculateIpHash(dataPassword) {
         try {
-            const ipAddress = await IpAddressProvider.getClientIpAddress();
+            const ipAddress = await new IpAddressProvider(SWAPS_FACADE_URL).getClientIpAddress();
             const ipHash = getSaltedHash(IpsServiceInternal.ipToStringOfBytes(ipAddress), dataPassword);
 
             return ipHash;
@@ -59,7 +60,7 @@ export default class ClientIpHashService {
 }
 
 async function provideIpHash() {
-    let ip = await IpAddressProvider.getClientIpAddress();
+    let ip = await new IpAddressProvider(SWAPS_FACADE_URL).getClientIpAddress();
     ip = IpsServiceInternal.ipToStringOfBytes(ip);
     const ipHash = getSaltedHash(ip, Storage.getDataPassword() || "");
 
