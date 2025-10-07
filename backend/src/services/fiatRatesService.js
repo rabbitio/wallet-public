@@ -6,7 +6,7 @@ import { getLocalDateByUTCTimestamp, getUTCDateStartByLocalDate } from "../utils
 import { dbConnectionHolder } from "../utils/dbConnectionHolder.js";
 import { BTC_USD_RATES_DATA } from "./data/btcFiatRates.js";
 import { isInsertManyResultValid } from "./mongoUtil.js";
-import ExternalBTCFiatRatesService from "./external/externalBTCFiatRatesService.js";
+// import ExternalBTCFiatRatesService from "./external/externalBTCFiatRatesService.js";
 import { NUMBER_OF_DATES_TO_CHECK_RATES_FOR } from "../properties.js";
 
 const log = log4js.getLogger("fiatRatesService");
@@ -125,50 +125,51 @@ export default class FiatRatesService {
 
 async function saveMissingRateValues(collection, previousDatesCountToCheckRatesPresenceFor = 10) {
     try {
-        log.info(`Start saving missing rate records.`);
-        const currentDateStartTimestamp = getUTCDateStartByLocalDate(new Date()).getTime();
-        log.info(`Current date timestamp: ${currentDateStartTimestamp}`);
-
-        const lastDaysTimestamps = [];
-        for (let i = 1; i <= previousDatesCountToCheckRatesPresenceFor; ++i) {
-            lastDaysTimestamps.push(new Date(currentDateStartTimestamp - i * 24 * 60 * 60 * 1000));
-        }
-        const foundRecords = await collection.find({ t: { $in: lastDaysTimestamps } }).toArray();
-        log.info(`Checked timestamps: ${lastDaysTimestamps}, found rates are: ${JSON.stringify(foundRecords)}`);
-
-        const notFoundTimestamps = lastDaysTimestamps.reduce(
-            (prev, timestamp) =>
-                foundRecords.filter(record => Date.parse(record.t) === timestamp.getTime()).length
-                    ? prev
-                    : [...prev, timestamp],
-            []
-        );
-        log.info(`Not found timestamps are: ${JSON.stringify(notFoundTimestamps)}`);
-
-        const usdRates = await ExternalBTCFiatRatesService.getRatesForTimestamps(notFoundTimestamps);
-        log.debug(`Found rates: ${JSON.stringify(usdRates)}`);
-
-        let onlyNotNullRates = usdRates.filter(rate => rate.r != null);
-        const timestampsWithNullRates = usdRates.filter(rate => rate.r == null).map(item => item.t);
-        if (timestampsWithNullRates.length) {
-            log.info(`Retrying for null rates: ${JSON.stringify(timestampsWithNullRates)}`);
-            const foundNotNullRates = (
-                await ExternalBTCFiatRatesService.getRatesForTimestamps(timestampsWithNullRates)
-            ).filter(rate => rate.r != null);
-            onlyNotNullRates = [...onlyNotNullRates, ...foundNotNullRates];
-        }
-
-        if (onlyNotNullRates.length) {
-            log.info(`Inserting following rates: ${JSON.stringify(onlyNotNullRates)}`);
-            const insertResult = await collection.insertMany(onlyNotNullRates);
-
-            if (!isInsertManyResultValid(insertResult, onlyNotNullRates.length)) {
-                throw new Error(`Insert many failed ${JSON.stringify(insertResult)}.`);
-            }
-            log.info(`Rates have been successfully inserted. Finish.`);
-        } else {
-            log.info(`Nothing to be inserted. Finish`);
-        }
+        // TODO: [feature, low] Enable after reincarnating the btc-fiat rates APIs. task_id=27565d688d6a80fdb2d5c812131fc87d
+        // log.info(`Start saving missing rate records.`);
+        // const currentDateStartTimestamp = getUTCDateStartByLocalDate(new Date()).getTime();
+        // log.info(`Current date timestamp: ${currentDateStartTimestamp}`);
+        //
+        // const lastDaysTimestamps = [];
+        // for (let i = 1; i <= previousDatesCountToCheckRatesPresenceFor; ++i) {
+        //     lastDaysTimestamps.push(new Date(currentDateStartTimestamp - i * 24 * 60 * 60 * 1000));
+        // }
+        // const foundRecords = await collection.find({ t: { $in: lastDaysTimestamps } }).toArray();
+        // log.info(`Checked timestamps: ${lastDaysTimestamps}, found rates are: ${JSON.stringify(foundRecords)}`);
+        //
+        // const notFoundTimestamps = lastDaysTimestamps.reduce(
+        //     (prev, timestamp) =>
+        //         foundRecords.filter(record => Date.parse(record.t) === timestamp.getTime()).length
+        //             ? prev
+        //             : [...prev, timestamp],
+        //     []
+        // );
+        // log.info(`Not found timestamps are: ${JSON.stringify(notFoundTimestamps)}`);
+        //
+        // const usdRates = await ExternalBTCFiatRatesService.getRatesForTimestamps(notFoundTimestamps);
+        // log.debug(`Found rates: ${JSON.stringify(usdRates)}`);
+        //
+        // let onlyNotNullRates = usdRates.filter(rate => rate.r != null);
+        // const timestampsWithNullRates = usdRates.filter(rate => rate.r == null).map(item => item.t);
+        // if (timestampsWithNullRates.length) {
+        //     log.info(`Retrying for null rates: ${JSON.stringify(timestampsWithNullRates)}`);
+        //     const foundNotNullRates = (
+        //         await ExternalBTCFiatRatesService.getRatesForTimestamps(timestampsWithNullRates)
+        //     ).filter(rate => rate.r != null);
+        //     onlyNotNullRates = [...onlyNotNullRates, ...foundNotNullRates];
+        // }
+        //
+        // if (onlyNotNullRates.length) {
+        //     log.info(`Inserting following rates: ${JSON.stringify(onlyNotNullRates)}`);
+        //     const insertResult = await collection.insertMany(onlyNotNullRates);
+        //
+        //     if (!isInsertManyResultValid(insertResult, onlyNotNullRates.length)) {
+        //         throw new Error(`Insert many failed ${JSON.stringify(insertResult)}.`);
+        //     }
+        //     log.info(`Rates have been successfully inserted. Finish.`);
+        // } else {
+        //     log.info(`Nothing to be inserted. Finish`);
+        // }
     } catch (e) {
         log.error("Failed to save missing rate values", e);
     }
